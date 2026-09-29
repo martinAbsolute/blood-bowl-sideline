@@ -464,16 +464,21 @@ export function TeamEditor({
                               {p.name || pos.position}
                             </strong>
                           ) : (
-                            <button
-                              className="flex items-center gap-2 text-left text-sm font-semibold text-primary hover:underline"
-                              onClick={() => {
-                                setSelected(p.id);
-                                setSearch("");
-                              }}
-                            >
-                              {p.name || pos.position}
-                              <ChevronRight className="size-3" />
-                            </button>
+                            <>
+                              <strong className="hidden text-sm print:block">
+                                {p.name || pos.position}
+                              </strong>
+                              <button
+                                className="no-print flex items-center gap-2 text-left text-sm font-semibold text-primary hover:underline"
+                                onClick={() => {
+                                  setSelected(p.id);
+                                  setSearch("");
+                                }}
+                              >
+                                {p.name || pos.position}
+                                <ChevronRight className="size-3" />
+                              </button>
+                            </>
                           )}
                           {p.name && (
                             <p className="mt-0.5 text-xs text-muted-foreground">

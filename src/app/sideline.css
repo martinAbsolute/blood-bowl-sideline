@@ -249,7 +249,9 @@ body {
   gap: 24px;
   align-items: start;
 }
-.budget-grid > * { min-width: 0; }
+.budget-grid > * {
+  min-width: 0;
+}
 @media (max-width: 900px) {
   .hero-grid {
     gap: 25px;
@@ -329,11 +331,14 @@ body {
     max-width: none;
   }
   .budget-grid {
-    grid-template-columns: 1fr 250px;
-    gap: 12px;
+    display: block;
   }
   .budget-side {
     position: static !important;
+    margin-top: 16px;
+  }
+  [data-slot="table-container"] {
+    overflow: visible !important;
   }
   [role="tablist"] {
     display: none !important;
@@ -347,6 +352,8 @@ body {
   td,
   th {
     padding: 5px !important;
+    min-width: 0 !important;
+    white-space: normal !important;
   }
   .print-break-avoid {
     break-inside: avoid;

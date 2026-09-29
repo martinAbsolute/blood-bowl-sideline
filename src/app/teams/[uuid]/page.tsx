@@ -17,9 +17,7 @@ export async function generateMetadata({
 }) {
   const data = await getTeam((await params).uuid);
   return {
-    title: data
-      ? `${data.team.name} · Blood Bowl Sideline`
-      : "Team not found · Blood Bowl Sideline",
+    title: data ? data.team.name : "Team not found",
     description: data
       ? `A ${data.team.rosterId} roster on Blood Bowl Sideline.`
       : undefined,
