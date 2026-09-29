@@ -1,0 +1,603 @@
+[
+  {
+    "id": "bb2025-matched-play",
+    "name": "BB2025 Matched Play",
+    "skillCurrency": "sp",
+    "tiers": {
+      "1": [
+        "amazon",
+        "chaos-dwarf",
+        "dark-elf",
+        "high-elf",
+        "lizardmen",
+        "norse",
+        "old-world-alliance",
+        "underworld-denizens",
+        "wood-elf"
+      ],
+      "2": [
+        "bretonnian",
+        "dwarf",
+        "elven-union",
+        "human",
+        "imperial-nobility",
+        "necromantic-horror",
+        "orc",
+        "shambling-undead",
+        "skaven",
+        "slann",
+        "tomb-kings",
+        "vampire"
+      ],
+      "3": ["black-orc", "chaos-chosen", "chaos-renegade", "khorne", "nurgle"],
+      "4": ["gnome", "goblin", "halfling", "ogre", "snotling"]
+    },
+    "tierBudgets": {
+      "1": {
+        "teamBudget": 1150000,
+        "skillGold": 6,
+        "flowingFunds": 0
+      },
+      "2": {
+        "teamBudget": 1150000,
+        "skillGold": 8,
+        "flowingFunds": 0
+      },
+      "3": {
+        "teamBudget": 1150000,
+        "skillGold": 9,
+        "flowingFunds": 0
+      },
+      "4": {
+        "teamBudget": 1150000,
+        "skillGold": 10,
+        "flowingFunds": 0
+      }
+    },
+    "skillCosts": {
+      "primaryNonElite": 1,
+      "primaryElite": 1,
+      "secondaryNonElite": 2,
+      "secondaryElite": 2,
+      "stackCosts": []
+    },
+    "maxAdvancementsPerPlayer": 1,
+    "maxSecondaryPerTeam": 4,
+    "maxSecondaryByTier": {
+      "1": 1,
+      "2": 2,
+      "3": 3,
+      "4": 4
+    },
+    "maxStackPerTeam": 0,
+    "maxElitePerTeam": 4,
+    "starPlayerTierRules": {
+      "1": {
+        "maxVeterans": 1,
+        "maxLegends": 0,
+        "canMix": false,
+        "veteranSkillGoldCost": 2,
+        "legendSkillGoldCost": 0
+      },
+      "2": {
+        "maxVeterans": 2,
+        "maxLegends": 0,
+        "canMix": false,
+        "veteranSkillGoldCost": 2,
+        "legendSkillGoldCost": 0
+      },
+      "3": {
+        "maxVeterans": 2,
+        "maxLegends": 0,
+        "canMix": false,
+        "veteranSkillGoldCost": 2,
+        "legendSkillGoldCost": 0
+      },
+      "4": {
+        "maxVeterans": 2,
+        "maxLegends": 0,
+        "canMix": false,
+        "veteranSkillGoldCost": 2,
+        "legendSkillGoldCost": 0
+      }
+    },
+    "bannedStarPlayers": [],
+    "veteranStarPlayers": [],
+    "legendStarPlayers": [],
+    "allowedInducements": [
+      "prayers-to-nuffle",
+      "part-time-assistant-coaches",
+      "temp-agency-cheerleaders",
+      "team-mascot",
+      "weather-mage",
+      "blitzers-best-kegs",
+      "bribes",
+      "extra-team-training",
+      "mortuary-assistant",
+      "plague-doctor",
+      "riotous-rookies",
+      "wandering-apothecary",
+      "halfling-master-chef",
+      "biased-referee-dodgy-league-rep",
+      "infamous-coaching-staff-josef-bugman",
+      "wizard-sports-wizard"
+    ],
+    "minPlayers": 11,
+    "maxPlayers": 16,
+    "starPlayerBlocksAdvancements": false
+  },
+  {
+    "id": "eurobowl-2026",
+    "name": "EuroBowl 2026",
+    "tiers": {
+      "1": ["old-world-alliance", "orc", "wood-elf"],
+      "2": ["amazon", "skaven", "underworld-denizens"],
+      "3": [
+        "dark-elf",
+        "high-elf",
+        "human",
+        "lizardmen",
+        "shambling-undead",
+        "vampire"
+      ],
+      "4": ["necromantic-horror", "norse", "nurgle", "slann", "tomb-kings"],
+      "5": [
+        "chaos-chosen",
+        "chaos-dwarf",
+        "dwarf",
+        "elven-union",
+        "imperial-nobility",
+        "snotling"
+      ],
+      "6": [
+        "black-orc",
+        "bretonnian",
+        "chaos-renegade",
+        "gnome",
+        "goblin",
+        "halfling",
+        "khorne"
+      ],
+      "7": ["ogre"]
+    },
+    "tierBudgets": {
+      "1": {
+        "teamBudget": 1070000,
+        "skillGold": 120000,
+        "flowingFunds": 10000
+      },
+      "2": {
+        "teamBudget": 1070000,
+        "skillGold": 140000,
+        "flowingFunds": 20000
+      },
+      "3": {
+        "teamBudget": 1080000,
+        "skillGold": 160000,
+        "flowingFunds": 30000
+      },
+      "4": {
+        "teamBudget": 1100000,
+        "skillGold": 190000,
+        "flowingFunds": 30000
+      },
+      "5": {
+        "teamBudget": 1120000,
+        "skillGold": 220000,
+        "flowingFunds": 30000
+      },
+      "6": {
+        "teamBudget": 1140000,
+        "skillGold": 240000,
+        "flowingFunds": 40000
+      },
+      "7": {
+        "teamBudget": 1150000,
+        "skillGold": 270000,
+        "flowingFunds": 50000
+      }
+    },
+    "skillCosts": {
+      "primaryNonElite": 20000,
+      "primaryElite": 30000,
+      "secondaryNonElite": 40000,
+      "secondaryElite": 50000,
+      "stackCosts": [
+        {
+          "cost": 50000
+        },
+        {
+          "cost": 60000
+        },
+        {
+          "cost": 70000
+        }
+      ]
+    },
+    "maxAdvancementsPerPlayer": 1,
+    "maxSecondaryPerTeam": 3,
+    "maxStackPerTeam": 3,
+    "starPlayerTierRules": {
+      "1": {
+        "maxVeterans": 0,
+        "maxLegends": 0,
+        "canMix": false,
+        "veteranSkillGoldCost": 0,
+        "legendSkillGoldCost": 0
+      },
+      "2": {
+        "maxVeterans": 0,
+        "maxLegends": 0,
+        "canMix": false,
+        "veteranSkillGoldCost": 0,
+        "legendSkillGoldCost": 0
+      },
+      "3": {
+        "maxVeterans": 0,
+        "maxLegends": 0,
+        "canMix": false,
+        "veteranSkillGoldCost": 0,
+        "legendSkillGoldCost": 0
+      },
+      "4": {
+        "maxVeterans": 0,
+        "maxLegends": 0,
+        "canMix": false,
+        "veteranSkillGoldCost": 0,
+        "legendSkillGoldCost": 0
+      },
+      "5": {
+        "maxVeterans": 2,
+        "maxLegends": 1,
+        "canMix": false,
+        "veteranSkillGoldCost": 50000,
+        "legendSkillGoldCost": 100000
+      },
+      "6": {
+        "maxVeterans": 2,
+        "maxLegends": 1,
+        "canMix": false,
+        "veteranSkillGoldCost": 40000,
+        "legendSkillGoldCost": 80000
+      },
+      "7": {
+        "maxVeterans": 2,
+        "maxLegends": 1,
+        "canMix": false,
+        "veteranSkillGoldCost": 40000,
+        "legendSkillGoldCost": 80000
+      }
+    },
+    "allowedInducements": [
+      "biased-referee-dodgy-league-rep",
+      "blitzers-best-kegs",
+      "bribes",
+      "halfling-master-chef",
+      "mortuary-assistant",
+      "plague-doctor",
+      "riotous-rookies",
+      "team-mascot",
+      "wandering-apothecary",
+      "weather-mage"
+    ],
+    "bannedStarPlayers": [
+      "bomber-dribblesnot",
+      "cindy-piewhistle",
+      "dribl",
+      "drull",
+      "estelle-la-veneaux",
+      "griff-oberwald",
+      "hthark-the-unstoppable",
+      "hakflem-skuttlespike",
+      "ivan-the-animal-deathshroud",
+      "jeremiah-kool",
+      "jordell-freshbreeze",
+      "morg-n-thorg",
+      "roxanna-darknail"
+    ],
+    "veteranStarPlayers": [
+      "akhorne-the-squirrel",
+      "barik-farblast",
+      "bilerot-vomitflesh",
+      "eldril-sidewinder",
+      "fungus-the-loon",
+      "glart-smashrip",
+      "gloriel-summerbloom",
+      "grashnak-blackhoof",
+      "grim-ironjaw",
+      "grombrindal",
+      "guffle-pusmaw",
+      "helmut-wulf",
+      "josef-bugman",
+      "karla-von-kill",
+      "kiroth-krakeneye",
+      "max-spleenripper",
+      "nobbla-blackwart",
+      "puggy-baconbreath",
+      "rashnak-backstabber",
+      "rodney-roachbait",
+      "rowana-forestfoot",
+      "rumbelow-sheepskin",
+      "scrappa-sorehead",
+      "scyla-anfingrimm",
+      "skrull-halfheight",
+      "swiftvine-glimmershard",
+      "the-black-gobbo",
+      "the-mighty-zug",
+      "thorsson-stoutmead",
+      "varag-ghoul-chewer",
+      "willow-rosebark",
+      "withergrasp-doubledrool",
+      "zzharg-madeye"
+    ],
+    "legendStarPlayers": [
+      "deeproot-strongbranch",
+      "grak",
+      "crumbleberry",
+      "ivar-eriksson",
+      "kreek-rustgouger",
+      "lord-borak-the-despoiler",
+      "lucien-swift",
+      "valen-swift",
+      "maple-highgrove",
+      "ripper-bolgrot",
+      "skitter-stab-stab",
+      "skrorg-snowpelt",
+      "zolcath-the-zoat"
+    ],
+    "minPlayers": 11,
+    "maxPlayers": 16,
+    "starPlayerBlocksAdvancements": true
+  },
+  {
+    "id": "world-cup-2027",
+    "name": "NAF World Cup 2027 v2.1",
+    "skillCurrency": "spp",
+    "tiers": {
+      "1": ["orc", "high-elf", "skaven", "underworld-denizens", "amazon"],
+      "2": ["shambling-undead"],
+      "3": ["snotling"],
+      "4": ["dark-elf", "old-world-alliance"],
+      "5": ["nurgle"],
+      "6": ["human"],
+      "7": ["lizardmen", "wood-elf"],
+      "8": ["chaos-chosen", "imperial-nobility", "tomb-kings"],
+      "9": ["chaos-renegade"],
+      "10": ["necromantic-horror"],
+      "11": ["bretonnian"],
+      "12": ["black-orc", "goblin"],
+      "13": ["slann"],
+      "14": ["chaos-dwarf"],
+      "15": ["elven-union", "halfling"],
+      "16": ["ogre"],
+      "17": ["vampire"],
+      "18": ["khorne", "norse", "gnome"],
+      "19": ["dwarf"]
+    },
+    "tierBudgets": {
+      "1": {
+        "teamBudget": 1080000,
+        "skillGold": 44,
+        "flowingFunds": 0
+      },
+      "2": {
+        "teamBudget": 1080000,
+        "skillGold": 52,
+        "flowingFunds": 0
+      },
+      "3": {
+        "teamBudget": 1080000,
+        "skillGold": 60,
+        "flowingFunds": 0
+      },
+      "4": {
+        "teamBudget": 1100000,
+        "skillGold": 44,
+        "flowingFunds": 0
+      },
+      "5": {
+        "teamBudget": 1100000,
+        "skillGold": 52,
+        "flowingFunds": 0
+      },
+      "6": {
+        "teamBudget": 1100000,
+        "skillGold": 58,
+        "flowingFunds": 0
+      },
+      "7": {
+        "teamBudget": 1140000,
+        "skillGold": 44,
+        "flowingFunds": 0
+      },
+      "8": {
+        "teamBudget": 1140000,
+        "skillGold": 58,
+        "flowingFunds": 0
+      },
+      "9": {
+        "teamBudget": 1140000,
+        "skillGold": 66,
+        "flowingFunds": 0
+      },
+      "10": {
+        "teamBudget": 1160000,
+        "skillGold": 52,
+        "flowingFunds": 0
+      },
+      "11": {
+        "teamBudget": 1160000,
+        "skillGold": 58,
+        "flowingFunds": 0
+      },
+      "12": {
+        "teamBudget": 1160000,
+        "skillGold": 60,
+        "flowingFunds": 0
+      },
+      "13": {
+        "teamBudget": 1180000,
+        "skillGold": 52,
+        "flowingFunds": 0
+      },
+      "14": {
+        "teamBudget": 1180000,
+        "skillGold": 58,
+        "flowingFunds": 0
+      },
+      "15": {
+        "teamBudget": 1180000,
+        "skillGold": 60,
+        "flowingFunds": 0
+      },
+      "16": {
+        "teamBudget": 1180000,
+        "skillGold": 66,
+        "flowingFunds": 0
+      },
+      "17": {
+        "teamBudget": 1200000,
+        "skillGold": 44,
+        "flowingFunds": 0
+      },
+      "18": {
+        "teamBudget": 1200000,
+        "skillGold": 58,
+        "flowingFunds": 0
+      },
+      "19": {
+        "teamBudget": 1200000,
+        "skillGold": 60,
+        "flowingFunds": 0
+      }
+    },
+    "skillCosts": {
+      "primaryNonElite": 6,
+      "primaryElite": 8,
+      "secondaryNonElite": 10,
+      "secondaryElite": 12,
+      "secondPrimaryNonElite": 8,
+      "secondPrimaryElite": 10,
+      "secondSecondaryNonElite": 12,
+      "secondSecondaryElite": 14,
+      "stackCosts": []
+    },
+    "maxAdvancementsPerPlayer": 1,
+    "maxSecondaryPerTeam": 99,
+    "maxStackPerTeam": 0,
+    "teamOverrides": {
+      "shambling-undead": {
+        "maxStackPlayers": 1,
+        "maxSkillsPerPlayer": 2
+      },
+      "human": {
+        "maxStackPlayers": 1,
+        "maxSkillsPerPlayer": 2
+      },
+      "imperial-nobility": {
+        "maxStackPlayers": 1,
+        "maxSkillsPerPlayer": 2
+      },
+      "tomb-kings": {
+        "maxStackPlayers": 1,
+        "maxSkillsPerPlayer": 2
+      },
+      "slann": {
+        "maxStackPlayers": 1,
+        "maxSkillsPerPlayer": 2
+      },
+      "chaos-chosen": {
+        "maxStackPlayers": 2,
+        "maxSkillsPerPlayer": 2
+      },
+      "chaos-dwarf": {
+        "maxStackPlayers": 2,
+        "maxSkillsPerPlayer": 2
+      },
+      "dwarf": {
+        "maxStackPlayers": 2,
+        "maxSkillsPerPlayer": 2
+      },
+      "bretonnian": {
+        "maxStackPlayers": 1,
+        "maxSkillsPerPlayer": 2,
+        "canHireStarPlayers": true
+      },
+      "norse": {
+        "maxStackPlayers": 2,
+        "maxSkillsPerPlayer": 2,
+        "canHireStarPlayers": true
+      },
+      "black-orc": {
+        "maxStackPlayers": 2,
+        "maxSkillsPerPlayer": 2,
+        "canHireStarPlayers": true
+      },
+      "ogre": {
+        "maxStackPlayers": 2,
+        "maxSkillsPerPlayer": 2,
+        "canHireStarPlayers": true
+      },
+      "snotling": {
+        "canHireStarPlayers": true
+      },
+      "chaos-renegade": {
+        "canHireStarPlayers": true
+      },
+      "halfling": {
+        "canHireStarPlayers": true
+      },
+      "gnome": {
+        "canHireStarPlayers": true
+      },
+      "goblin": {
+        "canHireStarPlayers": true
+      }
+    },
+    "starPlayerTierRules": {},
+    "bannedStarPlayers": [
+      "cindy-piewhistle",
+      "deeproot-strongbranch",
+      "grak",
+      "crumbleberry",
+      "griff-oberwald",
+      "hakflem-skuttlespike",
+      "hthark-the-unstoppable",
+      "ivar-eriksson",
+      "jordell-freshbreeze",
+      "lord-borak-the-despoiler",
+      "maple-highgrove",
+      "morg-n-thorg",
+      "ripper-bolgrot",
+      "skitter-stab-stab",
+      "skrorg-snowpelt",
+      "varag-ghoul-chewer"
+    ],
+    "veteranStarPlayers": [],
+    "legendStarPlayers": [],
+    "allowedInducements": [
+      "blitzers-best-kegs",
+      "bribes",
+      "riotous-rookies",
+      "halfling-master-chef",
+      "team-mascot"
+    ],
+    "starPlayerTax": [
+      {
+        "maxCost": 199000,
+        "sppCost": 18
+      },
+      {
+        "maxCost": 299000,
+        "sppCost": 24
+      },
+      {
+        "maxCost": 999999,
+        "sppCost": 32
+      }
+    ],
+    "minPlayers": 11,
+    "maxPlayers": 16,
+    "starPlayerBlocksAdvancements": false
+  }
+]

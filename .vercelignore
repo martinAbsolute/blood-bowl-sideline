@@ -1,0 +1,8 @@
+.research
+.agents
+.codex
+.env*
+tests
+docs
+scripts
+*.tsbuildinfo

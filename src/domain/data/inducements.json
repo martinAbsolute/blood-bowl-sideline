@@ -1,0 +1,133 @@
+[
+  {
+    "id": "prayers-to-nuffle",
+    "name": "Prayers to Nuffle",
+    "cost": 10000,
+    "max": "0-3",
+    "availability": "Any Team"
+  },
+  {
+    "id": "part-time-assistant-coaches",
+    "name": "Part-time Assistant Coaches",
+    "cost": 20000,
+    "max": "0-5",
+    "availability": "Any Team"
+  },
+  {
+    "id": "temp-agency-cheerleaders",
+    "name": "Temp Agency Cheerleaders",
+    "cost": 5000,
+    "max": "0-5",
+    "availability": "Any Team"
+  },
+  {
+    "id": "team-mascot",
+    "name": "Team Mascot",
+    "cost": 25000,
+    "max": "0-1",
+    "availability": "Any Team"
+  },
+  {
+    "id": "weather-mage",
+    "name": "Weather Mage",
+    "cost": 25000,
+    "max": "0-1",
+    "availability": "Any Team"
+  },
+  {
+    "id": "blitzers-best-kegs",
+    "name": "Blitzer's Best Kegs",
+    "cost": 50000,
+    "max": "0-2",
+    "availability": "Any Team"
+  },
+  {
+    "id": "bribes",
+    "name": "Bribes",
+    "cost": 100000,
+    "max": "0-3",
+    "availability": "Any Team",
+    "specialCosts": [
+      {
+        "specialRule": "Bribery and Corruption",
+        "cost": 50000,
+        "max": "0-6"
+      }
+    ]
+  },
+  {
+    "id": "extra-team-training",
+    "name": "Extra Team Training",
+    "cost": 100000,
+    "max": "0-8",
+    "availability": "Any Team"
+  },
+  {
+    "id": "mortuary-assistant",
+    "name": "Mortuary Assistant",
+    "cost": 100000,
+    "max": "0-1",
+    "availability": "Teams with the Masters of Undeath special rule only"
+  },
+  {
+    "id": "plague-doctor",
+    "name": "Plague Doctor",
+    "cost": 100000,
+    "max": "0-1",
+    "availability": "Teams with the Favoured of Nurgle special rule only"
+  },
+  {
+    "id": "riotous-rookies",
+    "name": "Riotous Rookies",
+    "cost": 150000,
+    "max": "0-1",
+    "availability": "Teams with the Low Cost Linemen special rule only"
+  },
+  {
+    "id": "wandering-apothecary",
+    "name": "Wandering Apothecary",
+    "cost": 100000,
+    "max": "0-2",
+    "availability": "Any team that can hire an Apothecary"
+  },
+  {
+    "id": "halfling-master-chef",
+    "name": "Halfling Master Chef",
+    "cost": 300000,
+    "max": "0-1",
+    "availability": "Any Team",
+    "specialCosts": [
+      {
+        "specialRule": "Halfling Thimble Cup",
+        "cost": 100000
+      }
+    ]
+  },
+  {
+    "id": "biased-referee-dodgy-league-rep",
+    "name": "Biased Referee: Dodgy League Rep",
+    "cost": 120000,
+    "max": "0-1",
+    "availability": "Any Team",
+    "specialCosts": [
+      {
+        "specialRule": "Bribery and Corruption",
+        "cost": 80000
+      }
+    ]
+  },
+  {
+    "id": "infamous-coaching-staff-josef-bugman",
+    "name": "Infamous Coaching Staff: Josef Bugman",
+    "cost": 100000,
+    "max": "0-1",
+    "availability": "Any Team"
+  },
+  {
+    "id": "wizard-sports-wizard",
+    "name": "Wizard: Sports-Wizard",
+    "cost": 150000,
+    "max": "0-1",
+    "availability": "Any Team"
+  }
+]

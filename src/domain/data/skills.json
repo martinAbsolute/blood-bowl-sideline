@@ -1,0 +1,650 @@
+[
+  {
+    "id": "catch",
+    "name": "Catch",
+    "category": "agility",
+    "isElite": false
+  },
+  {
+    "id": "diving_catch",
+    "name": "Diving Catch",
+    "category": "agility",
+    "isElite": false
+  },
+  {
+    "id": "diving_tackle",
+    "name": "Diving Tackle",
+    "category": "agility",
+    "isElite": false
+  },
+  {
+    "id": "dodge",
+    "name": "Dodge",
+    "category": "agility",
+    "isElite": true
+  },
+  {
+    "id": "defensive",
+    "name": "Defensive",
+    "category": "agility",
+    "isElite": false
+  },
+  {
+    "id": "hit_and_run",
+    "name": "Hit and Run",
+    "category": "agility",
+    "isElite": false
+  },
+  {
+    "id": "jump_up",
+    "name": "Jump Up",
+    "category": "agility",
+    "isElite": false
+  },
+  {
+    "id": "leap",
+    "name": "Leap",
+    "category": "agility",
+    "isElite": false
+  },
+  {
+    "id": "safe_pair_of_hands",
+    "name": "Safe Pair of Hands",
+    "category": "agility",
+    "isElite": false
+  },
+  {
+    "id": "sidestep",
+    "name": "Sidestep",
+    "category": "agility",
+    "isElite": false
+  },
+  {
+    "id": "sprint",
+    "name": "Sprint",
+    "category": "agility",
+    "isElite": false
+  },
+  {
+    "id": "sure_feet",
+    "name": "Sure Feet",
+    "category": "agility",
+    "isElite": false
+  },
+  {
+    "id": "block",
+    "name": "Block",
+    "category": "general",
+    "isElite": true
+  },
+  {
+    "id": "dauntless",
+    "name": "Dauntless",
+    "category": "general",
+    "isElite": false
+  },
+  {
+    "id": "fend",
+    "name": "Fend",
+    "category": "general",
+    "isElite": false
+  },
+  {
+    "id": "kick",
+    "name": "Kick",
+    "category": "general",
+    "isElite": false
+  },
+  {
+    "id": "pro",
+    "name": "Pro",
+    "category": "general",
+    "isElite": false
+  },
+  {
+    "id": "steady_footing",
+    "name": "Steady Footing",
+    "category": "general",
+    "isElite": false
+  },
+  {
+    "id": "strip_ball",
+    "name": "Strip Ball",
+    "category": "general",
+    "isElite": false
+  },
+  {
+    "id": "sure_hands",
+    "name": "Sure Hands",
+    "category": "general",
+    "isElite": false
+  },
+  {
+    "id": "frenzy",
+    "name": "Frenzy",
+    "category": "general",
+    "isElite": false
+  },
+  {
+    "id": "tackle",
+    "name": "Tackle",
+    "category": "general",
+    "isElite": false
+  },
+  {
+    "id": "taunt",
+    "name": "Taunt",
+    "category": "general",
+    "isElite": false
+  },
+  {
+    "id": "wrestle",
+    "name": "Wrestle",
+    "category": "general",
+    "isElite": false
+  },
+  {
+    "id": "arm_bar",
+    "name": "Arm Bar",
+    "category": "strength",
+    "isElite": false
+  },
+  {
+    "id": "brawler",
+    "name": "Brawler",
+    "category": "strength",
+    "isElite": false
+  },
+  {
+    "id": "break_tackle",
+    "name": "Break Tackle",
+    "category": "strength",
+    "isElite": false
+  },
+  {
+    "id": "grab",
+    "name": "Grab",
+    "category": "strength",
+    "isElite": false
+  },
+  {
+    "id": "guard",
+    "name": "Guard",
+    "category": "strength",
+    "isElite": true
+  },
+  {
+    "id": "juggernaut",
+    "name": "Juggernaut",
+    "category": "strength",
+    "isElite": false
+  },
+  {
+    "id": "mighty_blow",
+    "name": "Mighty Blow",
+    "category": "strength",
+    "isElite": true
+  },
+  {
+    "id": "multiple_block",
+    "name": "Multiple Block",
+    "category": "strength",
+    "isElite": false
+  },
+  {
+    "id": "stand_firm",
+    "name": "Stand Firm",
+    "category": "strength",
+    "isElite": false
+  },
+  {
+    "id": "strong_arm",
+    "name": "Strong Arm",
+    "category": "strength",
+    "isElite": false
+  },
+  {
+    "id": "bullseye",
+    "name": "Bullseye",
+    "category": "strength",
+    "isElite": false
+  },
+  {
+    "id": "thick_skull",
+    "name": "Thick Skull",
+    "category": "strength",
+    "isElite": false
+  },
+  {
+    "id": "accurate",
+    "name": "Accurate",
+    "category": "passing",
+    "isElite": false
+  },
+  {
+    "id": "cannoneer",
+    "name": "Cannoneer",
+    "category": "passing",
+    "isElite": false
+  },
+  {
+    "id": "cloud_burster",
+    "name": "Cloud Burster",
+    "category": "passing",
+    "isElite": false
+  },
+  {
+    "id": "dump_off",
+    "name": "Dump-Off",
+    "category": "passing",
+    "isElite": false
+  },
+  {
+    "id": "give_and_go",
+    "name": "Give and Go",
+    "category": "passing",
+    "isElite": false
+  },
+  {
+    "id": "hail_mary_pass",
+    "name": "Hail Mary Pass",
+    "category": "passing",
+    "isElite": false
+  },
+  {
+    "id": "leader",
+    "name": "Leader",
+    "category": "passing",
+    "isElite": false
+  },
+  {
+    "id": "nerves_of_steel",
+    "name": "Nerves of Steel",
+    "category": "passing",
+    "isElite": false
+  },
+  {
+    "id": "on_the_ball",
+    "name": "On the Ball",
+    "category": "passing",
+    "isElite": false
+  },
+  {
+    "id": "pass",
+    "name": "Pass",
+    "category": "passing",
+    "isElite": false
+  },
+  {
+    "id": "punt",
+    "name": "Punt",
+    "category": "passing",
+    "isElite": false
+  },
+  {
+    "id": "safe_pass",
+    "name": "Safe Pass",
+    "category": "passing",
+    "isElite": false
+  },
+  {
+    "id": "big_hand",
+    "name": "Big Hand",
+    "category": "mutation",
+    "isElite": false
+  },
+  {
+    "id": "claws",
+    "name": "Claws",
+    "category": "mutation",
+    "isElite": false
+  },
+  {
+    "id": "disturbing_presence",
+    "name": "Disturbing Presence",
+    "category": "mutation",
+    "isElite": false
+  },
+  {
+    "id": "extra_arms",
+    "name": "Extra Arms",
+    "category": "mutation",
+    "isElite": false
+  },
+  {
+    "id": "foul_appearance",
+    "name": "Foul Appearance",
+    "category": "mutation",
+    "isElite": false
+  },
+  {
+    "id": "horns",
+    "name": "Horns",
+    "category": "mutation",
+    "isElite": false
+  },
+  {
+    "id": "iron_hard_skin",
+    "name": "Iron Hard Skin",
+    "category": "mutation",
+    "isElite": false
+  },
+  {
+    "id": "monstrous_mouth",
+    "name": "Monstrous Mouth",
+    "category": "mutation",
+    "isElite": false
+  },
+  {
+    "id": "prehensile_tail",
+    "name": "Prehensile Tail",
+    "category": "mutation",
+    "isElite": false
+  },
+  {
+    "id": "tentacles",
+    "name": "Tentacles",
+    "category": "mutation",
+    "isElite": false
+  },
+  {
+    "id": "two_heads",
+    "name": "Two Heads",
+    "category": "mutation",
+    "isElite": false
+  },
+  {
+    "id": "very_long_legs",
+    "name": "Very Long Legs",
+    "category": "mutation",
+    "isElite": false
+  },
+  {
+    "id": "dirty_player",
+    "name": "Dirty Player",
+    "category": "devious",
+    "isElite": false
+  },
+  {
+    "id": "eye_gouge",
+    "name": "Eye Gouge",
+    "category": "devious",
+    "isElite": false
+  },
+  {
+    "id": "fumblerooski",
+    "name": "Fumblerooski",
+    "category": "devious",
+    "isElite": false
+  },
+  {
+    "id": "lethal_flight",
+    "name": "Lethal Flight",
+    "category": "devious",
+    "isElite": false
+  },
+  {
+    "id": "lone_fouler",
+    "name": "Lone Fouler",
+    "category": "devious",
+    "isElite": false
+  },
+  {
+    "id": "pile_driver",
+    "name": "Pile Driver",
+    "category": "devious",
+    "isElite": false
+  },
+  {
+    "id": "put_the_boot_in",
+    "name": "Put the Boot In",
+    "category": "devious",
+    "isElite": false
+  },
+  {
+    "id": "quick_foul",
+    "name": "Quick Foul",
+    "category": "devious",
+    "isElite": false
+  },
+  {
+    "id": "shadowing",
+    "name": "Shadowing",
+    "category": "devious",
+    "isElite": false
+  },
+  {
+    "id": "saboteur",
+    "name": "Saboteur",
+    "category": "devious",
+    "isElite": false
+  },
+  {
+    "id": "sneaky_git",
+    "name": "Sneaky Git",
+    "category": "devious",
+    "isElite": false
+  },
+  {
+    "id": "violent_innovator",
+    "name": "Violent Innovator",
+    "category": "devious",
+    "isElite": false
+  },
+  {
+    "id": "always_hungry",
+    "name": "Always Hungry",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "animosity",
+    "name": "Animosity (X)",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "animal_savagery",
+    "name": "Animal Savagery",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "ball_and_chain",
+    "name": "Ball & Chain",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "bloodlust",
+    "name": "Bloodlust (X+)",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "bombardier",
+    "name": "Bombardier",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "bone_head",
+    "name": "Bone Head",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "decay",
+    "name": "Decay",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "drunkard",
+    "name": "Drunkard",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "hatred",
+    "name": "Hatred (X)",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "hypnotic_gaze",
+    "name": "Hypnotic Gaze",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "insignificant",
+    "name": "Insignificant",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "kick_team_mate",
+    "name": "Kick Team-mate",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "loner",
+    "name": "Loner (X+)",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "my_ball",
+    "name": "My Ball",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "no_ball",
+    "name": "No Ball",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "pick_me_up",
+    "name": "Pick-me-up",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "plague_ridden",
+    "name": "Plague Ridden",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "pogo",
+    "name": "Pogo",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "projectile_vomit",
+    "name": "Projectile Vomit",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "really_stupid",
+    "name": "Really Stupid",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "regeneration",
+    "name": "Regeneration",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "right_stuff",
+    "name": "Right Stuff",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "secret_weapon",
+    "name": "Secret Weapon",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "stab",
+    "name": "Stab",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "stunty",
+    "name": "Stunty",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "swoop",
+    "name": "Swoop",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "take_root",
+    "name": "Take Root",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "throw_team_mate",
+    "name": "Throw Team-mate",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "timmm_ber",
+    "name": "Timmm-ber!",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "unchannelled_fury",
+    "name": "Unchannelled Fury",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "titchy",
+    "name": "Titchy",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "trickster",
+    "name": "Trickster",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "unsteady",
+    "name": "Unsteady",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "chainsaw",
+    "name": "Chainsaw",
+    "category": "trait",
+    "isElite": false
+  },
+  {
+    "id": "breathe_fire",
+    "name": "Breathe Fire",
+    "category": "trait",
+    "isElite": false
+  }
+]
