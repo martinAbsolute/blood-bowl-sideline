@@ -7,17 +7,17 @@ A bilingual BB2025 team builder for the Ukrainian community. English is the defa
 ## Run locally
 
 ```sh
-npm ci
+pnpm install --frozen-lockfile
 npx convex dev
-npm run dev
+pnpm dev
 ```
 
 Convex writes the deployment URL into `.env.local`. See `.env.example` for other public frontend settings. Store Telegram credentials in the Convex dashboard; never put them in browser variables or commit them. Development OIDC uses the cloud callback registered below and returns to localhost through `SITE_URL`.
 
 ```sh
-npm run check
-npm test
-npm run build
+pnpm check
+pnpm test
+pnpm build
 ```
 
 ## Project structure

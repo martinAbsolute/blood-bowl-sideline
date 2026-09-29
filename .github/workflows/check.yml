@@ -10,14 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v7.0.0
         with:
           node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm run check
-      - run: npm test
-      - run: npm run build
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run check
+      - run: pnpm test
+      - run: pnpm run build
         env:
           NEXT_PUBLIC_CONVEX_URL: https://expert-grasshopper-80.convex.cloud
           NEXT_PUBLIC_CONVEX_SITE_URL: https://expert-grasshopper-80.convex.site

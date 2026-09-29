@@ -21,7 +21,7 @@ Convex agent skills for common tasks can be installed by running
 - English is the source language. Use `gt-next` and keep `src/i18n/en.json` and `src/i18n/uk.json` complete. Proper skill and player names may remain English to match the Ukrainian reference.
 - Anonymous teams are browser-local drafts. Convex writes require authenticated ownership. UUID links expose only the intended public team view, never Telegram IDs or auth records.
 - League and tournament-running features are future work. Do not add scaffolding for those features until requested.
-- Before shipping, run `npm run check`, `npm test`, `npm run build`, and deploy Convex functions. Verify roster creation, ruleset switches, draft restoration, English/Ukrainian switching, and UUID pages in a browser.
+- Before shipping, run `pnpm check`, `pnpm test`, `pnpm build`, and deploy Convex functions. Verify roster creation, ruleset switches, draft restoration, English/Ukrainian switching, and UUID pages in a browser.
 - Never commit `.env*`, research assets, bot tokens, authentication payloads, or signing keys. `.env.example` contains names and safe placeholders only.
 
 <!-- BEGIN:nextjs-agent-rules -->
