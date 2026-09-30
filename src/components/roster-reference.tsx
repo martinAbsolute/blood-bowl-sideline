@@ -4,6 +4,7 @@ import { SkillList } from "./skill-box";
 import { PositionName } from "./position-name";
 import type { Roster } from "@/domain/types";
 import { PlayerIcon } from "./player-icon";
+import { TeamAffiliations } from "./team-affiliations";
 import {
   Table,
   TableBody,
@@ -105,14 +106,7 @@ export function RosterFacts({ roster }: { roster: Roster }) {
           </p>
         )}
       </div>
-      <p>
-        <span className="font-medium">{t("leagues")}:</span>{" "}
-        {roster.leagues.join(", ") || "—"}
-      </p>
-      <p>
-        <span className="font-medium">{t("specialRules")}:</span>{" "}
-        {roster.specialRules.join(", ") || "—"}
-      </p>
+      <TeamAffiliations roster={roster} />
     </div>
   );
 }

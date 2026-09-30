@@ -3,10 +3,14 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "gt-next";
 import { getRoster, newTeam } from "@/domain/catalog";
-import { ACTIVE, readDrafts } from "@/lib/drafts";
+import { ACTIVE, readDrafts, draftAccount } from "@/lib/drafts";
 import { TeamEditor } from "./team-editor";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { SharedTeam } from "./shared-team";
+import { useDraftSync } from "./draft-sync-provider";
 const subscribe = () => () => {};
 export function BuilderStart(props: {
   roster?: string;
@@ -19,9 +23,11 @@ export function BuilderStart(props: {
       () => false,
     ),
     t = useTranslations();
-  return hydrated ? (
+  const sync = useDraftSync();
+  return hydrated && sync.ready ? (
     <LocalBuilder
-      key={`${props.draft}-${props.roster}-${props.fresh}`}
+      key={`${props.draft}-${props.roster}-${props.fresh}-${sync.account}`}
+      account={sync.account}
       {...props}
     />
   ) : (
@@ -32,13 +38,17 @@ function LocalBuilder({
   roster,
   draft,
   fresh,
+  account,
 }: {
   roster?: string;
   draft?: string;
   fresh: boolean;
+  account: string | null;
 }) {
   const [initial] = useState(() => {
-    const drafts = readDrafts();
+    const drafts = readDrafts().filter(
+      (team) => !draftAccount(team.uuid) || draftAccount(team.uuid) === account,
+    );
     const existing = !fresh
       ? drafts.find(
           (t) =>
@@ -74,6 +84,8 @@ function LocalBuilder({
   }, [router, initial]);
   return initial ? (
     <TeamEditor initial={initial} />
+  ) : draft && account ? (
+    <CloudDraft uuid={draft} />
   ) : (
     <div className="page-width py-16 text-center">
       <h1 className="display-font text-3xl">{t("noTeams")}</h1>
@@ -82,5 +94,17 @@ function LocalBuilder({
         <Link href="/teams">{t("chooseRoster")}</Link>
       </Button>
     </div>
+  );
+}
+
+function CloudDraft({ uuid }: { uuid: string }) {
+  const team = useQuery(api.teams.getByUuid, { uuid });
+  const t = useTranslations();
+  return team ? (
+    <SharedTeam initial={team} />
+  ) : (
+    <p className="page-width py-20 text-muted-foreground">
+      {t(team === undefined ? "loading" : "notFound")}
+    </p>
   );
 }

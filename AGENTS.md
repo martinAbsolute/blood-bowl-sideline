@@ -14,12 +14,14 @@ Convex agent skills for common tasks can be installed by running
 
 ## Blood Bowl Sideline project rules
 
+- The app is fully in development without real users or backward-compatibility commitments. Obsolete development data and tests can be replaced when functionality changes; do not add migrations solely to preserve it.
+
 - Frontend code belongs in `src/`. Backend code belongs in `convex/`.
 - `src/components/ui/` and `src/components/magic-ui/` contain installed vendor components. **Do not directly modify files in either folder.** Compose or wrap them in other components and override presentation with Tailwind classes. Official registry reinstallation for upgrades is allowed; never patch vendor implementations.
 - Keep rules and factual catalogs in `src/domain/`. Both the browser and Convex must use the same validator and compute all costs from the catalog. Never trust client-supplied costs, legal status, owner IDs, or revision numbers.
-- Read `docs/rules-sources.md` before changing roster or tournament rules. Ruleset revisions are explicit; do not silently apply new rules to old snapshots.
+- Read `docs/rules-sources.md` before changing roster or tournament rules. Ruleset revisions are explicit. Development snapshots may be discarded when factual rules change.
 - English is the source language. Use `gt-next` and keep `src/i18n/en.json` and `src/i18n/uk.json` complete. Proper skill and player names may remain English to match the Ukrainian reference.
-- Anonymous teams are browser-local drafts. Convex writes require authenticated ownership. UUID links expose only the intended public team view, never Telegram IDs or auth records.
+- Anonymous teams are browser-local drafts. Signing in uploads all guest drafts into one account library. Successful cloud saves clear exact local recovery copies; failed work stays account-scoped on the device. Convex writes require authenticated ownership. UUID links expose only the intended public team view, never Telegram IDs or auth records.
 - League and tournament-running features are future work. Do not add scaffolding for those features until requested.
 - Before shipping, run `pnpm check`, `pnpm test`, `pnpm build`, and deploy Convex functions. Verify roster creation, ruleset switches, draft restoration, English/Ukrainian switching, and UUID pages in a browser.
 - Never commit `.env*`, research assets, bot tokens, authentication payloads, or signing keys. `.env.example` contains names and safe placeholders only.

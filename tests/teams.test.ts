@@ -146,3 +146,56 @@ describe("Convex team ownership and sharing", () => {
     ).not.toBeNull();
   });
 });
+
+describe("Account library search and filters", () => {
+  it("searches beyond the first page, combining owner, archive, roster and ruleset restrictions", async () => {
+    const { a, b } = await setup();
+    const target = {
+      ...newTeam(randomUUID(), "goblin"),
+      name: "Needle Squad",
+      coach: "Olexandr",
+      rulesetId: "eurobowl-2026" as const,
+    };
+    await a.mutation(api.teams.save, { team: target, expectedRevision: 0 });
+    for (let i = 0; i < 20; i++)
+      await a.mutation(api.teams.save, {
+        team: newTeam(randomUUID(), "dwarf"),
+        expectedRevision: 0,
+      });
+    await b.mutation(api.teams.save, {
+      team: { ...target, uuid: randomUUID() },
+      expectedRevision: 0,
+    });
+    const args = {
+      archived: false,
+      search: "Needle",
+      rosterId: "goblin",
+      rulesetId: "eurobowl-2026" as const,
+      paginationOpts: { numItems: 12, cursor: null },
+    };
+    expect(
+      (await a.query(api.teams.listMine, args)).page.map((d) => d.team.uuid),
+    ).toEqual([target.uuid]);
+    expect(
+      (await a.query(api.teams.listMine, { ...args, search: "Olex" })).page.map(
+        (d) => d.team.uuid,
+      ),
+    ).toEqual([target.uuid]);
+    expect(
+      (await a.query(api.teams.listMine, { ...args, rosterId: "dwarf" })).page,
+    ).toEqual([]);
+    expect(
+      (await a.query(api.teams.listMine, { ...args, search: "" })).page.map(
+        (d) => d.team.uuid,
+      ),
+    ).toEqual([target.uuid]);
+    await a.mutation(api.teams.setArchived, {
+      uuid: target.uuid,
+      archived: true,
+    });
+    expect((await a.query(api.teams.listMine, args)).page).toEqual([]);
+    expect(
+      (await a.query(api.teams.listMine, { ...args, archived: true })).page,
+    ).toHaveLength(1);
+  });
+});

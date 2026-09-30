@@ -15,6 +15,7 @@ import { TooltipProvider } from "../src/components/ui/tooltip";
 import { TeamEditor } from "../src/components/team-editor";
 import { LoginButton } from "../src/components/site-shell";
 import { BuilderStart } from "../src/components/builder-start";
+import { SharedTeam } from "../src/components/shared-team";
 
 const mocks = vi.hoisted(() => ({
   auth: { isAuthenticated: false, isLoading: false },
@@ -23,6 +24,7 @@ const mocks = vi.hoisted(() => ({
   error: vi.fn(),
   success: vi.fn(),
   replace: vi.fn(),
+  query: vi.fn(),
   t: (key: string) => key,
 }));
 vi.mock("gt-next", () => ({
@@ -33,6 +35,7 @@ vi.mock("gt-next", () => ({
 vi.mock("convex/react", () => ({
   useConvexAuth: () => mocks.auth,
   useMutation: () => mocks.save,
+  useQuery: () => mocks.query(),
 }));
 vi.mock("@convex-dev/auth/react", () => ({
   useAuthActions: () => ({ signIn: mocks.signIn }),
@@ -79,6 +82,7 @@ beforeEach(() => {
   mocks.error.mockClear();
   mocks.success.mockClear();
   mocks.replace.mockClear();
+  mocks.query.mockReset();
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
@@ -101,12 +105,17 @@ it("syncs rapid edits automatically with no Save button, coalescing them into on
   )!;
   await act(async () => add.click());
   await act(async () => add.click());
+  expect(container.querySelector('[role="status"]')?.textContent).toContain(
+    "saving",
+  );
   expect(mocks.save).not.toHaveBeenCalled();
   await act(async () => vi.advanceTimersByTimeAsync(450));
   expect(mocks.save).toHaveBeenCalledTimes(1);
   expect(mocks.save.mock.calls[0][0].team.players).toHaveLength(2);
   expect(mocks.save.mock.calls[0][0].expectedRevision).toBe(0);
-  expect(container.textContent).toContain("synced");
+  expect(container.querySelector('[role="status"]')?.textContent).toContain(
+    "savedCloud",
+  );
   expect(
     Array.from(container.querySelectorAll("button")).some((button) =>
       /saveTeam|saveChanges/.test(button.textContent ?? ""),
@@ -155,6 +164,9 @@ it("keeps failed automatic edits locally and retries on the next edit without a 
   )!;
   await act(async () => add.click());
   await act(async () => vi.advanceTimersByTimeAsync(450));
+  expect(container.querySelector('[role="status"]')?.textContent).toContain(
+    "saveStatusError",
+  );
   expect(readDrafts()[0].players).toHaveLength(1);
   await act(async () => vi.advanceTimersByTimeAsync(5000));
   expect(mocks.save).toHaveBeenCalledTimes(1);
@@ -162,6 +174,63 @@ it("keeps failed automatic edits locally and retries on the next edit without a 
   await act(async () => vi.advanceTimersByTimeAsync(450));
   expect(mocks.save).toHaveBeenCalledTimes(2);
   expect(mocks.save.mock.calls[1][0].team.players).toHaveLength(2);
+});
+
+it("opens owned UUID teams directly for editing and keeps local edits when live revisions arrive", async () => {
+  vi.useFakeTimers();
+  mocks.auth = { isAuthenticated: true, isLoading: false };
+  const team = newTeam(randomUUID(), "amazon");
+  const initial = {
+    team,
+    revision: 1,
+    legal: false,
+    updatedAt: 1,
+    canEdit: false,
+  };
+  const shared = () =>
+    createElement(
+      DraftSignInProvider,
+      null,
+      createElement(SharedTeam, { initial }),
+    );
+  await act(async () => root.render(shared()));
+  expect(container.querySelector('textarea[aria-label="teamName"]')).toBeNull();
+  mocks.query.mockReturnValue({ ...initial, canEdit: true });
+  await act(async () => root.render(shared()));
+  const name = container.querySelector('textarea[aria-label="teamName"]');
+  expect(name).not.toBeNull();
+  expect(container.textContent).not.toContain("editTeam");
+  const add = container.querySelector<HTMLButtonElement>(
+    'button[aria-label="increaseQuantity"]',
+  )!;
+  await act(async () => add.click());
+  mocks.query.mockReturnValue({ ...initial, canEdit: true, revision: 2 });
+  await act(async () => root.render(shared()));
+  expect(container.querySelector('textarea[aria-label="teamName"]')).toBe(name);
+  expect(readDrafts()[0].players).toHaveLength(1);
+  await act(async () => vi.advanceTimersByTimeAsync(450));
+  expect(mocks.save.mock.calls[0][0].team.players).toHaveLength(1);
+  mocks.query.mockReturnValue({ ...initial, canEdit: false });
+  await act(async () => root.render(shared()));
+  expect(container.querySelector('textarea[aria-label="teamName"]')).toBeNull();
+});
+
+it("shows a local draft status beside the editable title without claiming a cloud save", async () => {
+  await act(async () => root.render(editor(newTeam(randomUUID(), "amazon"))));
+  const status = container.querySelector('[role="status"]');
+  expect(status?.textContent).toBe("savedInDrafts");
+  expect(status?.parentElement?.querySelector("h1 textarea")).not.toBeNull();
+  expect(mocks.save).not.toHaveBeenCalled();
+});
+
+it("persists a ruleset change before navigation can interrupt post-render effects", async () => {
+  await act(async () => root.render(editor(newTeam(randomUUID(), "amazon"))));
+  const ruleset = container.querySelector<HTMLSelectElement>("aside select")!;
+  await act(async () => {
+    ruleset.value = "eurobowl-2026";
+    ruleset.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(readDrafts()[0].rulesetId).toBe("eurobowl-2026");
+  });
 });
 function editor(team = newTeam(randomUUID())) {
   return createElement(
@@ -216,7 +285,7 @@ it("header login preserves the exact draft; returning saves the entire unfinishe
   });
   expect(readRevision(team.uuid)).toBe(1);
   expect(sessionStorage.getItem(PENDING_SAVE)).toBeNull();
-  expect(readDrafts()).toEqual([team]);
+  expect(readDrafts()).toEqual([]);
   await act(async () => root.render(editor(team)));
   expect(mocks.save).toHaveBeenCalledTimes(1);
 });

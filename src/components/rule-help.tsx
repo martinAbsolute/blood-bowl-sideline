@@ -24,6 +24,7 @@ export function RuleHelp({
   className,
   label,
   href,
+  fullDescription = false,
 }: {
   title: string;
   description: string;
@@ -32,6 +33,7 @@ export function RuleHelp({
   className?: string;
   label?: string;
   href?: string;
+  fullDescription?: boolean;
 }) {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
@@ -69,7 +71,14 @@ export function RuleHelp({
         >
           <p className="font-semibold">{title}</p>
           {meta && <p className="text-xs opacity-80">{meta}</p>}
-          <p className="line-clamp-10 whitespace-pre-wrap">{description}</p>
+          <p
+            className={cn(
+              "whitespace-pre-wrap",
+              !fullDescription && "line-clamp-10",
+            )}
+          >
+            {description}
+          </p>
         </TooltipContent>
       </Tooltip>
       <Dialog open={open} onOpenChange={setOpen}>

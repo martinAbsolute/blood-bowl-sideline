@@ -18,6 +18,47 @@ import {
   validateTeam,
 } from "../src/domain/rules";
 import type { Team } from "../src/domain/types";
+import {
+  leagueName,
+  leagueSlug,
+  leagues,
+  specialRuleKey,
+  starsForLeague,
+} from "../src/domain/team-reference";
+import en from "../src/i18n/en.json";
+import uk from "../src/i18n/uk.json";
+
+describe("league and team-rule reference", () => {
+  it("resolves every roster league to a reference route, including the High Elf alias", () => {
+    for (const roster of rosters)
+      for (const league of roster.leagues) {
+        expect(leagues).toContain(leagueName(league));
+        expect(leagueSlug(league)).toMatch(/^[a-z-]+$/);
+      }
+    expect(leagueSlug("Elven Kingdom Leagues")).toBe("elven-kingdoms-league");
+  });
+  it("includes universal hires, honours league exclusions, and separates god-specific hires", () => {
+    const universal = stars.find((star) => star.playsFor.includes("Any Team"))!;
+    const excluded = stars.find((star) =>
+      star.playsFor.some((name) => name.startsWith("Any team except")),
+    )!;
+    expect(starsForLeague("Old World Classic")).toContain(universal);
+    expect(starsForLeague("Old World Classic")).toContain(excluded);
+    expect(starsForLeague("Sylvanian Spotlight")).not.toContain(excluded);
+    for (const star of stars.filter((s) =>
+      s.playsFor.every((name) => name.startsWith("Favoured of")),
+    )) {
+      expect(starsForLeague("Chaos Clash")).not.toContain(star);
+    }
+  });
+  it("has English and Ukrainian explanations for every catalog special rule", () => {
+    for (const name of rosters.flatMap((roster) => roster.specialRules)) {
+      const key = specialRuleKey(name) as keyof typeof en.teamSpecialRules;
+      expect(en.teamSpecialRules[key]).toBeTruthy();
+      expect(uk.teamSpecialRules[key]).toBeTruthy();
+    }
+  });
+});
 function human(rulesetId: Team["rulesetId"] = "bb2025-default"): Team {
   const team = newTeam(randomUUID());
   team.rulesetId = rulesetId;

@@ -33,7 +33,11 @@ import {
   exportTeam,
   readRevision,
   storeRevision,
+  draftAccount,
 } from "@/lib/drafts";
+import { saveCloudDraft } from "@/lib/cloud-save";
+import { useDraftSync } from "./draft-sync-provider";
+import { TeamName } from "./team-name";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -56,6 +60,7 @@ import {
 import { PlayerRecruitment } from "./player-recruitment";
 import { SkillList, TableSkills } from "./skill-box";
 import { RuleInfo } from "./rule-help";
+import { TeamAffiliations, SpecialRules } from "./team-affiliations";
 import { Checkbox } from "./ui/checkbox";
 import {
   Accordion,
@@ -69,8 +74,11 @@ import { positionLabel } from "./position-name";
 import { QuantityStepper } from "./quantity-stepper";
 import { hasTeamProgress, resetTeamRoster } from "@/lib/builder";
 import {
-  ArrowUpRight,
   Check,
+  CloudCheck,
+  CloudOff,
+  LoaderCircle,
+  ArrowLeft,
   ChevronRight,
   Copy,
   Download,
@@ -82,7 +90,6 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { LoginButton } from "./site-shell";
 import { toast } from "sonner";
 import Link from "next/link";
 import { PlayerIcon, StarPlayerIcon } from "./player-icon";
@@ -179,14 +186,13 @@ export function TeamEditor({
     { isAuthenticated, isLoading } = useConvexAuth(),
     draftSignIn = useDraftSignIn(),
     save = useMutation(api.teams.save);
+  const draftSync = useDraftSync();
   const [team, setTeam] = useState(initial),
     [revision, setRevision] = useState(
       () => initialRevision || readRevision(initial.uuid),
     ),
     [saving, setSaving] = useState(false),
-    [dirty, setDirty] = useState(
-      () => initialRevision === 0 && readRevision(initial.uuid) > 0,
-    );
+    [dirty, setDirty] = useState(() => initialRevision === 0);
   const [dialog, setDialog] = useState<"stars" | null>(null),
     [selected, setSelected] = useState<string | null>(null),
     [search, setSearch] = useState("");
@@ -194,6 +200,10 @@ export function TeamEditor({
   const [syncError, setSyncError] = useState<{
     team: Team;
     conflict: boolean;
+  } | null>(null);
+  const [localSave, setLocalSave] = useState<{
+    team: Team;
+    failed: boolean;
   } | null>(null);
   const playerTitle = useRef<HTMLHeadingElement>(null);
   const resumedSave = useRef(false);
@@ -210,20 +220,61 @@ export function TeamEditor({
     ? stars.find((star) => star.id === selected)
     : undefined;
   const requiresCaptain = roster.specialRules.includes("Team Captain");
+  const storageErrorText = t("storageError");
+  const reserveEditor = draftSync.editing;
   useEffect(() => {
-    if (!readOnly) {
+    if (!readOnly) return reserveEditor(team.uuid);
+  }, [reserveEditor, team.uuid, readOnly]);
+  useEffect(() => {
+    let cancelled = false;
+    if (
+      !readOnly &&
+      (dirty || revision === 0) &&
+      (localSave?.team !== team ||
+        (draftSync.account && draftAccount(team.uuid) !== draftSync.account))
+    ) {
+      let failed = false;
       try {
-        storeDraft(team);
+        storeDraft(team, draftSync.account);
       } catch {
-        toast.error(t("storageError"));
+        failed = true;
+        toast.error(storageErrorText);
       }
+      queueMicrotask(() => {
+        if (!cancelled)
+          setLocalSave((current) =>
+            current?.team === team && current.failed === failed
+              ? current
+              : { team, failed },
+          );
+      });
     }
-  }, [team, readOnly, t]);
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    team,
+    readOnly,
+    storageErrorText,
+    localSave,
+    dirty,
+    revision,
+    draftSync.account,
+  ]);
   useEffect(() => {
     if (readOnly || isAuthenticated) return;
     return draftSignIn.register(() => prepareDraftSignIn(team, revision));
   }, [draftSignIn, team, revision, readOnly, isAuthenticated]);
   function change(next: Team) {
+    // Persist before navigation can interrupt React's effect commit.
+    try {
+      storeDraft(next, draftSync.account);
+      if (next.uuid === team.uuid) storeRevision(next.uuid, revision);
+      setLocalSave({ team: next, failed: false });
+    } catch {
+      toast.error(storageErrorText);
+      setLocalSave({ team: next, failed: true });
+    }
     latestTeam.current = next;
     setTeam(next);
     setDirty(true);
@@ -274,9 +325,8 @@ export function TeamEditor({
       setSyncError(null);
       const pending = pendingDraftSave(team.uuid);
       try {
-        const result = await save({ team, expectedRevision });
+        const result = await saveCloudDraft(team, expectedRevision, save);
         setRevision(result.revision);
-        storeRevision(team.uuid, result.revision);
         finishDraftSignIn(team.uuid);
         setDirty(latestTeam.current !== team);
         if (pending) toast.success(t("saved"));
@@ -302,17 +352,27 @@ export function TeamEditor({
       returnedFromSignIn.current = false;
       toast.error(t("loginFailed"));
     }
-    if (readOnly || !isAuthenticated || resumedSave.current) return;
+    if (readOnly || !isAuthenticated || !draftSync.ready || resumedSave.current)
+      return;
     const pending = pendingDraftSave(team.uuid);
     if (!pending) return;
     resumedSave.current = true;
     // Resume the external save after React finishes committing authentication.
     queueMicrotask(() => void saveTeam(pending.revision));
-  }, [readOnly, isAuthenticated, isLoading, team.uuid, saveTeam, t]);
+  }, [
+    readOnly,
+    isAuthenticated,
+    isLoading,
+    team.uuid,
+    saveTeam,
+    t,
+    draftSync.ready,
+  ]);
   useEffect(() => {
     if (
       readOnly ||
       !isAuthenticated ||
+      !draftSync.ready ||
       saving ||
       !dirty ||
       !team.name.trim() ||
@@ -323,7 +383,16 @@ export function TeamEditor({
     // Coalesce rapid edits and serialize requests using the returned revision.
     const timer = window.setTimeout(() => void saveTeam(), 400);
     return () => window.clearTimeout(timer);
-  }, [readOnly, isAuthenticated, saving, dirty, team, syncError, saveTeam]);
+  }, [
+    readOnly,
+    isAuthenticated,
+    saving,
+    dirty,
+    team,
+    syncError,
+    saveTeam,
+    draftSync.ready,
+  ]);
   async function share() {
     try {
       await navigator.clipboard.writeText(
@@ -370,17 +439,92 @@ export function TeamEditor({
   const eligibleInducements = inducements.filter(
     (i) => inducementInfo(team, i).allowed || (team.inducements[i.id] ?? 0) > 0,
   );
+  const localPending = (dirty || revision === 0) && localSave?.team !== team;
+  const cloudPending =
+    isAuthenticated && (saving || (dirty && !!team.name.trim() && !syncError));
+  const saveStatus = syncError
+    ? "saveStatusError"
+    : localSave?.failed
+      ? "saveStatusLocalError"
+      : cloudPending || localPending
+        ? "saving"
+        : revision > 0 && !dirty
+          ? "savedCloud"
+          : "savedInDrafts";
+  const SaveIcon =
+    syncError || localSave?.failed
+      ? CloudOff
+      : cloudPending || localPending
+        ? LoaderCircle
+        : revision > 0 && !dirty
+          ? CloudCheck
+          : Check;
   return (
     <div className="page-width team-builder py-5">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="eyebrow">
-            {readOnly ? t("sharedTeam") : t("teamBuilder")} / {roster.name}
-          </p>
-          <h1 className="display-font mt-1 text-2xl leading-tight">
-            {team.name || t("untitled")}
-          </h1>
+      <div className="mb-4 flex flex-col items-start justify-between gap-3 lg:flex-row lg:items-center">
+        <div className="min-w-0 w-full max-w-full lg:flex-1">
+          <Link
+            href="/my-teams"
+            className="no-print mb-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:underline"
+          >
+            <ArrowLeft className="size-3.5" />
+            {t("myTeams")}
+          </Link>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <h1 className="display-font min-w-0 max-w-full text-2xl leading-tight sm:text-3xl">
+              {readOnly ? (
+                team.name || t("untitled")
+              ) : (
+                <TeamName
+                  label={t("teamName")}
+                  value={team.name}
+                  placeholder={t("untitled")}
+                  onChange={(name) => change({ ...team, name })}
+                />
+              )}
+            </h1>
+            {!readOnly && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="no-print flex items-center gap-1.5 text-xs text-muted-foreground"
+                title={
+                  syncError
+                    ? t(syncError.conflict ? "conflict" : "saveFailed")
+                    : localSave?.failed
+                      ? t("storageError")
+                      : isAuthenticated && !team.name.trim()
+                        ? t("teamNameRequired")
+                        : !isAuthenticated
+                          ? t("guestText")
+                          : undefined
+                }
+              >
+                <SaveIcon
+                  aria-hidden="true"
+                  className={`size-3.5 shrink-0 ${saveStatus === "saving" ? "animate-spin" : ""}`}
+                />
+                <span>{t(saveStatus)}</span>
+                {syncError && !syncError.conflict && (
+                  <button
+                    type="button"
+                    className="underline underline-offset-4"
+                    disabled={saving || !team.name.trim()}
+                    onClick={() => void saveTeam()}
+                  >
+                    {t("retry")}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
           <div className="mt-2 flex flex-wrap gap-2">
+            <Link
+              href={`/team/${roster.id}`}
+              className="mr-1 text-xs text-muted-foreground underline decoration-border underline-offset-4 hover:decoration-current"
+            >
+              {roster.name}
+            </Link>
             <Badge variant="outline">{rules.name}</Badge>
             <Badge variant="secondary">
               {totals.playerCount}/16 {t("players")}
@@ -770,6 +914,17 @@ export function TeamEditor({
             )}
           </CollapsibleSection>
           <section className="rounded-lg border bg-card p-3">
+            {!readOnly && (
+              <label className="mb-4 block text-xs font-medium">
+                {t("coachName")}
+                <Input
+                  className="mt-1 h-9 max-w-sm"
+                  value={team.coach}
+                  maxLength={80}
+                  onChange={(e) => change({ ...team, coach: e.target.value })}
+                />
+              </label>
+            )}
             <h2 className="section-title mb-4">{t("notes")}</h2>
             {readOnly ? (
               <p className="whitespace-pre-wrap text-sm leading-relaxed">
@@ -828,27 +983,9 @@ export function TeamEditor({
                     ))}
                   </select>
                 </label>
-                <label className="text-xs font-medium">
-                  {t("teamName")}
-                  <Input
-                    className="mt-1 h-9"
-                    value={team.name}
-                    maxLength={80}
-                    onChange={(e) => change({ ...team, name: e.target.value })}
-                  />
-                </label>
-                <label className="text-xs font-medium">
-                  {t("coachName")}
-                  <Input
-                    className="mt-1 h-9"
-                    value={team.coach}
-                    maxLength={80}
-                    onChange={(e) => change({ ...team, coach: e.target.value })}
-                  />
-                </label>
                 {["chaos-chosen", "chaos-renegade"].includes(roster.id) && (
                   <label className="text-xs font-medium">
-                    {t("favouredOf")}
+                    <SpecialRules names={["Favoured of…"]} />
                     <select
                       className={`${selectClass} mt-1`}
                       value={team.favouredOf}
@@ -890,109 +1027,109 @@ export function TeamEditor({
                   </label>
                 )}
               </div>
-              <div className="mt-3 space-y-1 border-t pt-3 text-[11px] leading-relaxed text-muted-foreground">
-                <p>{roster.leagues.join(", ")}</p>
-                {roster.specialRules.length > 0 && (
-                  <p>{roster.specialRules.join(", ")}</p>
-                )}
-                <Link
-                  href={`/team/${roster.id}`}
-                  className="inline-flex items-center gap-1 text-primary hover:underline"
-                >
-                  {t("teamDetails")}
-                  <ArrowUpRight className="size-3" />
-                </Link>
+              <div className="mt-4 border-t pt-4">
+                <TeamAffiliations roster={roster} team={team} />
               </div>
+            </section>
+          )}
+          {readOnly && (
+            <section className="rounded-lg border bg-card p-4">
+              <TeamAffiliations roster={roster} team={team} />
             </section>
           )}
 
           <section className="print-break-avoid overflow-hidden rounded-lg border bg-card">
-            <div className="bg-primary p-3 text-primary-foreground">
-              <p className="text-[10px] font-semibold tracking-[.16em] opacity-60">
-                {t("summary").toUpperCase()}
+            <div className="p-4">
+              <p className="text-xs font-medium text-muted-foreground">
+                {t("summary")}
               </p>
               <div className="mt-4 flex items-end justify-between">
-                <span className="display-font text-3xl">
+                <span className="display-font text-2xl">
                   {gold(totals.teamGold)}
                 </span>
-                <span className="pb-1 font-mono text-xs opacity-60">
+                <span className="pb-1 font-mono text-xs text-muted-foreground">
                   / {gold(totals.budget.teamBudget)} GP
                 </span>
               </div>
-              <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/15">
+              <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-secondary">
                 <div
-                  className={`h-full transition-[width] ${totals.remaining < 0 ? "bg-orange-300" : "bg-lime-200"}`}
+                  className={`h-full transition-[width] ${totals.remaining < 0 ? "bg-orange-600" : "bg-primary/60"}`}
                   style={{
                     width: `${Math.min(100, (totals.teamGold / totals.budget.teamBudget) * 100)}%`,
                   }}
                 />
               </div>
               <div className="mt-3 flex justify-between text-xs">
-                <span className="opacity-70">{t("remaining")}</span>
+                <span className="text-muted-foreground">{t("remaining")}</span>
                 <span className="font-mono">{gold(totals.remaining)} GP</span>
               </div>
             </div>
-            <div className="space-y-3 p-3 text-xs">
-              {[
-                [t("players"), totals.players],
-                [t("staff"), totals.staff],
-                [t("starPlayers"), totals.starGold],
-                [t("inducements"), totals.inducements],
-              ].map(([label, n]) => (
-                <div className="flex justify-between" key={label}>
-                  <span className="text-muted-foreground">{label}</span>
-                  <span className="font-mono">{gold(n as number)}</span>
-                </div>
-              ))}
-              {rules.id !== "bb2025-default" && (
-                <div className="border-t pt-3">
-                  <div className="flex justify-between font-semibold">
-                    <span>{t("skillAllowance")}</span>
-                    <span className="font-mono">
-                      {rules.skillCurrency
-                        ? totals.skills
-                        : gold(totals.skills)}{" "}
-                      /{" "}
-                      {rules.skillCurrency
-                        ? totals.budget.skillGold
-                        : gold(totals.budget.skillGold)}{" "}
-                      {rules.skillCurrency === "spp"
-                        ? "SPP"
-                        : rules.skillCurrency === "sp"
-                          ? "SP"
-                          : "GP"}
-                    </span>
+            <details className="border-t px-4 py-3 text-xs">
+              <summary className="cursor-pointer text-muted-foreground">
+                {t("budgetBreakdown")}
+              </summary>
+              <div className="mt-4 space-y-3">
+                {[
+                  [t("players"), totals.players],
+                  [t("staff"), totals.staff],
+                  [t("starPlayers"), totals.starGold],
+                  [t("inducements"), totals.inducements],
+                ].map(([label, n]) => (
+                  <div className="flex justify-between" key={label}>
+                    <span className="text-muted-foreground">{label}</span>
+                    <span className="font-mono">{gold(n as number)}</span>
                   </div>
-                  {totals.starTax > 0 && (
-                    <p className="mt-2 text-muted-foreground">
-                      {t("starPlayers")}:{" "}
-                      {rules.skillCurrency
-                        ? totals.starTax
-                        : gold(totals.starTax)}{" "}
-                      {rules.skillCurrency?.toUpperCase() ?? "GP"}
+                ))}
+                {rules.id !== "bb2025-default" && (
+                  <div className="border-t pt-3">
+                    <div className="flex justify-between font-semibold">
+                      <span>{t("skillAllowance")}</span>
+                      <span className="font-mono">
+                        {rules.skillCurrency
+                          ? totals.skills
+                          : gold(totals.skills)}{" "}
+                        /{" "}
+                        {rules.skillCurrency
+                          ? totals.budget.skillGold
+                          : gold(totals.budget.skillGold)}{" "}
+                        {rules.skillCurrency === "spp"
+                          ? "SPP"
+                          : rules.skillCurrency === "sp"
+                            ? "SP"
+                            : "GP"}
+                      </span>
+                    </div>
+                    {totals.starTax > 0 && (
+                      <p className="mt-2 text-muted-foreground">
+                        {t("starPlayers")}:{" "}
+                        {rules.skillCurrency
+                          ? totals.starTax
+                          : gold(totals.starTax)}{" "}
+                        {rules.skillCurrency?.toUpperCase() ?? "GP"}
+                      </p>
+                    )}
+                  </div>
+                )}
+                {rules.id === "eurobowl-2026" && (
+                  <div className="border-t pt-3">
+                    <div className="flex justify-between">
+                      <span>{t("flowingFunds")}</span>
+                      <span className="font-mono">
+                        {gold(totals.fundsUsed)} /{" "}
+                        {gold(totals.budget.flowingFunds)}
+                      </span>
+                    </div>
+                    <p className="mt-2 leading-relaxed text-muted-foreground">
+                      {t("flowingHint")}
                     </p>
-                  )}
-                </div>
-              )}
-              {rules.id === "eurobowl-2026" && (
-                <div className="border-t pt-3">
-                  <div className="flex justify-between">
-                    <span>{t("flowingFunds")}</span>
-                    <span className="font-mono">
-                      {gold(totals.fundsUsed)} /{" "}
-                      {gold(totals.budget.flowingFunds)}
-                    </span>
                   </div>
-                  <p className="mt-2 leading-relaxed text-muted-foreground">
-                    {t("flowingHint")}
-                  </p>
+                )}
+                <div className="flex justify-between border-t pt-3">
+                  <span>{t("tier")}</span>
+                  <span>{totals.tier || roster.tier}</span>
                 </div>
-              )}
-              <div className="flex justify-between border-t pt-3">
-                <span>{t("tier")}</span>
-                <span>{totals.tier || roster.tier}</span>
               </div>
-            </div>
+            </details>
           </section>
           <section
             className={`relative overflow-hidden rounded-lg border p-3 ${validation.valid ? "border-emerald-300 bg-emerald-50" : "bg-card"}`}
@@ -1013,14 +1150,22 @@ export function TeamEditor({
                 </p>
               </>
             ) : (
-              <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
-                {validation.issues.map((issue, index) => (
-                  <li key={`${issue.code}-${index}`} className="flex gap-2">
-                    <span className="mt-1.5 size-1 shrink-0 rounded-full bg-orange-600" />
-                    <span>{t(`issues.${issue.code}`, issue.values)}</span>
-                  </li>
-                ))}
-              </ul>
+              <details
+                className="mt-3 text-xs"
+                open={validation.issues.length <= 2}
+              >
+                <summary className="cursor-pointer text-muted-foreground">
+                  {t("rosterChecks", { count: validation.issues.length })}
+                </summary>
+                <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
+                  {validation.issues.map((issue, index) => (
+                    <li key={`${issue.code}-${index}`} className="flex gap-2">
+                      <span className="mt-1.5 size-1 shrink-0 rounded-full bg-orange-600" />
+                      <span>{t(`issues.${issue.code}`, issue.values)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
             )}
             {rules.id !== "bb2025-default" && (
               <p className="mt-4 border-t pt-3 text-[10px] leading-relaxed text-muted-foreground">
@@ -1028,74 +1173,14 @@ export function TeamEditor({
               </p>
             )}
           </section>
-          {!readOnly && (
-            <div className="no-print space-y-3">
-              {isAuthenticated ? (
-                <div
-                  role="status"
-                  className="text-center text-xs text-muted-foreground"
-                >
-                  {t(
-                    syncError
-                      ? syncError.conflict
-                        ? "conflict"
-                        : "saveFailed"
-                      : !team.name.trim()
-                        ? "teamNameRequired"
-                        : saving || dirty
-                          ? "saving"
-                          : revision > 0
-                            ? "synced"
-                            : "syncOnEdit",
-                  )}
-                  {syncError && !syncError.conflict && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => void saveTeam()}
-                      disabled={saving || !team.name.trim()}
-                    >
-                      {t("retry")}
-                    </Button>
-                  )}
-                </div>
-              ) : null}
-              <p className="flex justify-center gap-1.5 text-[10px] text-muted-foreground">
-                <Check className="size-3" />
-                {t("draftSaved")}
-              </p>
-              {revision > 0 && (
-                <>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href={`/teams/${team.uuid}`}>
-                      {t("viewTeam")}
-                      <ArrowUpRight className="size-4" />
-                    </Link>
-                  </Button>
-                  <p className="text-center text-[10px] leading-relaxed text-muted-foreground">
-                    {t("savedHint")}
-                  </p>
-                </>
-              )}
-            </div>
+          {!readOnly && syncError && (
+            <p
+              role="alert"
+              className="text-xs leading-relaxed text-muted-foreground"
+            >
+              {t(syncError.conflict ? "conflict" : "saveFailed")}
+            </p>
           )}
-          {!readOnly && !isAuthenticated && (
-            <div className="no-print rounded-lg border bg-secondary/40 p-3">
-              <div>
-                <p className="text-sm font-semibold">{t("guestTitle")}</p>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                  {t("guestText")}
-                </p>
-              </div>
-              <LoginButton className="mt-3 w-full bg-transparent text-xs" />
-            </div>
-          )}
-          <Link
-            href="/rules"
-            className="no-print block text-center text-xs text-muted-foreground hover:underline"
-          >
-            {t("rulesSources")} · {t("rulesAsOf")}
-          </Link>
         </aside>
       </div>
       <Dialog

@@ -1,20 +1,30 @@
 # Blood Bowl Sideline
 
-A bilingual BB2025 team builder for the Ukrainian community. English is the default; Ukrainian is a persistent language choice powered by `gt-next` and local dictionaries. No translation API account is required.
+A bilingual BB2025 team builder for the Ukrainian community, built with Next.js, React, Convex and `gt-next`. English is the source language; Ukrainian is a persistent language choice using local dictionaries.
 
-31 rosters, 108 skill/trait facts, 66 star players, and four presets: Default, Matched Play, EuroBowl 2026, NAF World Cup **2027 v2.1** (the edition shown by both reference builders). Guest drafts stay on the device; Telegram-authenticated coaches can save teams in Convex and share public UUID views. Incomplete teams save as drafts. Ownership, costs, legality, and edit revisions are enforced on the backend.
+The app is actively in development, with no real users or backward-compatibility commitments. Tests describe current behavior. Do not add migrations just to preserve obsolete development data.
 
-The homepage opens the team catalog at `/teams`; `/rosters` redirects there. Each team type has a full reference page at `/team/[team-name]`. Creation lives at `/builder`, local drafts and account teams at `/my-teams`, and public saved teams keep their `/teams/[uuid]` links. Switching team type in the builder warns before resetting draft progress and keeps the selected ruleset.
+## Team flow
 
-## Run locally
+- Choose a roster at `/teams` and start building. Guest drafts save automatically on the current device.
+- Sign in with Telegram to upload **all** guest drafts. Signed-in creation, imports and edits save automatically to the account.
+- `/my-teams` is one library with search by name, coach, roster or ruleset, plus roster, ruleset and archive filters. Draft/Ready describes roster validation, not where a team is saved.
+- Successful cloud saves clear the local recovery copy. Failed or unfinished edits remain on the device; retry from the library or editor. Account recovery copies are isolated from other accounts. A blank name needs to be filled in before upload.
+- `/teams/[uuid]` opens directly in edit mode for its owner and as a read-only public view for everyone else. Archiving hides the public link; restoring makes it available again.
+- Team names behave like document filenames: type inline, Enter to finish, Escape to restore the previous name. Long names wrap on narrow screens.
+- `/team/[roster]` contains roster details. `/leagues/[league]` lists affiliated rosters and clickable star-player details. Special rules have full help on hover, keyboard focus and tap.
+
+Costs and legality come from the shared catalog and validator, including on the server. UUID pages never expose owner IDs or authentication records. League progression and tournament management are outside scope.
+
+## Development
 
 ```sh
 pnpm install --frozen-lockfile
-npx convex dev
+pnpm exec convex dev
 pnpm dev
 ```
 
-Convex writes the deployment URL into `.env.local`. See `.env.example` for other public frontend settings. Store Telegram credentials in the Convex dashboard; never put them in browser variables or commit them. Development OIDC uses the cloud callback registered below and returns to localhost through `SITE_URL`.
+Convex sets up `.env.local`. Use [.env.example](.env.example) for frontend variable names. Keep Telegram credentials and signing keys only in Convex environment variables. Never commit `.env` files or expose secrets through `NEXT_PUBLIC_*`.
 
 ```sh
 pnpm check
@@ -22,57 +32,44 @@ pnpm test
 pnpm build
 ```
 
-## Project structure
+Before shipping, also check creation, ruleset changes, draft restoration, language switching, owner/public UUID pages, account synchronization, library filters and narrow-screen name editing in a browser.
 
-- `src/app/`: Next.js App Router and SSR public team views.
-- `src/components/`: original composed application UI.
-- `src/components/ui/`, `src/components/magic-ui/`: installed vendor components; do not directly edit them.
-- `src/domain/`: versioned factual catalogs, shared validation and budget engine.
-- `src/i18n/`: paired English/Ukrainian `gt-next` dictionaries.
-- `convex/`: auth, webhook, owner-scoped teams, public projections, and reversible archives.
-- `tests/`: tournament calculations, Telegram security, and Convex authorization/concurrency.
+## Structure
 
-Read [rules provenance and coverage](docs/rules-sources.md) before changing data. The Default preset is an exhibition draft; enhanced recruitment needs organiser agreement. Squad-level rules and event rulings are outside individual-roster checks. League play and tournament running are intentionally future work. Team snapshots, stable UUIDs, owners, rules revisions, and soft archives provide a foundation without adding those features prematurely.
+- `src/app/`: routes and server-rendered public team views.
+- `src/components/`: application UI; compose installed vendor components without modifying `ui/` or `magic-ui/`.
+- `src/domain/`: factual catalogs, shared validators, costs and reference relationships.
+- `src/lib/`: browser drafts, account synchronization and document utilities.
+- `src/i18n/`: complete English/Ukrainian dictionaries.
+- `convex/`: Telegram authentication, owner-scoped persistence, indexed search and public projections. See [backend notes](convex/README.md).
+- `tests/`: current rules, authentication, ownership and user-flow coverage.
 
-## Telegram OpenID Connect
+Read [rules provenance](docs/rules-sources.md) before changing factual catalogs. There are 31 rosters, 108 skills/traits, 66 star players and four presets: Default, Matched Play, EuroBowl 2026 and NAF World Cup 2027 v2.1.
 
-Authentication uses Telegram's standard authorization-code flow with S256 PKCE and state protection, through Convex Auth. Telegram ID-token signatures are independently verified against the official JWKS, along with issuer, audience, expiry, and subject. Only the opaque account subject, name, and optional photo are projected into account records. No phone or messaging permission is requested. The optional bot webhook only answers explicit private /start requests with a link to the application.
+## Telegram authentication
 
-Bot identity is configured through `TELEGRAM_BOT_USERNAME`, `TELEGRAM_BOT_TOKEN`, and `TELEGRAM_CLIENT_ID` in Convex. Current bot: @bb_sideline_bot; client ID: 8809799343. Store `TELEGRAM_CLIENT_SECRET` only in Convex environment variables.
+Convex Auth uses Telegram OpenID Connect with authorization codes, S256 PKCE and state protection. ID tokens are verified against Telegram's JWKS and checked for issuer, audience, expiry and subject. No phone or messaging permission is requested. The optional bot webhook responds only to explicit private `/start` requests.
 
-Register the following OIDC redirect URIs in BotFather's app:
+Configure `TELEGRAM_BOT_USERNAME`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CLIENT_ID`, `TELEGRAM_CLIENT_SECRET`, `SITE_URL`, `JWT_PRIVATE_KEY` and `JWKS` in Convex. The setup script, `scripts/setup-telegram.mjs`, verifies the bot identity, signing-key configuration and webhook. Read its options before running it against a deployment.
 
-- Production: https://blood-bowl-sideline.vercel.app/api/auth/callback/telegram
-- Development: https://pleasant-buffalo-91.convex.site/api/auth/callback/telegram
-- Trusted website origin: https://blood-bowl-sideline.vercel.app
+Register exact callback URLs with BotFather:
 
-Native Login is unnecessary. For localhost OIDC testing, use the development callback and SITE_URL=http://localhost:3000; register any additional trusted origin Telegram requires. The shared bot's single webhook remains pointed at production.
+- Production: `https://blood-bowl-sideline.vercel.app/api/auth/callback/telegram`
+- Development: `https://pleasant-buffalo-91.convex.site/api/auth/callback/telegram`
 
-```sh
-node scripts/setup-telegram.mjs --prod --copy-dev-credentials --client-id=8809799343 --site=https://blood-bowl-sideline.vercel.app --convex-site=https://expert-grasshopper-80.convex.site
-```
-
-The script verifies the bot ID, copies credentials securely, creates signing keys only when absent, rotates the webhook secret when changing bots, and verifies the registered webhook. Set NEXT_PUBLIC_TELEGRAM_AUTH_READY=true in Vercel and redeploy after configuration. The frontend sign-in button starts OIDC directly; no legacy login widget or signed-query callback remains.
-
-Production uses `CUSTOM_AUTH_SITE_URL=https://blood-bowl-sideline.vercel.app` in Convex. The Next.js auth route forwards only Telegram sign-in/callback requests to `NEXT_PUBLIC_CONVEX_SITE_URL`, preserving redirects and separate state/PKCE cookies without caching. Register that exact Vercel callback in BotFather. Development without `CUSTOM_AUTH_SITE_URL` uses the Convex callback above. Login from an editable draft persists it, returns to its UUID, and resumes one authenticated account save; failures keep the local draft available.
-
-Authenticated edits sync automatically after a short pause, with one save in flight and optimistic revision checks. Changes made during a save are synced next using the returned revision. Failed saves stay local and offer retry; conflicts require opening the saved version before editing again. A fresh device shows an empty state until the coach chooses a roster.
+Production uses `CUSTOM_AUTH_SITE_URL=https://blood-bowl-sideline.vercel.app` in Convex. The Next.js auth route forwards Telegram requests to `NEXT_PUBLIC_CONVEX_SITE_URL` while preserving redirects and state/PKCE cookies. Local development uses the development callback and `SITE_URL=http://localhost:3000`. Keep the shared bot webhook pointed at production. Set `NEXT_PUBLIC_TELEGRAM_AUTH_READY=true` only once authentication is configured.
 
 ## Deployment
 
-The frontend is linked to Vercel project `blood-bowl-sideline` in `martin-bahniuks-projects`. Convex project is `martin-bahniuk:blood-bowl-sideline`, with dev `pleasant-buffalo-91` and production `expert-grasshopper-80`. Configure Vercel production with the **production** Convex URL. Never expose the Convex deploy key or Telegram token using `NEXT_PUBLIC_`.
+GitHub `main` triggers the linked Vercel project, `blood-bowl-sideline`. GitHub Actions runs checks, tests and the build. Backend changes must be deployed before the frontend push:
 
 ```sh
-npx convex deploy -y
-vercel --prod
+pnpm exec convex deploy -y
+git push origin main
 ```
 
-Deploy backend changes before frontend changes. CI runs checks, tests, and the Next.js build. For future automated Convex deployment, create a project deploy key in the dashboard and store it as a protected Vercel environment variable; none is stored in this repository.
+Confirm the target first: personal development is `pleasant-buffalo-91`; production is `expert-grasshopper-80`. Vercel production must use the production Convex URL. A deployment key, if automation is configured later, belongs in protected platform secrets.
 
-When `bbsideline.com.ua` is registered, add it to Vercel, apply the DNS records Vercel provides, update `SITE_URL` in Convex and `NEXT_PUBLIC_SITE_URL` in Vercel, add `https://bbsideline.com.ua` to Telegram's trusted origins, and redeploy. The Convex OIDC callback URL and team UUID paths remain the same.
+## Attribution
 
-## Tooling compatibility
-
-Application libraries were checked against current stable npm releases. TypeScript 7 is the checker; Microsoft's `@typescript/typescript6` compatibility alias supplies the compiler API required by Next.js/ESLint. The latest ESLint uses the official `@eslint/compat` adapter for Next.js's shipped plugins. Cobe stays on 0.6.5 because the installed current Magic UI Globe registry component requires its pre-2.0 API. See `AGENTS.md` for installed Next.js and Convex AI guidance.
-
-Independent community software. Blood Bowl is a Games Workshop trademark; no affiliation or endorsement. English skill definitions reproduce the user-supplied BB2025 export verbatim; see the rules provenance above. No third-party artwork is redistributed.
+Independent community software; Blood Bowl is a Games Workshop trademark. No affiliation or endorsement. English skill definitions match the user-supplied export described in the rules provenance. Player artwork comes from the FUMBBL community; see [asset attribution and mappings](public/assets/fumbbl/README.md).

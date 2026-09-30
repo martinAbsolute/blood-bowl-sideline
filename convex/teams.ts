@@ -4,7 +4,7 @@ import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { publicTeam, teamValidator } from "./validators";
 import { teamSchema } from "../src/domain/types";
-import { getRoster } from "../src/domain/catalog";
+import { getRoster, getRuleset } from "../src/domain/catalog";
 import { validateTeam } from "../src/domain/rules";
 
 export const getByUuid = query({
@@ -27,8 +27,19 @@ export const getByUuid = query({
     };
   },
 });
+export const viewer = query({
+  args: {},
+  returns: v.union(v.id("users"), v.null()),
+  handler: async (ctx) => getAuthUserId(ctx),
+});
 export const listMine = query({
-  args: { paginationOpts: paginationOptsValidator, archived: v.boolean() },
+  args: {
+    paginationOpts: paginationOptsValidator,
+    archived: v.boolean(),
+    search: v.optional(v.string()),
+    rosterId: v.optional(v.string()),
+    rulesetId: v.optional(teamValidator.fields.rulesetId),
+  },
   returns: v.object({
     page: v.array(publicTeam),
     isDone: v.boolean(),
@@ -42,19 +53,61 @@ export const listMine = query({
       ),
     ),
   }),
-  handler: async (ctx, { paginationOpts, archived }) => {
+  handler: async (
+    ctx,
+    { paginationOpts, archived, search, rosterId, rulesetId },
+  ) => {
     const owner = await getAuthUserId(ctx);
     if (!owner) throw new ConvexError("UNAUTHENTICATED");
-    const result = await ctx.db
-      .query("teams")
-      .withIndex("by_ownerId_and_archived", (q) =>
-        q.eq("ownerId", owner).eq("archived", archived),
-      )
-      .order("desc")
-      .paginate({
-        ...paginationOpts,
-        numItems: Math.min(paginationOpts.numItems, 30),
-      });
+    const text = search?.trim().slice(0, 160);
+    const table = ctx.db.query("teams");
+    const source = text
+      ? table.withSearchIndex("search_library", (q) => {
+          let filter = q
+            .search("searchText", text)
+            .eq("ownerId", owner)
+            .eq("archived", archived);
+          if (rosterId) filter = filter.eq("team.rosterId", rosterId);
+          if (rulesetId) filter = filter.eq("team.rulesetId", rulesetId);
+          return filter;
+        })
+      : rosterId && rulesetId
+        ? table
+            .withIndex("by_owner_archive_roster_ruleset", (q) =>
+              q
+                .eq("ownerId", owner)
+                .eq("archived", archived)
+                .eq("team.rosterId", rosterId)
+                .eq("team.rulesetId", rulesetId),
+            )
+            .order("desc")
+        : rosterId
+          ? table
+              .withIndex("by_owner_archive_roster", (q) =>
+                q
+                  .eq("ownerId", owner)
+                  .eq("archived", archived)
+                  .eq("team.rosterId", rosterId),
+              )
+              .order("desc")
+          : rulesetId
+            ? table
+                .withIndex("by_owner_archive_ruleset", (q) =>
+                  q
+                    .eq("ownerId", owner)
+                    .eq("archived", archived)
+                    .eq("team.rulesetId", rulesetId),
+                )
+                .order("desc")
+            : table
+                .withIndex("by_ownerId_and_archived", (q) =>
+                  q.eq("ownerId", owner).eq("archived", archived),
+                )
+                .order("desc");
+    const result = await source.paginate({
+      ...paginationOpts,
+      numItems: Math.min(paginationOpts.numItems, 30),
+    });
     return {
       ...result,
       page: result.page.map((d) => ({
@@ -89,8 +142,20 @@ export const save = mutation({
     const revision = (existing?.revision ?? 0) + 1,
       updatedAt = Date.now(),
       legal = validateTeam(team).valid;
+    const searchText = [
+      team.name,
+      team.coach,
+      getRoster(team.rosterId)!.name,
+      getRuleset(team.rulesetId).name,
+    ].join(" ");
     if (existing)
-      await ctx.db.patch(existing._id, { team, revision, updatedAt, legal });
+      await ctx.db.patch(existing._id, {
+        team,
+        revision,
+        updatedAt,
+        legal,
+        searchText,
+      });
     else
       await ctx.db.insert("teams", {
         ownerId,
@@ -100,6 +165,7 @@ export const save = mutation({
         updatedAt,
         legal,
         archived: false,
+        searchText,
       });
     return { team, revision, updatedAt, legal, canEdit: true };
   },
