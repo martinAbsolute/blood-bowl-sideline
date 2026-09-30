@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { useTranslations } from "gt-next";
 import { affiliation } from "@/domain/rules";
 import {
@@ -18,9 +19,15 @@ export function LeagueLinks({ names }: { names: string[] }) {
         <Link
           key={name}
           href={`/leagues/${leagueSlug(name)}`}
-          className="underline decoration-border underline-offset-4 hover:decoration-current"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-baseline gap-0.5 underline decoration-border underline-offset-4 hover:decoration-current"
         >
           {leagueName(name)}
+          <ArrowUpRight
+            aria-hidden="true"
+            className="size-3 shrink-0 self-center text-muted-foreground"
+          />
         </Link>
       ))}
     </span>

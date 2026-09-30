@@ -15,7 +15,7 @@ export function TeamName({
   const beforeFocus = useRef(value);
   const cancelled = useRef(false);
   return (
-    <span className="relative grid w-max min-w-[min(12ch,100%)] max-w-full grid-cols-[minmax(0,1fr)]">
+    <span className="relative -left-[9px] grid w-max min-w-[min(12ch,100%)] max-w-full grid-cols-[minmax(0,1fr)]">
       <span
         aria-hidden="true"
         className="invisible min-w-0 whitespace-pre-wrap rounded-md border px-2 py-1"

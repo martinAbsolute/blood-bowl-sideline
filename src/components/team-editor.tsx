@@ -38,6 +38,9 @@ import {
 import { saveCloudDraft } from "@/lib/cloud-save";
 import { useDraftSync } from "./draft-sync-provider";
 import { TeamName } from "./team-name";
+import { TeamHeader } from "./team-header";
+import { EditorSelect } from "./editor-select";
+import { ReadinessCard } from "./readiness-card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -100,8 +103,6 @@ import {
   prepareDraftSignIn,
 } from "@/lib/draft-sign-in";
 const gold = (n: number) => `${(n / 1000).toLocaleString("en")}k`;
-const selectClass =
-  "h-9 w-full rounded-md border border-input bg-card px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring";
 function CollapsibleSection({
   title,
   children,
@@ -461,8 +462,8 @@ export function TeamEditor({
           : Check;
   return (
     <div className="page-width team-builder py-5">
-      <div className="mb-4 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <TeamHeader
+        back={
           <Link
             href="/my-teams"
             className="no-print inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:underline"
@@ -470,7 +471,9 @@ export function TeamEditor({
             <ArrowLeft className="size-3.5" />
             {t("myTeams")}
           </Link>
-          <div className="no-print flex flex-wrap gap-2">
+        }
+        actions={
+          <>
             <Button
               variant="outline"
               size="sm"
@@ -495,10 +498,10 @@ export function TeamEditor({
                 {t("share")}
               </Button>
             )}
-          </div>
-        </div>
-        <div className="min-w-0 w-full max-w-full">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          </>
+        }
+        title={
+          <>
             <h1 className="display-font w-max min-w-0 max-w-full shrink-0 break-words text-2xl leading-tight [overflow-wrap:anywhere] sm:text-3xl">
               {readOnly ? (
                 team.name || t("untitled")
@@ -545,22 +548,20 @@ export function TeamEditor({
                 )}
               </div>
             )}
-          </div>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <Link
-              href={`/team/${roster.id}`}
-              className="mr-1 text-xs text-muted-foreground underline decoration-border underline-offset-4 hover:decoration-current"
-            >
-              {roster.name}
-            </Link>
-            <Badge variant="outline">{rules.name}</Badge>
-            <Badge variant="secondary">
-              {totals.playerCount}/16 {t("players")}
-            </Badge>
-            {readOnly && <Badge variant="outline">{t("viewOnly")}</Badge>}
-          </div>
+          </>
+        }
+      >
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="outline" asChild>
+            <Link href={`/team/${roster.id}`}>{roster.name}</Link>
+          </Badge>
+          <Badge variant="outline">{rules.name}</Badge>
+          <Badge variant="secondary">
+            {totals.playerCount}/16 {t("players")}
+          </Badge>
+          {readOnly && <Badge variant="outline">{t("viewOnly")}</Badge>}
         </div>
-      </div>
+      </TeamHeader>
       <div className="budget-grid">
         <div className="space-y-3">
           {!readOnly && <PlayerRecruitment team={team} onChange={change} />}
@@ -921,10 +922,10 @@ export function TeamEditor({
           </CollapsibleSection>
           <section className="rounded-lg border bg-card p-3">
             {!readOnly && (
-              <label className="mb-4 block text-xs font-medium">
+              <label className="mb-4 block text-xs font-medium text-muted-foreground">
                 {t("coachName")}
                 <Input
-                  className="mt-1 h-9 max-w-sm"
+                  className="mt-1 h-9 max-w-sm px-2.5 text-sm font-normal text-foreground md:text-sm"
                   value={team.coach}
                   maxLength={80}
                   onChange={(e) => change({ ...team, coach: e.target.value })}
@@ -951,10 +952,9 @@ export function TeamEditor({
           {!readOnly && (
             <section className="no-print rounded-lg border bg-card p-3">
               <div className="grid gap-3">
-                <label className="text-xs font-medium">
+                <label className="text-xs font-medium text-muted-foreground">
                   {t("ruleset")}
-                  <select
-                    className={`${selectClass} mt-1`}
+                  <EditorSelect
                     value={team.rulesetId}
                     onChange={(e) =>
                       change({
@@ -968,12 +968,11 @@ export function TeamEditor({
                         {r.name}
                       </option>
                     ))}
-                  </select>
+                  </EditorSelect>
                 </label>
-                <label className="text-xs font-medium">
+                <label className="text-xs font-medium text-muted-foreground">
                   {t("teamType")}
-                  <select
-                    className={`${selectClass} mt-1`}
+                  <EditorSelect
                     value={team.rosterId}
                     onChange={(e) => {
                       const id = e.target.value;
@@ -987,13 +986,12 @@ export function TeamEditor({
                         {r.name}
                       </option>
                     ))}
-                  </select>
+                  </EditorSelect>
                 </label>
                 {["chaos-chosen", "chaos-renegade"].includes(roster.id) && (
-                  <label className="text-xs font-medium">
+                  <label className="text-xs font-medium text-muted-foreground">
                     <SpecialRules names={["Favoured of…"]} />
-                    <select
-                      className={`${selectClass} mt-1`}
+                    <EditorSelect
                       value={team.favouredOf}
                       onChange={(e) =>
                         change({
@@ -1011,14 +1009,13 @@ export function TeamEditor({
                       ].map((x) => (
                         <option key={x}>{x}</option>
                       ))}
-                    </select>
+                    </EditorSelect>
                   </label>
                 )}
                 {roster.id === "norse" && (
-                  <label className="text-xs font-medium">
+                  <label className="text-xs font-medium text-muted-foreground">
                     {t("norseLeague")}
-                    <select
-                      className={`${selectClass} mt-1`}
+                    <EditorSelect
                       value={team.norseLeague}
                       onChange={(e) =>
                         change({
@@ -1029,7 +1026,7 @@ export function TeamEditor({
                     >
                       <option>Old World Classic</option>
                       <option>Chaos Clash</option>
-                    </select>
+                    </EditorSelect>
                   </label>
                 )}
               </div>
@@ -1070,77 +1067,82 @@ export function TeamEditor({
                 <span className="font-mono">{gold(totals.remaining)} GP</span>
               </div>
             </div>
-            <details className="border-t px-4 py-3 text-xs">
-              <summary className="cursor-pointer text-muted-foreground">
-                {t("budgetBreakdown")}
-              </summary>
-              <div className="mt-4 space-y-3">
-                {[
-                  [t("players"), totals.players],
-                  [t("staff"), totals.staff],
-                  [t("starPlayers"), totals.starGold],
-                  [t("inducements"), totals.inducements],
-                ].map(([label, n]) => (
-                  <div className="flex justify-between" key={label}>
-                    <span className="text-muted-foreground">{label}</span>
-                    <span className="font-mono">{gold(n as number)}</span>
-                  </div>
-                ))}
-                {rules.id !== "bb2025-default" && (
-                  <div className="border-t pt-3">
-                    <div className="flex justify-between font-semibold">
-                      <span>{t("skillAllowance")}</span>
-                      <span className="font-mono">
-                        {rules.skillCurrency
-                          ? totals.skills
-                          : gold(totals.skills)}{" "}
-                        /{" "}
-                        {rules.skillCurrency
-                          ? totals.budget.skillGold
-                          : gold(totals.budget.skillGold)}{" "}
-                        {rules.skillCurrency === "spp"
-                          ? "SPP"
-                          : rules.skillCurrency === "sp"
-                            ? "SP"
-                            : "GP"}
-                      </span>
-                    </div>
-                    {totals.starTax > 0 && (
-                      <p className="mt-2 text-muted-foreground">
-                        {t("starPlayers")}:{" "}
-                        {rules.skillCurrency
-                          ? totals.starTax
-                          : gold(totals.starTax)}{" "}
-                        {rules.skillCurrency?.toUpperCase() ?? "GP"}
-                      </p>
+            <Accordion
+              type="single"
+              collapsible
+              className="border-t px-4 text-xs"
+            >
+              <AccordionItem value="budget">
+                <AccordionTrigger className="items-center py-3 text-xs font-normal text-muted-foreground hover:no-underline">
+                  {t("budgetBreakdown")}
+                </AccordionTrigger>
+                <AccordionContent className="text-xs motion-reduce:animate-none">
+                  <div className="space-y-3">
+                    {[
+                      [t("players"), totals.players],
+                      [t("staff"), totals.staff],
+                      [t("starPlayers"), totals.starGold],
+                      [t("inducements"), totals.inducements],
+                    ].map(([label, n]) => (
+                      <div className="flex justify-between" key={label}>
+                        <span className="text-muted-foreground">{label}</span>
+                        <span className="font-mono">{gold(n as number)}</span>
+                      </div>
+                    ))}
+                    {rules.id !== "bb2025-default" && (
+                      <div className="border-t pt-3">
+                        <div className="flex justify-between font-semibold">
+                          <span>{t("skillAllowance")}</span>
+                          <span className="font-mono">
+                            {rules.skillCurrency
+                              ? totals.skills
+                              : gold(totals.skills)}{" "}
+                            /{" "}
+                            {rules.skillCurrency
+                              ? totals.budget.skillGold
+                              : gold(totals.budget.skillGold)}{" "}
+                            {rules.skillCurrency === "spp"
+                              ? "SPP"
+                              : rules.skillCurrency === "sp"
+                                ? "SP"
+                                : "GP"}
+                          </span>
+                        </div>
+                        {totals.starTax > 0 && (
+                          <p className="mt-2 text-muted-foreground">
+                            {t("starPlayers")}:{" "}
+                            {rules.skillCurrency
+                              ? totals.starTax
+                              : gold(totals.starTax)}{" "}
+                            {rules.skillCurrency?.toUpperCase() ?? "GP"}
+                          </p>
+                        )}
+                      </div>
                     )}
-                  </div>
-                )}
-                {rules.id === "eurobowl-2026" && (
-                  <div className="border-t pt-3">
-                    <div className="flex justify-between">
-                      <span>{t("flowingFunds")}</span>
-                      <span className="font-mono">
-                        {gold(totals.fundsUsed)} /{" "}
-                        {gold(totals.budget.flowingFunds)}
-                      </span>
+                    {rules.id === "eurobowl-2026" && (
+                      <div className="border-t pt-3">
+                        <div className="flex justify-between">
+                          <span>{t("flowingFunds")}</span>
+                          <span className="font-mono">
+                            {gold(totals.fundsUsed)} /{" "}
+                            {gold(totals.budget.flowingFunds)}
+                          </span>
+                        </div>
+                        <p className="mt-2 leading-relaxed text-muted-foreground">
+                          {t("flowingHint")}
+                        </p>
+                      </div>
+                    )}
+                    <div className="flex justify-between border-t pt-3">
+                      <span>{t("tier")}</span>
+                      <span>{totals.tier || roster.tier}</span>
                     </div>
-                    <p className="mt-2 leading-relaxed text-muted-foreground">
-                      {t("flowingHint")}
-                    </p>
                   </div>
-                )}
-                <div className="flex justify-between border-t pt-3">
-                  <span>{t("tier")}</span>
-                  <span>{totals.tier || roster.tier}</span>
-                </div>
-              </div>
-            </details>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </section>
-          <section
-            className={`relative overflow-hidden rounded-lg border p-3 ${validation.valid ? "border-emerald-300 bg-emerald-50" : "bg-card"}`}
-            aria-live="polite"
-          >
+          <ReadinessCard ready={validation.valid}>
             <div className="flex items-center gap-2">
               <ShieldCheck
                 className={`size-5 ${validation.valid ? "text-emerald-700" : "text-muted-foreground"}`}
@@ -1178,7 +1180,7 @@ export function TeamEditor({
                 {t("squadNotice")}
               </p>
             )}
-          </section>
+          </ReadinessCard>
           {!readOnly && syncError && (
             <p
               role="alert"
