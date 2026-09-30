@@ -461,17 +461,45 @@ export function TeamEditor({
           : Check;
   return (
     <div className="page-width team-builder py-5">
-      <div className="mb-4 flex flex-col items-start justify-between gap-3 lg:flex-row lg:items-center">
-        <div className="min-w-0 w-full max-w-full lg:flex-1">
+      <div className="mb-4 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/my-teams"
-            className="no-print mb-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:underline"
+            className="no-print inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:underline"
           >
             <ArrowLeft className="size-3.5" />
             {t("myTeams")}
           </Link>
+          <div className="no-print flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => exportTeam(team)}
+            >
+              <Download className="size-4" />
+              {t("export")}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => window.print()}>
+              <Printer className="size-4" />
+              {t("print")}
+            </Button>
+            {readOnly && (
+              <Button size="sm" onClick={copy}>
+                <Copy className="size-4" />
+                {t("duplicate")}
+              </Button>
+            )}
+            {revision > 0 && (
+              <Button variant="outline" size="sm" onClick={share}>
+                <Copy className="size-4" />
+                {t("share")}
+              </Button>
+            )}
+          </div>
+        </div>
+        <div className="min-w-0 w-full max-w-full">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <h1 className="display-font min-w-0 max-w-full text-2xl leading-tight sm:text-3xl">
+            <h1 className="display-font w-max min-w-0 max-w-full shrink-0 break-words text-2xl leading-tight [overflow-wrap:anywhere] sm:text-3xl">
               {readOnly ? (
                 team.name || t("untitled")
               ) : (
@@ -487,7 +515,7 @@ export function TeamEditor({
               <div
                 role="status"
                 aria-live="polite"
-                className="no-print flex items-center gap-1.5 text-xs text-muted-foreground"
+                className="no-print flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground"
                 title={
                   syncError
                     ? t(syncError.conflict ? "conflict" : "saveFailed")
@@ -531,28 +559,6 @@ export function TeamEditor({
             </Badge>
             {readOnly && <Badge variant="outline">{t("viewOnly")}</Badge>}
           </div>
-        </div>
-        <div className="no-print flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => exportTeam(team)}>
-            <Download className="size-4" />
-            {t("export")}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => window.print()}>
-            <Printer className="size-4" />
-            {t("print")}
-          </Button>
-          {readOnly && (
-            <Button size="sm" onClick={copy}>
-              <Copy className="size-4" />
-              {t("duplicate")}
-            </Button>
-          )}
-          {revision > 0 && (
-            <Button variant="outline" size="sm" onClick={share}>
-              <Copy className="size-4" />
-              {t("share")}
-            </Button>
-          )}
         </div>
       </div>
       <div className="budget-grid">

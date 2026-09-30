@@ -15,13 +15,11 @@ export function TeamName({
   const beforeFocus = useRef(value);
   const cancelled = useRef(false);
   return (
-    <span
-      className="relative -ml-2 inline-grid min-w-[min(12ch,100%)] max-w-full align-top"
-      style={{ maxWidth: "min(42ch, 100%)" }}
-    >
+    <span className="relative grid w-max min-w-[min(12ch,100%)] max-w-full grid-cols-[minmax(0,1fr)]">
       <span
         aria-hidden="true"
-        className="invisible whitespace-pre-wrap break-words rounded-md border px-2 py-1 [overflow-wrap:anywhere]"
+        className="invisible min-w-0 whitespace-pre-wrap rounded-md border px-2 py-1"
+        style={{ overflowWrap: "anywhere" }}
       >
         {value || placeholder}{" "}
       </span>
