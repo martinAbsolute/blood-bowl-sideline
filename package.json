@@ -1,9 +1,9 @@
 {
   "name": "blood-bowl-sideline",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "license": "AGPL-3.0-only",
-  "author": "martinAbsolute",
+  "author": "Martin Bahniuk",
   "homepage": "https://blood-bowl-sideline.vercel.app/",
   "repository": {
     "type": "git",

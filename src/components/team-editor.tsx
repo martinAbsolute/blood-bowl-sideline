@@ -50,7 +50,6 @@ import {
   DropdownMenuItem,
 } from "./ui/dropdown-menu";
 import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
 import { Badge } from "./ui/badge";
 import {
   Dialog,
@@ -448,7 +447,17 @@ export function TeamEditor({
   async function print(orientation: "portrait" | "landscape") {
     try {
       const { printTeam } = await import("./team-print");
-      await printTeam(team, orientation, t, locale);
+      await printTeam(
+        team,
+        orientation,
+        t,
+        locale,
+        isAuthenticated
+          ? readOnly
+            ? team.coach
+            : draftSync.coachName
+          : undefined,
+      );
     } catch {
       toast.add({ type: "error", title: t("printFailed") });
     }
@@ -564,7 +573,7 @@ export function TeamEditor({
               <div
                 role="status"
                 aria-live="polite"
-                className="no-print flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground"
+                className="no-print -ml-[18px] mb-[9px] flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground"
                 title={
                   syncError
                     ? t(syncError.conflict ? "conflict" : "saveFailed")
@@ -971,39 +980,6 @@ export function TeamEditor({
               </p>
             )}
           </CollapsibleSection>
-          <section className="rounded-lg border bg-card p-3">
-            {!readOnly && (
-              <div className="mb-4 max-w-sm">
-                <label
-                  htmlFor={`coach-${team.uuid}`}
-                  className="block text-xs font-medium text-muted-foreground"
-                >
-                  {t("coachName")}
-                </label>
-                <Input
-                  id={`coach-${team.uuid}`}
-                  className="mt-1 block h-9 px-2.5 text-sm font-normal text-foreground md:text-sm"
-                  value={team.coach}
-                  maxLength={80}
-                  onChange={(e) => change({ ...team, coach: e.target.value })}
-                />
-              </div>
-            )}
-            <h2 className="section-title mb-4">{t("notes")}</h2>
-            {readOnly ? (
-              <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                {team.notes || "—"}
-              </p>
-            ) : (
-              <Textarea
-                value={team.notes}
-                maxLength={2000}
-                placeholder={t("notesHint")}
-                className="min-h-24"
-                onChange={(e) => change({ ...team, notes: e.target.value })}
-              />
-            )}
-          </section>
         </div>
         <aside className="budget-side space-y-3">
           {!readOnly && (
@@ -1045,6 +1021,27 @@ export function TeamEditor({
                     ))}
                   </EditorSelect>
                 </label>
+                {!isAuthenticated && (
+                  <label className="text-xs font-medium text-muted-foreground no-print max-[900px]:col-start-2">
+                    {t("coachName")}
+                    <Input
+                      className="mt-1 block h-9 bg-card px-2.5 text-sm font-normal text-foreground md:text-sm"
+                      value={team.coach}
+                      maxLength={80}
+                      onChange={(e) =>
+                        change({ ...team, coach: e.target.value })
+                      }
+                    />
+                  </label>
+                )}
+                {isAuthenticated && draftSync.coachName && (
+                  <div className="text-xs font-medium text-muted-foreground">
+                    {t("coachName")}
+                    <p className="mt-1 text-sm font-normal text-foreground">
+                      {draftSync.coachName}
+                    </p>
+                  </div>
+                )}
                 {["chaos-chosen", "chaos-renegade"].includes(roster.id) && (
                   <label className="text-xs font-medium text-muted-foreground">
                     <SpecialRules names={["Favoured of…"]} />

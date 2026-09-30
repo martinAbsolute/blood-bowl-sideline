@@ -1,13 +1,13 @@
 "use client";
 import Link from "next/link";
 import { useTranslations } from "gt-next";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { inducements, newTeam, stars } from "@/domain/catalog";
 import { SkillList } from "./skill-box";
 import { RuleHelp } from "./rule-help";
 import { inducementInfo, starEligible } from "@/domain/rules";
 import type { Roster } from "@/domain/types";
-import { Button } from "./ui/button";
+import { CreateTeamButton } from "./create-team-button";
 import {
   Table,
   TableBody,
@@ -44,14 +44,7 @@ export function TeamReference({ roster }: { roster: Roster }) {
             <h1 className="display-font text-3xl">{roster.name}</h1>
           </div>
         </div>
-        <Button
-          size="sm"
-          nativeButton={false}
-          render={<Link href={`/rosters?roster=${roster.id}&new=1`} />}
-        >
-          <Plus className="size-4" />
-          {t("createTeam")}
-        </Button>
+        <CreateTeamButton size="sm" rosterId={roster.id} />
       </div>
       <section className="overflow-hidden rounded-lg border bg-card">
         <RosterTable roster={roster} />

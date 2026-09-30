@@ -53,7 +53,7 @@ export function TeamName({
             e.currentTarget.blur();
           }
         }}
-        className="absolute inset-0 h-full w-full resize-none overflow-hidden rounded-md border border-transparent bg-transparent px-2 py-1 text-foreground outline-none transition-colors placeholder:text-muted-foreground hover:border-input focus:border-ring focus:ring-2 focus:ring-ring/20"
+        className="absolute inset-0 h-full w-full resize-none overflow-hidden rounded-md border border-transparent bg-transparent px-2 py-1 text-foreground outline-none placeholder:text-muted-foreground"
       />
     </span>
   );

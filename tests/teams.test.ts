@@ -9,7 +9,7 @@ const modules = import.meta.glob("../convex/**/*.ts");
 async function setup() {
   const t = convexTest(schema, modules);
   const ids = await t.run(async (ctx) => ({
-    a: await ctx.db.insert("users", { name: "A" }),
+    a: await ctx.db.insert("users", { name: "Olexandr" }),
     b: await ctx.db.insert("users", { name: "B" }),
   }));
   return {
@@ -19,6 +19,28 @@ async function setup() {
   };
 }
 describe("Convex team ownership and sharing", () => {
+  it("uses the authenticated profile name and discards notes when saving guest drafts", async () => {
+    const { a, b, t } = await setup();
+    const team = {
+      ...newTeam(randomUUID()),
+      coach: "Forged coach",
+      notes: "Obsolete notes",
+    };
+    const saved = await a.mutation(api.teams.save, {
+      team,
+      expectedRevision: 0,
+    });
+    expect(saved.team.coach).toBe("Olexandr");
+    expect(saved.team.notes).toBe("");
+    expect(await a.query(api.teams.viewer, {})).toMatchObject({
+      name: "Olexandr",
+    });
+    expect(await b.query(api.teams.viewer, {})).toMatchObject({ name: "B" });
+    expect(await t.query(api.teams.viewer, {})).toBeNull();
+    const shared = await t.query(api.teams.getByUuid, { uuid: team.uuid });
+    expect(shared?.team.coach).toBe("Olexandr");
+    expect(shared).not.toHaveProperty("id");
+  });
   it("a fresh account starts empty even when another coach has saved teams", async () => {
     const { t, a, b } = await setup();
     await a.mutation(api.teams.save, {

@@ -6,7 +6,6 @@ export function hasTeamProgress(team: Team) {
   return (
     team.name !== empty.name ||
     team.coach !== "" ||
-    team.notes !== "" ||
     team.players.length > 0 ||
     team.stars.length > 0 ||
     Object.values(team.staff).some((count) => count > 0) ||

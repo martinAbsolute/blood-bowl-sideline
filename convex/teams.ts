@@ -33,8 +33,13 @@ export const getByUuid = query({
 });
 export const viewer = query({
   args: {},
-  returns: v.union(v.id("users"), v.null()),
-  handler: async (ctx) => getAuthUserId(ctx),
+  returns: v.union(v.object({ id: v.id("users"), name: v.string() }), v.null()),
+  handler: async (ctx) => {
+    const id = await getAuthUserId(ctx);
+    if (!id) return null;
+    const user = await ctx.db.get("users", id);
+    return user ? { id, name: (user.name ?? "").trim().slice(0, 80) } : null;
+  },
 });
 export const listMine = query({
   args: {
@@ -135,7 +140,12 @@ export const save = mutation({
     const parsed = teamSchema.safeParse(args.team);
     if (!parsed.success || !getRoster(parsed.data.rosterId))
       throw new ConvexError("INVALID_TEAM");
-    const team = parsed.data;
+    const user = await ctx.db.get("users", ownerId);
+    const team = {
+      ...parsed.data,
+      coach: (user?.name ?? "").trim().slice(0, 80),
+      notes: "",
+    };
     if (teamSaveIssues(team).length) throw new ConvexError("INVALID_TEAM");
     const existing = await ctx.db
       .query("teams")

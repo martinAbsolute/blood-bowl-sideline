@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import { useLocale, useSetLocale, useTranslations } from "gt-next";
 import { useConvexAuth } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { CodeXml, Heart, Languages, LogOut, Send } from "lucide-react";
+import { Languages, LogOut, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "./brand";
 import { toast } from "@/components/ui/toast";
 import { useDraftSignIn } from "./draft-sign-in-provider";
-import { version } from "../../package.json";
+import { SiteFooter } from "./site-footer";
 export function LoginButton({ className }: { className?: string }) {
   const t = useTranslations(),
     { signIn } = useAuthActions(),
@@ -100,48 +100,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main className="min-h-[calc(100vh-245px)]">{children}</main>
-      <footer className="no-print border-t border-border py-6">
-        <div className="page-width flex flex-col justify-between gap-5 md:flex-row md:items-center">
-          <div className="space-y-2">
-            <p className="flex items-start gap-2 text-sm font-medium leading-relaxed text-primary">
-              <Heart
-                aria-hidden="true"
-                className="mt-0.5 size-4 shrink-0 text-orange-500"
-              />
-              {t("community")}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              © 2026 martinAbsolute · Blood Bowl Sideline
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 text-xs text-muted-foreground">
-            <a
-              href="https://github.com/martinAbsolute/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-sm transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-            >
-              <CodeXml aria-hidden="true" className="size-4" />
-              GitHub
-            </a>
-            <a
-              href="https://t.me/martinAbsolute"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-sm transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-            >
-              <Send aria-hidden="true" className="size-4" />
-              @martinAbsolute
-            </a>
-            <p
-              className="font-mono tabular-nums"
-              aria-label={t("appVersion", { version })}
-            >
-              v{version}
-            </p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter community={t("community")} />
     </>
   );
 }

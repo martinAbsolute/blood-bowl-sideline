@@ -16,6 +16,7 @@ import {
   useDraftSync,
 } from "../src/components/draft-sync-provider";
 import { TeamName } from "../src/components/team-name";
+import { CreateTeamButton } from "../src/components/create-team-button";
 import { TeamLibrary } from "../src/components/team-library";
 import { libraryMatches } from "../src/lib/team-library";
 
@@ -23,6 +24,7 @@ const mocks = vi.hoisted(() => ({
   authenticated: false,
   account: null as string | null,
   save: vi.fn(),
+  push: vi.fn(),
   results: [] as { team: ReturnType<typeof newTeam> }[],
 }));
 vi.mock("convex/react", () => ({
@@ -30,7 +32,8 @@ vi.mock("convex/react", () => ({
     isAuthenticated: mocks.authenticated,
     isLoading: false,
   }),
-  useQuery: () => mocks.account,
+  useQuery: () =>
+    mocks.account ? { id: mocks.account, name: "Telegram Coach" } : null,
   useMutation: () => mocks.save,
   usePaginatedQuery: () => ({
     results: mocks.results,
@@ -39,7 +42,7 @@ vi.mock("convex/react", () => ({
   }),
 }));
 vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }));
 vi.mock("next/link", () => ({
   default: ({
     children,
@@ -65,6 +68,7 @@ beforeEach(() => {
   mocks.authenticated = false;
   mocks.account = null;
   mocks.results = [];
+  mocks.push.mockReset();
   mocks.save.mockReset().mockResolvedValue({ revision: 1 });
   container = document.createElement("div");
   document.body.append(container);
@@ -323,4 +327,20 @@ it("acknowledges names exactly while they are being typed, without retaining dup
   expect(readDrafts()[0]).toEqual(team);
   await saveCloudDraft(team, 0, mocks.save);
   expect(readDrafts()).toEqual([]);
+});
+
+it("stores a selected roster before navigating directly to its UUID editor", async () => {
+  mocks.push.mockImplementation((path: string) => {
+    const draft = readDrafts()[0];
+    expect(draft.rosterId).toBe("goblin");
+    expect(path).toBe(`/teams/${draft.uuid}`);
+  });
+  await act(async () =>
+    root.render(createElement(CreateTeamButton, { rosterId: "goblin" })),
+  );
+  await act(async () =>
+    (container.querySelector("button") as HTMLButtonElement).click(),
+  );
+  expect(mocks.push).toHaveBeenCalledTimes(1);
+  expect(readDrafts()).toHaveLength(1);
 });

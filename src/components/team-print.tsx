@@ -49,7 +49,7 @@ export function printStyles(orientation: PrintOrientation) {
     thead { display: table-header-group; }
     .added { text-decoration: underline dashed; text-underline-offset: 2px; }
     .captain { text-decoration: underline dotted; text-underline-offset: 2px; }
-    .legend, .notes { margin-top: 3mm; font-size: 9pt; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .legend { margin-top: 3mm; font-size: 9pt; white-space: pre-wrap; overflow-wrap: anywhere; }
     .reference { break-before: page; }
     .reference h2 { border-bottom: 1px solid; padding-bottom: 2mm; }
     .rules { columns: ${orientation === "portrait" ? 2 : 3}; column-gap: 5mm; font-size: 9pt; line-height: 1.3; }
@@ -89,7 +89,15 @@ function PrintedSkills({
   ));
 }
 
-export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
+export function TeamPrint({
+  team,
+  t,
+  coachName,
+}: {
+  team: Team;
+  t: Translate;
+  coachName?: string;
+}) {
   const roster = getRoster(team.rosterId)!;
   const ruleset = getRuleset(team.rulesetId);
   const totals = summarize(team);
@@ -140,9 +148,9 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
           <p>
             {roster.name} · {ruleset.name} · {t("tier")} {totals.tier}
           </p>
-          {team.coach && (
+          {coachName && (
             <p>
-              {t("coachName")}: {team.coach}
+              {t("coachName")}: {coachName}
             </p>
           )}
         </header>
@@ -285,11 +293,6 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
           <span className="added">{t("addedSkills")}</span> ·{" "}
           <span className="captain">{t("proCaptain")}</span>
         </p>
-        {team.notes && (
-          <p className="notes">
-            {t("notes")}: {team.notes}
-          </p>
-        )}
       </section>
       <section className="reference">
         <h2>{t("printRules")}</h2>
@@ -311,6 +314,7 @@ export async function printTeam(
   orientation: PrintOrientation,
   t: Translate,
   locale: string,
+  coachName?: string,
 ) {
   const { renderToStaticMarkup } = await import("react-dom/server");
   // This is a standalone iframe document, outside Next.js's page and head manager.
@@ -323,7 +327,7 @@ export async function printTeam(
         <style>{printStyles(orientation)}</style>
       </head>
       <body>
-        <TeamPrint team={team} t={t} />
+        <TeamPrint team={team} t={t} coachName={coachName} />
       </body>
     </html>,
   );

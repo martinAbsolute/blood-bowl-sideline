@@ -7,13 +7,13 @@ describe("switching team type", () => {
   it("only requires a warning when switching would discard progress", () => {
     const empty = newTeam(uuid);
     expect(hasTeamProgress(empty)).toBe(false);
+    expect(hasTeamProgress({ ...empty, notes: "Obsolete notes" })).toBe(false);
     expect(hasTeamProgress({ ...empty, rulesetId: "eurobowl-2026" })).toBe(
       false,
     );
     for (const update of [
       { name: "My team" },
       { coach: "Coach" },
-      { notes: "Game plan" },
       { staff: { ...empty.staff, rerolls: 1 } },
       { inducements: { bribes: 1 } },
       { stars: ["akhorne"] },

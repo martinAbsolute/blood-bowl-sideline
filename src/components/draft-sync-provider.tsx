@@ -24,6 +24,7 @@ import { finishDraftSignIn } from "@/lib/draft-sign-in";
 
 type Sync = {
   account: string | null;
+  coachName?: string;
   ready: boolean;
   editing: (uuid: string) => () => void;
   failed: ReadonlySet<string>;
@@ -44,7 +45,7 @@ export function useDraftSync() {
 export function DraftSyncProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useConvexAuth();
   const viewer = useQuery(api.teams.viewer, isAuthenticated ? {} : "skip");
-  const account = viewer ?? null;
+  const account = viewer?.id ?? null;
   const save = useMutation(api.teams.save);
   const raw = useSyncExternalStore(subscribeDrafts, draftSnapshot, () => "[]");
   const active = useRef(new Set<string>());
@@ -110,6 +111,7 @@ export function DraftSyncProvider({ children }: { children: ReactNode }) {
     <Context.Provider
       value={{
         account,
+        coachName: viewer?.name,
         ready: !isAuthenticated || viewer !== undefined,
         failed,
         ...controls,

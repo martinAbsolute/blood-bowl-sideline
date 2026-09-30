@@ -2,12 +2,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "gt-next";
-import { Search, Plus, ArrowUpRight, ChevronDown } from "lucide-react";
+import { Search, ArrowUpRight, ChevronDown } from "lucide-react";
 import { rosters } from "@/domain/catalog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { RosterIcon } from "./player-icon";
 import { RosterFacts, RosterTable } from "./roster-reference";
+import { CreateTeamButton } from "./create-team-button";
 
 export function RosterExplorer() {
   const t = useTranslations();
@@ -94,15 +95,12 @@ export function RosterExplorer() {
                   <span className="hidden md:inline">{t("teamDetails")}</span>
                   <ArrowUpRight className="size-3 min-[360px]:size-3.5" />
                 </Button>
-                <Button
+                <CreateTeamButton
                   size="sm"
+                  rosterId={r.id}
                   className="gap-1 px-1.5 text-[10px] has-[>svg]:px-1.5 min-[360px]:px-2 min-[360px]:text-xs min-[360px]:has-[>svg]:px-2 md:gap-1.5 md:px-3 md:text-sm md:has-[>svg]:px-2.5"
-                  nativeButton={false}
-                  render={<Link href={`/rosters?roster=${r.id}&new=1`} />}
-                >
-                  <Plus className="hidden size-3.5 md:block" />
-                  {t("createTeam")}
-                </Button>
+                  iconClassName="hidden size-3.5 md:block"
+                />
               </div>
               <Button
                 size="icon-sm"

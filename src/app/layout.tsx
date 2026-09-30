@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   metadataBase: siteUrl,
   applicationName: siteName,
   authors: [
-    { name: "martinAbsolute", url: "https://github.com/martinAbsolute/" },
+    { name: "Martin Bahniuk", url: "https://github.com/martinAbsolute/" },
   ],
   title: {
     default: "Blood Bowl Sideline — Teams, Leagues & Tournaments",

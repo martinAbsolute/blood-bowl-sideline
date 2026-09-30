@@ -1,6 +1,9 @@
 import { Skeleton } from "./ui/skeleton";
 import { BrandLogo } from "./brand";
-import { version } from "../../package.json";
+import { SiteFooter } from "./site-footer";
+import en from "@/i18n/en.json";
+import { getRoster } from "@/domain/catalog";
+import type { Team } from "@/domain/types";
 
 export type LoadingVariant = "library" | "editor" | "catalog";
 
@@ -47,12 +50,33 @@ export function LibraryCardsLoading({ label }: { label: string }) {
   );
 }
 
-function TableLoading({ rows }: { rows: number }) {
+function TableLoading({
+  rows,
+  empty = false,
+  compact = false,
+  footer = false,
+  title = true,
+  framed = true,
+}: {
+  rows: number;
+  empty?: boolean;
+  compact?: boolean;
+  footer?: boolean;
+  title?: boolean;
+  framed?: boolean;
+}) {
   return (
-    <div className="overflow-hidden rounded-lg border bg-card">
-      <div className="flex h-14 items-center border-b bg-secondary/40 px-4">
-        <Skeleton className="h-5 w-36" />
-      </div>
+    <div
+      className={`overflow-hidden bg-card ${framed ? "rounded-lg border" : ""}`}
+    >
+      {title && (
+        <div
+          className={`flex items-center justify-between border-b bg-secondary/40 px-4 ${compact ? "h-[44px]" : "h-[54px]"}`}
+        >
+          <Skeleton className="h-5 w-36" />
+          <Skeleton className="h-3 w-10" />
+        </div>
+      )}
       <div className="flex h-[34px] items-center gap-5 border-b px-4">
         <Skeleton className="h-3 w-24" />
         <Skeleton className="ml-auto h-3 w-1/3" />
@@ -60,13 +84,25 @@ function TableLoading({ rows }: { rows: number }) {
       {Array.from({ length: rows }, (_, index) => (
         <div
           key={index}
-          className="flex h-11 items-center gap-3 border-b px-4 last:border-0"
+          className={`flex items-center gap-3 border-b px-4 last:border-0 ${empty ? "h-[30px] justify-center" : "h-12"}`}
         >
-          <Skeleton className="size-7 shrink-0" />
-          <Skeleton className="h-4 w-1/3" />
-          <Skeleton className="ml-auto h-4 w-1/4" />
+          {empty ? (
+            <Skeleton className="h-3 w-2/3" />
+          ) : (
+            <>
+              <Skeleton className="size-8 shrink-0" />
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="ml-auto h-4 w-1/4" />
+            </>
+          )}
         </div>
       ))}
+      {footer && (
+        <div className="flex h-[53px] items-center justify-between border-t px-5">
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="h-7 w-32" />
+        </div>
+      )}
     </div>
   );
 }
@@ -74,9 +110,11 @@ function TableLoading({ rows }: { rows: number }) {
 export function LoadingLayout({
   variant = "library",
   label,
+  team,
 }: {
   variant?: LoadingVariant;
   label: string;
+  team?: Team;
 }) {
   if (variant === "editor")
     return (
@@ -91,9 +129,12 @@ export function LoadingLayout({
             <div className="flex min-h-8 items-center">
               <Skeleton className="h-4 w-20" />
             </div>
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <Skeleton className="h-9 w-60 max-w-full" />
-              <div className="flex gap-2">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div className="flex max-w-full items-end gap-2">
+                <Skeleton className="h-10 w-60 max-w-full sm:h-12" />
+                <Skeleton className="mb-[9px] h-3 w-24" />
+              </div>
+              <div className="mb-1 flex gap-2">
                 <Skeleton className="h-8 w-28" />
                 <Skeleton className="h-8 w-24" />
               </div>
@@ -106,15 +147,50 @@ export function LoadingLayout({
           </div>
           <div className="budget-grid">
             <div className="space-y-3">
-              <TableLoading rows={4} />
-              <TableLoading rows={2} />
-              <TableLoading rows={3} />
+              <TableLoading
+                rows={getRoster(team?.rosterId ?? "human")!.players.length}
+              />
+              <TableLoading
+                rows={
+                  (team?.players.length ?? 0) + (team?.stars.length ?? 0) || 1
+                }
+                empty={!team?.players.length && !team?.stars.length}
+                compact
+                footer
+              />
+              {[5, 6].map((count) => (
+                <section
+                  key={count}
+                  className="overflow-hidden rounded-lg border bg-card"
+                >
+                  <div className="flex h-[54px] items-center bg-secondary/50 px-4">
+                    <Skeleton className="h-5 w-36" />
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 border-t p-3 min-[380px]:grid-cols-2 sm:grid-cols-3">
+                    {Array.from({ length: count }, (_, index) => (
+                      <Skeleton key={index} className="h-[126px]" />
+                    ))}
+                  </div>
+                </section>
+              ))}
             </div>
             <aside className="budget-side space-y-3">
-              <section className="grid gap-3 rounded-lg border bg-card p-3">
-                <Skeleton className="h-14 w-full" />
-                <Skeleton className="h-14 w-full" />
-                <Skeleton className="h-12 w-full" />
+              <section className="rounded-lg border bg-card p-3">
+                <div className="grid gap-3">
+                  {[0, 1, 2].map((index) => (
+                    <div
+                      key={index}
+                      className={`space-y-1 ${index === 2 ? "max-[900px]:col-start-2" : ""}`}
+                    >
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-9 w-full" />
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 space-y-2 border-t pt-4">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                </div>
               </section>
               <section className="space-y-5 rounded-lg border bg-card p-4">
                 <Skeleton className="h-4 w-20" />
@@ -141,7 +217,7 @@ export function LoadingLayout({
       >
         <span className="sr-only">{label}</span>
         <div aria-hidden="true">
-          <div className="mb-5 flex h-9 items-center justify-between">
+          <div className="mb-5 flex h-[30px] items-center justify-between sm:h-[37.5px]">
             <Skeleton className="h-8 w-36" />
             <Skeleton className="h-4 w-20" />
           </div>
@@ -157,7 +233,22 @@ export function LoadingLayout({
             </aside>
             <div className="min-w-0 space-y-5">
               {[0, 1, 2].map((index) => (
-                <TableLoading key={index} rows={4} />
+                <div
+                  key={index}
+                  className="overflow-hidden rounded-lg border bg-card"
+                >
+                  <div className="flex h-[46px] items-center justify-between bg-secondary/40 px-3 md:h-[49px]">
+                    <Skeleton className="h-6 w-36" />
+                    <Skeleton className="h-7 w-32" />
+                  </div>
+                  <div className="hidden md:block">
+                    <TableLoading rows={4} title={false} framed={false} />
+                    <div className="space-y-3 border-t p-4">
+                      <Skeleton className="h-4 w-2/3" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -200,26 +291,14 @@ export function ShellLoading() {
           <BrandLogo />
           <div className="flex gap-2">
             <Skeleton className="h-8 w-20 rounded-full" />
-            <Skeleton className="h-8 w-8 rounded-full md:w-40" />
+            <Skeleton className="h-8 w-10 rounded-full md:w-[180px]" />
           </div>
         </div>
       </header>
       <main className="min-h-[calc(100vh-245px)]">
         <LoadingLayout label="Loading…" />
       </main>
-      <footer className="no-print border-t border-border py-4">
-        <div className="page-width flex flex-col justify-between gap-5 md:flex-row">
-          <div aria-hidden="true">
-            <Skeleton className="h-5 w-72 max-w-full" />
-            <Skeleton className="mt-2 h-8 w-[32rem] max-w-full" />
-            <Skeleton className="mt-2 h-4 w-64 max-w-full" />
-          </div>
-          <div className="text-xs text-muted-foreground">
-            <Skeleton className="h-4 w-28" />
-            <p className="mt-3 font-mono tabular-nums">v{version}</p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter community={en.community} />
     </>
   );
 }

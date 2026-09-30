@@ -67,12 +67,14 @@ export function PlayerRecruitment({
       >
         <AccordionItem value="recruit">
           <AccordionTrigger className="items-center rounded-none rounded-t-lg aria-[expanded=false]:rounded-b-lg bg-secondary px-4 py-3.5 text-base font-semibold hover:no-underline [&>svg]:text-primary">
-            <span>{t("recruitPlayers")}</span>
-            <span
-              aria-live="polite"
-              className="ml-auto font-mono text-sm tabular-nums text-muted-foreground"
-            >
-              {playerCount}/16
+            <span className="flex flex-1 items-center justify-between gap-3 pr-3">
+              <span>{t("recruitPlayers")}</span>
+              <span
+                aria-live="polite"
+                className="font-mono text-xs font-normal tabular-nums text-muted-foreground"
+              >
+                {playerCount}/16
+              </span>
             </span>
           </AccordionTrigger>
           <AccordionContent className="border-t p-0">
