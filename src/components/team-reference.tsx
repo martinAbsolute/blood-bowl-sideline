@@ -30,11 +30,11 @@ export function TeamReference({ roster }: { roster: Roster }) {
   return (
     <div className="page-width space-y-5 py-6">
       <Link
-        href="/teams"
+        href="/rosters"
         className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:underline"
       >
         <ArrowLeft className="size-3.5" />
-        {t("allTeams")}
+        {t("allRosters")}
       </Link>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -44,11 +44,13 @@ export function TeamReference({ roster }: { roster: Roster }) {
             <h1 className="display-font text-3xl">{roster.name}</h1>
           </div>
         </div>
-        <Button asChild size="sm">
-          <Link href={`/builder?roster=${roster.id}&new=1`}>
-            <Plus className="size-4" />
-            {t("createTeam")}
-          </Link>
+        <Button
+          size="sm"
+          nativeButton={false}
+          render={<Link href={`/rosters?roster=${roster.id}&new=1`} />}
+        >
+          <Plus className="size-4" />
+          {t("createTeam")}
         </Button>
       </div>
       <section className="overflow-hidden rounded-lg border bg-card">

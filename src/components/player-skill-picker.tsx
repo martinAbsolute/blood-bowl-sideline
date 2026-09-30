@@ -269,7 +269,7 @@ export function PlayerSkillPicker({
             </span>
           </div>
           <SkillDropZone id={selectedZone}>
-            <ScrollArea className="h-24 sm:h-64" type="auto">
+            <ScrollArea className="h-24 sm:h-64">
               <SortableContext
                 items={selected}
                 strategy={verticalListSortingStrategy}
@@ -318,7 +318,7 @@ export function PlayerSkillPicker({
             />
           </div>
           <SkillDropZone id={availableZone}>
-            <ScrollArea className="h-48 sm:h-64" type="auto">
+            <ScrollArea className="h-48 sm:h-64">
               <div className="space-y-2 pr-3">
                 {available.map((skill) => (
                   <AvailableSkill

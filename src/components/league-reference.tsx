@@ -51,7 +51,7 @@ export function LeagueReference({ name }: { name: string }) {
         className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:underline"
       >
         <ArrowLeft className="size-3.5" />
-        {t("allTeams")}
+        {t("allRosters")}
       </Link>
       <header>
         <p className="eyebrow">{t("leagues")}</p>
@@ -73,12 +73,12 @@ export function LeagueReference({ name }: { name: string }) {
         ))}
       </nav>
       <section>
-        <h2 className="mb-3 text-sm font-semibold">{t("teams")}</h2>
+        <h2 className="mb-3 text-sm font-semibold">{t("rosters")}</h2>
         <div className="flex flex-wrap gap-2">
           {teams.map((roster) => (
             <Link
               key={roster.id}
-              href={`/team/${roster.id}`}
+              href={`/rosters/${roster.id}`}
               className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-sm hover:bg-secondary"
             >
               <RosterIcon rosterId={roster.id} className="size-7" />

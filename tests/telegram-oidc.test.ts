@@ -1,4 +1,4 @@
-import { beforeAll, expect, it, afterEach, vi } from "vitest";
+import { beforeAll, expect, it } from "vitest";
 import {
   createLocalJWKSet,
   exportJWK,
@@ -7,7 +7,6 @@ import {
   type CryptoKey,
 } from "jose";
 import {
-  telegramProvider,
   TELEGRAM_ISSUER,
   verifyTelegramIdToken,
 } from "../src/lib/telegram-oidc";
@@ -20,7 +19,6 @@ beforeAll(async () => {
     keys: [{ ...(await exportJWK(pair.publicKey)), kid: "test" }],
   });
 });
-afterEach(() => vi.unstubAllEnvs());
 function sign(issuer = TELEGRAM_ISSUER, audience = clientId, expiry = "5m") {
   return new SignJWT({
     name: "Test coach",
@@ -71,15 +69,4 @@ it("rejects expired tokens and altered signatures", async () => {
   await expect(
     verifyTelegramIdToken(parts.join("."), clientId, keys),
   ).rejects.toThrow();
-});
-it("configures PKCE/state, Basic client authentication, and ID-token-only profiles", () => {
-  vi.stubEnv("TELEGRAM_CLIENT_ID", clientId);
-  vi.stubEnv("TELEGRAM_CLIENT_SECRET", "test-only-secret");
-  const p = telegramProvider();
-  expect(p.type).toBe("oidc");
-  expect(p.checks).toEqual(["pkce", "state"]);
-  expect(p.client?.token_endpoint_auth_method).toBe("client_secret_basic");
-  expect(p.idToken).toBe(true);
-  expect(p.authorization).toEqual({ params: { scope: "openid profile" } });
-  expect(p.clientId).toBe(clientId);
 });

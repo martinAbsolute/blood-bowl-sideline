@@ -42,7 +42,7 @@ export function PlayerRecruitment({
   const t = useTranslations();
   const roster = getRoster(team.rosterId)!;
   const [pendingRemoval, setPendingRemoval] = useState<string | null>(null);
-  const [recruitOpen, setRecruitOpen] = useState("recruit");
+  const [recruitOpen, setRecruitOpen] = useState<string[]>(["recruit"]);
   const removalTrigger = useRef<HTMLElement | null>(null);
   const cancelButton = useRef<HTMLButtonElement | null>(null);
   const pendingPlayer = team.players.find((p) => p.id === pendingRemoval);
@@ -61,14 +61,12 @@ export function PlayerRecruitment({
   return (
     <>
       <Accordion
-        type="single"
-        collapsible
         value={recruitOpen}
         onValueChange={setRecruitOpen}
         className="no-print recruitment-menu player-recruitment rounded-lg border bg-card"
       >
         <AccordionItem value="recruit">
-          <AccordionTrigger className="items-center rounded-none rounded-t-lg bg-secondary px-4 py-3.5 text-base font-semibold hover:no-underline [&>svg]:text-primary">
+          <AccordionTrigger className="items-center rounded-none rounded-t-lg aria-[expanded=false]:rounded-b-lg bg-secondary px-4 py-3.5 text-base font-semibold hover:no-underline [&>svg]:text-primary">
             <span>{t("recruitPlayers")}</span>
             <span
               aria-live="polite"
@@ -187,16 +185,7 @@ export function PlayerRecruitment({
           if (!open) setPendingRemoval(null);
         }}
       >
-        <DialogContent
-          onOpenAutoFocus={(event) => {
-            event.preventDefault();
-            cancelButton.current?.focus();
-          }}
-          onCloseAutoFocus={(event) => {
-            event.preventDefault();
-            removalTrigger.current?.focus();
-          }}
-        >
+        <DialogContent initialFocus={cancelButton} finalFocus={removalTrigger}>
           <DialogHeader>
             <DialogTitle>{t("removePlayer")}</DialogTitle>
             <DialogDescription>

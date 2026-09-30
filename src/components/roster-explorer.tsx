@@ -39,7 +39,7 @@ export function RosterExplorer() {
           />
         </div>
         <nav
-          aria-label={t("teams")}
+          aria-label={t("rosters")}
           className="mt-3 flex gap-1 overflow-auto lg:max-h-[calc(100vh-230px)] lg:flex-col"
         >
           {list.map((r) => (
@@ -75,7 +75,7 @@ export function RosterExplorer() {
                   </span>
                 </span>
                 <Link
-                  href={`/team/${r.id}`}
+                  href={`/rosters/${r.id}`}
                   className="hidden items-center gap-2 font-semibold hover:underline md:flex"
                 >
                   <RosterIcon rosterId={r.id} className="size-8" />
@@ -84,26 +84,24 @@ export function RosterExplorer() {
               </h2>
               <div className="ml-auto flex shrink-0 gap-1 md:gap-2">
                 <Button
-                  asChild
                   size="sm"
                   variant="ghost"
                   className="gap-0.5 px-1 text-[10px] has-[>svg]:px-1 min-[360px]:gap-1 min-[360px]:px-1.5 min-[360px]:text-xs min-[360px]:has-[>svg]:px-1.5 md:gap-1.5 md:px-3 md:text-sm md:has-[>svg]:px-2.5"
+                  nativeButton={false}
+                  render={<Link href={`/rosters/${r.id}`} />}
                 >
-                  <Link href={`/team/${r.id}`}>
-                    <span className="md:hidden">{t("teamDetailsShort")}</span>
-                    <span className="hidden md:inline">{t("teamDetails")}</span>
-                    <ArrowUpRight className="size-3 min-[360px]:size-3.5" />
-                  </Link>
+                  <span className="md:hidden">{t("teamDetailsShort")}</span>
+                  <span className="hidden md:inline">{t("teamDetails")}</span>
+                  <ArrowUpRight className="size-3 min-[360px]:size-3.5" />
                 </Button>
                 <Button
-                  asChild
                   size="sm"
                   className="gap-1 px-1.5 text-[10px] has-[>svg]:px-1.5 min-[360px]:px-2 min-[360px]:text-xs min-[360px]:has-[>svg]:px-2 md:gap-1.5 md:px-3 md:text-sm md:has-[>svg]:px-2.5"
+                  nativeButton={false}
+                  render={<Link href={`/rosters?roster=${r.id}&new=1`} />}
                 >
-                  <Link href={`/builder?roster=${r.id}&new=1`}>
-                    <Plus className="hidden size-3.5 md:block" />
-                    {t("createTeam")}
-                  </Link>
+                  <Plus className="hidden size-3.5 md:block" />
+                  {t("createTeam")}
                 </Button>
               </div>
               <Button

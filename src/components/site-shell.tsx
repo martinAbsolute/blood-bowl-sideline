@@ -1,15 +1,13 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
 import { useLocale, useSetLocale, useTranslations } from "gt-next";
 import { useConvexAuth } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { ArrowUpRight, Languages, LogOut, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "./brand";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 import { useDraftSignIn } from "./draft-sign-in-provider";
 export function LoginButton({ className }: { className?: string }) {
   const t = useTranslations(),
@@ -18,7 +16,7 @@ export function LoginButton({ className }: { className?: string }) {
     [starting, setStarting] = useState(false);
   async function login() {
     if (process.env.NEXT_PUBLIC_TELEGRAM_AUTH_READY !== "true") {
-      toast.info(t("botPending"));
+      toast.add({ type: "info", title: t("botPending") });
       return;
     }
     setStarting(true);
@@ -27,14 +25,14 @@ export function LoginButton({ className }: { className?: string }) {
       try {
         redirectTo = draftSignIn.prepare();
       } catch {
-        toast.error(t("storageError"));
+        toast.add({ type: "error", title: t("storageError") });
         setStarting(false);
         return;
       }
       const result = await signIn("telegram", { redirectTo });
       if (!result.redirect) setStarting(false);
     } catch {
-      toast.error(t("loginFailed"));
+      toast.add({ type: "error", title: t("loginFailed") });
       setStarting(false);
     }
   }
@@ -54,8 +52,7 @@ export function LoginButton({ className }: { className?: string }) {
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const t = useTranslations(),
     locale = useLocale(),
-    setLocale = useSetLocale(),
-    pathname = usePathname();
+    setLocale = useSetLocale();
   const { isAuthenticated } = useConvexAuth(),
     { signOut } = useAuthActions();
   return (
@@ -69,29 +66,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           >
             <BrandLogo />
           </Link>
-          <nav
-            aria-label={t("home")}
-            className="order-3 flex w-full min-w-0 gap-1 overflow-x-auto sm:order-none sm:w-auto"
-          >
-            {[
-              ["/builder", "teamBuilder"],
-              ["/my-teams", "myTeams"],
-              ["/teams", "teams"],
-            ].map(([href, key]) => (
-              <Button
-                key={href}
-                asChild
-                variant="ghost"
-                size="sm"
-                className={cn(
-                  "rounded-md px-3 text-xs sm:px-4 sm:text-sm",
-                  pathname.startsWith(href) && "bg-secondary font-semibold",
-                )}
-              >
-                <Link href={href}>{t(key)}</Link>
-              </Button>
-            ))}
-          </nav>
+
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"

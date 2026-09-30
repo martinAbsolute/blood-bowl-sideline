@@ -42,28 +42,27 @@ export function RuleHelp({
   const descriptionId = useId();
   return (
     <>
-      <Tooltip
-        open={hovered && !open}
-        onOpenChange={setHovered}
-        delayDuration={250}
-      >
-        <TooltipTrigger asChild>
-          <button
-            ref={trigger}
-            type="button"
-            aria-label={label ?? title}
-            aria-haspopup="dialog"
-            className={cn(
-              "rule-help rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-              className,
-            )}
-            onClick={() => {
-              setHovered(false);
-              setOpen(true);
-            }}
-          >
-            {children}
-          </button>
+      <Tooltip open={hovered && !open} onOpenChange={setHovered}>
+        <TooltipTrigger
+          delay={250}
+          render={
+            <button
+              ref={trigger}
+              type="button"
+              aria-label={label ?? title}
+              aria-haspopup="dialog"
+              className={cn(
+                "rule-help rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                className,
+              )}
+              onClick={() => {
+                setHovered(false);
+                setOpen(true);
+              }}
+            />
+          }
+        >
+          {children}
         </TooltipTrigger>
         <TooltipContent
           sideOffset={6}
@@ -85,10 +84,9 @@ export function RuleHelp({
         <DialogContent
           aria-describedby={meta ? descriptionId : undefined}
           className="max-h-[85dvh] overflow-y-auto sm:max-w-md"
-          onCloseAutoFocus={(event) => {
-            event.preventDefault();
-            trigger.current?.focus();
+          finalFocus={() => {
             setHovered(false);
+            return trigger.current;
           }}
         >
           <DialogHeader className="pr-6">
@@ -110,10 +108,8 @@ export function RuleHelp({
               {t("fullRule")}
             </a>
           )}
-          <DialogClose asChild>
-            <Button variant="outline" className="mt-2">
-              {t("ok")}
-            </Button>
+          <DialogClose render={<Button variant="outline" className="mt-2" />}>
+            {t("ok")}
           </DialogClose>
         </DialogContent>
       </Dialog>

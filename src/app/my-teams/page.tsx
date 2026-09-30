@@ -1,5 +1,4 @@
-import { TeamLibrary } from "@/components/team-library";
-export const metadata = { title: "My teams" };
+import { permanentRedirect } from "next/navigation";
 export default function Page() {
-  return <TeamLibrary />;
+  permanentRedirect("/teams");
 }

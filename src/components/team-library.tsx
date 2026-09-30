@@ -23,6 +23,7 @@ import {
 } from "@/lib/drafts";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import { EditorSelect } from "./editor-select";
 import {
   Plus,
   Upload,
@@ -39,13 +40,12 @@ import {
   Users,
 } from "lucide-react";
 import { LoginButton } from "./site-shell";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 import { RosterIcon } from "./player-icon";
 import { useDraftSync } from "./draft-sync-provider";
 import { libraryMatches } from "@/lib/team-library";
 
-const selectClass =
-  "h-10 min-w-0 rounded-lg border border-input bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring";
+const selectClass = "h-10 rounded-lg pl-3";
 export function TeamLibrary() {
   const t = useTranslations(),
     router = useRouter(),
@@ -100,9 +100,9 @@ export function TeamLibrary() {
       if (!getRoster(parsed.rosterId)) throw new Error();
       const team = { ...parsed, uuid: crypto.randomUUID() };
       storeDraft(team, sync.account);
-      router.push(`/builder?draft=${team.uuid}`);
+      router.push(`/teams/${team.uuid}`);
     } catch {
-      toast.error(t("invalidImport"));
+      toast.add({ type: "error", title: t("invalidImport") });
     } finally {
       if (input.current) input.current.value = "";
     }
@@ -112,7 +112,7 @@ export function TeamLibrary() {
     try {
       await archive({ uuid: team.uuid, archived: !archived });
     } catch {
-      toast.error(t("saveFailed"));
+      toast.add({ type: "error", title: t("saveFailed") });
     } finally {
       setBusy(null);
     }
@@ -138,11 +138,9 @@ export function TeamLibrary() {
             <Upload className="size-4" />
             {t("import")}
           </Button>
-          <Button asChild>
-            <Link href="/teams">
-              <Plus className="size-4" />
-              {t("createTeam")}
-            </Link>
+          <Button nativeButton={false} render={<Link href="/rosters" />}>
+            <Plus className="size-4" />
+            {t("createTeam")}
           </Button>
         </div>
       </header>
@@ -183,8 +181,9 @@ export function TeamLibrary() {
             className="h-10 rounded-lg bg-card pl-9"
           />
         </div>
-        <select
+        <EditorSelect
           aria-label={t("roster")}
+          wrapperClassName="mt-0"
           className={selectClass}
           value={rosterId}
           onChange={(e) => setRoster(e.target.value)}
@@ -195,9 +194,10 @@ export function TeamLibrary() {
               {roster.name}
             </option>
           ))}
-        </select>
-        <select
+        </EditorSelect>
+        <EditorSelect
           aria-label={t("ruleset")}
+          wrapperClassName="mt-0"
           className={selectClass}
           value={rulesetId}
           onChange={(e) => setRuleset(e.target.value as Team["rulesetId"] | "")}
@@ -208,17 +208,18 @@ export function TeamLibrary() {
               {rules.name}
             </option>
           ))}
-        </select>
+        </EditorSelect>
         {isAuthenticated && (
-          <select
+          <EditorSelect
             aria-label={t("teamLibraryView")}
-            className={`${selectClass} col-span-2 lg:col-span-1`}
+            wrapperClassName="mt-0 col-span-2 lg:col-span-1"
+            className={selectClass}
             value={archived ? "archived" : "active"}
             onChange={(e) => setArchived(e.target.value === "archived")}
           >
             <option value="active">{t("activeTeams")}</option>
             <option value="archived">{t("archivedTeams")}</option>
-          </select>
+          </EditorSelect>
         )}
       </div>
       <section
@@ -265,8 +266,12 @@ export function TeamLibrary() {
               </Button>
             ) : (
               !archived && (
-                <Button asChild className="mt-5">
-                  <Link href="/teams">{t("createTeam")}</Link>
+                <Button
+                  className="mt-5"
+                  nativeButton={false}
+                  render={<Link href="/rosters" />}
+                >
+                  {t("createTeam")}
                 </Button>
               )
             )}
@@ -282,7 +287,7 @@ export function TeamLibrary() {
                   archived
                     ? undefined
                     : local
-                      ? `/builder?draft=${team.uuid}`
+                      ? `/teams/${team.uuid}`
                       : `/teams/${team.uuid}`
                 }
                 saveState={
@@ -305,7 +310,10 @@ export function TeamLibrary() {
                           try {
                             removeDraft(team.uuid);
                           } catch {
-                            toast.error(t("storageError"));
+                            toast.add({
+                              type: "error",
+                              title: t("storageError"),
+                            });
                           }
                         }}
                       >

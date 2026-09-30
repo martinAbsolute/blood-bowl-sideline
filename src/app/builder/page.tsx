@@ -1,16 +1,11 @@
-import { BuilderStart } from "@/components/builder-start";
-export const metadata = { title: "Team builder" };
+import { redirect } from "next/navigation";
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ roster?: string; draft?: string; new?: string }>;
+  searchParams: Promise<Record<string, string>>;
 }) {
   const params = await searchParams;
-  return (
-    <BuilderStart
-      roster={params.roster}
-      draft={params.draft}
-      fresh={params.new === "1"}
-    />
-  );
+  const { draft, ...rest } = params;
+  const query = new URLSearchParams(rest).toString();
+  redirect(`${draft ? `/teams/${draft}` : "/rosters"}${query ? `?${query}` : ""}`);
 }

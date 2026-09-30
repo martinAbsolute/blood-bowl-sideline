@@ -80,7 +80,7 @@ function LocalBuilder({
       (params.get("draft") === initial.uuid && !params.has("new"))
     )
       return;
-    router.replace(`/builder?draft=${initial.uuid}`, { scroll: false });
+    router.replace(`/teams/${initial.uuid}`, { scroll: false });
   }, [router, initial]);
   return initial ? (
     <TeamEditor initial={initial} />
@@ -90,8 +90,12 @@ function LocalBuilder({
     <div className="page-width py-16 text-center">
       <h1 className="display-font text-3xl">{t("noTeams")}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{t("noTeamsHint")}</p>
-      <Button asChild className="mt-5">
-        <Link href="/teams">{t("chooseRoster")}</Link>
+      <Button
+        className="mt-5"
+        nativeButton={false}
+        render={<Link href="/rosters" />}
+      >
+        {t("chooseRoster")}
       </Button>
     </div>
   );

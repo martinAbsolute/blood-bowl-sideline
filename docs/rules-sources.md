@@ -1,15 +1,15 @@
 # Rules snapshot and provenance
 
-Snapshot: `bb2025-2026-09-29`. Blood Bowl Third Season (2025). This is an independent community builder, not an organiser certification tool.
+Snapshot: `bb2025-2026-09-30`. Blood Bowl Third Season (2025). This is an independent community builder, not an organiser certification tool.
 
 ## References
 
 - [BBTC](https://bbtc.pl/): public BB2025 roster and tournament builder pages, including [EuroBowl Human](https://bbtc.pl/team/bb2025/human?ruleset=EB2026_04) and [World Cup Human](https://bbtc.pl/team/bb2025/human?ruleset=WC2027_03), inspected 29 September 2026.
-- [Ukrainian community rules and builder](https://bb-rules-g2p.pages.dev/): public factual roster, player, skill-category, star, inducement, and preset data, inspected 29 September 2026. Ukrainian UI terminology is based on this reference. Skill and positional proper names remain English.
-- [Mordorbihan BB2025 skills API](https://mordorbihan.fr/api/skills/public/ruleset/BB2025): the user supplied its JSON export on 30 September 2026. All 108 catalog skill and trait names and English definitions match the supplied `name_EN` and `description_EN` strings verbatim, including punctuation, spelling, and paragraph breaks. Existing skill identifiers, categories, elite flags, and Ukrainian descriptions are preserved. The export's inactive characteristic increases (with empty descriptions) and hidden Team Captain entry are outside the selectable skill catalog.
+- [Ukrainian community rules and builder](https://bb-rules-g2p.pages.dev/): public factual roster, player, skill-category, star, inducement, and preset data, inspected 29 September 2026. Skill definitions were refreshed from the complete [English](https://bb-rules-g2p.pages.dev/en/skills) and [Ukrainian](https://bb-rules-g2p.pages.dev/uk/skills) reference on 30 September 2026 (reference v0.5.3). All 108 skills and traits have full definitions in both languages, including paragraph breaks and English skill/action names where used by the Ukrainian reference. This replaces the previous Ukrainian summaries. The user explicitly selected this reference when definitions conflicted with the earlier English import, including Really Stupid (+2) and Monstrous Mouth (3+). Existing skill identifiers, categories, elite flags, and costs are preserved.
+- [Mordorbihan BB2025 skills API](https://mordorbihan.fr/api/skills/public/ruleset/BB2025): the user supplied its JSON export on 30 September 2026. This established the skill and trait catalog, but its English definitions have since been superseded by the bilingual community reference above at the user's request. The export's inactive characteristic increases (with empty descriptions) and hidden Team Captain entry are outside the selectable skill catalog.
 - [EuroBowl 2026 organiser](https://www.eurobowl.eu/entrance-options/): links BBTC as its roster builder. Event rules and organiser decisions take precedence.
 
-Catalog fields and numerical restrictions are based on the references above. English skill definitions are preserved from the user-supplied export. Third-party application code and research downloads are not distributed. FUMBBL player artwork is attributed separately in `public/assets/fumbbl/README.md`. Temporary research downloads are ignored by Git and Vercel. Our implementation and presentation are original.
+Catalog fields and numerical restrictions are based on the references above. Full skill definitions in both languages follow the community reference. Third-party application code and research downloads are not distributed. FUMBBL player artwork is attributed separately in `public/assets/fumbbl/README.md`. Temporary research downloads are ignored by Git and Vercel. Our implementation and presentation are original.
 
 ## Presets
 

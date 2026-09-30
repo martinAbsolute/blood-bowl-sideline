@@ -1,5 +1,5 @@
-import { TeamCatalog } from "@/components/team-catalog";
-export const metadata = { title: "Teams" };
+import { TeamLibrary } from "@/components/team-library";
+export const metadata = { title: "My teams" };
 export default function Page() {
-  return <TeamCatalog />;
+  return <TeamLibrary />;
 }

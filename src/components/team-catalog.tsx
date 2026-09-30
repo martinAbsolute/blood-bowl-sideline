@@ -7,7 +7,7 @@ export function TeamCatalog() {
   return (
     <div className="page-width py-6">
       <div className="mb-5 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-        <h1 className="display-font text-3xl">{t("teams")}</h1>
+        <h1 className="display-font text-3xl">{t("rosters")}</h1>
         <span className="ml-auto text-xs font-medium text-muted-foreground">
           BB2025 · {rosters.length}
         </span>

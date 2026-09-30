@@ -1,4 +1,4 @@
-// @vitest-environment jsdom
+// @vitest-environment happy-dom
 import { act, createElement, StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
@@ -214,7 +214,7 @@ it("shows one card per team when a local recovery copy overlaps a cloud team", a
   );
   expect(container.querySelectorAll("article")).toHaveLength(1);
   expect(container.querySelector("article a")?.getAttribute("href")).toBe(
-    `/builder?draft=${team.uuid}`,
+    `/teams/${team.uuid}`,
   );
   await tick();
   expect(container.querySelectorAll("article")).toHaveLength(1);

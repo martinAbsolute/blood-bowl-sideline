@@ -1,5 +1,5 @@
 "use client";
-import { useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import { useTranslations } from "gt-next";
 import { api } from "../../convex/_generated/api";
 import type { Team } from "@/domain/types";
@@ -17,6 +17,7 @@ export function SharedTeam({
 }) {
   const t = useTranslations(),
     live = useQuery(api.teams.getByUuid, { uuid: initial.team.uuid });
+  const { isAuthenticated } = useConvexAuth();
   if (live === null)
     return (
       <div className="page-width py-16">
@@ -25,12 +26,13 @@ export function SharedTeam({
       </div>
     );
   const data = live ?? initial;
+  const canEdit = isAuthenticated && data.canEdit;
   return (
     <TeamEditor
-      key={data.canEdit ? `edit-${data.team.uuid}` : `view-${data.revision}`}
+      key={canEdit ? `edit-${data.team.uuid}` : `view-${data.revision}`}
       initial={data.team}
       revision={data.revision}
-      readOnly={!data.canEdit}
+      readOnly={!canEdit}
     />
   );
 }

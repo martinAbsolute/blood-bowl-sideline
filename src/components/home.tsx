@@ -36,19 +36,23 @@ export function Home() {
             {t("heroText")}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild size="lg" className="h-12 rounded-full px-6">
-              <Link href="/builder?new=1">
-                {t("createTeam")}
-                <ArrowRight className="size-4" />
-              </Link>
+            <Button
+              size="lg"
+              className="h-12 rounded-full px-6"
+              nativeButton={false}
+              render={<Link href="/rosters" />}
+            >
+              {t("createTeam")}
+              <ArrowRight className="size-4" />
             </Button>
             <Button
-              asChild
               variant="outline"
               size="lg"
               className="h-12 rounded-full px-6"
+              nativeButton={false}
+              render={<Link href="/rosters" />}
             >
-              <Link href="/teams">{t("browseRosters")}</Link>
+              {t("browseRosters")}
             </Button>
           </div>
           <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">

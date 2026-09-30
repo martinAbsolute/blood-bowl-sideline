@@ -1,4 +1,4 @@
-// @vitest-environment jsdom
+// @vitest-environment happy-dom
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { act, createElement, StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -21,9 +21,9 @@ const mocks = vi.hoisted(() => ({
   auth: { isAuthenticated: false, isLoading: false },
   save: vi.fn(),
   signIn: vi.fn(),
-  error: vi.fn(),
-  success: vi.fn(),
+  toast: vi.fn(),
   replace: vi.fn(),
+  push: vi.fn(),
   query: vi.fn(),
   t: (key: string) => key,
 }));
@@ -41,15 +41,15 @@ vi.mock("@convex-dev/auth/react", () => ({
   useAuthActions: () => ({ signIn: mocks.signIn }),
 }));
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: mocks.replace }),
+  useRouter: () => ({ replace: mocks.replace, push: mocks.push }),
   usePathname: () => "/builder",
 }));
 vi.mock("next/link", () => ({
   default: ({ children, ...props }: { children: React.ReactNode }) =>
     createElement("a", props, children),
 }));
-vi.mock("sonner", () => ({
-  toast: { error: mocks.error, success: mocks.success, info: vi.fn() },
+vi.mock("@/components/ui/toast", () => ({
+  toast: { add: mocks.toast },
 }));
 
 let root: Root;
@@ -79,9 +79,9 @@ beforeEach(() => {
   mocks.signIn.mockReset().mockResolvedValue({
     redirect: new URL("https://oauth.telegram.org/auth"),
   });
-  mocks.error.mockClear();
-  mocks.success.mockClear();
+  mocks.toast.mockClear();
   mocks.replace.mockClear();
+  mocks.push.mockClear();
   mocks.query.mockReset();
   container = document.createElement("div");
   document.body.append(container);
@@ -267,7 +267,7 @@ it("header login preserves the exact draft; returning saves the entire unfinishe
       .click(),
   );
   expect(mocks.signIn).toHaveBeenCalledWith("telegram", {
-    redirectTo: `/builder?draft=${team.uuid}`,
+    redirectTo: `/teams/${team.uuid}`,
   });
   expect(readDrafts()).toEqual([team]);
   expect(pendingDraftSave(team.uuid)?.revision).toBe(0);
@@ -300,7 +300,10 @@ it("preserves the draft and pending save on rejection without repeatedly retryin
     team,
     expectedRevision: 2,
   });
-  expect(mocks.error).toHaveBeenCalledWith("conflict");
+  expect(mocks.toast).toHaveBeenCalledWith({
+    type: "error",
+    title: "conflict",
+  });
   expect(readDrafts()).toEqual([team]);
   expect(pendingDraftSave(team.uuid)).not.toBeNull();
   await act(async () => root.render(editor(team)));
@@ -315,7 +318,10 @@ it("keeps a nameless local draft through login, asking for a name before the acc
   mocks.auth = { isAuthenticated: true, isLoading: false };
   await act(async () => root.render(editor(readDrafts()[0])));
   expect(mocks.save).not.toHaveBeenCalled();
-  expect(mocks.error).toHaveBeenCalledWith("teamNameRequired");
+  expect(mocks.toast).toHaveBeenCalledWith({
+    type: "error",
+    title: "teamNameRequired",
+  });
 });
 
 it("never uploads an unrelated draft or a read-only public team", async () => {
@@ -340,11 +346,7 @@ it("never uploads an unrelated draft or a read-only public team", async () => {
 it("does not erase the callback code while the builder mounts", async () => {
   const team = newTeam(randomUUID());
   prepareDraftSignIn(team, 0);
-  window.history.replaceState(
-    {},
-    "",
-    `/builder?draft=${team.uuid}&code=test-callback`,
-  );
+  window.history.replaceState({}, "", `/teams/${team.uuid}?code=test-callback`);
   mocks.auth = { isAuthenticated: false, isLoading: true };
   await act(async () =>
     root.render(
@@ -372,7 +374,124 @@ it("a new device opens an empty builder without creating a phantom draft", async
   );
   expect(readDrafts()).toEqual([]);
   expect(mocks.replace).not.toHaveBeenCalled();
-  expect(container.querySelector('a[href="/teams"]')?.textContent).toBe(
+  expect(container.querySelector('a[href="/rosters"]')?.textContent).toBe(
     "chooseRoster",
   );
+});
+
+function action(label: string) {
+  return Array.from(
+    container.querySelectorAll<HTMLButtonElement>("button"),
+  ).find((button) => button.textContent === label)!;
+}
+
+it("duplicates a public team into a new guest draft without changing the source", async () => {
+  const team = newTeam(randomUUID(), "orc");
+  team.name = "Absolute Orcs";
+  await act(async () =>
+    root.render(
+      createElement(
+        DraftSignInProvider,
+        null,
+        createElement(TeamEditor, {
+          initial: team,
+          revision: 1,
+          readOnly: true,
+        }),
+      ),
+    ),
+  );
+  expect(action("share")).toBeUndefined();
+  expect(action("export")).toBeUndefined();
+  await act(async () => action("duplicate").click());
+  const duplicate = readDrafts()[0];
+  expect(duplicate.name).toBe("Absolute Orcs (copySuffix)");
+  expect(duplicate.uuid).not.toBe(team.uuid);
+  expect(mocks.save).not.toHaveBeenCalled();
+  expect(mocks.push).toHaveBeenCalledWith(`/teams/${duplicate.uuid}`);
+});
+
+it("saves a duplicate to the signed-in account and clears its exact local recovery copy", async () => {
+  mocks.auth = { isAuthenticated: true, isLoading: false };
+  const team = newTeam(randomUUID(), "orc");
+  await act(async () =>
+    root.render(
+      createElement(
+        DraftSignInProvider,
+        null,
+        createElement(TeamEditor, {
+          initial: team,
+          revision: 1,
+          readOnly: true,
+        }),
+      ),
+    ),
+  );
+  await act(async () => action("duplicate").click());
+  const request = mocks.save.mock.calls[0][0];
+  expect(request.team.uuid).not.toBe(team.uuid);
+  expect(request.expectedRevision).toBe(0);
+  expect(readDrafts()).toEqual([]);
+  expect(readRevision(request.team.uuid)).toBe(1);
+  expect(mocks.push).toHaveBeenCalledWith(`/teams/${request.team.uuid}`);
+});
+
+it("retains a failed duplicate as a recovery draft and reports the cloud failure", async () => {
+  mocks.auth = { isAuthenticated: true, isLoading: false };
+  mocks.save.mockRejectedValue(new Error("Offline"));
+  const team = newTeam(randomUUID(), "orc");
+  await act(async () =>
+    root.render(
+      createElement(
+        DraftSignInProvider,
+        null,
+        createElement(TeamEditor, {
+          initial: team,
+          revision: 1,
+          readOnly: true,
+        }),
+      ),
+    ),
+  );
+  await act(async () => action("duplicate").click());
+  expect(readDrafts()).toHaveLength(1);
+  expect(mocks.toast).toHaveBeenCalledWith({
+    type: "error",
+    title: "saveFailed",
+  });
+  expect(mocks.push).toHaveBeenCalledWith(`/teams/${readDrafts()[0].uuid}`);
+});
+
+it("shares only an authenticated owner's saved team and reports clipboard denial", async () => {
+  mocks.auth = { isAuthenticated: true, isLoading: false };
+  const writeText = vi.fn().mockResolvedValue(undefined);
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: { writeText },
+  });
+  const team = newTeam(randomUUID(), "orc");
+  await act(async () =>
+    root.render(
+      createElement(
+        DraftSignInProvider,
+        null,
+        createElement(TeamEditor, { initial: team, revision: 1 }),
+      ),
+    ),
+  );
+  await act(async () => action("share").click());
+  expect(writeText).toHaveBeenCalledWith(
+    `${window.location.origin}/teams/${team.uuid}`,
+  );
+  expect(mocks.toast).toHaveBeenCalledWith({
+    type: "success",
+    title: "copied",
+  });
+  writeText.mockRejectedValue(new Error("Clipboard denied"));
+  await act(async () => action("share").click());
+  expect(mocks.toast).toHaveBeenCalledWith({
+    type: "error",
+    title: "copyFailed",
+  });
+  expect(action("duplicate")).toBeDefined();
 });

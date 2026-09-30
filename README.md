@@ -6,13 +6,15 @@ The app is actively in development, with no real users or backward-compatibility
 
 ## Team flow
 
-- Choose a roster at `/teams` and start building. Guest drafts save automatically on the current device.
+- Start in My Teams at `/teams` (also the default page). Choose a roster at `/rosters` and start building. Guest drafts save automatically on the current device.
 - Sign in with Telegram to upload **all** guest drafts. Signed-in creation, imports and edits save automatically to the account.
-- `/my-teams` is one library with search by name, coach, roster or ruleset, plus roster, ruleset and archive filters. Draft/Ready describes roster validation, not where a team is saved.
+- `/teams` is one library with search by name, coach, roster or ruleset, plus roster, ruleset and archive filters. Draft/Ready describes roster validation, not where a team is saved.
 - Successful cloud saves clear the local recovery copy. Failed or unfinished edits remain on the device; retry from the library or editor. Account recovery copies are isolated from other accounts. A blank name needs to be filled in before upload.
 - `/teams/[uuid]` opens directly in edit mode for its owner and as a read-only public view for everyone else. Archiving hides the public link; restoring makes it available again.
 - Team names behave like document filenames: type inline, Enter to finish, Escape to restore the previous name. Long names wrap on narrow screens.
-- `/team/[roster]` contains roster details. `/leagues/[league]` lists affiliated rosters and clickable star-player details. Special rules have full help on hover, keyboard focus and tap.
+- `/rosters/orc`, `/rosters/amazon`, and the other fixed roster names contain roster details. `/leagues/[league]` lists affiliated rosters and clickable star-player details. Special rules have full help on hover, keyboard focus and tap.
+- Quick actions offer portrait or landscape printing with a plain roster table and complete skill definitions from page two onward. Built-in skills are regular, added skills are underlined, and captain Pro has a dotted underline. JSON export is removed.
+- Duplicate creates a separate team named `Team name (Copy)`, saving to the account when signed in or as a local draft otherwise. Authenticated owners can share their saved team's link using the clipboard action.
 
 Costs and legality come from the shared catalog and validator, including on the server. UUID pages never expose owner IDs or authentication records. League progression and tournament management are outside scope.
 

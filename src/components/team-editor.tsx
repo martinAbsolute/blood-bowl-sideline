@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "gt-next";
+import { useLocale, useTranslations } from "gt-next";
 import { useConvexAuth, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import {
@@ -30,18 +30,24 @@ import {
 import type { Team } from "@/domain/types";
 import {
   storeDraft,
-  exportTeam,
   readRevision,
   storeRevision,
   draftAccount,
 } from "@/lib/drafts";
 import { saveCloudDraft } from "@/lib/cloud-save";
+import { duplicateTeam } from "@/lib/duplicate-team";
 import { useDraftSync } from "./draft-sync-provider";
 import { TeamName } from "./team-name";
 import { TeamHeader } from "./team-header";
 import { EditorSelect } from "./editor-select";
 import { ReadinessCard } from "./readiness-card";
 import { Button } from "./ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "./ui/dropdown-menu";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Badge } from "./ui/badge";
@@ -84,7 +90,8 @@ import {
   ArrowLeft,
   ChevronRight,
   Copy,
-  Download,
+  Clipboard,
+  ChevronDown,
   Plus,
   Printer,
   ShieldCheck,
@@ -93,7 +100,7 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 import Link from "next/link";
 import { PlayerIcon, StarPlayerIcon } from "./player-icon";
 import { useDraftSignIn } from "./draft-sign-in-provider";
@@ -112,9 +119,7 @@ function CollapsibleSection({
 }) {
   return (
     <Accordion
-      type="single"
-      collapsible
-      defaultValue="content"
+      defaultValue={["content"]}
       className="recruitment-menu overflow-hidden rounded-lg border bg-card"
     >
       <AccordionItem value="content">
@@ -188,6 +193,8 @@ export function TeamEditor({
     draftSignIn = useDraftSignIn(),
     save = useMutation(api.teams.save);
   const draftSync = useDraftSync();
+  const locale = useLocale();
+  const [duplicating, setDuplicating] = useState(false);
   const [team, setTeam] = useState(initial),
     [revision, setRevision] = useState(
       () => initialRevision || readRevision(initial.uuid),
@@ -239,7 +246,7 @@ export function TeamEditor({
         storeDraft(team, draftSync.account);
       } catch {
         failed = true;
-        toast.error(storageErrorText);
+        toast.add({ type: "error", title: storageErrorText });
       }
       queueMicrotask(() => {
         if (!cancelled)
@@ -273,7 +280,7 @@ export function TeamEditor({
       if (next.uuid === team.uuid) storeRevision(next.uuid, revision);
       setLocalSave({ team: next, failed: false });
     } catch {
-      toast.error(storageErrorText);
+      toast.add({ type: "error", title: storageErrorText });
       setLocalSave({ team: next, failed: true });
     }
     latestTeam.current = next;
@@ -291,11 +298,11 @@ export function TeamEditor({
       try {
         storeDraft(next);
       } catch {
-        toast.error(t("storageError"));
+        toast.add({ type: "error", title: t("storageError") });
         return;
       }
       setRevision(0);
-      router.replace(`/builder?draft=${next.uuid}`, { scroll: false });
+      router.replace(`/teams/${next.uuid}`, { scroll: false });
     }
     change(next);
     setSelected(null);
@@ -318,7 +325,7 @@ export function TeamEditor({
     ) => {
       if (saveInFlight.current) return;
       if (!team.name.trim()) {
-        toast.error(t("teamNameRequired"));
+        toast.add({ type: "error", title: t("teamNameRequired") });
         return;
       }
       saveInFlight.current = true;
@@ -330,12 +337,15 @@ export function TeamEditor({
         setRevision(result.revision);
         finishDraftSignIn(team.uuid);
         setDirty(latestTeam.current !== team);
-        if (pending) toast.success(t("saved"));
+        if (pending) toast.add({ type: "success", title: t("saved") });
       } catch (error) {
         const conflict =
           error instanceof Error && error.message.includes("CONFLICT");
         setSyncError({ team, conflict });
-        toast.error(conflict ? t("conflict") : t("saveFailed"));
+        toast.add({
+          type: "error",
+          title: conflict ? t("conflict") : t("saveFailed"),
+        });
       } finally {
         saveInFlight.current = false;
         setSaving(false);
@@ -351,7 +361,7 @@ export function TeamEditor({
       !isAuthenticated
     ) {
       returnedFromSignIn.current = false;
-      toast.error(t("loginFailed"));
+      toast.add({ type: "error", title: t("loginFailed") });
     }
     if (readOnly || !isAuthenticated || !draftSync.ready || resumedSave.current)
       return;
@@ -399,22 +409,41 @@ export function TeamEditor({
       await navigator.clipboard.writeText(
         `${window.location.origin}/teams/${team.uuid}`,
       );
-      toast.success(t("copied"));
+      toast.add({ type: "success", title: t("copied") });
     } catch {
-      toast.error(t("copyFailed"));
+      toast.add({ type: "error", title: t("copyFailed") });
     }
   }
-  function copy() {
-    const duplicate = {
-      ...team,
-      uuid: crypto.randomUUID(),
-      name: `${team.name} (${t("copySuffix")})`.slice(0, 80),
-    };
+  async function copy() {
+    if (duplicating) return;
+    setDuplicating(true);
+    const duplicate = duplicateTeam(team, t("copySuffix"));
+    const release = draftSync.editing(duplicate.uuid);
     try {
-      storeDraft(duplicate);
-      router.push(`/builder?draft=${duplicate.uuid}`);
+      storeDraft(duplicate, draftSync.account);
     } catch {
-      toast.error(t("storageError"));
+      toast.add({ type: "error", title: t("storageError") });
+      release();
+      setDuplicating(false);
+      return;
+    }
+    try {
+      if (isAuthenticated) await saveCloudDraft(duplicate, 0, save);
+      router.push(`/teams/${duplicate.uuid}`);
+    } catch {
+      toast.add({ type: "error", title: t("saveFailed") });
+      router.push(`/teams/${duplicate.uuid}`);
+    } finally {
+      release();
+      setDuplicating(false);
+    }
+  }
+  async function print(orientation: "portrait" | "landscape") {
+    try {
+      const { printTeam } = await import("./team-print");
+      await printTeam(team, orientation, t, locale);
+    } catch {
+      toast.add({ type: "error", title: t("printFailed") });
     }
   }
   function hireStar(id: string) {
@@ -465,7 +494,7 @@ export function TeamEditor({
       <TeamHeader
         back={
           <Link
-            href="/my-teams"
+            href="/teams"
             className="no-print inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:underline"
           >
             <ArrowLeft className="size-3.5" />
@@ -474,27 +503,33 @@ export function TeamEditor({
         }
         actions={
           <>
+            <DropdownMenu>
+              <DropdownMenuTrigger render={<Button size="sm" />}>
+                <Printer className="size-4" />
+                {t("print")}
+                <ChevronDown className="size-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-44">
+                <DropdownMenuItem onClick={() => void print("portrait")}>
+                  {t("verticalPdf")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => void print("landscape")}>
+                  {t("horizontalPdf")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => exportTeam(team)}
+              disabled={duplicating || isLoading || !draftSync.ready}
+              onClick={() => void copy()}
             >
-              <Download className="size-4" />
-              {t("export")}
+              <Copy className="size-4" />
+              {t("duplicate")}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => window.print()}>
-              <Printer className="size-4" />
-              {t("print")}
-            </Button>
-            {readOnly && (
-              <Button size="sm" onClick={copy}>
-                <Copy className="size-4" />
-                {t("duplicate")}
-              </Button>
-            )}
-            {revision > 0 && (
+            {!readOnly && isAuthenticated && revision > 0 && (
               <Button variant="outline" size="sm" onClick={share}>
-                <Copy className="size-4" />
+                <Clipboard className="size-4" />
                 {t("share")}
               </Button>
             )}
@@ -552,8 +587,11 @@ export function TeamEditor({
         }
       >
         <div className="flex flex-wrap gap-2">
-          <Badge variant="outline" asChild>
-            <Link href={`/team/${roster.id}`}>{roster.name}</Link>
+          <Badge
+            variant="outline"
+            render={<Link href={`/rosters/${roster.id}`} />}
+          >
+            {roster.name}
           </Badge>
           <Badge variant="outline">{rules.name}</Badge>
           <Badge variant="secondary">
@@ -1073,11 +1111,7 @@ export function TeamEditor({
                 <span className="font-mono">{gold(totals.remaining)} GP</span>
               </div>
             </div>
-            <Accordion
-              type="single"
-              collapsible
-              className="border-t px-4 text-xs"
-            >
+            <Accordion className="border-t px-4 text-xs">
               <AccordionItem value="budget">
                 <AccordionTrigger className="items-center py-3 text-xs font-normal text-muted-foreground hover:no-underline">
                   {t("budgetBreakdown")}
@@ -1367,10 +1401,7 @@ export function TeamEditor({
       >
         <DialogContent
           className="player-dialog flex max-h-[90dvh] flex-col overflow-hidden p-4 sm:max-w-2xl sm:p-6"
-          onOpenAutoFocus={(event) => {
-            event.preventDefault();
-            playerTitle.current?.focus();
-          }}
+          initialFocus={playerTitle}
         >
           <DialogHeader className="pr-8 text-left">
             <DialogTitle
@@ -1393,7 +1424,7 @@ export function TeamEditor({
           </DialogHeader>
           {currentPlayer && position && (
             <>
-              <ScrollArea className="h-[min(65dvh,40rem)] min-h-0" type="auto">
+              <ScrollArea className="h-[min(65dvh,40rem)] min-h-0">
                 <div className="space-y-5 pr-3">
                   <label className="block text-xs font-medium">
                     {t("playerName")}
@@ -1466,7 +1497,7 @@ export function TeamEditor({
           )}
           {currentStar && (
             <>
-              <ScrollArea className="h-[min(50dvh,24rem)] min-h-0" type="auto">
+              <ScrollArea className="h-[min(50dvh,24rem)] min-h-0">
                 <div className="space-y-5 pr-3">
                   <p className="font-mono text-sm">
                     {gold(currentStar.cost)} GP

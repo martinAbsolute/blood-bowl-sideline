@@ -2,7 +2,7 @@
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toast";
 import { useState } from "react";
 import { DraftSignInProvider } from "./draft-sign-in-provider";
 import { DraftSyncProvider } from "./draft-sync-provider";
@@ -17,7 +17,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <DraftSyncProvider>
           <TooltipProvider>
             {children}
-            <Toaster richColors position="bottom-right" />
+            <Toaster />
           </TooltipProvider>
         </DraftSyncProvider>
       </DraftSignInProvider>

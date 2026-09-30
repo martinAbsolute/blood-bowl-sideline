@@ -15,7 +15,7 @@ export function prepareDraftSignIn(team: Team, revision: number) {
     PENDING_SAVE,
     JSON.stringify({ uuid: team.uuid, revision }),
   );
-  return `/builder?draft=${team.uuid}`;
+  return `/teams/${team.uuid}`;
 }
 
 export function pendingDraftSave(uuid: string) {

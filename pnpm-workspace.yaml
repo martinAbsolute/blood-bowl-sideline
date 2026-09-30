@@ -2,6 +2,9 @@ allowBuilds:
   esbuild: true
   tree-sitter-python: true
   unrs-resolver: true
+overrides:
+  # Browser tests use happy-dom; exclude Vitest's unused optional environment.
+  'vitest>jsdom': '-'
 minimumReleaseAgeExclude:
   - '@next/env@16.3.7'
   - '@next/eslint-plugin-next@16.3.7'

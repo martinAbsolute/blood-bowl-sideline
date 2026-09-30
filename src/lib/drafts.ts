@@ -97,14 +97,3 @@ export function acknowledgeDraft(team: Team, revision: number) {
   if (local && JSON.stringify(local) === JSON.stringify(team))
     removeDraft(team.uuid);
 }
-export function exportTeam(team: Team) {
-  const blob = new Blob([JSON.stringify(team, null, 2)], {
-      type: "application/json",
-    }),
-    url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${team.name.replace(/[^\p{L}\p{N} -]/gu, "").slice(0, 60) || "team"}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
