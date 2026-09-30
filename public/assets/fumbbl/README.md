@@ -3,6 +3,8 @@
 Source: https://fumbbl.com/p/icons, retrieved 2026-09-30. Artwork by the FUMBBL
 community; original player labels and individual image source URLs are preserved
 in `manifest.json`. This attribution does not assert a new license for the artwork.
+Player artwork is excluded from the project's AGPL license; see
+[third-party notices](../../../THIRD_PARTY_NOTICES.md).
 
 All 227 player-icon images on that page are included (including historical stars
 and Prize Players). Navigation/site-decoration images are excluded.

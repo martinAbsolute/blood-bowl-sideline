@@ -62,9 +62,9 @@ it("prints regular, additional and captain skills distinctly and escapes coach-e
     html.indexOf('<span class="added">Tackle</span>'),
   );
   expect(player.skills).toEqual(["tackle", "guard"]);
-  expect(html).toContain('<span class="captain">Pro (Captain)</span>');
+  expect(html).toContain('<span class="captain">Pro (Team Captain)</span>');
   expect(html.indexOf('<span class="added">Tackle</span>')).toBeLessThan(
-    html.indexOf('<span class="captain">Pro (Captain)</span>'),
+    html.indexOf('<span class="captain">Pro (Team Captain)</span>'),
   );
   expect(html).not.toMatch(/<script|<img|<button|<input/);
   expect(html).toContain("&lt;script&gt;");

@@ -3,8 +3,13 @@ import { z } from "zod";
 import { TeamPage } from "@/components/team-page";
 import { Suspense } from "react";
 import { WorkspaceLoading } from "@/components/workspace-loading";
+import { pageMetadata } from "@/lib/site-metadata";
 export const metadata = {
-  title: "Team",
+  ...pageMetadata(
+    "Shared Blood Bowl Team",
+    undefined,
+    "View a shared Blood Bowl roster, player advancements and team costs on Blood Bowl Sideline.",
+  ),
   robots: { index: false, follow: false },
 };
 export default function Page(props: { params: Promise<{ slug: string }> }) {

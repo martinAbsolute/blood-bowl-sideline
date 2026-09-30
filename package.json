@@ -1,7 +1,17 @@
 {
   "name": "blood-bowl-sideline",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
+  "license": "AGPL-3.0-only",
+  "author": "martinAbsolute",
+  "homepage": "https://blood-bowl-sideline.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/martinAbsolute/blood-bowl-sideline.git"
+  },
+  "bugs": {
+    "url": "https://github.com/martinAbsolute/blood-bowl-sideline/issues"
+  },
   "packageManager": "pnpm@12.8.1+sha512.f64ba907507f5ceafe06c8d38e6052d0179444580ec1279ddd5bfc11cb48aa8a2644b66598e07e761da84872a9fc57d5f902b87fa49d024198d558612aabbe45",
   "scripts": {
     "dev": "next dev",
@@ -12,13 +22,16 @@
     "build": "pnpm typecheck && next build",
     "start": "next start",
     "lint": "eslint .",
-    "format": "prettier --write src convex tests scripts docs README.md"
+    "format": "prettier --write src convex tests scripts docs README.md CONTRIBUTING.md NOTICE.md THIRD_PARTY_NOTICES.md package.json",
+    "format:check": "prettier --check src convex tests scripts docs README.md CONTRIBUTING.md NOTICE.md THIRD_PARTY_NOTICES.md package.json"
   },
   "dependencies": {
     "@auth/core": "^0.41.3",
     "@base-ui/react": "^1.8.0",
     "@convex-dev/auth": "^0.0.95",
     "@shikijs/transformers": "^4.4.3",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

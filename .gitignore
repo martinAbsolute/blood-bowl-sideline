@@ -40,8 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Public reference assets are research only; never publish third-party source.
+# Research downloads are local only.
 .research/
+/Absolute*.pdf
 
 *.log
 .test-results/

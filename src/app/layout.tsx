@@ -2,6 +2,15 @@ import type { Metadata } from "next";
 import { Geist, Roboto_Condensed } from "next/font/google";
 import { GTProvider } from "gt-next";
 import { Suspense } from "react";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import {
+  isPreview,
+  siteDescription,
+  siteName,
+  siteUrl,
+  shareImage,
+} from "@/lib/site-metadata";
 import { Providers } from "@/components/providers";
 import { SiteShell } from "@/components/site-shell";
 import { ShellLoading } from "@/components/loading-layouts";
@@ -19,31 +28,41 @@ const display = Roboto_Condensed({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ??
-      "https://blood-bowl-sideline.vercel.app",
-  ),
+  metadataBase: siteUrl,
+  applicationName: siteName,
+  authors: [
+    { name: "martinAbsolute", url: "https://github.com/martinAbsolute/" },
+  ],
   title: {
-    default: "Blood Bowl Sideline",
-    template: "%s | Blood Bowl Sideline",
+    default: "Blood Bowl Sideline — Teams, Leagues & Tournaments",
+    template: `%s | ${siteName}`,
   },
-  description:
-    "Build BB2025 teams for the Ukrainian Blood Bowl community. English and Ukrainian. Default, Matched Play, EuroBowl 2026 and World Cup 2027 v2.1.",
+  description: siteDescription,
+  robots: isPreview
+    ? { index: false, follow: false }
+    : { index: true, follow: true },
   icons: {
-    shortcut: "/icon.svg?brand=sideline-2026",
+    icon: [
+      { url: "/favicon.ico", sizes: "any", type: "image/x-icon" },
+      { url: "/icon.svg", sizes: "any", type: "image/svg+xml" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: "/favicon.ico",
   },
   openGraph: {
     type: "website",
-    siteName: "Blood Bowl Sideline",
-    title: "Blood Bowl Sideline",
-    description:
-      "Build your next Blood Bowl team. Roster planning for the Ukrainian Blood Bowl community, in English and Ukrainian.",
+    siteName,
+    title: "Blood Bowl Sideline — Teams, Leagues & Tournaments",
+    description: siteDescription,
+    locale: "en_US",
+    alternateLocale: ["uk_UA"],
+    images: [shareImage],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Blood Bowl Sideline",
-    description:
-      "Build your next Blood Bowl team. Roster planning in English and Ukrainian.",
+    title: "Blood Bowl Sideline — Teams, Leagues & Tournaments",
+    description: siteDescription,
+    images: [shareImage],
   },
 };
 
@@ -62,6 +81,8 @@ export default function RootLayout({
             </Providers>
           </GTProvider>
         </Suspense>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

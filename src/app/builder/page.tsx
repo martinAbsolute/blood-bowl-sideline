@@ -7,5 +7,7 @@ export default async function Page({
   const params = await searchParams;
   const { draft, ...rest } = params;
   const query = new URLSearchParams(rest).toString();
-  redirect(`${draft ? `/teams/${draft}` : "/rosters"}${query ? `?${query}` : ""}`);
+  redirect(
+    `${draft ? `/teams/${draft}` : "/rosters"}${query ? `?${query}` : ""}`,
+  );
 }

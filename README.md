@@ -1,84 +1,110 @@
 # Blood Bowl Sideline
 
-A bilingual BB2025 team builder for the Ukrainian community, built with Next.js, React, Convex and `gt-next`. English is the source language; Ukrainian is a persistent language choice using local dictionaries.
+**Your Blood Bowl sideline, from the first roster to the final whistle.**
 
-The app is actively in development, with no real users or backward-compatibility commitments. Tests describe current behavior. Do not add migrations just to preserve obsolete development data.
+A home for building and sharing teams, managing player advancements, tracking games, and running leagues and tournaments. Made with love for the Ukrainian Blood Bowl community, with an English and Ukrainian interface.
 
-## Team flow
+**[Open Blood Bowl Sideline](https://blood-bowl-sideline.vercel.app/)** · [Contributing](CONTRIBUTING.md) · [License](LICENSE) · [Attribution](NOTICE.md)
 
-- Start in My Teams at `/teams` (also the default page). Choose a roster at `/rosters` and start building. Guest drafts save automatically on the current device.
-- Sign in with Telegram to upload **all** guest drafts. Signed-in creation, imports and edits save automatically to the account.
-- `/teams` is one library with search by name, coach, roster or ruleset, plus roster, ruleset and archive filters. Draft/Ready describes roster validation, not where a team is saved.
-- Successful cloud saves clear the local recovery copy. Failed or unfinished edits remain on the device; retry from the library or editor. Account recovery copies are isolated from other accounts. A blank name needs to be filled in before upload.
-- `/teams/[uuid]` opens directly in edit mode for its owner and as a read-only public view for everyone else. Archiving hides the public link; restoring makes it available again.
-- Team names behave like document filenames: type inline, Enter to finish, Escape to restore the previous name. Long names wrap on narrow screens.
-- `/rosters/orc`, `/rosters/amazon`, and the other fixed roster names contain roster details. `/leagues/[league]` lists affiliated rosters and clickable star-player details. Special rules have full help on hover, keyboard focus and tap.
-- Quick actions offer portrait or landscape printing with a plain roster table and complete skill definitions from page two onward. Starting and additional skills are alphabetized within their groups, followed by captain Pro. Added skills have a dashed underline in print, and captain Pro has a dotted underline. JSON export is removed.
-- Duplicate creates a separate team named `Team name (Copy)`, saving to the account when signed in or as a local draft otherwise. Authenticated owners can share their saved team's link using the clipboard action.
+![Blood Bowl Sideline](src/app/opengraph-image.png)
 
-Costs and legality come from the shared catalog and validator, including on the server. UUID pages never expose owner IDs or authentication records. League progression and tournament management are outside scope.
+## Teams, players, and the season ahead
 
-## Development
+Build a team around your play style, compare players and star hires, and keep your roster close at hand on game day. Sideline brings roster planning, team sharing, player development, match records, and competition management into one community workspace.
+
+The roster builder includes:
+
+- All 31 BB2025 rosters, player and star-player references, skill definitions, inducements, and special-rule help.
+- Default, Matched Play, EuroBowl 2026, and NAF World Cup 2027 v2.1 presets, with shared validation of budgets, skills, and eligibility.
+- Guest drafts that save on your device; Telegram sign-in brings all guest teams into your account library.
+- Automatic cloud saving with account-scoped recovery copies for unfinished or failed edits.
+- Team search, filters, duplication, archiving, and shareable UUID links. Owners edit their teams; visitors see the public roster.
+- Portrait and landscape printouts with full skill references and clearly marked advancements.
+- English and Ukrainian, with a persistent language choice.
+
+## Run locally
+
+Use Node.js 24 and the pnpm version pinned in `package.json`, plus your own Convex development deployment.
 
 ```sh
+corepack enable
 pnpm install --frozen-lockfile
-pnpm exec convex dev
+pnpm dev:backend
+```
+
+Keep the backend running. Set up `.env.local` using [.env.example](.env.example), then start the frontend in another terminal:
+
+```sh
 pnpm dev
 ```
 
-Convex sets up `.env.local`. Use [.env.example](.env.example) for frontend variable names. Keep Telegram credentials and signing keys only in Convex environment variables. Never commit `.env` files or expose secrets through `NEXT_PUBLIC_*`.
+Open [localhost:3000](http://localhost:3000). Guest team building works without Telegram credentials. See [CONTRIBUTING.md](CONTRIBUTING.md) for the complete environment and optional authentication setup.
 
-```sh
-pnpm check
-pnpm test
-pnpm build
-```
+## Stack and project layout
 
-Before shipping, also check creation, ruleset changes, draft restoration, language switching, owner/public UUID pages, account synchronization, library filters and narrow-screen name editing in a browser.
+Next.js App Router, React, TypeScript, Tailwind CSS, shadcn/ui, and Magic UI power the frontend. Convex provides authentication and reactive persistence; `gt-next` uses local English and Ukrainian dictionaries. Vercel Web Analytics and Speed Insights are mounted in the root layout.
 
-## Structure
+| Directory               | Purpose                                                             |
+| ----------------------- | ------------------------------------------------------------------- |
+| `src/app/`              | Routes, metadata, sitemap, robots, and application icons            |
+| `src/components/`       | Application UI and installed vendor components                      |
+| `src/domain/`           | Shared factual catalogs, costs, and roster validation               |
+| `src/lib/`              | Browser drafts, account synchronization, and utilities              |
+| `src/i18n/`             | English and Ukrainian dictionaries                                  |
+| `convex/`               | Telegram authentication, owner-scoped writes, and public team views |
+| `tests/`                | Rules, authentication, ownership, translations, and team flows      |
+| `docs/`                 | Rules provenance and component notes                                |
+| `public/brand/`         | Brand artwork                                                       |
+| `public/assets/fumbbl/` | Player artwork, source manifest, and attribution                    |
 
-- `src/app/`: routes and server-rendered public team views.
-- `src/components/`: application UI; compose installed vendor components without modifying `ui/` or `magic-ui/`.
-- `src/domain/`: factual catalogs, shared validators, costs and reference relationships.
-- `src/lib/`: browser drafts, account synchronization and document utilities.
-- `src/i18n/`: complete English/Ukrainian dictionaries.
-- `convex/`: Telegram authentication, owner-scoped persistence, indexed search and public projections. See [backend notes](convex/README.md).
-- `tests/`: current rules, authentication, ownership and user-flow coverage.
-
-Read [rules provenance](docs/rules-sources.md) before changing factual catalogs. There are 31 rosters, 108 skills/traits, 66 star players and four presets: Default, Matched Play, EuroBowl 2026 and NAF World Cup 2027 v2.1.
-
-## Telegram authentication
-
-Convex Auth uses Telegram OpenID Connect with authorization codes, S256 PKCE and state protection. ID tokens are verified against Telegram's JWKS and checked for issuer, audience, expiry and subject. No phone or messaging permission is requested. The optional bot webhook responds only to explicit private `/start` requests.
-
-Configure `TELEGRAM_BOT_USERNAME`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CLIENT_ID`, `TELEGRAM_CLIENT_SECRET`, `SITE_URL`, `JWT_PRIVATE_KEY` and `JWKS` in Convex. The setup script, `scripts/setup-telegram.mjs`, verifies the bot identity, signing-key configuration and webhook. Read its options before running it against a deployment.
-
-Register exact callback URLs with BotFather:
-
-- Production: `https://blood-bowl-sideline.vercel.app/api/auth/callback/telegram`
-- Development: `https://pleasant-buffalo-91.convex.site/api/auth/callback/telegram`
-
-Production uses `CUSTOM_AUTH_SITE_URL=https://blood-bowl-sideline.vercel.app` in Convex. The Next.js auth route forwards Telegram requests to `NEXT_PUBLIC_CONVEX_SITE_URL` while preserving redirects and state/PKCE cookies. Local development uses the development callback and `SITE_URL=http://localhost:3000`. Keep the shared bot webhook pointed at production. Set `NEXT_PUBLIC_TELEGRAM_AUTH_READY=true` only once authentication is configured.
+Both the browser and backend compute costs and validate teams from the same catalog. Cloud writes require authenticated ownership. Public UUID views omit owner IDs and authentication records; archived teams hide their public links. Read [rules provenance](docs/rules-sources.md) before changing factual data and [backend notes](convex/README.md) before changing persistence.
 
 ## Deployment
 
-GitHub `main` triggers the linked Vercel project, `blood-bowl-sideline`. Its production build runs the lockfile-pinned Convex CLI and builds the frontend together:
+The live application is [blood-bowl-sideline.vercel.app](https://blood-bowl-sideline.vercel.app/). The linked Vercel project deploys GitHub `main`; its production build deploys Convex functions and builds the frontend together. [vercel.json](vercel.json) defines the command:
 
 ```sh
 pnpm exec convex deploy --cmd 'pnpm run build'
 ```
 
-`vercel.json` keeps this build command in source control. `CONVEX_DEPLOY_KEY` is stored as a production-only Vercel secret for `expert-grasshopper-80`; it is never committed. Preview builds remain frontend-only with their configured backend. GitHub Actions runs checks, tests and the build without deploying.
+For your own deployment, import your fork into Vercel and connect your own Convex project. Configure these Vercel environment variables:
 
-To release, bump the version in `package.json`, run the checks above, and push to `main`. The footer shows the deployed version:
+| Variable                          | Value                                                               |
+| --------------------------------- | ------------------------------------------------------------------- |
+| `CONVEX_DEPLOY_KEY`               | A **Production-only secret** from your Convex production deployment |
+| `NEXT_PUBLIC_CONVEX_URL`          | Your deployment's `https://…convex.cloud` URL                       |
+| `NEXT_PUBLIC_CONVEX_SITE_URL`     | Its `https://…convex.site` URL for the auth proxy                   |
+| `NEXT_PUBLIC_SITE_URL`            | Your application's public origin, used in metadata and the sitemap  |
+| `NEXT_PUBLIC_TELEGRAM_AUTH_READY` | `true` only when Telegram authentication is configured              |
+
+Configure authentication secrets in Convex as described in [CONTRIBUTING.md](CONTRIBUTING.md). Production Telegram callbacks use the application's `/api/auth/callback/telegram` route; set Convex `CUSTOM_AUTH_SITE_URL` to that public origin. Set Convex `SITE_URL` to the same origin.
+
+Preview builds run `pnpm run build` against the backend configured for Preview. Keep Preview pointed at a separate development backend; the production deploy key must not be available there. Preview metadata and robots prevent indexing. The sitemap includes public reference pages and the builder entry, while UUID team pages carry `noindex`.
+
+Enable **Web Analytics** and **Speed Insights** for the Vercel project in its dashboard; the application already includes both SDKs. See Vercel's [Analytics setup](https://vercel.com/docs/analytics/quickstart) and [Speed Insights setup](https://vercel.com/docs/speed-insights/quickstart).
+
+GitHub Actions runs formatting, type checking, linting, tests, and a frontend build. To release, bump the version in `package.json` (shown in the footer), run the local checks, and push to `main`:
 
 ```sh
+pnpm format:check
+pnpm check
+pnpm test
+pnpm build
 git push origin main
 ```
 
-Personal development is `pleasant-buffalo-91`; production is `expert-grasshopper-80`. Confirm the target before any manual backend deployment.
+Never commit `.env` files, deploy keys, Telegram tokens, auth payloads, or signing keys. [.env.example](.env.example) contains safe placeholders only.
 
-## Attribution
+## Contributing and forks
 
-Independent community software; Blood Bowl is a Games Workshop trademark. No affiliation or endorsement. English skill definitions match the user-supplied export described in the rules provenance. Player artwork comes from the FUMBBL community; see [asset attribution and mappings](public/assets/fumbbl/README.md).
+**Forking is welcome**, and so are issues and pull requests. Report bugs, suggest improvements, help with translations, or adapt Sideline for your community. See [CONTRIBUTING.md](CONTRIBUTING.md) for practical steps. This is a community project maintained as time allows; there is no guaranteed response, review, support, or release schedule.
+
+## License and credits
+
+Copyright © 2026 martinAbsolute. Original project code and documentation are licensed under **GNU AGPL-3.0-only**, with the attribution-preservation term in [NOTICE.md](NOTICE.md). Keep credit and a link back to this project in distributed copies and appropriate legal notices. Hosted modified versions must provide their corresponding source under the AGPL.
+
+Blood Bowl is a trademark of Games Workshop. This independent community project is not affiliated with, endorsed by, or sponsored by Games Workshop or FUMBBL. Game names, rules, and third-party artwork remain subject to their respective rights; this project's license does not grant rights to them.
+
+Player icons come from the **[FUMBBL community icon collection](https://fumbbl.com/p/icons)**. Source URLs, labels, checksums, and crop mappings are preserved in the asset manifest. See the [player artwork notes](public/assets/fumbbl/README.md) and [third-party notices](THIRD_PARTY_NOTICES.md); attribution does not relicense that artwork.
+
+Created by [martinAbsolute on GitHub](https://github.com/martinAbsolute/) · [@martinAbsolute on Telegram](https://t.me/martinAbsolute).

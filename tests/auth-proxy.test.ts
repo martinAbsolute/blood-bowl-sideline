@@ -46,17 +46,15 @@ it("forwards sign-in to Convex without following Telegram redirects and preserve
 
 it("passes callback cookies and form body to Convex for verification", async () => {
   vi.stubEnv("NEXT_PUBLIC_CONVEX_SITE_URL", "https://example.convex.site");
-  const fetch = vi
-    .fn()
-    .mockResolvedValue(
-      new Response(null, {
-        status: 302,
-        headers: {
-          location:
-            "https://sideline.example/builder?draft=uuid&code=verification",
-        },
-      }),
-    );
+  const fetch = vi.fn().mockResolvedValue(
+    new Response(null, {
+      status: 302,
+      headers: {
+        location:
+          "https://sideline.example/builder?draft=uuid&code=verification",
+      },
+    }),
+  );
   vi.stubGlobal("fetch", fetch);
   const response = await proxyTelegramAuth(
     new Request("https://sideline.example/api/auth/callback/telegram", {
