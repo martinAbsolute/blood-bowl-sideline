@@ -4,6 +4,7 @@ import {
   getRuleset,
   inducements,
   skillName,
+  sortSkillIds,
   stars,
 } from "@/domain/catalog";
 import {
@@ -46,7 +47,7 @@ export function printStyles(orientation: PrintOrientation) {
     .cost { width: 16mm; text-align: right; }
     tr { break-inside: avoid; }
     thead { display: table-header-group; }
-    .added { text-decoration: underline; text-underline-offset: 2px; }
+    .added { text-decoration: underline dashed; text-underline-offset: 2px; }
     .captain { text-decoration: underline dotted; text-underline-offset: 2px; }
     .legend, .notes { margin-top: 3mm; font-size: 9pt; white-space: pre-wrap; overflow-wrap: anywhere; }
     .reference { break-before: page; }
@@ -70,8 +71,14 @@ function PrintedSkills({
   t: Translate;
 }) {
   const entries = [
-    ...builtIn.map((id) => ({ name: skillName(id), className: undefined })),
-    ...added.map((id) => ({ name: skillName(id), className: "added" })),
+    ...sortSkillIds(builtIn).map((id) => ({
+      name: skillName(id),
+      className: undefined,
+    })),
+    ...sortSkillIds(added).map((id) => ({
+      name: skillName(id),
+      className: "added",
+    })),
     ...(captain ? [{ name: t("proCaptain"), className: "captain" }] : []),
   ];
   return entries.map((entry, index) => (

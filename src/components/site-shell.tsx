@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { BrandLogo } from "./brand";
 import { toast } from "@/components/ui/toast";
 import { useDraftSignIn } from "./draft-sign-in-provider";
+import { version } from "../../package.json";
 export function LoginButton({ className }: { className?: string }) {
   const t = useTranslations(),
     { signIn } = useAuthActions(),
@@ -123,6 +124,12 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
               {t("rulesSources")}
               <ArrowUpRight className="size-3" />
             </Link>
+            <p
+              className="mt-3 font-mono tabular-nums"
+              aria-label={t("appVersion", { version })}
+            >
+              v{version}
+            </p>
           </div>
         </div>
       </footer>

@@ -7,7 +7,7 @@ export default function Page(props: {
   searchParams: Promise<{ roster?: string; draft?: string; new?: string }>;
 }) {
   return (
-    <Suspense fallback={<WorkspaceLoading />}>
+    <Suspense fallback={<WorkspaceLoading variant="catalog" />}>
       <RosterPage {...props} />
     </Suspense>
   );

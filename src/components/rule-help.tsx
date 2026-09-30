@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogClose,
-} from "./ui/dialog";
+} from "./dialog";
 import { Button } from "./ui/button";
 import { CircleHelp } from "lucide-react";
 

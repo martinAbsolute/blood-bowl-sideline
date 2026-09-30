@@ -58,7 +58,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
+} from "./dialog";
 import {
   Table,
   TableBody,
@@ -973,16 +973,16 @@ export function TeamEditor({
           </CollapsibleSection>
           <section className="rounded-lg border bg-card p-3">
             {!readOnly && (
-              <div className="mb-4 grid max-w-sm gap-1">
+              <div className="mb-4 max-w-sm">
                 <label
                   htmlFor={`coach-${team.uuid}`}
-                  className="text-xs font-medium text-muted-foreground"
+                  className="block text-xs font-medium text-muted-foreground"
                 >
                   {t("coachName")}
                 </label>
                 <Input
                   id={`coach-${team.uuid}`}
-                  className="block h-9 px-2.5 text-sm font-normal text-foreground md:text-sm"
+                  className="mt-1 block h-9 px-2.5 text-sm font-normal text-foreground md:text-sm"
                   value={team.coach}
                   maxLength={80}
                   onChange={(e) => change({ ...team, coach: e.target.value })}
@@ -1028,7 +1028,7 @@ export function TeamEditor({
                   </EditorSelect>
                 </label>
                 <label className="text-xs font-medium text-muted-foreground">
-                  {t("teamType")}
+                  {t("roster")}
                   <EditorSelect
                     value={team.rosterId}
                     onChange={(e) => {
@@ -1423,20 +1423,23 @@ export function TeamEditor({
           initialFocus={playerTitle}
         >
           <DialogHeader className="pr-8 text-left">
+            <p className="eyebrow">{t("managePlayer")}</p>
             <DialogTitle
               ref={playerTitle}
               tabIndex={-1}
-              className="display-font text-2xl outline-none"
+              className="display-font break-words text-2xl leading-tight outline-none"
             >
-              {t("managePlayer")}
+              {currentStar?.name ||
+                currentPlayer?.name.trim() ||
+                (position && positionLabel(position.position))}
             </DialogTitle>
-            <DialogDescription className="flex items-center gap-2">
+            <DialogDescription className="flex items-center gap-2 font-medium text-foreground">
               {position && <PlayerIcon positionId={position.id} />}
               {position && positionLabel(position.position)}
               {currentStar && (
                 <>
                   <StarPlayerIcon starId={currentStar.id} />
-                  {currentStar.name}
+                  {t("starPlayers")}
                 </>
               )}
             </DialogDescription>
@@ -1444,7 +1447,7 @@ export function TeamEditor({
           {currentPlayer && position && (
             <>
               <ScrollArea className="h-[min(65dvh,40rem)] min-h-0">
-                <div className="space-y-5 pr-3">
+                <div className="space-y-5 py-1 pl-1 pr-3">
                   <label className="block text-xs font-medium">
                     {t("playerName")}
                     <Input
@@ -1459,10 +1462,7 @@ export function TeamEditor({
                   </label>
                   <div>
                     <p className="eyebrow mb-2">{t("builtInSkills")}</p>
-                    <SkillList
-                      ids={position.skills}
-                      captain={team.captainId === currentPlayer.id}
-                    />
+                    <SkillList ids={position.skills} />
                   </div>
                   {readOnly ? (
                     <div>
@@ -1486,6 +1486,12 @@ export function TeamEditor({
                       )}
                       onChange={(skills) => editPlayer({ skills })}
                     />
+                  )}
+                  {team.captainId === currentPlayer.id && (
+                    <div>
+                      <p className="eyebrow mb-2">{t("teamCaptain")}</p>
+                      <SkillList ids={[]} captain />
+                    </div>
                   )}
                 </div>
               </ScrollArea>
@@ -1519,7 +1525,7 @@ export function TeamEditor({
           {currentStar && (
             <>
               <ScrollArea className="h-[min(50dvh,24rem)] min-h-0">
-                <div className="space-y-5 pr-3">
+                <div className="space-y-5 py-1 pl-1 pr-3">
                   <p className="font-mono text-sm">
                     {gold(currentStar.cost)} GP
                   </p>

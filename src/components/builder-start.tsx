@@ -31,7 +31,7 @@ export function BuilderStart(props: {
       {...props}
     />
   ) : (
-    <WorkspaceLoading />
+    <WorkspaceLoading variant="editor" />
   );
 }
 function LocalBuilder({
@@ -104,6 +104,7 @@ function LocalBuilder({
 function CloudDraft({ uuid }: { uuid: string }) {
   const team = useQuery(api.teams.getByUuid, { uuid });
   const t = useTranslations();
+  if (team === undefined) return <WorkspaceLoading variant="editor" />;
   return team ? (
     <SharedTeam initial={team} />
   ) : (

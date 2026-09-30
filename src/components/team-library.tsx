@@ -35,6 +35,7 @@ import { toast } from "@/components/ui/toast";
 import { RosterIcon } from "./player-icon";
 import { useDraftSync } from "./draft-sync-provider";
 import { libraryMatches } from "@/lib/team-library";
+import { LibraryCardsLoading } from "./loading-layouts";
 
 const selectClass = "h-10 rounded-lg pl-3";
 export function TeamLibrary() {
@@ -181,7 +182,7 @@ export function TeamLibrary() {
         )}
       </div>
       <section
-        className="min-h-[320px]"
+        className="min-h-[400px]"
         aria-label={t("myTeams")}
         aria-busy={
           search !== deferredSearch ||
@@ -189,16 +190,12 @@ export function TeamLibrary() {
         }
       >
         {cards.length === 0 &&
-        (isLoading || (isAuthenticated && status === "LoadingFirstPage")) ? (
-          <div
-            role="status"
-            className="flex min-h-[300px] items-center justify-center rounded-xl border bg-card/50 text-sm text-muted-foreground"
-          >
-            <LoaderCircle className="mr-2 size-4 animate-spin" />
-            {t("loading")}
-          </div>
+        (!sync.ready ||
+          isLoading ||
+          (isAuthenticated && status === "LoadingFirstPage")) ? (
+          <LibraryCardsLoading label={t("loading")} />
         ) : cards.length === 0 ? (
-          <div className="rounded-xl border border-dashed bg-card/50 px-6 py-16 text-center">
+          <div className="flex min-h-[400px] flex-col items-center justify-center rounded-xl border border-dashed bg-card/50 px-6 py-16 text-center">
             <FileText className="mx-auto mb-4 size-7 text-muted-foreground" />
             <h2 className="text-lg font-semibold">
               {t(

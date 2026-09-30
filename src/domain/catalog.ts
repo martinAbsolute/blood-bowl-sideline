@@ -76,6 +76,10 @@ export function skillName(id: string) {
     ? name.replace(/\(x\+?\)/i, `(${parameter})`)
     : `${name} (${parameter})`;
 }
+/** A fixed English alphabetical order, independent of selection or UI language. */
+export function sortSkillIds(ids: string[]) {
+  return ids.toSorted((a, b) => skillName(a).localeCompare(skillName(b), "en"));
+}
 export function newTeam(uuid: string, rosterId = "human"): Team {
   return {
     schemaVersion: 1,

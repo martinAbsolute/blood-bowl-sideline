@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "gt-next";
-import { getSkill, skillName } from "@/domain/catalog";
+import { getSkill, skillName, sortSkillIds } from "@/domain/catalog";
 import { RuleHelp } from "./rule-help";
 
 export function SkillBox({
@@ -31,11 +31,6 @@ export function SkillBox({
       skillPreview
       className={`skill-box skill-${category}${added || captain ? " skill-added" : ""}`}
     >
-      {added && (
-        <span aria-hidden="true" className="mr-1 font-bold">
-          +
-        </span>
-      )}
       {captain ? t("proCaptain") : skillName(id)}
     </RuleHelp>
   );
@@ -55,13 +50,13 @@ export function SkillList({
   const t = useTranslations();
   return ids.length || additionalIds.length || captain ? (
     <div className="flex flex-wrap gap-1.5">
-      {ids.map((id) => (
+      {sortSkillIds(ids).map((id) => (
         <SkillBox key={id} id={id} added={added} />
       ))}
-      {captain && <SkillBox id="pro" captain />}
-      {additionalIds.map((id) => (
+      {sortSkillIds(additionalIds).map((id) => (
         <SkillBox key={`added-${id}`} id={id} added />
       ))}
+      {captain && <SkillBox id="pro" captain />}
     </div>
   ) : (
     <span className="text-xs text-muted-foreground">{t("noSkills")}</span>

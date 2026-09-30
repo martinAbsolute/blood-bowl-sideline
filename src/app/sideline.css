@@ -619,3 +619,13 @@ html {
 .skill-box.skill-added {
   border-style: dashed;
 }
+
+[data-slot="dropdown-menu-item"],
+[data-slot="dropdown-menu-checkbox-item"],
+[data-slot="dropdown-menu-radio-item"],
+[data-slot="dropdown-menu-sub-trigger"],
+[data-slot="select-item"],
+select,
+option {
+  cursor: pointer;
+}

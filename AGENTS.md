@@ -24,6 +24,7 @@ Convex agent skills for common tasks can be installed by running
 - Anonymous teams are browser-local drafts. Signing in uploads all guest drafts into one account library. Successful cloud saves clear exact local recovery copies; failed work stays account-scoped on the device. Convex writes require authenticated ownership. UUID links expose only the intended public team view, never Telegram IDs or auth records.
 - League and tournament-running features are future work. Do not add scaffolding for those features until requested.
 - Before shipping, run `pnpm check`, `pnpm test`, `pnpm build`, and deploy Convex functions. Verify roster creation, ruleset switches, draft restoration, English/Ukrainian switching, and UUID pages in a browser.
+- Every push to `main` must bump the version in `package.json`; the footer displays that release version.
 - Never commit `.env*`, research assets, bot tokens, authentication payloads, or signing keys. `.env.example` contains names and safe placeholders only.
 
 <!-- BEGIN:nextjs-agent-rules -->

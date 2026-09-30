@@ -49,7 +49,7 @@ it("prints regular, additional and captain skills distinctly and escapes coach-e
     id: randomUUID(),
     positionId: "orc-3",
     name: "<img src=x>",
-    skills: ["guard"],
+    skills: ["tackle", "guard"],
   };
   team.players = [player];
   team.captainId = player.id;
@@ -58,7 +58,14 @@ it("prints regular, additional and captain skills distinctly and escapes coach-e
   );
   expect(html).toContain("<span>Block</span>");
   expect(html).toContain('<span class="added">Guard</span>');
+  expect(html.indexOf('<span class="added">Guard</span>')).toBeLessThan(
+    html.indexOf('<span class="added">Tackle</span>'),
+  );
+  expect(player.skills).toEqual(["tackle", "guard"]);
   expect(html).toContain('<span class="captain">Pro (Captain)</span>');
+  expect(html.indexOf('<span class="added">Tackle</span>')).toBeLessThan(
+    html.indexOf('<span class="captain">Pro (Captain)</span>'),
+  );
   expect(html).not.toMatch(/<script|<img|<button|<input/);
   expect(html).toContain("&lt;script&gt;");
   expect(html).toContain(en.skillDescriptions.guard);

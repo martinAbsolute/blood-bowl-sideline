@@ -9,7 +9,7 @@ export const metadata = {
 };
 export default function Page(props: { params: Promise<{ slug: string }> }) {
   return (
-    <Suspense fallback={<WorkspaceLoading />}>
+    <Suspense fallback={<WorkspaceLoading variant="editor" />}>
       <UuidPage {...props} />
     </Suspense>
   );

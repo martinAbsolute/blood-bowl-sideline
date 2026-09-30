@@ -13,7 +13,7 @@ The app is actively in development, with no real users or backward-compatibility
 - `/teams/[uuid]` opens directly in edit mode for its owner and as a read-only public view for everyone else. Archiving hides the public link; restoring makes it available again.
 - Team names behave like document filenames: type inline, Enter to finish, Escape to restore the previous name. Long names wrap on narrow screens.
 - `/rosters/orc`, `/rosters/amazon`, and the other fixed roster names contain roster details. `/leagues/[league]` lists affiliated rosters and clickable star-player details. Special rules have full help on hover, keyboard focus and tap.
-- Quick actions offer portrait or landscape printing with a plain roster table and complete skill definitions from page two onward. Built-in skills are regular, added skills are underlined, and captain Pro has a dotted underline. JSON export is removed.
+- Quick actions offer portrait or landscape printing with a plain roster table and complete skill definitions from page two onward. Starting and additional skills are alphabetized within their groups, followed by captain Pro. Added skills have a dashed underline in print, and captain Pro has a dotted underline. JSON export is removed.
 - Duplicate creates a separate team named `Team name (Copy)`, saving to the account when signed in or as a local draft otherwise. Authenticated owners can share their saved team's link using the clipboard action.
 
 Costs and legality come from the shared catalog and validator, including on the server. UUID pages never expose owner IDs or authentication records. League progression and tournament management are outside scope.
@@ -71,7 +71,7 @@ pnpm exec convex deploy --cmd 'pnpm run build'
 
 `vercel.json` keeps this build command in source control. `CONVEX_DEPLOY_KEY` is stored as a production-only Vercel secret for `expert-grasshopper-80`; it is never committed. Preview builds remain frontend-only with their configured backend. GitHub Actions runs checks, tests and the build without deploying.
 
-To release, run the checks above and push to `main`:
+To release, bump the version in `package.json`, run the checks above, and push to `main`. The footer shows the deployed version:
 
 ```sh
 git push origin main

@@ -4,6 +4,7 @@ import { GTProvider } from "gt-next";
 import { Suspense } from "react";
 import { Providers } from "@/components/providers";
 import { SiteShell } from "@/components/site-shell";
+import { ShellLoading } from "@/components/loading-layouts";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -54,16 +55,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${display.variable}`}>
       <body className="bg-background font-sans text-foreground antialiased">
-        <Suspense
-          fallback={
-            <div
-              className="page-width flex min-h-screen items-center justify-center text-sm text-muted-foreground"
-              role="status"
-            >
-              Blood Bowl Sideline
-            </div>
-          }
-        >
+        <Suspense fallback={<ShellLoading />}>
           <GTProvider>
             <Providers>
               <SiteShell>{children}</SiteShell>
