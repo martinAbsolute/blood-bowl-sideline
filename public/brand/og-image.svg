@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#F6F4ED"/>
+  <svg x="255" y="237" width="114" height="156" viewBox="9 4 38 52"><path d="M47 51H9V9H47V51ZM19 29V32H37V29H19Z" fill="#E56D3B"/>
+<path d="M37 47C37 48.6569 38.3431 50 40 50H47V54C47 55.1046 46.1046 56 45 56H11C9.89543 56 9 55.1046 9 54V50H16C17.6569 50 19 48.6569 19 47V32H37V47ZM45 4C46.1046 4 47 4.89543 47 6V10H40C38.3431 10 37 11.3431 37 13V29H19V13C19 11.3431 17.6569 10 16 10H9V6C9 4.89543 9.89543 4 11 4H45Z" fill="#26362E"/></svg>
+  <svg x="417" y="237" width="461" height="47"
+    viewBox="14 94 461 47"><text x="10" y="140" font-family="Arial, Helvetica, sans-serif" font-weight="700"
+      font-size="62" letter-spacing="4" fill="#26362E">BLOOD BOWL</text></svg>
+  <svg x="417" y="306" width="528" height="87"
+    viewBox="14 55 528 87"><text x="10" y="140" font-family="Arial, Helvetica, sans-serif" font-weight="700"
+      font-size="116" letter-spacing="-4" fill="#26362E">SIDELINE<tspan fill="#E56D3B">.</tspan></text></svg>
+</svg>

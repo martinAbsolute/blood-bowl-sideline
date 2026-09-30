@@ -235,6 +235,8 @@ export function validateTeam(input: unknown): {
     team.favouredOf === "Hashut"
   )
     issue("affiliation");
+  if (roster.specialRules.includes("Team Captain") && !team.captainId)
+    issue("captain");
   if (team.captainId) {
     const captain = team.players.find((p) => p.id === team.captainId),
       position = roster.players.find((p) => p.id === captain?.positionId);

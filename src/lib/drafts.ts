@@ -1,4 +1,8 @@
 import { teamSchema, type Team } from "@/domain/types";
+import { z } from "zod";
+// Preserve work even while the coach has cleared the team name. Account saves
+// still use the stricter shared server validator.
+const localDraftSchema = teamSchema.extend({ name: z.string().trim().max(80) });
 const KEY = "bbsideline:drafts:v1";
 export const ACTIVE = "bbsideline:active-draft";
 export function parseDrafts(raw: string): Team[] {
@@ -6,7 +10,7 @@ export function parseDrafts(raw: string): Team[] {
     const data: unknown = JSON.parse(raw);
     return Array.isArray(data)
       ? data.flatMap((t) => {
-          const parsed = teamSchema.safeParse(t);
+          const parsed = localDraftSchema.safeParse(t);
           return parsed.success ? [parsed.data] : [];
         })
       : [];
@@ -30,13 +34,7 @@ export function storeRevision(uuid: string, revision: number) {
 }
 export function readDrafts(): Team[] {
   try {
-    const data: unknown = JSON.parse(localStorage.getItem(KEY) ?? "[]");
-    return Array.isArray(data)
-      ? data.flatMap((t) => {
-          const parsed = teamSchema.safeParse(t);
-          return parsed.success ? [parsed.data] : [];
-        })
-      : [];
+    return parseDrafts(localStorage.getItem(KEY) ?? "[]");
   } catch {
     return [];
   }

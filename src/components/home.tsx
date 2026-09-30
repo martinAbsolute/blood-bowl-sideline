@@ -48,7 +48,7 @@ export function Home() {
               size="lg"
               className="h-12 rounded-full px-6"
             >
-              <Link href="/rosters">{t("browseRosters")}</Link>
+              <Link href="/teams">{t("browseRosters")}</Link>
             </Button>
           </div>
           <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">

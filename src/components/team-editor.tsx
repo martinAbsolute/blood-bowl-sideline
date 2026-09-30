@@ -1,5 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "gt-next";
 import { useConvexAuth, useMutation } from "convex/react";
@@ -7,10 +13,9 @@ import { api } from "../../convex/_generated/api";
 import {
   getRoster,
   getRuleset,
+  rosters,
   inducements,
   rulesets,
-  skills,
-  skillName,
   stars,
   starPairs,
   starChoices,
@@ -18,7 +23,6 @@ import {
 import {
   inducementInfo,
   playerSkillCost,
-  skillAccess,
   starEligible,
   summarize,
   validateTeam,
@@ -49,18 +53,29 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { BorderBeam } from "./magic-ui/border-beam";
+import { PlayerRecruitment } from "./player-recruitment";
+import { SkillList, TableSkills } from "./skill-box";
+import { RuleInfo } from "./rule-help";
+import { Checkbox } from "./ui/checkbox";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "./ui/accordion";
+import { ScrollArea } from "./ui/scroll-area";
+import { PlayerSkillPicker } from "./player-skill-picker";
+import { positionLabel } from "./position-name";
+import { QuantityStepper } from "./quantity-stepper";
+import { hasTeamProgress, resetTeamRoster } from "@/lib/builder";
 import {
   ArrowUpRight,
   Check,
   ChevronRight,
   Copy,
   Download,
-  Minus,
   Plus,
   Printer,
-  Save,
   ShieldCheck,
   Star,
   Trash2,
@@ -70,9 +85,39 @@ import {
 import { LoginButton } from "./site-shell";
 import { toast } from "sonner";
 import Link from "next/link";
+import { PlayerIcon, StarPlayerIcon } from "./player-icon";
+import { useDraftSignIn } from "./draft-sign-in-provider";
+import {
+  finishDraftSignIn,
+  pendingDraftSave,
+  prepareDraftSignIn,
+} from "@/lib/draft-sign-in";
 const gold = (n: number) => `${(n / 1000).toLocaleString("en")}k`;
 const selectClass =
-  "h-10 w-full rounded-md border border-input bg-card px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring";
+  "h-9 w-full rounded-md border border-input bg-card px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring";
+function CollapsibleSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <Accordion
+      type="single"
+      collapsible
+      defaultValue="content"
+      className="recruitment-menu overflow-hidden rounded-lg border bg-card"
+    >
+      <AccordionItem value="content">
+        <AccordionTrigger className="items-center rounded-none bg-secondary/50 px-4 py-3.5 text-base font-semibold hover:no-underline [&>svg]:text-primary">
+          {title}
+        </AccordionTrigger>
+        <AccordionContent className="border-t p-0">{children}</AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  );
+}
 function Counter({
   label,
   value,
@@ -80,6 +125,7 @@ function Counter({
   onChange,
   disabled = false,
   cost,
+  description,
 }: {
   label: string;
   value: number;
@@ -87,39 +133,34 @@ function Counter({
   onChange: (v: number) => void;
   disabled?: boolean;
   cost?: number;
+  description?: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-border/60 py-4 last:border-0">
-      <div>
-        <p className="text-sm font-medium">{label}</p>
+    <div className="relative flex flex-col justify-between gap-3 rounded-md border bg-background/40 p-3">
+      {description && (
+        <RuleInfo
+          title={label}
+          description={description}
+          className="absolute right-2 top-2"
+        />
+      )}
+      <div className="pr-7">
+        <p className="text-sm font-semibold leading-snug">{label}</p>
         {cost !== undefined && (
           <p className="mt-1 font-mono text-xs text-muted-foreground">
             {gold(cost)} GP
           </p>
         )}
       </div>
-      <div className="flex items-center gap-2">
-        <Button
-          size="icon"
-          variant="outline"
-          className="size-8"
-          disabled={disabled || value === 0}
-          aria-label={`− ${label}`}
-          onClick={() => onChange(value - 1)}
-        >
-          <Minus className="size-3" />
-        </Button>
-        <span className="w-6 text-center font-mono text-sm">{value}</span>
-        <Button
-          size="icon"
-          variant="outline"
-          className="size-8"
-          disabled={disabled || value >= max}
-          aria-label={`+ ${label}`}
-          onClick={() => onChange(value + 1)}
-        >
-          <Plus className="size-3" />
-        </Button>
+      <div className="border-t pt-3">
+        <QuantityStepper
+          label={label}
+          value={value}
+          max={max}
+          disabled={disabled}
+          onDecrease={() => onChange(value - 1)}
+          onIncrease={() => onChange(value + 1)}
+        />
       </div>
     </div>
   );
@@ -135,23 +176,40 @@ export function TeamEditor({
 }) {
   const t = useTranslations(),
     router = useRouter(),
-    { isAuthenticated } = useConvexAuth(),
+    { isAuthenticated, isLoading } = useConvexAuth(),
+    draftSignIn = useDraftSignIn(),
     save = useMutation(api.teams.save);
   const [team, setTeam] = useState(initial),
     [revision, setRevision] = useState(
       () => initialRevision || readRevision(initial.uuid),
     ),
     [saving, setSaving] = useState(false),
-    [dirty, setDirty] = useState(false);
-  const [dialog, setDialog] = useState<"players" | "stars" | null>(null),
+    [dirty, setDirty] = useState(
+      () => initialRevision === 0 && readRevision(initial.uuid) > 0,
+    );
+  const [dialog, setDialog] = useState<"stars" | null>(null),
     [selected, setSelected] = useState<string | null>(null),
     [search, setSearch] = useState("");
+  const [pendingRoster, setPendingRoster] = useState<string | null>(null);
+  const [syncError, setSyncError] = useState<{
+    team: Team;
+    conflict: boolean;
+  } | null>(null);
+  const playerTitle = useRef<HTMLHeadingElement>(null);
+  const resumedSave = useRef(false);
+  const returnedFromSignIn = useRef(pendingDraftSave(initial.uuid) !== null);
+  const latestTeam = useRef(team);
+  const saveInFlight = useRef(false);
   const roster = getRoster(team.rosterId)!,
     rules = getRuleset(team.rulesetId),
     totals = summarize(team),
     validation = validateTeam(team);
   const currentPlayer = team.players.find((p) => p.id === selected),
     position = roster.players.find((p) => p.id === currentPlayer?.positionId);
+  const currentStar = team.stars.includes(selected ?? "")
+    ? stars.find((star) => star.id === selected)
+    : undefined;
+  const requiresCaptain = roster.specialRules.includes("Team Captain");
   useEffect(() => {
     if (!readOnly) {
       try {
@@ -161,9 +219,35 @@ export function TeamEditor({
       }
     }
   }, [team, readOnly, t]);
+  useEffect(() => {
+    if (readOnly || isAuthenticated) return;
+    return draftSignIn.register(() => prepareDraftSignIn(team, revision));
+  }, [draftSignIn, team, revision, readOnly, isAuthenticated]);
   function change(next: Team) {
+    latestTeam.current = next;
     setTeam(next);
     setDirty(true);
+  }
+  function switchRoster(rosterId: string) {
+    const next = resetTeamRoster(
+      team,
+      rosterId,
+      revision > 0 ? crypto.randomUUID() : team.uuid,
+    );
+    // A saved team keeps its identity; switching starts a separate local draft.
+    if (revision > 0) {
+      try {
+        storeDraft(next);
+      } catch {
+        toast.error(t("storageError"));
+        return;
+      }
+      setRevision(0);
+      router.replace(`/builder?draft=${next.uuid}`, { scroll: false });
+    }
+    change(next);
+    setSelected(null);
+    setPendingRoster(null);
   }
   function staff(key: keyof Team["staff"], value: number) {
     change({ ...team, staff: { ...team.staff, [key]: value } });
@@ -176,24 +260,70 @@ export function TeamEditor({
       ),
     });
   }
-  async function saveTeam() {
-    setSaving(true);
-    try {
-      const result = await save({ team, expectedRevision: revision });
-      setRevision(result.revision);
-      storeRevision(team.uuid, result.revision);
-      setDirty(false);
-      toast.success(t("saved"));
-    } catch (error) {
-      toast.error(
-        error instanceof Error && error.message.includes("CONFLICT")
-          ? t("conflict")
-          : t("saveFailed"),
-      );
-    } finally {
-      setSaving(false);
+  const saveTeam = useCallback(
+    async (
+      expectedRevision = pendingDraftSave(team.uuid)?.revision ?? revision,
+    ) => {
+      if (saveInFlight.current) return;
+      if (!team.name.trim()) {
+        toast.error(t("teamNameRequired"));
+        return;
+      }
+      saveInFlight.current = true;
+      setSaving(true);
+      setSyncError(null);
+      const pending = pendingDraftSave(team.uuid);
+      try {
+        const result = await save({ team, expectedRevision });
+        setRevision(result.revision);
+        storeRevision(team.uuid, result.revision);
+        finishDraftSignIn(team.uuid);
+        setDirty(latestTeam.current !== team);
+        if (pending) toast.success(t("saved"));
+      } catch (error) {
+        const conflict =
+          error instanceof Error && error.message.includes("CONFLICT");
+        setSyncError({ team, conflict });
+        toast.error(conflict ? t("conflict") : t("saveFailed"));
+      } finally {
+        saveInFlight.current = false;
+        setSaving(false);
+      }
+    },
+    [revision, save, team, t],
+  );
+  useEffect(() => {
+    if (
+      !readOnly &&
+      returnedFromSignIn.current &&
+      !isLoading &&
+      !isAuthenticated
+    ) {
+      returnedFromSignIn.current = false;
+      toast.error(t("loginFailed"));
     }
-  }
+    if (readOnly || !isAuthenticated || resumedSave.current) return;
+    const pending = pendingDraftSave(team.uuid);
+    if (!pending) return;
+    resumedSave.current = true;
+    // Resume the external save after React finishes committing authentication.
+    queueMicrotask(() => void saveTeam(pending.revision));
+  }, [readOnly, isAuthenticated, isLoading, team.uuid, saveTeam, t]);
+  useEffect(() => {
+    if (
+      readOnly ||
+      !isAuthenticated ||
+      saving ||
+      !dirty ||
+      !team.name.trim() ||
+      syncError?.conflict ||
+      syncError?.team === team
+    )
+      return;
+    // Coalesce rapid edits and serialize requests using the returned revision.
+    const timer = window.setTimeout(() => void saveTeam(), 400);
+    return () => window.clearTimeout(timer);
+  }, [readOnly, isAuthenticated, saving, dirty, team, syncError, saveTeam]);
   async function share() {
     try {
       await navigator.clipboard.writeText(
@@ -241,16 +371,16 @@ export function TeamEditor({
     (i) => inducementInfo(team, i).allowed || (team.inducements[i.id] ?? 0) > 0,
   );
   return (
-    <div className="page-width py-8 md:py-12">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+    <div className="page-width team-builder py-5">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="eyebrow">
-            {readOnly ? t("sharedTeam") : t("newRoster")} / {roster.name}
+            {readOnly ? t("sharedTeam") : t("teamBuilder")} / {roster.name}
           </p>
-          <h1 className="display-font mt-2 text-4xl leading-tight md:text-5xl">
+          <h1 className="display-font mt-1 text-2xl leading-tight">
             {team.name || t("untitled")}
           </h1>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-2 flex flex-wrap gap-2">
             <Badge variant="outline">{rules.name}</Badge>
             <Badge variant="secondary">
               {totals.playerCount}/16 {t("players")}
@@ -281,257 +411,233 @@ export function TeamEditor({
           )}
         </div>
       </div>
-      {!readOnly && !isAuthenticated && (
-        <div className="no-print mb-6 flex flex-col justify-between gap-4 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 sm:flex-row sm:items-center">
-          <div>
-            <p className="text-sm font-semibold text-amber-950">
-              {t("guestTitle")}
-            </p>
-            <p className="mt-1 max-w-2xl text-xs leading-relaxed text-amber-900/80">
-              {t("guestText")}
-            </p>
-          </div>
-          <LoginButton className="shrink-0 border-amber-300 bg-transparent text-xs" />
-        </div>
-      )}
       <div className="budget-grid">
-        <div className="space-y-6">
-          {!readOnly && (
-            <section className="no-print rounded-xl border bg-card p-5">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="text-xs font-medium">
-                  {t("teamName")}
-                  <Input
-                    className="mt-2"
-                    value={team.name}
-                    maxLength={80}
-                    onChange={(e) => change({ ...team, name: e.target.value })}
-                  />
-                </label>
-                <label className="text-xs font-medium">
-                  {t("coachName")}
-                  <Input
-                    className="mt-2"
-                    value={team.coach}
-                    maxLength={80}
-                    onChange={(e) => change({ ...team, coach: e.target.value })}
-                  />
-                </label>
-                <label className="text-xs font-medium">
-                  {t("ruleset")}
-                  <select
-                    className={`${selectClass} mt-2`}
-                    value={team.rulesetId}
-                    onChange={(e) =>
-                      change({
-                        ...team,
-                        rulesetId: e.target.value as Team["rulesetId"],
-                      })
-                    }
-                  >
-                    {rulesets.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <div className="flex items-end">
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/rosters">
-                      {t("chooseRoster")}
-                      <ArrowUpRight className="size-4" />
-                    </Link>
-                  </Button>
-                </div>
-                {["chaos-chosen", "chaos-renegade"].includes(roster.id) && (
-                  <label className="text-xs font-medium">
-                    {t("favouredOf")}
-                    <select
-                      className={`${selectClass} mt-2`}
-                      value={team.favouredOf}
-                      onChange={(e) =>
-                        change({
-                          ...team,
-                          favouredOf: e.target.value as Team["favouredOf"],
-                        })
-                      }
-                    >
-                      {[
-                        "Undivided",
-                        "Khorne",
-                        "Nurgle",
-                        "Slaanesh",
-                        "Tzeentch",
-                      ].map((x) => (
-                        <option key={x}>{x}</option>
-                      ))}
-                    </select>
-                  </label>
-                )}
-                {roster.id === "norse" && (
-                  <label className="text-xs font-medium">
-                    {t("norseLeague")}
-                    <select
-                      className={`${selectClass} mt-2`}
-                      value={team.norseLeague}
-                      onChange={(e) =>
-                        change({
-                          ...team,
-                          norseLeague: e.target.value as Team["norseLeague"],
-                        })
-                      }
-                    >
-                      <option>Old World Classic</option>
-                      <option>Chaos Clash</option>
-                    </select>
-                  </label>
-                )}
-              </div>
-            </section>
-          )}
-          <section className="overflow-hidden rounded-xl border bg-card">
-            <div className="flex items-center justify-between border-b px-5 py-4">
+        <div className="space-y-3">
+          {!readOnly && <PlayerRecruitment team={team} onChange={change} />}
+          <section className="overflow-hidden rounded-lg border bg-card">
+            <div className="flex items-center justify-between border-b px-3 py-2.5">
               <h2 className="section-title flex items-center gap-2">
                 <Users className="size-5 text-muted-foreground" />
                 {t("players")}
               </h2>
-              {!readOnly && (
-                <Button
-                  size="sm"
-                  disabled={totals.playerCount >= 16}
-                  onClick={() => setDialog("players")}
-                >
-                  <Plus className="size-4" />
-                  {t("addPlayer")}
-                </Button>
-              )}
+              <span className="font-mono text-xs text-muted-foreground">
+                {totals.playerCount}/16
+              </span>
             </div>
-            {team.players.length === 0 && team.stars.length === 0 ? (
-              <div className="px-6 py-16 text-center">
-                <div className="mx-auto mb-5 grid size-14 place-items-center rounded-full bg-secondary">
-                  <Users className="size-6 text-primary/60" />
-                </div>
-                <p className="display-font text-2xl">{t("emptyRoster")}</p>
-                <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
-                  {t("emptyRosterHint")}
-                </p>
-                {!readOnly && (
-                  <Button
-                    className="mt-6"
-                    variant="outline"
-                    onClick={() => setDialog("players")}
-                  >
-                    {t("addPlayer")}
-                    <Plus className="size-4" />
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-10 pl-5">#</TableHead>
-                    <TableHead className="min-w-44">{t("player")}</TableHead>
-                    {["MA", "ST", "AG", "PA", "AV"].map((x) => (
-                      <TableHead
-                        key={x}
-                        className="text-center font-mono text-xs"
-                      >
-                        {x}
-                      </TableHead>
-                    ))}
-                    <TableHead className="min-w-44">{t("skills")}</TableHead>
-                    <TableHead className="pr-5 text-right">
-                      {t("cost")}
+            <Table
+              aria-label={t("players")}
+              className="player-table min-w-[740px] table-auto md:table-fixed"
+            >
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10 pl-3">#</TableHead>
+                  <TableHead className="w-48">{t("player")}</TableHead>
+                  {["MA", "ST", "AG", "PA", "AV"].map((x) => (
+                    <TableHead
+                      key={x}
+                      className="w-8 text-center font-mono text-xs"
+                    >
+                      {x}
                     </TableHead>
+                  ))}
+                  <TableHead>{t("skills")}</TableHead>
+                  {requiresCaptain && (
+                    <TableHead className="w-16 text-center">
+                      {t("teamCaptain")}
+                    </TableHead>
+                  )}
+                  <TableHead className="w-16 pr-3 text-right">
+                    {t("cost")}
+                  </TableHead>
+                  <TableHead className="w-8">
+                    <span className="sr-only">{t("managePlayer")}</span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {!team.players.length && !team.stars.length && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={requiresCaptain ? 11 : 10}
+                      className="py-8 text-center text-xs text-muted-foreground"
+                    >
+                      {t("emptyRosterHint")}
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {team.players.map((p, index) => {
-                    const pos = roster.players.find(
-                      (x) => x.id === p.positionId,
-                    );
-                    if (!pos) return null;
-                    return (
-                      <TableRow key={p.id}>
-                        <TableCell className="pl-5 font-mono text-xs text-muted-foreground">
-                          {String(index + 1).padStart(2, "0")}
-                        </TableCell>
-                        <TableCell>
-                          {readOnly ? (
-                            <strong className="text-sm">
-                              {p.name || pos.position}
-                            </strong>
-                          ) : (
-                            <>
-                              <strong className="hidden text-sm print:block">
-                                {p.name || pos.position}
+                )}
+                {team.players.map((p, index) => {
+                  const pos = roster.players.find((x) => x.id === p.positionId);
+                  if (!pos) return null;
+                  return (
+                    <TableRow
+                      key={p.id}
+                      className="group cursor-pointer focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-[-2px]"
+                      tabIndex={0}
+                      aria-label={`${t("managePlayer")} · ${p.name || positionLabel(pos.position)}`}
+                      onClick={(event) => {
+                        if (
+                          (event.target as HTMLElement).closest(
+                            "button, a, input, [role=checkbox]",
+                          )
+                        )
+                          return;
+                        setSelected(p.id);
+                      }}
+                      onKeyDown={(event) => {
+                        if (
+                          event.target === event.currentTarget &&
+                          ["Enter", " "].includes(event.key)
+                        ) {
+                          event.preventDefault();
+                          setSelected(p.id);
+                        }
+                      }}
+                    >
+                      <TableCell className="pl-5 font-mono text-xs text-muted-foreground">
+                        {String(index + 1).padStart(2, "0")}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <PlayerIcon
+                            positionId={pos.id}
+                            variant={index}
+                            className="size-8"
+                          />
+                          <div>
+                            {readOnly ? (
+                              <strong className="text-sm">
+                                {p.name || positionLabel(pos.position)}
                               </strong>
-                              <button
-                                className="no-print flex items-center gap-2 text-left text-sm font-semibold text-primary hover:underline"
-                                onClick={() => {
-                                  setSelected(p.id);
-                                  setSearch("");
-                                }}
-                              >
-                                {p.name || pos.position}
-                                <ChevronRight className="size-3" />
-                              </button>
-                            </>
-                          )}
-                          {p.name && (
-                            <p className="mt-0.5 text-xs text-muted-foreground">
-                              {pos.position}
-                            </p>
-                          )}
+                            ) : (
+                              <>
+                                <strong className="hidden text-sm print:block">
+                                  {p.name || positionLabel(pos.position)}
+                                </strong>
+                                <button
+                                  className="no-print inline-flex items-center gap-2 text-left text-sm font-semibold text-primary hover:underline"
+                                  onClick={() => {
+                                    setSelected(p.id);
+                                    setSearch("");
+                                  }}
+                                >
+                                  {p.name || positionLabel(pos.position)}
+                                </button>
+                              </>
+                            )}
+                            {p.name && (
+                              <p className="mt-0.5 text-xs text-muted-foreground">
+                                {positionLabel(pos.position)}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </TableCell>
+                      {[pos.ma, pos.st, pos.ag, pos.pa, pos.av].map((x, i) => (
+                        <TableCell
+                          key={i}
+                          className="text-center font-mono text-xs"
+                        >
+                          {x}
                         </TableCell>
-                        {[pos.ma, pos.st, pos.ag, pos.pa, pos.av].map(
-                          (x, i) => (
-                            <TableCell
-                              key={i}
-                              className="text-center font-mono text-xs"
-                            >
-                              {x}
-                            </TableCell>
-                          ),
+                      ))}
+                      <TableCell>
+                        <TableSkills
+                          ids={pos.skills}
+                          additionalIds={p.skills}
+                          captain={team.captainId === p.id}
+                          label={t("skills")}
+                        />
+                      </TableCell>
+                      {requiresCaptain && (
+                        <TableCell className="text-center">
+                          <label
+                            className="inline-flex size-8 items-center justify-center"
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            <Checkbox
+                              checked={team.captainId === p.id}
+                              disabled={
+                                readOnly || pos.position.includes("Big Guy")
+                              }
+                              aria-label={`${t("teamCaptain")} · ${p.name || positionLabel(pos.position)}`}
+                              onCheckedChange={(checked) => {
+                                const next = { ...team };
+                                if (checked) {
+                                  next.captainId = p.id;
+                                  next.players = team.players.map((player) =>
+                                    player.id === p.id
+                                      ? {
+                                          ...player,
+                                          skills: player.skills.filter(
+                                            (id) => id !== "pro",
+                                          ),
+                                        }
+                                      : player,
+                                  );
+                                } else delete next.captainId;
+                                change(next);
+                              }}
+                            />
+                          </label>
+                        </TableCell>
+                      )}
+                      <TableCell className="pr-5 text-right font-mono text-xs">
+                        {gold(
+                          pos.cost +
+                            (rules.id === "bb2025-default"
+                              ? playerSkillCost(team, pos, p.skills)
+                              : 0),
                         )}
+                      </TableCell>
+                      <TableCell className="pr-3">
+                        <ChevronRight
+                          aria-hidden="true"
+                          className="size-4 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
+                        />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {team.stars.map((id) => {
+                  const s = stars.find((x) => x.id === id);
+                  return (
+                    s && (
+                      <TableRow
+                        key={id}
+                        className="group cursor-pointer bg-amber-50/70 focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-[-2px]"
+                        tabIndex={0}
+                        aria-label={`${t("managePlayer")} · ${s.name}`}
+                        onClick={(event) => {
+                          if (
+                            !(event.target as HTMLElement).closest("button, a")
+                          )
+                            setSelected(id);
+                        }}
+                        onKeyDown={(event) => {
+                          if (
+                            event.target === event.currentTarget &&
+                            ["Enter", " "].includes(event.key)
+                          ) {
+                            event.preventDefault();
+                            setSelected(id);
+                          }
+                        }}
+                      >
+                        <TableCell className="pl-5 text-amber-700">
+                          <Star className="size-3" />
+                        </TableCell>
                         <TableCell>
-                          <p className="text-xs leading-relaxed text-muted-foreground">
-                            {[
-                              ...pos.skills,
-                              ...(team.captainId === p.id ? ["pro"] : []),
-                            ]
-                              .map(skillName)
-                              .join(", ") || "—"}
-                          </p>
-                          {p.skills.length > 0 && (
-                            <p className="mt-1 text-xs font-semibold text-primary">
-                              + {p.skills.map(skillName).join(", ")}
-                            </p>
-                          )}
-                        </TableCell>
-                        <TableCell className="pr-5 text-right font-mono text-xs">
-                          {gold(
-                            pos.cost +
-                              (rules.id === "bb2025-default"
-                                ? playerSkillCost(team, pos, p.skills)
-                                : 0),
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                  {team.stars.map((id) => {
-                    const s = stars.find((x) => x.id === id);
-                    return (
-                      s && (
-                        <TableRow key={id} className="bg-amber-50/70">
-                          <TableCell className="pl-5 text-amber-700">
-                            <Star className="size-3" />
-                          </TableCell>
-                          <TableCell>
-                            <strong className="text-sm">{s.name}</strong>
+                          <div className="flex items-center gap-2">
+                            <StarPlayerIcon starId={s.id} className="size-10" />
+                            <strong className="hidden text-sm print:block">
+                              {s.name}
+                            </strong>
+                            <button
+                              className="no-print text-left text-sm font-semibold"
+                              onClick={() => setSelected(id)}
+                            >
+                              {s.name}
+                            </button>
                             {!readOnly && (
                               <button
                                 className="ml-2 text-muted-foreground"
@@ -552,28 +658,35 @@ export function TeamEditor({
                                 <X className="size-3" />
                               </button>
                             )}
+                          </div>
+                        </TableCell>
+                        {[s.ma, s.st, s.ag, s.pa, s.av].map((x, i) => (
+                          <TableCell
+                            key={i}
+                            className="text-center font-mono text-xs"
+                          >
+                            {x}
                           </TableCell>
-                          {[s.ma, s.st, s.ag, s.pa, s.av].map((x, i) => (
-                            <TableCell
-                              key={i}
-                              className="text-center font-mono text-xs"
-                            >
-                              {x}
-                            </TableCell>
-                          ))}
-                          <TableCell className="text-xs text-muted-foreground">
-                            {s.skills.map(skillName).join(", ")}
-                          </TableCell>
-                          <TableCell className="pr-5 text-right font-mono text-xs">
-                            {gold(s.cost)}
-                          </TableCell>
-                        </TableRow>
-                      )
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            )}
+                        ))}
+                        <TableCell className="whitespace-normal text-xs text-muted-foreground">
+                          <TableSkills ids={s.skills} label={t("skills")} />
+                        </TableCell>
+                        {requiresCaptain && <TableCell />}
+                        <TableCell className="pr-5 text-right font-mono text-xs">
+                          {gold(s.cost)}
+                        </TableCell>
+                        <TableCell className="pr-3">
+                          <ChevronRight
+                            aria-hidden="true"
+                            className="size-4 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
+                          />
+                        </TableCell>
+                      </TableRow>
+                    )
+                  );
+                })}
+              </TableBody>
+            </Table>
             {!readOnly && (
               <div className="flex items-center justify-between border-t px-5 py-3">
                 <p className="text-xs text-muted-foreground">
@@ -598,79 +711,65 @@ export function TeamEditor({
               </div>
             )}
           </section>
-          <section className="rounded-xl border bg-card p-5">
-            <Tabs defaultValue="staff">
-              <TabsList className="no-print">
-                <TabsTrigger value="staff">{t("staff")}</TabsTrigger>
-                <TabsTrigger value="inducements">
-                  {t("inducements")}
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent
-                value="staff"
-                forceMount
-                className="mt-3 data-[state=inactive]:hidden print:!block"
-              >
-                <h2 className="section-title mb-2">{t("staff")}</h2>
-                {(
+          <CollapsibleSection title={t("staff")}>
+            <div className="grid grid-cols-1 gap-3 p-3 min-[380px]:grid-cols-2 sm:grid-cols-3">
+              {(
+                [
+                  ["rerolls", roster.rerolls.cost, roster.rerolls.max],
+                  ["apothecary", 50000, roster.apothecary ? 1 : 0],
+                  ["assistantCoaches", 10000, 6],
+                  ["cheerleaders", 10000, 6],
                   [
-                    ["rerolls", roster.rerolls.cost, roster.rerolls.max],
-                    ["apothecary", 50000, roster.apothecary ? 1 : 0],
-                    ["assistantCoaches", 10000, 6],
-                    ["cheerleaders", 10000, 6],
-                    [
-                      "dedicatedFans",
-                      5000,
-                      team.rulesetId === "bb2025-default" ? 6 : 0,
-                    ],
-                  ] as const
-                ).map(([key, cost, max]) => (
-                  <Counter
-                    key={key}
-                    label={t(key)}
-                    value={team.staff[key]}
-                    cost={cost}
-                    max={max}
-                    disabled={readOnly}
-                    onChange={(v) => staff(key, v)}
-                  />
-                ))}
-              </TabsContent>
-              <TabsContent
-                value="inducements"
-                forceMount
-                className="mt-3 data-[state=inactive]:hidden print:!block"
-              >
-                <h2 className="section-title mb-2">{t("inducements")}</h2>
-                {eligibleInducements.length ? (
-                  eligibleInducements.map((i) => {
-                    const info = inducementInfo(team, i);
-                    return (
-                      <Counter
-                        key={i.id}
-                        label={i.name}
-                        value={team.inducements[i.id] ?? 0}
-                        max={info.allowed ? info.max : 0}
-                        cost={info.cost}
-                        disabled={readOnly}
-                        onChange={(v) =>
-                          change({
-                            ...team,
-                            inducements: { ...team.inducements, [i.id]: v },
-                          })
-                        }
-                      />
-                    );
-                  })
-                ) : (
-                  <p className="py-5 text-sm text-muted-foreground">
-                    {t("noInducements")}
-                  </p>
-                )}
-              </TabsContent>
-            </Tabs>
-          </section>
-          <section className="rounded-xl border bg-card p-5">
+                    "dedicatedFans",
+                    5000,
+                    team.rulesetId === "bb2025-default" ? 6 : 0,
+                  ],
+                ] as const
+              ).map(([key, cost, max]) => (
+                <Counter
+                  key={key}
+                  label={t(key)}
+                  description={t(`staffDescriptions.${key}`)}
+                  value={team.staff[key]}
+                  cost={cost}
+                  max={max}
+                  disabled={readOnly}
+                  onChange={(v) => staff(key, v)}
+                />
+              ))}
+            </div>
+          </CollapsibleSection>
+          <CollapsibleSection title={t("inducements")}>
+            {eligibleInducements.length ? (
+              <div className="grid grid-cols-1 gap-3 p-3 min-[380px]:grid-cols-2 sm:grid-cols-3">
+                {eligibleInducements.map((i) => {
+                  const info = inducementInfo(team, i);
+                  return (
+                    <Counter
+                      key={i.id}
+                      label={i.name}
+                      description={t(`inducementDescriptions.${i.id}`)}
+                      value={team.inducements[i.id] ?? 0}
+                      max={info.allowed ? info.max : 0}
+                      cost={info.cost}
+                      disabled={readOnly}
+                      onChange={(v) =>
+                        change({
+                          ...team,
+                          inducements: { ...team.inducements, [i.id]: v },
+                        })
+                      }
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="py-5 text-sm text-muted-foreground">
+                {t("noInducements")}
+              </p>
+            )}
+          </CollapsibleSection>
+          <section className="rounded-lg border bg-card p-3">
             <h2 className="section-title mb-4">{t("notes")}</h2>
             {readOnly ? (
               <p className="whitespace-pre-wrap text-sm leading-relaxed">
@@ -687,14 +786,133 @@ export function TeamEditor({
             )}
           </section>
         </div>
-        <aside className="budget-side space-y-4 md:sticky md:top-6">
-          <section className="print-break-avoid overflow-hidden rounded-xl border bg-card">
-            <div className="bg-primary p-5 text-primary-foreground">
+        <aside className="budget-side space-y-3">
+          {!readOnly && (
+            <section className="no-print rounded-lg border bg-card p-3">
+              <div className="grid gap-3">
+                <label className="text-xs font-medium">
+                  {t("ruleset")}
+                  <select
+                    className={`${selectClass} mt-1`}
+                    value={team.rulesetId}
+                    onChange={(e) =>
+                      change({
+                        ...team,
+                        rulesetId: e.target.value as Team["rulesetId"],
+                      })
+                    }
+                  >
+                    {rulesets.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="text-xs font-medium">
+                  {t("teamType")}
+                  <select
+                    className={`${selectClass} mt-1`}
+                    value={team.rosterId}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      if (id === team.rosterId) return;
+                      if (hasTeamProgress(team)) setPendingRoster(id);
+                      else switchRoster(id);
+                    }}
+                  >
+                    {rosters.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="text-xs font-medium">
+                  {t("teamName")}
+                  <Input
+                    className="mt-1 h-9"
+                    value={team.name}
+                    maxLength={80}
+                    onChange={(e) => change({ ...team, name: e.target.value })}
+                  />
+                </label>
+                <label className="text-xs font-medium">
+                  {t("coachName")}
+                  <Input
+                    className="mt-1 h-9"
+                    value={team.coach}
+                    maxLength={80}
+                    onChange={(e) => change({ ...team, coach: e.target.value })}
+                  />
+                </label>
+                {["chaos-chosen", "chaos-renegade"].includes(roster.id) && (
+                  <label className="text-xs font-medium">
+                    {t("favouredOf")}
+                    <select
+                      className={`${selectClass} mt-1`}
+                      value={team.favouredOf}
+                      onChange={(e) =>
+                        change({
+                          ...team,
+                          favouredOf: e.target.value as Team["favouredOf"],
+                        })
+                      }
+                    >
+                      {[
+                        "Undivided",
+                        "Khorne",
+                        "Nurgle",
+                        "Slaanesh",
+                        "Tzeentch",
+                      ].map((x) => (
+                        <option key={x}>{x}</option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                {roster.id === "norse" && (
+                  <label className="text-xs font-medium">
+                    {t("norseLeague")}
+                    <select
+                      className={`${selectClass} mt-1`}
+                      value={team.norseLeague}
+                      onChange={(e) =>
+                        change({
+                          ...team,
+                          norseLeague: e.target.value as Team["norseLeague"],
+                        })
+                      }
+                    >
+                      <option>Old World Classic</option>
+                      <option>Chaos Clash</option>
+                    </select>
+                  </label>
+                )}
+              </div>
+              <div className="mt-3 space-y-1 border-t pt-3 text-[11px] leading-relaxed text-muted-foreground">
+                <p>{roster.leagues.join(", ")}</p>
+                {roster.specialRules.length > 0 && (
+                  <p>{roster.specialRules.join(", ")}</p>
+                )}
+                <Link
+                  href={`/team/${roster.id}`}
+                  className="inline-flex items-center gap-1 text-primary hover:underline"
+                >
+                  {t("teamDetails")}
+                  <ArrowUpRight className="size-3" />
+                </Link>
+              </div>
+            </section>
+          )}
+
+          <section className="print-break-avoid overflow-hidden rounded-lg border bg-card">
+            <div className="bg-primary p-3 text-primary-foreground">
               <p className="text-[10px] font-semibold tracking-[.16em] opacity-60">
                 {t("summary").toUpperCase()}
               </p>
               <div className="mt-4 flex items-end justify-between">
-                <span className="display-font text-4xl">
+                <span className="display-font text-3xl">
                   {gold(totals.teamGold)}
                 </span>
                 <span className="pb-1 font-mono text-xs opacity-60">
@@ -714,7 +932,7 @@ export function TeamEditor({
                 <span className="font-mono">{gold(totals.remaining)} GP</span>
               </div>
             </div>
-            <div className="space-y-3 p-5 text-xs">
+            <div className="space-y-3 p-3 text-xs">
               {[
                 [t("players"), totals.players],
                 [t("staff"), totals.staff],
@@ -777,7 +995,7 @@ export function TeamEditor({
             </div>
           </section>
           <section
-            className={`relative overflow-hidden rounded-xl border p-5 ${validation.valid ? "border-emerald-300 bg-emerald-50" : "bg-card"}`}
+            className={`relative overflow-hidden rounded-lg border p-3 ${validation.valid ? "border-emerald-300 bg-emerald-50" : "bg-card"}`}
             aria-live="polite"
           >
             <div className="flex items-center gap-2">
@@ -793,12 +1011,6 @@ export function TeamEditor({
                 <p className="mt-3 text-xs leading-relaxed text-emerald-900">
                   {t("legalText")}
                 </p>
-                <BorderBeam
-                  size={120}
-                  duration={9}
-                  colorFrom="#84a97b"
-                  colorTo="#e9eddf"
-                />
               </>
             ) : (
               <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
@@ -819,25 +1031,35 @@ export function TeamEditor({
           {!readOnly && (
             <div className="no-print space-y-3">
               {isAuthenticated ? (
-                <Button
-                  className="w-full"
-                  disabled={
-                    saving || (!dirty && revision > 0) || !team.name.trim()
-                  }
-                  onClick={() => void saveTeam()}
+                <div
+                  role="status"
+                  className="text-center text-xs text-muted-foreground"
                 >
-                  {saving ? (
-                    <span className="animate-pulse">{t("saving")}</span>
-                  ) : (
-                    <>
-                      <Save className="size-4" />
-                      {t(revision ? "saveChanges" : "saveTeam")}
-                    </>
+                  {t(
+                    syncError
+                      ? syncError.conflict
+                        ? "conflict"
+                        : "saveFailed"
+                      : !team.name.trim()
+                        ? "teamNameRequired"
+                        : saving || dirty
+                          ? "saving"
+                          : revision > 0
+                            ? "synced"
+                            : "syncOnEdit",
                   )}
-                </Button>
-              ) : (
-                <LoginButton className="w-full" />
-              )}
+                  {syncError && !syncError.conflict && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => void saveTeam()}
+                      disabled={saving || !team.name.trim()}
+                    >
+                      {t("retry")}
+                    </Button>
+                  )}
+                </div>
+              ) : null}
               <p className="flex justify-center gap-1.5 text-[10px] text-muted-foreground">
                 <Check className="size-3" />
                 {t("draftSaved")}
@@ -857,6 +1079,17 @@ export function TeamEditor({
               )}
             </div>
           )}
+          {!readOnly && !isAuthenticated && (
+            <div className="no-print rounded-lg border bg-secondary/40 p-3">
+              <div>
+                <p className="text-sm font-semibold">{t("guestTitle")}</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  {t("guestText")}
+                </p>
+              </div>
+              <LoginButton className="mt-3 w-full bg-transparent text-xs" />
+            </div>
+          )}
           <Link
             href="/rules"
             className="no-print block text-center text-xs text-muted-foreground hover:underline"
@@ -866,265 +1099,304 @@ export function TeamEditor({
         </aside>
       </div>
       <Dialog
+        open={pendingRoster !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingRoster(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("switchTeamTitle")}</DialogTitle>
+            <DialogDescription>
+              {t("switchTeamWarning", {
+                team: getRoster(pendingRoster ?? "")?.name ?? "",
+              })}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setPendingRoster(null)}>
+              {t("cancel")}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (pendingRoster) switchRoster(pendingRoster);
+              }}
+            >
+              {t("switchTeam")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog
         open={dialog !== null}
         onOpenChange={(open) => {
           if (!open) setDialog(null);
         }}
       >
-        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+        <DialogContent className="star-recruitment flex max-h-[85dvh] flex-col overflow-hidden sm:max-w-5xl">
           <DialogHeader>
             <DialogTitle className="display-font text-3xl">
-              {t(dialog === "stars" ? "addStar" : "addPlayer")}
+              {t("addStar")}
             </DialogTitle>
-            <DialogDescription>
-              {t(dialog === "stars" ? "starHint" : "addPlayersHint")}
-            </DialogDescription>
+            <DialogDescription>{t("starHint")}</DialogDescription>
           </DialogHeader>
-          {dialog === "players" ? (
-            <div className="mt-2 grid gap-3 sm:grid-cols-2">
-              {roster.players.map((p) => {
-                const count = team.players.filter(
-                    (x) => x.positionId === p.id,
-                  ).length,
-                  max = Number(p.qty.split("-")[1]);
-                return (
-                  <button
-                    key={p.id}
-                    className="rounded-xl border bg-card p-4 text-left transition-colors hover:bg-secondary disabled:opacity-40"
-                    disabled={totals.playerCount >= 16 || count >= max}
-                    onClick={() =>
-                      change({
-                        ...team,
-                        players: [
-                          ...team.players,
-                          {
-                            id: crypto.randomUUID(),
-                            positionId: p.id,
-                            name: "",
-                            skills: [],
-                          },
-                        ],
-                      })
-                    }
-                  >
-                    <div className="flex justify-between gap-2">
-                      <strong className="text-sm">{p.position}</strong>
-                      <Plus className="size-4 text-primary" />
-                    </div>
-                    <div className="mt-3 flex gap-4 font-mono text-xs">
-                      <span>{gold(p.cost)} GP</span>
-                      <span className="text-muted-foreground">
-                        {count}/{max}
-                      </span>
-                    </div>
-                    <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                      {p.skills.map(skillName).join(", ") || "—"}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <>
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t("searchRosters")}
+          <>
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t("searchRosters")}
+              aria-label={t("starPlayers")}
+            />
+            <div
+              className="min-h-0 overflow-auto rounded-lg border bg-card"
+              data-star-player-list
+            >
+              <Table
+                className="min-w-[740px] table-auto md:table-fixed"
                 aria-label={t("starPlayers")}
-              />
-              <div className="grid gap-3 sm:grid-cols-2">
-                {allowedStars.map((s) => (
-                  <button
-                    key={s.id}
-                    className="rounded-xl border bg-card p-4 text-left hover:bg-secondary"
-                    onClick={() => hireStar(s.id)}
-                  >
-                    <strong className="text-sm">
-                      {(starPairs.find((p) => p.includes(s.id)) ?? [s.id])
-                        .map((id) => stars.find((s) => s.id === id)?.name)
-                        .join(" & ")}
-                    </strong>
-                    <p className="mt-2 font-mono text-xs">
-                      {gold(
-                        (
-                          starPairs.find((p) => p.includes(s.id)) ?? [s.id]
-                        ).reduce(
-                          (sum, id) =>
-                            sum + (stars.find((s) => s.id === id)?.cost ?? 0),
-                          0,
-                        ),
-                      )}{" "}
-                      GP
-                    </p>
-                    <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                      {s.skills.map(skillName).join(", ")}
-                    </p>
-                  </button>
-                ))}
-              </div>
-              {!allowedStars.length && (
-                <p className="py-6 text-sm text-muted-foreground">
-                  {t("noStars")}
-                </p>
-              )}
-            </>
-          )}
+              >
+                <TableHeader className="sticky top-0 z-10 bg-card">
+                  <TableRow>
+                    <TableHead className="w-48 pl-3">{t("player")}</TableHead>
+                    {["MA", "ST", "AG", "PA", "AV"].map((stat) => (
+                      <TableHead
+                        key={stat}
+                        className="w-8 text-center font-mono text-xs"
+                      >
+                        {stat}
+                      </TableHead>
+                    ))}
+                    <TableHead>{t("skills")}</TableHead>
+                    <TableHead className="w-14 text-right">
+                      {t("cost")}
+                    </TableHead>
+                    <TableHead className="sticky right-0 w-14 bg-card pr-3">
+                      <span className="sr-only">{t("addStar")}</span>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {allowedStars.flatMap((choice) => {
+                    const pair = starPairs.find((pair) =>
+                      pair.includes(choice.id),
+                    ) ?? [choice.id];
+                    const members = pair.map((id) =>
+                      stars.find((star) => star.id === id)!,
+                    );
+                    return members.map((star, index) => (
+                      <TableRow key={star.id} className="h-12">
+                        <TableCell className="pl-3">
+                          <div className="flex items-center gap-2">
+                            <StarPlayerIcon
+                              starId={star.id}
+                              className="size-8"
+                            />
+                            <strong
+                              className="truncate text-sm"
+                              title={star.name}
+                            >
+                              {star.name}
+                            </strong>
+                          </div>
+                        </TableCell>
+                        {[star.ma, star.st, star.ag, star.pa, star.av].map(
+                          (stat, i) => (
+                            <TableCell
+                              key={i}
+                              className="text-center font-mono text-xs"
+                            >
+                              {stat}
+                            </TableCell>
+                          ),
+                        )}
+                        <TableCell>
+                          <TableSkills
+                            ids={star.skills}
+                            label={t("skills") + " · " + star.name}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-xs">
+                          {star.cost / 1000}k
+                        </TableCell>
+                        {index === 0 && (
+                          <TableCell
+                            rowSpan={members.length}
+                            className="sticky right-0 bg-card pr-3 text-right"
+                          >
+                            <Button
+                              size="icon"
+                              className="size-8"
+                              aria-label={t("hireStarPlayer", {
+                                player: members
+                                  .map((star) => star.name)
+                                  .join(" & "),
+                              })}
+                              onClick={() => hireStar(choice.id)}
+                            >
+                              <Plus className="size-4" />
+                            </Button>
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    ));
+                  })}
+                  {!allowedStars.length && (
+                    <TableRow>
+                      <TableCell
+                        colSpan={9}
+                        className="py-6 text-center text-sm text-muted-foreground"
+                      >
+                        {t("noStars")}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </>
           <Button variant="outline" onClick={() => setDialog(null)}>
             {t("close")}
           </Button>
         </DialogContent>
       </Dialog>
       <Dialog
-        open={!!currentPlayer}
+        open={!!currentPlayer || !!currentStar}
         onOpenChange={(open) => {
           if (!open) setSelected(null);
         }}
       >
-        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-xl">
-          <DialogHeader>
-            <DialogTitle className="display-font text-3xl">
+        <DialogContent
+          className="player-dialog flex max-h-[90dvh] flex-col overflow-hidden p-4 sm:max-w-2xl sm:p-6"
+          onOpenAutoFocus={(event) => {
+            event.preventDefault();
+            playerTitle.current?.focus();
+          }}
+        >
+          <DialogHeader className="pr-8 text-left">
+            <DialogTitle
+              ref={playerTitle}
+              tabIndex={-1}
+              className="display-font text-2xl outline-none"
+            >
               {t("managePlayer")}
             </DialogTitle>
-            <DialogDescription>{position?.position}</DialogDescription>
+            <DialogDescription className="flex items-center gap-2">
+              {position && <PlayerIcon positionId={position.id} />}
+              {position && positionLabel(position.position)}
+              {currentStar && (
+                <>
+                  <StarPlayerIcon starId={currentStar.id} />
+                  {currentStar.name}
+                </>
+              )}
+            </DialogDescription>
           </DialogHeader>
           {currentPlayer && position && (
             <>
-              <label className="text-xs font-medium">
-                {t("playerName")}
-                <Input
-                  value={currentPlayer.name}
-                  maxLength={80}
-                  className="mt-2"
-                  onChange={(e) => editPlayer({ name: e.target.value })}
-                />
-              </label>
-              {roster.specialRules.includes("Team Captain") &&
-                !position.position.includes("Big Guy") && (
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      const next = { ...team };
-                      if (next.captainId === currentPlayer.id)
-                        delete next.captainId;
-                      else next.captainId = currentPlayer.id;
-                      next.players = next.players.map((p) =>
-                        p.id === currentPlayer.id
-                          ? {
-                              ...p,
-                              skills: p.skills.filter((s) => s !== "pro"),
-                            }
-                          : p,
-                      );
-                      change(next);
-                    }}
-                  >
-                    {t(
-                      team.captainId === currentPlayer.id
-                        ? "removeCaptain"
-                        : "makeCaptain",
-                    )}
-                  </Button>
-                )}
-              <div>
-                <p className="eyebrow mb-2">{t("builtInSkills")}</p>
-                <p className="text-sm text-muted-foreground">
-                  {[
-                    ...position.skills,
-                    ...(team.captainId === currentPlayer.id ? ["pro"] : []),
-                  ]
-                    .map(skillName)
-                    .join(", ") || "—"}
-                </p>
-              </div>
-              <div>
-                <p className="eyebrow mb-3">{t("addedSkills")}</p>
-                <div className="flex flex-wrap gap-2">
-                  {currentPlayer.skills.map((id) => (
-                    <Button
-                      key={id}
-                      variant="secondary"
-                      size="sm"
-                      onClick={() =>
-                        editPlayer({
-                          skills: currentPlayer.skills.filter((s) => s !== id),
-                        })
+              <ScrollArea className="h-[min(65dvh,40rem)] min-h-0" type="auto">
+                <div className="space-y-5 pr-3">
+                  <label className="block text-xs font-medium">
+                    {t("playerName")}
+                    <Input
+                      value={currentPlayer.name}
+                      maxLength={80}
+                      className="mt-2"
+                      disabled={readOnly}
+                      onChange={(event) =>
+                        editPlayer({ name: event.target.value })
                       }
-                    >
-                      {skillName(id)}
-                      <X className="size-3" />
-                    </Button>
-                  ))}
-                  {!currentPlayer.skills.length && (
-                    <p className="text-sm text-muted-foreground">
-                      {t("noSkills")}
-                    </p>
+                    />
+                  </label>
+                  <div>
+                    <p className="eyebrow mb-2">{t("builtInSkills")}</p>
+                    <SkillList
+                      ids={position.skills}
+                      captain={team.captainId === currentPlayer.id}
+                    />
+                  </div>
+                  {readOnly ? (
+                    <div>
+                      <p className="eyebrow mb-2">{t("addedSkills")}</p>
+                      <SkillList ids={currentPlayer.skills} added />
+                    </div>
+                  ) : (
+                    <PlayerSkillPicker
+                      key={currentPlayer.id}
+                      position={position}
+                      selected={currentPlayer.skills}
+                      captain={team.captainId === currentPlayer.id}
+                      max={Math.min(
+                        6,
+                        rules.teamOverrides?.[roster.id]?.maxSkillsPerPlayer ??
+                          (rules.id === "eurobowl-2026"
+                            ? 2
+                            : rules.maxAdvancementsPerPlayer),
+                      )}
+                      onChange={(skills) => editPlayer({ skills })}
+                    />
                   )}
                 </div>
-              </div>
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t("searchSkills")}
-                aria-label={t("searchSkills")}
-              />
-              <div className="grid max-h-64 grid-cols-2 gap-2 overflow-y-auto">
-                {skills
-                  .filter(
-                    (s) =>
-                      skillAccess(position, s.id) &&
-                      !position.skills.some((x) => x.split(":")[0] === s.id) &&
-                      !currentPlayer.skills.includes(s.id) &&
-                      !(
-                        team.captainId === currentPlayer.id && s.id === "pro"
-                      ) &&
-                      s.name.toLowerCase().includes(search.toLowerCase()),
-                  )
-                  .map((s) => (
-                    <button
-                      key={s.id}
-                      disabled={
-                        currentPlayer.skills.length >=
-                        Math.min(
-                          6,
-                          rules.teamOverrides?.[roster.id]
-                            ?.maxSkillsPerPlayer ??
-                            (rules.id === "eurobowl-2026"
-                              ? 2
-                              : rules.maxAdvancementsPerPlayer),
-                        )
-                      }
-                      className="rounded-lg border p-3 text-left text-xs hover:bg-secondary disabled:opacity-40"
-                      onClick={() =>
-                        editPlayer({ skills: [...currentPlayer.skills, s.id] })
-                      }
-                    >
-                      <strong>{s.name}</strong>
-                      <p className="mt-1 text-[10px] text-muted-foreground">
-                        {t(skillAccess(position, s.id)!)}
-                        {s.isElite ? ` · ${t("elite")}` : ""}
-                      </p>
-                    </button>
-                  ))}
-              </div>
-              <div className="flex justify-between border-t pt-4">
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => {
-                    const next = {
-                      ...team,
-                      players: team.players.filter((p) => p.id !== selected),
-                    };
-                    if (next.captainId === selected) delete next.captainId;
-                    change(next);
-                    setSelected(null);
-                  }}
-                >
-                  <Trash2 className="size-4" />
-                  {t("removePlayer")}
+              </ScrollArea>
+              <div className="flex justify-between gap-3 border-t pt-4">
+                {!readOnly && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      const next = {
+                        ...team,
+                        players: team.players.filter(
+                          (player) => player.id !== selected,
+                        ),
+                      };
+                      if (next.captainId === selected) delete next.captainId;
+                      change(next);
+                      setSelected(null);
+                    }}
+                  >
+                    <Trash2 className="size-4" />
+                    {t("removePlayer")}
+                  </Button>
+                )}
+                <Button className="ml-auto" onClick={() => setSelected(null)}>
+                  {t("close")}
                 </Button>
-                <Button onClick={() => setSelected(null)}>{t("close")}</Button>
               </div>
+            </>
+          )}
+          {currentStar && (
+            <>
+              <ScrollArea className="h-[min(50dvh,24rem)] min-h-0" type="auto">
+                <div className="space-y-5 pr-3">
+                  <p className="font-mono text-sm">
+                    {gold(currentStar.cost)} GP
+                  </p>
+                  <dl className="grid grid-cols-5 gap-2 text-center font-mono">
+                    {[
+                      ["MA", currentStar.ma],
+                      ["ST", currentStar.st],
+                      ["AG", currentStar.ag],
+                      ["PA", currentStar.pa],
+                      ["AV", currentStar.av],
+                    ].map(([label, value]) => (
+                      <div key={label}>
+                        <dt className="text-xs text-muted-foreground">
+                          {label}
+                        </dt>
+                        <dd className="mt-1 text-sm">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                  <div>
+                    <p className="eyebrow mb-2">{t("builtInSkills")}</p>
+                    <SkillList ids={currentStar.skills} />
+                  </div>
+                </div>
+              </ScrollArea>
+              <Button className="ml-auto" onClick={() => setSelected(null)}>
+                {t("close")}
+              </Button>
             </>
           )}
         </DialogContent>

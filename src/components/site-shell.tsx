@@ -7,12 +7,14 @@ import { useConvexAuth } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { ArrowUpRight, Languages, LogOut, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BrandMark } from "./brand";
+import { BrandLogo } from "./brand";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useDraftSignIn } from "./draft-sign-in-provider";
 export function LoginButton({ className }: { className?: string }) {
   const t = useTranslations(),
     { signIn } = useAuthActions(),
+    draftSignIn = useDraftSignIn(),
     [starting, setStarting] = useState(false);
   async function login() {
     if (process.env.NEXT_PUBLIC_TELEGRAM_AUTH_READY !== "true") {
@@ -21,7 +23,16 @@ export function LoginButton({ className }: { className?: string }) {
     }
     setStarting(true);
     try {
-      await signIn("telegram", { redirectTo: "/builder" });
+      let redirectTo: string;
+      try {
+        redirectTo = draftSignIn.prepare();
+      } catch {
+        toast.error(t("storageError"));
+        setStarting(false);
+        return;
+      }
+      const result = await signIn("telegram", { redirectTo });
+      if (!result.redirect) setStarting(false);
     } catch {
       toast.error(t("loginFailed"));
       setStarting(false);
@@ -50,19 +61,13 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <header className="site-header no-print">
-        <div className="page-width flex min-h-20 flex-wrap items-center justify-between gap-3 py-4">
+        <div className="page-width flex min-h-14 flex-wrap items-center justify-between gap-3 py-2">
           <Link
-            href="/"
+            href="/teams"
             className="flex items-center gap-2.5 text-primary"
             aria-label={t("app")}
           >
-            <BrandMark />
-            <span className="brand-wordmark">
-              BLOOD BOWL
-              <span>
-                SIDELINE<span className="brand-dot">.</span>
-              </span>
-            </span>
+            <BrandLogo />
           </Link>
           <nav
             aria-label={t("home")}
@@ -70,8 +75,8 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           >
             {[
               ["/builder", "teamBuilder"],
-              ["/teams", "myTeams"],
-              ["/rosters", "rosters"],
+              ["/my-teams", "myTeams"],
+              ["/teams", "teams"],
             ].map(([href, key]) => (
               <Button
                 key={href}
@@ -79,7 +84,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
                 variant="ghost"
                 size="sm"
                 className={cn(
-                  "rounded-full px-3 text-xs sm:px-4 sm:text-sm",
+                  "rounded-md px-3 text-xs sm:px-4 sm:text-sm",
                   pathname.startsWith(href) && "bg-secondary font-semibold",
                 )}
               >
@@ -116,13 +121,21 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main className="min-h-[calc(100vh-245px)]">{children}</main>
-      <footer className="no-print border-t border-border py-7">
+      <footer className="no-print border-t border-border py-4">
         <div className="page-width flex flex-col justify-between gap-5 md:flex-row">
           <div>
             <p className="text-sm font-medium text-primary">{t("community")}</p>
             <p className="mt-2 max-w-lg text-xs leading-relaxed text-muted-foreground">
               {t("fanDisclaimer")}
             </p>
+            <a
+              href="https://fumbbl.com/p/icons"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 inline-block text-xs text-muted-foreground hover:underline"
+            >
+              {t("playerArtworkCredit")}
+            </a>
           </div>
           <div className="text-xs text-muted-foreground">
             <Link
@@ -132,7 +145,6 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
               {t("rulesSources")}
               <ArrowUpRight className="size-3" />
             </Link>
-            <p className="mt-2">{t("futureLeague")}</p>
           </div>
         </div>
       </footer>

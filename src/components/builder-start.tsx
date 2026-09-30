@@ -5,6 +5,8 @@ import { useTranslations } from "gt-next";
 import { getRoster, newTeam } from "@/domain/catalog";
 import { ACTIVE, readDrafts } from "@/lib/drafts";
 import { TeamEditor } from "./team-editor";
+import Link from "next/link";
+import { Button } from "./ui/button";
 const subscribe = () => () => {};
 export function BuilderStart(props: {
   roster?: string;
@@ -51,14 +53,34 @@ function LocalBuilder({
               })()),
         )
       : undefined;
-    return (
-      existing ??
-      newTeam(crypto.randomUUID(), getRoster(roster ?? "")?.id ?? "human")
-    );
+    if (existing) return existing;
+    const selectedRoster = getRoster(roster ?? "");
+    return fresh || selectedRoster
+      ? newTeam(crypto.randomUUID(), selectedRoster?.id ?? "human")
+      : null;
   });
   const router = useRouter();
+  const t = useTranslations();
   useEffect(() => {
+    if (!initial) return;
+    // Convex Auth must consume the callback code before any URL normalization.
+    const params = new URLSearchParams(window.location.search);
+    if (
+      params.has("code") ||
+      (params.get("draft") === initial.uuid && !params.has("new"))
+    )
+      return;
     router.replace(`/builder?draft=${initial.uuid}`, { scroll: false });
-  }, [router, initial.uuid]);
-  return <TeamEditor initial={initial} />;
+  }, [router, initial]);
+  return initial ? (
+    <TeamEditor initial={initial} />
+  ) : (
+    <div className="page-width py-16 text-center">
+      <h1 className="display-font text-3xl">{t("noTeams")}</h1>
+      <p className="mt-2 text-sm text-muted-foreground">{t("noTeamsHint")}</p>
+      <Button asChild className="mt-5">
+        <Link href="/teams">{t("chooseRoster")}</Link>
+      </Button>
+    </div>
+  );
 }

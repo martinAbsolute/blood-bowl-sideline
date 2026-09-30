@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { randomUUID } from "node:crypto";
 import schema from "../convex/schema";
 import { api } from "../convex/_generated/api";
-import { newTeam } from "../src/domain/catalog";
+import { getRoster, newTeam } from "../src/domain/catalog";
 const modules = import.meta.glob("../convex/**/*.ts");
 async function setup() {
   const t = convexTest(schema, modules);
@@ -19,6 +19,48 @@ async function setup() {
   };
 }
 describe("Convex team ownership and sharing", () => {
+  it("a fresh account starts empty even when another coach has saved teams", async () => {
+    const { t, a, b } = await setup();
+    await a.mutation(api.teams.save, {
+      team: newTeam(randomUUID()),
+      expectedRevision: 0,
+    });
+    const args = {
+      archived: false,
+      paginationOpts: { numItems: 12, cursor: null },
+    };
+    expect((await b.query(api.teams.listMine, args)).page).toEqual([]);
+    await expect(t.query(api.teams.listMine, args)).rejects.toThrow(
+      "UNAUTHENTICATED",
+    );
+  });
+  it("keeps a complete captain roster in draft until a captain is selected", async () => {
+    const { a } = await setup();
+    const team = newTeam(randomUUID());
+    team.players = Array.from({ length: 11 }, () => ({
+      id: randomUUID(),
+      positionId: getRoster("human")!.players[0].id,
+      name: "",
+      skills: [],
+    }));
+    const draft = await a.mutation(api.teams.save, {
+      team,
+      expectedRevision: 0,
+    });
+    expect(draft.legal).toBe(false);
+    team.captainId = team.players[0].id;
+    const ready = await a.mutation(api.teams.save, {
+      team,
+      expectedRevision: 1,
+    });
+    expect(ready.legal).toBe(true);
+    delete team.captainId;
+    const incomplete = await a.mutation(api.teams.save, {
+      team,
+      expectedRevision: 2,
+    });
+    expect(incomplete.legal).toBe(false);
+  });
   it("requires sign-in for writes and computes draft legality on the server", async () => {
     const { t, a } = await setup(),
       team = newTeam(randomUUID());

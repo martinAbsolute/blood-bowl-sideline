@@ -68,9 +68,14 @@ export const getRoster = (id: string) => rosters.find((r) => r.id === id);
 export const getRuleset = (id: string) => rulesets.find((r) => r.id === id)!;
 export const getSkill = (id: string) =>
   skills.find((s) => s.id === id.split(":")[0]);
-export const skillName = (id: string) =>
-  (getSkill(id)?.name ?? id.split(":")[0]) +
-  (id.includes(":") ? ` (${id.split(":")[1]})` : "");
+export function skillName(id: string) {
+  const [base, parameter] = id.split(":");
+  const name = getSkill(id)?.name ?? base;
+  if (!parameter) return name;
+  return /\(x\+?\)/i.test(name)
+    ? name.replace(/\(x\+?\)/i, `(${parameter})`)
+    : `${name} (${parameter})`;
+}
 export function newTeam(uuid: string, rosterId = "human"): Team {
   return {
     schemaVersion: 1,

@@ -58,16 +58,14 @@ body {
   background: var(--paper);
 }
 .brand-wordmark {
-  display: flex;
-  flex-direction: column;
-  font-size: 9px;
+  display: inline-flex;
+  font-size: 22px;
   line-height: 1.2;
   font-weight: 800;
-  letter-spacing: 0.13em;
+  letter-spacing: -0.04em;
 }
 .brand-wordmark > span {
-  font-size: 24px;
-  letter-spacing: -0.07em;
+  font-size: inherit;
 }
 .brand-dot {
   color: #df703e;
@@ -374,4 +372,233 @@ body {
   footer {
     display: none !important;
   }
+}
+
+/* Compact reference pages and team workspace. */
+.catalog-layout {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+.catalog-index {
+  position: sticky;
+  top: 20px;
+}
+.reference-table {
+  font-size: 12px;
+}
+.reference-table th {
+  height: 34px;
+  padding: 6px 10px;
+  font-size: 10px;
+}
+.reference-table td {
+  padding: 7px 10px;
+}
+.team-builder .section-title {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 650;
+}
+.team-builder .budget-grid {
+  grid-template-columns: minmax(0, 1fr) 275px;
+  gap: 16px;
+}
+.team-builder .budget-side {
+  grid-column: 2;
+  grid-row: 1;
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+.team-builder .budget-grid > div {
+  grid-column: 1;
+  grid-row: 1;
+}
+.team-builder th {
+  height: 34px;
+  font-size: 10px;
+}
+.team-builder td {
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+/* Tailwind v4 / shadcn cursor opt-in, without changing installed primitives. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+}
+
+.skill-box {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--skill-border);
+  border-radius: 4px;
+  background: var(--skill-background);
+  color: var(--skill-foreground);
+  padding: 4px 7px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 1.4;
+  white-space: normal;
+  transition: filter 150ms;
+}
+.skill-box:hover {
+  filter: brightness(0.96);
+}
+.skill-agility {
+  --skill-background: #e4edf3;
+  --skill-border: #becfdc;
+  --skill-foreground: #2c536e;
+}
+.skill-general {
+  --skill-background: #e5eddf;
+  --skill-border: #c3d4b9;
+  --skill-foreground: #36572f;
+}
+.skill-strength {
+  --skill-background: #f3e3df;
+  --skill-border: #dfc1b9;
+  --skill-foreground: #873f32;
+}
+.skill-passing {
+  --skill-background: #f4edcf;
+  --skill-border: #ded19a;
+  --skill-foreground: #6f571e;
+}
+.skill-mutation {
+  --skill-background: #f2e2e9;
+  --skill-border: #dbbdcb;
+  --skill-foreground: #803c5c;
+}
+.skill-devious {
+  --skill-background: #ebe4f1;
+  --skill-border: #cec1dc;
+  --skill-foreground: #65477e;
+}
+.skill-trait {
+  --skill-background: #eaece5;
+  --skill-border: #ccd0c3;
+  --skill-foreground: #515b4c;
+}
+
+.recruitment-menu [data-slot="accordion-trigger"] > svg {
+  translate: 0 0;
+}
+.team-builder .player-recruitment td,
+.team-builder .player-table td,
+.star-recruitment td {
+  padding-block: 3px;
+}
+.player-recruitment .skill-box,
+.player-table .skill-box,
+.star-recruitment .skill-box {
+  min-height: 28px;
+  padding: 3px 7px;
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .player-recruitment > [data-slot="accordion-item"] > h3 {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+}
+.recruitment-menu [data-slot="accordion-content"][data-state="open"] {
+  animation: recruit-expand 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.recruitment-menu [data-slot="accordion-content"][data-state="closed"] {
+  animation: recruit-collapse 220ms ease-in-out;
+}
+@keyframes recruit-expand {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+}
+@keyframes recruit-collapse {
+  from {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+@media (pointer: coarse), (max-width: 640px) {
+  .skill-box {
+    min-height: 36px;
+    padding: 6px 8px;
+  }
+}
+
+/* Tooltips must not acquire native scrollbars or shift during entrance. */
+[data-slot="tooltip-content"] {
+  overflow: clip;
+  scrollbar-width: none;
+  animation: none;
+}
+[data-slot="tooltip-content"]::-webkit-scrollbar {
+  display: none;
+}
+.player-dialog {
+  --muted-foreground: #606e64;
+}
+@media (max-width: 1023px) {
+  .catalog-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .catalog-index {
+    position: static;
+  }
+}
+@media (max-width: 900px) {
+  .team-builder .budget-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .team-builder .budget-side {
+    display: contents;
+  }
+  .team-builder .budget-side > * {
+    margin-top: 0;
+  }
+  .team-builder .budget-side > section:first-child {
+    grid-row: 1;
+  }
+  .team-builder .budget-side > section:first-child > .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .team-builder .budget-grid > div {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
+@media print {
+  .rule-help {
+    display: inline-flex !important;
+  }
+  .catalog-layout {
+    display: block;
+  }
+  .team-builder .budget-grid,
+  .team-builder .budget-side {
+    display: block;
+    max-height: none;
+    overflow: visible;
+    position: static;
+  }
+}
+
+.skill-box.skill-added {
+  border-style: dashed;
 }

@@ -28,8 +28,18 @@ export const metadata: Metadata = {
   },
   description:
     "Build BB2025 teams for the Ukrainian Blood Bowl community. English and Ukrainian. Default, Matched Play, EuroBowl 2026 and World Cup 2027 v2.1.",
-  icons: {
-    icon: "/icon.svg",
+  openGraph: {
+    type: "website",
+    siteName: "Blood Bowl Sideline",
+    title: "Blood Bowl Sideline",
+    description:
+      "Build your next Blood Bowl team. Roster planning for the Ukrainian Blood Bowl community, in English and Ukrainian.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Blood Bowl Sideline",
+    description:
+      "Build your next Blood Bowl team. Roster planning in English and Ukrainian.",
   },
 };
 

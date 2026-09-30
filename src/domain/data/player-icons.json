@@ -1,0 +1,2395 @@
+{
+  "436254": {
+    "label": "Chosen Blocker",
+    "group": "Chaos Chosen",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/chaos-chosen/chosen-blocker-436254-v01-red-front-32x32.png",
+      "/assets/fumbbl/players/chaos-chosen/chosen-blocker-436254-v02-red-front-32x32.png",
+      "/assets/fumbbl/players/chaos-chosen/chosen-blocker-436254-v03-red-front-32x32.png",
+      "/assets/fumbbl/players/chaos-chosen/chosen-blocker-436254-v04-red-front-32x32.png",
+      "/assets/fumbbl/players/chaos-chosen/chosen-blocker-436254-v05-red-front-32x32.png",
+      "/assets/fumbbl/players/chaos-chosen/chosen-blocker-436254-v06-red-front-32x32.png"
+    ]
+  },
+  "436255": {
+    "label": "Minotaur",
+    "group": "Chaos Chosen",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/chaos-chosen/minotaur-436255-v01-red-front-40x40.png"
+    ]
+  },
+  "436257": {
+    "label": "Chaos Dwarf Blocker",
+    "group": "Chaos Dwarf",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/chaos-dwarf/chaos-dwarf-blocker-436257-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/chaos-dwarf/chaos-dwarf-blocker-436257-v02-red-front-30x30.png",
+      "/assets/fumbbl/players/chaos-dwarf/chaos-dwarf-blocker-436257-v03-red-front-30x30.png",
+      "/assets/fumbbl/players/chaos-dwarf/chaos-dwarf-blocker-436257-v04-red-front-30x30.png",
+      "/assets/fumbbl/players/chaos-dwarf/chaos-dwarf-blocker-436257-v05-red-front-30x30.png",
+      "/assets/fumbbl/players/chaos-dwarf/chaos-dwarf-blocker-436257-v06-red-front-30x30.png"
+    ]
+  },
+  "436258": {
+    "label": "Bull Centaur Blitzer",
+    "group": "Chaos Dwarf",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/chaos-dwarf/bull-centaur-blitzer-436258-v01-red-front-40x40.png",
+      "/assets/fumbbl/players/chaos-dwarf/bull-centaur-blitzer-436258-v02-red-front-40x40.png"
+    ]
+  },
+  "436259": {
+    "label": "Enslaved Minotaur",
+    "group": "Chaos Dwarf",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/chaos-dwarf/enslaved-minotaur-436259-v01-red-front-40x40.png"
+    ]
+  },
+  "436265": {
+    "label": "Blocker",
+    "group": "Dwarf",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/dwarf/blocker-436265-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/dwarf/blocker-436265-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/dwarf/blocker-436265-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/dwarf/blocker-436265-v04-red-front-28x28.png",
+      "/assets/fumbbl/players/dwarf/blocker-436265-v05-red-front-28x28.png",
+      "/assets/fumbbl/players/dwarf/blocker-436265-v06-red-front-28x28.png"
+    ]
+  },
+  "436266": {
+    "label": "Runner",
+    "group": "Dwarf",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/dwarf/runner-436266-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/dwarf/runner-436266-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/dwarf/runner-436266-v03-red-front-28x28.png"
+    ]
+  },
+  "436267": {
+    "label": "Blitzer",
+    "group": "Dwarf",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/dwarf/blitzer-436267-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/dwarf/blitzer-436267-v02-red-front-28x28.png"
+    ]
+  },
+  "436268": {
+    "label": "Troll Slayer",
+    "group": "Dwarf",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/dwarf/troll-slayer-436268-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/dwarf/troll-slayer-436268-v02-red-front-28x28.png"
+    ]
+  },
+  "436269": {
+    "label": "Deathroller",
+    "group": "Dwarf",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/dwarf/deathroller-436269-v01-red-front-38x38.png"
+    ]
+  },
+  "436275": {
+    "label": "Bomma",
+    "group": "Goblin",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/goblin/bomma-436275-v01-red-front-32x32.png",
+      "/assets/fumbbl/players/goblin/bomma-436275-v02-red-front-32x32.png"
+    ]
+  },
+  "436278": {
+    "label": "Fanatic",
+    "group": "Goblin",
+    "width": 36,
+    "height": 36,
+    "variants": [
+      "/assets/fumbbl/players/goblin/fanatic-436278-v01-red-front-36x36.png",
+      "/assets/fumbbl/players/goblin/fanatic-436278-v02-red-front-36x36.png"
+    ]
+  },
+  "436280": {
+    "label": "Troll",
+    "group": "Goblin",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/goblin/troll-436280-v01-red-front-40x40.png",
+      "/assets/fumbbl/players/goblin/troll-436280-v02-red-front-40x40.png",
+      "/assets/fumbbl/players/goblin/troll-436280-v03-red-front-40x40.png"
+    ]
+  },
+  "436281": {
+    "label": "Halfling Hopeful",
+    "group": "Halfling",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/halfling/halfling-hopeful-436281-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/halfling/halfling-hopeful-436281-v02-red-front-30x30.png",
+      "/assets/fumbbl/players/halfling/halfling-hopeful-436281-v03-red-front-30x30.png",
+      "/assets/fumbbl/players/halfling/halfling-hopeful-436281-v04-red-front-30x30.png",
+      "/assets/fumbbl/players/halfling/halfling-hopeful-436281-v05-red-front-30x30.png",
+      "/assets/fumbbl/players/halfling/halfling-hopeful-436281-v06-red-front-30x30.png",
+      "/assets/fumbbl/players/halfling/halfling-hopeful-436281-v07-red-front-30x30.png",
+      "/assets/fumbbl/players/halfling/halfling-hopeful-436281-v08-red-front-30x30.png",
+      "/assets/fumbbl/players/halfling/halfling-hopeful-436281-v09-red-front-30x30.png",
+      "/assets/fumbbl/players/halfling/halfling-hopeful-436281-v10-red-front-30x30.png",
+      "/assets/fumbbl/players/halfling/halfling-hopeful-436281-v11-red-front-30x30.png",
+      "/assets/fumbbl/players/halfling/halfling-hopeful-436281-v12-red-front-30x30.png",
+      "/assets/fumbbl/players/halfling/halfling-hopeful-436281-v13-red-front-30x30.png",
+      "/assets/fumbbl/players/halfling/halfling-hopeful-436281-v14-red-front-30x30.png",
+      "/assets/fumbbl/players/halfling/halfling-hopeful-436281-v15-red-front-30x30.png",
+      "/assets/fumbbl/players/halfling/halfling-hopeful-436281-v16-red-front-30x30.png"
+    ]
+  },
+  "436282": {
+    "label": "Treeman",
+    "group": "Halfling",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/halfling/treeman-436282-v01-red-front-40x40.png",
+      "/assets/fumbbl/players/halfling/treeman-436282-v02-red-front-40x40.png",
+      "/assets/fumbbl/players/halfling/treeman-436282-v03-red-front-40x40.png"
+    ]
+  },
+  "436284": {
+    "label": "Thrower",
+    "group": "High Elf",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/high-elf/thrower-436284-v01-red-front-32x32.png",
+      "/assets/fumbbl/players/high-elf/thrower-436284-v02-red-front-32x32.png"
+    ]
+  },
+  "436286": {
+    "label": "Blitzer",
+    "group": "High Elf",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/high-elf/blitzer-436286-v01-red-front-32x32.png",
+      "/assets/fumbbl/players/high-elf/blitzer-436286-v02-red-front-32x32.png"
+    ]
+  },
+  "436296": {
+    "label": "Skink Runner",
+    "group": "Lizardmen",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/lizardmen/skink-runner-436296-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/lizardmen/skink-runner-436296-v02-red-front-30x30.png",
+      "/assets/fumbbl/players/lizardmen/skink-runner-436296-v03-red-front-30x30.png",
+      "/assets/fumbbl/players/lizardmen/skink-runner-436296-v04-red-front-30x30.png",
+      "/assets/fumbbl/players/lizardmen/skink-runner-436296-v05-red-front-30x30.png",
+      "/assets/fumbbl/players/lizardmen/skink-runner-436296-v06-red-front-30x30.png"
+    ]
+  },
+  "436297": {
+    "label": "Saurus Blocker",
+    "group": "Lizardmen",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/lizardmen/saurus-blocker-436297-v01-red-front-32x32.png",
+      "/assets/fumbbl/players/lizardmen/saurus-blocker-436297-v02-red-front-32x32.png",
+      "/assets/fumbbl/players/lizardmen/saurus-blocker-436297-v03-red-front-32x32.png",
+      "/assets/fumbbl/players/lizardmen/saurus-blocker-436297-v04-red-front-32x32.png",
+      "/assets/fumbbl/players/lizardmen/saurus-blocker-436297-v05-red-front-32x32.png",
+      "/assets/fumbbl/players/lizardmen/saurus-blocker-436297-v06-red-front-32x32.png"
+    ]
+  },
+  "436298": {
+    "label": "Kroxigor",
+    "group": "Lizardmen",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/lizardmen/kroxigor-436298-v01-red-front-38x38.png"
+    ]
+  },
+  "436300": {
+    "label": "Ghoul Runner",
+    "group": "Necromantic Horror",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/necromantic-horror/ghoul-runner-436300-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/necromantic-horror/ghoul-runner-436300-v02-red-front-28x28.png"
+    ]
+  },
+  "436301": {
+    "label": "Wight Blitzer",
+    "group": "Necromantic Horror",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/necromantic-horror/wight-blitzer-436301-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/necromantic-horror/wight-blitzer-436301-v02-red-front-28x28.png"
+    ]
+  },
+  "436302": {
+    "label": "Flesh Golem",
+    "group": "Necromantic Horror",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/necromantic-horror/flesh-golem-436302-v01-red-front-32x32.png",
+      "/assets/fumbbl/players/necromantic-horror/flesh-golem-436302-v02-red-front-32x32.png"
+    ]
+  },
+  "436303": {
+    "label": "Werewolf",
+    "group": "Necromantic Horror",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/necromantic-horror/werewolf-436303-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/necromantic-horror/werewolf-436303-v02-red-front-28x28.png"
+    ]
+  },
+  "436310": {
+    "label": "Rotter",
+    "group": "Nurgle",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/nurgle/rotter-436310-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/nurgle/rotter-436310-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/nurgle/rotter-436310-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/nurgle/rotter-436310-v04-red-front-28x28.png",
+      "/assets/fumbbl/players/nurgle/rotter-436310-v05-red-front-28x28.png",
+      "/assets/fumbbl/players/nurgle/rotter-436310-v06-red-front-28x28.png"
+    ]
+  },
+  "436311": {
+    "label": "Pestigor",
+    "group": "Nurgle",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/nurgle/pestigor-436311-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/nurgle/pestigor-436311-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/nurgle/pestigor-436311-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/nurgle/pestigor-436311-v04-red-front-28x28.png"
+    ]
+  },
+  "436312": {
+    "label": "Bloater",
+    "group": "Nurgle",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/nurgle/bloater-436312-v01-red-front-32x32.png",
+      "/assets/fumbbl/players/nurgle/bloater-436312-v02-red-front-32x32.png",
+      "/assets/fumbbl/players/nurgle/bloater-436312-v03-red-front-32x32.png",
+      "/assets/fumbbl/players/nurgle/bloater-436312-v04-red-front-32x32.png"
+    ]
+  },
+  "436313": {
+    "label": "Rotspawn",
+    "group": "Nurgle",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/nurgle/rotspawn-436313-v01-red-front-38x38.png"
+    ]
+  },
+  "436319": {
+    "label": "Black Orc Blocker",
+    "group": "Orc",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/orc/black-orc-blocker-436319-v01-red-front-32x32.png",
+      "/assets/fumbbl/players/orc/black-orc-blocker-436319-v02-red-front-32x32.png",
+      "/assets/fumbbl/players/orc/black-orc-blocker-436319-v03-red-front-32x32.png",
+      "/assets/fumbbl/players/orc/black-orc-blocker-436319-v04-red-front-32x32.png"
+    ]
+  },
+  "436324": {
+    "label": "Gutter Runner",
+    "group": "Skaven",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/skaven/gutter-runner-436324-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/skaven/gutter-runner-436324-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/skaven/gutter-runner-436324-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/skaven/gutter-runner-436324-v04-red-front-28x28.png"
+    ]
+  },
+  "436325": {
+    "label": "Blitzer",
+    "group": "Skaven",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/skaven/blitzer-436325-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/skaven/blitzer-436325-v02-red-front-28x28.png"
+    ]
+  },
+  "436326": {
+    "label": "Rat Ogre",
+    "group": "Skaven",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/skaven/rat-ogre-436326-v01-red-front-38x38.png"
+    ]
+  },
+  "436327": {
+    "label": "Skeleton",
+    "group": "Shambling Undead",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/shambling-undead/skeleton-436327-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/shambling-undead/skeleton-436327-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/shambling-undead/skeleton-436327-v03-red-front-28x28.png"
+    ]
+  },
+  "436329": {
+    "label": "Ghoul Runner",
+    "group": "Shambling Undead",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/shambling-undead/ghoul-runner-436329-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/shambling-undead/ghoul-runner-436329-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/shambling-undead/ghoul-runner-436329-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/shambling-undead/ghoul-runner-436329-v04-red-front-28x28.png"
+    ]
+  },
+  "436330": {
+    "label": "Wight Blitzer",
+    "group": "Shambling Undead",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/shambling-undead/wight-blitzer-436330-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/shambling-undead/wight-blitzer-436330-v02-red-front-28x28.png"
+    ]
+  },
+  "436331": {
+    "label": "Mummy",
+    "group": "Shambling Undead",
+    "width": 36,
+    "height": 36,
+    "variants": [
+      "/assets/fumbbl/players/shambling-undead/mummy-436331-v01-red-front-36x36.png",
+      "/assets/fumbbl/players/shambling-undead/mummy-436331-v02-red-front-36x36.png"
+    ]
+  },
+  "436338": {
+    "label": "Treeman",
+    "group": "Wood Elf",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/wood-elf/treeman-436338-v01-red-front-40x40.png",
+      "/assets/fumbbl/players/wood-elf/treeman-436338-v02-red-front-40x40.png",
+      "/assets/fumbbl/players/wood-elf/treeman-436338-v03-red-front-40x40.png"
+    ]
+  },
+  "436343": {
+    "label": "Troll",
+    "group": "Chaos Renegade",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/chaos-renegade/troll-436343-v01-red-front-38x38.png"
+    ]
+  },
+  "436344": {
+    "label": "Ogre",
+    "group": "Chaos Renegade",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/chaos-renegade/ogre-436344-v01-red-front-38x38.png"
+    ]
+  },
+  "436345": {
+    "label": "Minotaur",
+    "group": "Chaos Renegade",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/chaos-renegade/minotaur-436345-v01-red-front-40x40.png"
+    ]
+  },
+  "436346": {
+    "label": "Lineman",
+    "group": "Slann",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/slann/lineman-436346-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/slann/lineman-436346-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/slann/lineman-436346-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/slann/lineman-436346-v04-red-front-28x28.png",
+      "/assets/fumbbl/players/slann/lineman-436346-v05-red-front-28x28.png",
+      "/assets/fumbbl/players/slann/lineman-436346-v06-red-front-28x28.png",
+      "/assets/fumbbl/players/slann/lineman-436346-v07-red-front-28x28.png"
+    ]
+  },
+  "436348": {
+    "label": "Blitzer",
+    "group": "Slann",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/slann/blitzer-436348-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/slann/blitzer-436348-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/slann/blitzer-436348-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/slann/blitzer-436348-v04-red-front-28x28.png"
+    ]
+  },
+  "436349": {
+    "label": "Kroxigor",
+    "group": "Slann",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/slann/kroxigor-436349-v01-red-front-38x38.png"
+    ]
+  },
+  "436353": {
+    "label": "Skaven Blitzer",
+    "group": "Underworld Denizens",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/underworld-denizens/skaven-blitzer-436353-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/underworld-denizens/skaven-blitzer-436353-v02-red-front-28x28.png"
+    ]
+  },
+  "436354": {
+    "label": "Underworld Troll",
+    "group": "Underworld Denizens",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/underworld-denizens/underworld-troll-436354-v01-red-front-38x38.png"
+    ]
+  },
+  "436377": {
+    "label": "Pogoer",
+    "group": "Goblin",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/goblin/pogoer-436377-v01-red-front-32x32.png",
+      "/assets/fumbbl/players/goblin/pogoer-436377-v02-red-front-32x32.png"
+    ]
+  },
+  "436379": {
+    "label": "Renegade Dark Elf Lineman",
+    "group": "Chaos Renegade",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/chaos-renegade/renegade-dark-elf-lineman-436379-v01-red-front-28x28.png"
+    ]
+  },
+  "436380": {
+    "label": "Renegade Skaven Lineman",
+    "group": "Chaos Renegade",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/chaos-renegade/renegade-skaven-lineman-436380-v01-red-front-28x28.png"
+    ]
+  },
+  "436436": {
+    "label": "Looney",
+    "group": "Goblin",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/goblin/looney-436436-v01-red-front-32x32.png",
+      "/assets/fumbbl/players/goblin/looney-436436-v02-red-front-32x32.png"
+    ]
+  },
+  "436437": {
+    "label": "Barik Farblast",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/barik-farblast-436437-v01-red-front-28x28.png"
+    ]
+  },
+  "436438": {
+    "label": "Bertha Bigfist",
+    "group": "Star Players",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/star-players/bertha-bigfist-436438-v01-red-front-38x38.png"
+    ]
+  },
+  "436439": {
+    "label": "Brick Far'th",
+    "group": "Star Players",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/star-players/brick-far-th-436439-v01-red-front-38x38.png"
+    ]
+  },
+  "436440": {
+    "label": "Grotty",
+    "group": "Star Players",
+    "width": 20,
+    "height": 20,
+    "variants": [
+      "/assets/fumbbl/players/star-players/grotty-436440-v01-red-front-20x20.png"
+    ]
+  },
+  "436441": {
+    "label": "Bomber Dribblesnot",
+    "group": "Star Players",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/star-players/bomber-dribblesnot-436441-v01-red-front-32x32.png"
+    ]
+  },
+  "436442": {
+    "label": "Boomer",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/boomer-436442-v01-red-front-28x28.png"
+    ]
+  },
+  "436443": {
+    "label": "Count Luthor Von Drakenborg",
+    "group": "Star Players",
+    "width": 34,
+    "height": 34,
+    "variants": [
+      "/assets/fumbbl/players/star-players/count-luthor-von-drakenborg-436443-v01-red-front-34x34.png"
+    ]
+  },
+  "436444": {
+    "label": "Crazy Igor",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/crazy-igor-436444-v01-red-front-28x28.png"
+    ]
+  },
+  "436445": {
+    "label": "Deeproot Strongbranch",
+    "group": "Star Players",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/star-players/deeproot-strongbranch-436445-v01-red-front-40x40.png"
+    ]
+  },
+  "436446": {
+    "label": "Dolfar Longstride",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/dolfar-longstride-436446-v01-red-front-28x28.png"
+    ]
+  },
+  "436447": {
+    "label": "Eldril Sidewinder",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/eldril-sidewinder-436447-v01-red-front-28x28.png"
+    ]
+  },
+  "436448": {
+    "label": "Fezglitch",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/fezglitch-436448-v01-red-front-28x28.png"
+    ]
+  },
+  "436449": {
+    "label": "Flint Churnblade",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/flint-churnblade-436449-v01-red-front-28x28.png"
+    ]
+  },
+  "436450": {
+    "label": "Fungus the Loon",
+    "group": "Star Players",
+    "width": 36,
+    "height": 36,
+    "variants": [
+      "/assets/fumbbl/players/star-players/fungus-the-loon-436450-v01-red-front-36x36.png"
+    ]
+  },
+  "436451": {
+    "label": "Glart Smashrip Jr.",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/glart-smashrip-jr-436451-v01-red-front-28x28.png"
+    ]
+  },
+  "436452": {
+    "label": "Grashnak Blackhoof",
+    "group": "Star Players",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/star-players/grashnak-blackhoof-436452-v01-red-front-38x38.png"
+    ]
+  },
+  "436453": {
+    "label": "Griff Oberwald",
+    "group": "Star Players",
+    "width": 34,
+    "height": 34,
+    "variants": [
+      "/assets/fumbbl/players/star-players/griff-oberwald-436453-v01-red-front-34x34.png"
+    ]
+  },
+  "436454": {
+    "label": "Grim Ironjaw",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/grim-ironjaw-436454-v01-red-front-28x28.png"
+    ]
+  },
+  "436455": {
+    "label": "Hack Enslash",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/hack-enslash-436455-v01-red-front-28x28.png"
+    ]
+  },
+  "436457": {
+    "label": "Headsplitter",
+    "group": "Star Players",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/star-players/headsplitter-436457-v01-red-front-38x38.png"
+    ]
+  },
+  "436458": {
+    "label": "Helmut Wulf",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/helmut-wulf-436458-v01-red-front-28x28.png"
+    ]
+  },
+  "436459": {
+    "label": "Hemlock",
+    "group": "Star Players",
+    "width": 20,
+    "height": 20,
+    "variants": [
+      "/assets/fumbbl/players/star-players/hemlock-436459-v01-red-front-20x20.png"
+    ]
+  },
+  "436460": {
+    "label": "Horkon Heartripper",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/horkon-heartripper-436460-v01-red-front-28x28.png"
+    ]
+  },
+  "436461": {
+    "label": "Hthark the Unstoppable",
+    "group": "Star Players",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/star-players/hthark-the-unstoppable-436461-v01-red-front-40x40.png"
+    ]
+  },
+  "436462": {
+    "label": "Hubris Rakarth",
+    "group": "Star Players",
+    "width": 28,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/star-players/hubris-rakarth-436462-v01-red-front-28x32.png"
+    ]
+  },
+  "436463": {
+    "label": "Humerus Carpal",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/humerus-carpal-436463-v01-red-front-28x28.png"
+    ]
+  },
+  "436464": {
+    "label": "Icepelt Hammerblow",
+    "group": "Star Players",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/star-players/icepelt-hammerblow-436464-v01-red-front-38x38.png"
+    ]
+  },
+  "436465": {
+    "label": "Ithaca Benoin",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/ithaca-benoin-436465-v01-red-front-28x28.png"
+    ]
+  },
+  "436466": {
+    "label": "J Earlice",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/j-earlice-436466-v01-red-front-28x28.png"
+    ]
+  },
+  "436467": {
+    "label": "Jordell Freshbreeze",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/jordell-freshbreeze-436467-v01-red-front-28x28.png"
+    ]
+  },
+  "436468": {
+    "label": "Lewdgrip Whiparm",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/lewdgrip-whiparm-436468-v01-red-front-28x28.png"
+    ]
+  },
+  "436469": {
+    "label": "Lord Borak the Despoiler",
+    "group": "Star Players",
+    "width": 36,
+    "height": 36,
+    "variants": [
+      "/assets/fumbbl/players/star-players/lord-borak-the-despoiler-436469-v01-red-front-36x36.png"
+    ]
+  },
+  "436471": {
+    "label": "Max Spleenripper",
+    "group": "Star Players",
+    "width": 34,
+    "height": 34,
+    "variants": [
+      "/assets/fumbbl/players/star-players/max-spleenripper-436471-v01-red-front-34x34.png"
+    ]
+  },
+  "436472": {
+    "label": "Mighty Zug",
+    "group": "Star Players",
+    "width": 34,
+    "height": 34,
+    "variants": [
+      "/assets/fumbbl/players/star-players/mighty-zug-436472-v01-red-front-34x34.png"
+    ]
+  },
+  "436473": {
+    "label": "Morg 'n' Thorg",
+    "group": "Star Players",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/star-players/morg-n-thorg-436473-v01-red-front-38x38.png"
+    ]
+  },
+  "436474": {
+    "label": "Nobbla Blackwart",
+    "group": "Star Players",
+    "width": 34,
+    "height": 34,
+    "variants": [
+      "/assets/fumbbl/players/star-players/nobbla-blackwart-436474-v01-red-front-34x34.png"
+    ]
+  },
+  "436475": {
+    "label": "Prince Moranion",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/prince-moranion-436475-v01-red-front-28x28.png"
+    ]
+  },
+  "436476": {
+    "label": "Puggy Baconbreath",
+    "group": "Star Players",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/star-players/puggy-baconbreath-436476-v01-red-front-30x30.png"
+    ]
+  },
+  "436478": {
+    "label": "Ramtut III",
+    "group": "Star Players",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/star-players/ramtut-iii-436478-v01-red-front-38x38.png"
+    ]
+  },
+  "436479": {
+    "label": "Rashnak Backstabber",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/rashnak-backstabber-436479-v01-red-front-28x28.png"
+    ]
+  },
+  "436480": {
+    "label": "Ripper Bolgrot",
+    "group": "Star Players",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/star-players/ripper-bolgrot-436480-v01-red-front-38x38.png"
+    ]
+  },
+  "436481": {
+    "label": "Roxanna Darknail",
+    "group": "Star Players",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/star-players/roxanna-darknail-436481-v01-red-front-32x32.png"
+    ]
+  },
+  "436482": {
+    "label": "Scrappa Sorehead",
+    "group": "Star Players",
+    "width": 34,
+    "height": 34,
+    "variants": [
+      "/assets/fumbbl/players/star-players/scrappa-sorehead-436482-v01-red-front-34x34.png"
+    ]
+  },
+  "436483": {
+    "label": "Setekh",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/setekh-436483-v01-red-front-28x28.png"
+    ]
+  },
+  "436485": {
+    "label": "Sinnedbad",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/sinnedbad-436485-v01-red-front-28x28.png"
+    ]
+  },
+  "436486": {
+    "label": "Skitter Stab-Stab",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/skitter-stab-stab-436486-v01-red-front-28x28.png"
+    ]
+  },
+  "436487": {
+    "label": "Soaren Hightower",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/soaren-hightower-436487-v01-red-front-28x28.png"
+    ]
+  },
+  "436488": {
+    "label": "Ugroth Bolgrot",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/ugroth-bolgrot-436488-v01-red-front-28x28.png"
+    ]
+  },
+  "436489": {
+    "label": "Varag Ghoulchewer",
+    "group": "Star Players",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/star-players/varag-ghoulchewer-436489-v01-red-front-32x32.png"
+    ]
+  },
+  "436490": {
+    "label": "Wilhelm 'The Wolf-Man' Chaney",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/wilhelm-the-wolf-man-chaney-436490-v01-red-front-28x28.png"
+    ]
+  },
+  "436492": {
+    "label": "Zara the Slayer",
+    "group": "Star Players",
+    "width": 34,
+    "height": 34,
+    "variants": [
+      "/assets/fumbbl/players/star-players/zara-the-slayer-436492-v01-red-front-34x34.png"
+    ]
+  },
+  "436493": {
+    "label": "Zzharg Madeye",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/zzharg-madeye-436493-v01-red-front-28x28.png"
+    ]
+  },
+  "440131": {
+    "label": "Lottabottol",
+    "group": "Star Players",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/star-players/lottabottol-440131-v01-red-front-30x30.png"
+    ]
+  },
+  "440133": {
+    "label": "Vampire",
+    "group": "Vampire",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/vampire/vampire-440133-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/vampire/vampire-440133-v02-red-front-30x30.png",
+      "/assets/fumbbl/players/vampire/vampire-440133-v03-red-front-30x30.png",
+      "/assets/fumbbl/players/vampire/vampire-440133-v04-red-front-30x30.png",
+      "/assets/fumbbl/players/vampire/vampire-440133-v05-red-front-30x30.png",
+      "/assets/fumbbl/players/vampire/vampire-440133-v06-red-front-30x30.png"
+    ]
+  },
+  "440137": {
+    "label": "Zombie",
+    "group": "Shambling Undead",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/shambling-undead/zombie-440137-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/shambling-undead/zombie-440137-v02-red-front-30x30.png",
+      "/assets/fumbbl/players/shambling-undead/zombie-440137-v03-red-front-30x30.png",
+      "/assets/fumbbl/players/shambling-undead/zombie-440137-v04-red-front-30x30.png",
+      "/assets/fumbbl/players/shambling-undead/zombie-440137-v05-red-front-30x30.png",
+      "/assets/fumbbl/players/shambling-undead/zombie-440137-v06-red-front-30x30.png",
+      "/assets/fumbbl/players/shambling-undead/zombie-440137-v07-red-front-30x30.png",
+      "/assets/fumbbl/players/shambling-undead/zombie-440137-v08-red-front-30x30.png",
+      "/assets/fumbbl/players/shambling-undead/zombie-440137-v09-red-front-30x30.png",
+      "/assets/fumbbl/players/shambling-undead/zombie-440137-v10-red-front-30x30.png",
+      "/assets/fumbbl/players/shambling-undead/zombie-440137-v11-red-front-30x30.png",
+      "/assets/fumbbl/players/shambling-undead/zombie-440137-v12-red-front-30x30.png"
+    ]
+  },
+  "440138": {
+    "label": "Zombie",
+    "group": "Necromantic Horror",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/necromantic-horror/zombie-440138-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/necromantic-horror/zombie-440138-v02-red-front-30x30.png",
+      "/assets/fumbbl/players/necromantic-horror/zombie-440138-v03-red-front-30x30.png",
+      "/assets/fumbbl/players/necromantic-horror/zombie-440138-v04-red-front-30x30.png",
+      "/assets/fumbbl/players/necromantic-horror/zombie-440138-v05-red-front-30x30.png",
+      "/assets/fumbbl/players/necromantic-horror/zombie-440138-v06-red-front-30x30.png",
+      "/assets/fumbbl/players/necromantic-horror/zombie-440138-v07-red-front-30x30.png",
+      "/assets/fumbbl/players/necromantic-horror/zombie-440138-v08-red-front-30x30.png",
+      "/assets/fumbbl/players/necromantic-horror/zombie-440138-v09-red-front-30x30.png",
+      "/assets/fumbbl/players/necromantic-horror/zombie-440138-v10-red-front-30x30.png",
+      "/assets/fumbbl/players/necromantic-horror/zombie-440138-v11-red-front-30x30.png",
+      "/assets/fumbbl/players/necromantic-horror/zombie-440138-v12-red-front-30x30.png"
+    ]
+  },
+  "440141": {
+    "label": "Quetzal Leap",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/quetzal-leap-440141-v01-red-front-28x28.png"
+    ]
+  },
+  "440142": {
+    "label": "Willow Rosebark",
+    "group": "Star Players",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/star-players/willow-rosebark-440142-v01-red-front-30x30.png"
+    ]
+  },
+  "440143": {
+    "label": "Catcher",
+    "group": "Elven Union",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/elven-union/catcher-440143-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/elven-union/catcher-440143-v02-red-front-30x30.png",
+      "/assets/fumbbl/players/elven-union/catcher-440143-v03-red-front-30x30.png",
+      "/assets/fumbbl/players/elven-union/catcher-440143-v04-red-front-30x30.png"
+    ]
+  },
+  "440145": {
+    "label": "Thrower",
+    "group": "Elven Union",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/elven-union/thrower-440145-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/elven-union/thrower-440145-v02-red-front-30x30.png"
+    ]
+  },
+  "440149": {
+    "label": "Renegade Human Lineman",
+    "group": "Chaos Renegade",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/chaos-renegade/renegade-human-lineman-440149-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/chaos-renegade/renegade-human-lineman-440149-v02-red-front-30x30.png",
+      "/assets/fumbbl/players/chaos-renegade/renegade-human-lineman-440149-v03-red-front-30x30.png",
+      "/assets/fumbbl/players/chaos-renegade/renegade-human-lineman-440149-v04-red-front-30x30.png",
+      "/assets/fumbbl/players/chaos-renegade/renegade-human-lineman-440149-v05-red-front-30x30.png",
+      "/assets/fumbbl/players/chaos-renegade/renegade-human-lineman-440149-v06-red-front-30x30.png",
+      "/assets/fumbbl/players/chaos-renegade/renegade-human-lineman-440149-v07-red-front-30x30.png",
+      "/assets/fumbbl/players/chaos-renegade/renegade-human-lineman-440149-v08-red-front-30x30.png"
+    ]
+  },
+  "440308": {
+    "label": "Blitzer",
+    "group": "Elven Union",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/elven-union/blitzer-440308-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/elven-union/blitzer-440308-v02-red-front-30x30.png"
+    ]
+  },
+  "450982": {
+    "label": "Slibli",
+    "group": "Star Players",
+    "width": 34,
+    "height": 34,
+    "variants": [
+      "/assets/fumbbl/players/star-players/slibli-450982-v01-red-front-34x34.png"
+    ]
+  },
+  "475697": {
+    "label": "Sand Skeleton",
+    "group": "Prize Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/prize-players/sand-skeleton-475697-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/prize-players/sand-skeleton-475697-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/prize-players/sand-skeleton-475697-v03-red-front-28x28.png"
+    ]
+  },
+  "528240": {
+    "label": "Hakflem Skuttlespike",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/hakflem-skuttlespike-528240-v01-red-front-28x28.png"
+    ]
+  },
+  "563513": {
+    "label": "Guffle Pusmaw",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/guffle-pusmaw-563513-v01-red-front-28x28.png"
+    ]
+  },
+  "568459": {
+    "label": "Renegade Orc Lineman",
+    "group": "Chaos Renegade",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/chaos-renegade/renegade-orc-lineman-568459-v01-red-front-32x32.png"
+    ]
+  },
+  "568462": {
+    "label": "'Ooligan",
+    "group": "Goblin",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/goblin/ooligan-568462-v01-red-front-30x30.png"
+    ]
+  },
+  "578021": {
+    "label": "Doom Diver",
+    "group": "Goblin",
+    "width": 36,
+    "height": 36,
+    "variants": [
+      "/assets/fumbbl/players/goblin/doom-diver-578021-v01-red-front-36x36.png"
+    ]
+  },
+  "581225": {
+    "label": "Catcher",
+    "group": "Slann",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/slann/catcher-581225-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/slann/catcher-581225-v02-red-front-30x30.png",
+      "/assets/fumbbl/players/slann/catcher-581225-v03-red-front-30x30.png",
+      "/assets/fumbbl/players/slann/catcher-581225-v04-red-front-30x30.png"
+    ]
+  },
+  "582789": {
+    "label": "Asperon Thorn",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/asperon-thorn-582789-v01-red-front-28x28.png"
+    ]
+  },
+  "582793": {
+    "label": "Kiroth Krakeneye",
+    "group": "Star Players",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/star-players/kiroth-krakeneye-582793-v01-red-front-30x30.png"
+    ]
+  },
+  "582794": {
+    "label": "Elijah Doom",
+    "group": "Star Players",
+    "width": 34,
+    "height": 34,
+    "variants": [
+      "/assets/fumbbl/players/star-players/elijah-doom-582794-v01-red-front-34x34.png"
+    ]
+  },
+  "582797": {
+    "label": "Gobbler Grimlich",
+    "group": "Star Players",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/star-players/gobbler-grimlich-582797-v01-red-front-40x40.png"
+    ]
+  },
+  "582799": {
+    "label": "Scyla Anfingrimm",
+    "group": "Star Players",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/star-players/scyla-anfingrimm-582799-v01-red-front-40x40.png"
+    ]
+  },
+  "582801": {
+    "label": "Withergrasp Doubledrool",
+    "group": "Star Players",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/star-players/withergrasp-doubledrool-582801-v01-red-front-30x30.png"
+    ]
+  },
+  "582803": {
+    "label": "Bilerot Vomitflesh",
+    "group": "Star Players",
+    "width": 34,
+    "height": 34,
+    "variants": [
+      "/assets/fumbbl/players/star-players/bilerot-vomitflesh-582803-v01-red-front-34x34.png"
+    ]
+  },
+  "582805": {
+    "label": "Glart Smashrip",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/glart-smashrip-582805-v01-red-front-28x28.png"
+    ]
+  },
+  "582807": {
+    "label": "Karla von Kill",
+    "group": "Star Players",
+    "width": 34,
+    "height": 34,
+    "variants": [
+      "/assets/fumbbl/players/star-players/karla-von-kill-582807-v01-red-front-34x34.png"
+    ]
+  },
+  "582809": {
+    "label": "Kreek Rustgouger",
+    "group": "Star Players",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/star-players/kreek-rustgouger-582809-v01-red-front-40x40.png"
+    ]
+  },
+  "582811": {
+    "label": "Madcap Miggz",
+    "group": "Star Players",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/star-players/madcap-miggz-582811-v01-red-front-40x40.png"
+    ]
+  },
+  "583230": {
+    "label": "Frank N Stein",
+    "group": "Star Players",
+    "width": 34,
+    "height": 34,
+    "variants": [
+      "/assets/fumbbl/players/star-players/frank-n-stein-583230-v01-red-front-34x34.png"
+    ]
+  },
+  "583280": {
+    "label": "Tolly Glocklinger",
+    "group": "Star Players",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/star-players/tolly-glocklinger-583280-v01-red-front-40x40.png"
+    ]
+  },
+  "585587": {
+    "label": "Bo Gallanté",
+    "group": "Star Players",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/star-players/bo-gallante-585587-v01-red-front-32x32.png"
+    ]
+  },
+  "585589": {
+    "label": "Bryce 'The Slice' Cambuel",
+    "group": "Star Players",
+    "width": 36,
+    "height": 36,
+    "variants": [
+      "/assets/fumbbl/players/star-players/bryce-the-slice-cambuel-585589-v01-red-front-36x36.png"
+    ]
+  },
+  "585591": {
+    "label": "Bulla Shardhorn",
+    "group": "Star Players",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/star-players/bulla-shardhorn-585591-v01-red-front-38x38.png"
+    ]
+  },
+  "585593": {
+    "label": "Gretchen Wächter 'The Blood Bowl Widow'",
+    "group": "Star Players",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/star-players/gretchen-wachter-the-blood-bowl-widow-585593-v01-red-front-32x32.png"
+    ]
+  },
+  "585595": {
+    "label": "G'Ral Blodschüker",
+    "group": "Star Players",
+    "width": 36,
+    "height": 36,
+    "variants": [
+      "/assets/fumbbl/players/star-players/g-ral-blodschuker-585595-v01-red-front-36x36.png"
+    ]
+  },
+  "585597": {
+    "label": "Ivan 'The Animal' Deathshroud",
+    "group": "Star Players",
+    "width": 36,
+    "height": 36,
+    "variants": [
+      "/assets/fumbbl/players/star-players/ivan-the-animal-deathshroud-585597-v01-red-front-36x36.png"
+    ]
+  },
+  "585599": {
+    "label": "Throttlesnot 'The Impaler'",
+    "group": "Star Players",
+    "width": 34,
+    "height": 34,
+    "variants": [
+      "/assets/fumbbl/players/star-players/throttlesnot-the-impaler-585599-v01-red-front-34x34.png"
+    ]
+  },
+  "585607": {
+    "label": "Skeleton Lineman",
+    "group": "Tomb Kings",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/tomb-kings/skeleton-lineman-585607-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/tomb-kings/skeleton-lineman-585607-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/tomb-kings/skeleton-lineman-585607-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/tomb-kings/skeleton-lineman-585607-v04-red-front-28x28.png",
+      "/assets/fumbbl/players/tomb-kings/skeleton-lineman-585607-v05-red-front-28x28.png",
+      "/assets/fumbbl/players/tomb-kings/skeleton-lineman-585607-v06-red-front-28x28.png",
+      "/assets/fumbbl/players/tomb-kings/skeleton-lineman-585607-v07-red-front-28x28.png",
+      "/assets/fumbbl/players/tomb-kings/skeleton-lineman-585607-v08-red-front-28x28.png"
+    ]
+  },
+  "585608": {
+    "label": "Anointed Thrower",
+    "group": "Tomb Kings",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/tomb-kings/anointed-thrower-585608-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/tomb-kings/anointed-thrower-585608-v02-red-front-28x28.png"
+    ]
+  },
+  "585609": {
+    "label": "Anointed Blitzer",
+    "group": "Tomb Kings",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/tomb-kings/anointed-blitzer-585609-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/tomb-kings/anointed-blitzer-585609-v02-red-front-28x28.png"
+    ]
+  },
+  "585610": {
+    "label": "Tomb Guardian",
+    "group": "Tomb Kings",
+    "width": 34,
+    "height": 34,
+    "variants": [
+      "/assets/fumbbl/players/tomb-kings/tomb-guardian-585610-v01-red-front-34x34.png",
+      "/assets/fumbbl/players/tomb-kings/tomb-guardian-585610-v02-red-front-34x34.png",
+      "/assets/fumbbl/players/tomb-kings/tomb-guardian-585610-v03-red-front-34x34.png",
+      "/assets/fumbbl/players/tomb-kings/tomb-guardian-585610-v04-red-front-34x34.png"
+    ]
+  },
+  "585611": {
+    "label": "Lineman",
+    "group": "Norse",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/norse/lineman-585611-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/norse/lineman-585611-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/norse/lineman-585611-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/norse/lineman-585611-v04-red-front-28x28.png",
+      "/assets/fumbbl/players/norse/lineman-585611-v05-red-front-28x28.png",
+      "/assets/fumbbl/players/norse/lineman-585611-v06-red-front-28x28.png",
+      "/assets/fumbbl/players/norse/lineman-585611-v07-red-front-28x28.png",
+      "/assets/fumbbl/players/norse/lineman-585611-v08-red-front-28x28.png",
+      "/assets/fumbbl/players/norse/lineman-585611-v09-red-front-28x28.png",
+      "/assets/fumbbl/players/norse/lineman-585611-v10-red-front-28x28.png"
+    ]
+  },
+  "585612": {
+    "label": "Thrower",
+    "group": "Norse",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/norse/thrower-585612-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/norse/thrower-585612-v02-red-front-28x28.png"
+    ]
+  },
+  "585613": {
+    "label": "Catcher",
+    "group": "Norse",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/norse/catcher-585613-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/norse/catcher-585613-v02-red-front-28x28.png"
+    ]
+  },
+  "585614": {
+    "label": "Berserker",
+    "group": "Norse",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/norse/berserker-585614-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/norse/berserker-585614-v02-red-front-28x28.png"
+    ]
+  },
+  "585615": {
+    "label": "Ulfwerenar",
+    "group": "Norse",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/norse/ulfwerenar-585615-v01-red-front-32x32.png",
+      "/assets/fumbbl/players/norse/ulfwerenar-585615-v02-red-front-32x32.png"
+    ]
+  },
+  "585616": {
+    "label": "Snow Troll",
+    "group": "Norse",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/norse/snow-troll-585616-v01-red-front-38x38.png"
+    ]
+  },
+  "585617": {
+    "label": "Goblin",
+    "group": "Goblin",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/goblin/goblin-585617-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/goblin/goblin-585617-v02-red-front-30x30.png",
+      "/assets/fumbbl/players/goblin/goblin-585617-v03-red-front-30x30.png",
+      "/assets/fumbbl/players/goblin/goblin-585617-v04-red-front-30x30.png",
+      "/assets/fumbbl/players/goblin/goblin-585617-v05-red-front-30x30.png",
+      "/assets/fumbbl/players/goblin/goblin-585617-v06-red-front-30x30.png",
+      "/assets/fumbbl/players/goblin/goblin-585617-v07-red-front-30x30.png",
+      "/assets/fumbbl/players/goblin/goblin-585617-v08-red-front-30x30.png",
+      "/assets/fumbbl/players/goblin/goblin-585617-v09-red-front-30x30.png",
+      "/assets/fumbbl/players/goblin/goblin-585617-v10-red-front-30x30.png",
+      "/assets/fumbbl/players/goblin/goblin-585617-v11-red-front-30x30.png",
+      "/assets/fumbbl/players/goblin/goblin-585617-v12-red-front-30x30.png"
+    ]
+  },
+  "585618": {
+    "label": "Lineman",
+    "group": "Wood Elf",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/wood-elf/lineman-585618-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/wood-elf/lineman-585618-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/wood-elf/lineman-585618-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/wood-elf/lineman-585618-v04-red-front-28x28.png",
+      "/assets/fumbbl/players/wood-elf/lineman-585618-v05-red-front-28x28.png",
+      "/assets/fumbbl/players/wood-elf/lineman-585618-v06-red-front-28x28.png",
+      "/assets/fumbbl/players/wood-elf/lineman-585618-v07-red-front-28x28.png",
+      "/assets/fumbbl/players/wood-elf/lineman-585618-v08-red-front-28x28.png",
+      "/assets/fumbbl/players/wood-elf/lineman-585618-v09-red-front-28x28.png"
+    ]
+  },
+  "585619": {
+    "label": "Catcher",
+    "group": "Wood Elf",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/wood-elf/catcher-585619-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/wood-elf/catcher-585619-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/wood-elf/catcher-585619-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/wood-elf/catcher-585619-v04-red-front-28x28.png"
+    ]
+  },
+  "585621": {
+    "label": "Wardancer",
+    "group": "Wood Elf",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/wood-elf/wardancer-585621-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/wood-elf/wardancer-585621-v02-red-front-28x28.png"
+    ]
+  },
+  "585622": {
+    "label": "Goblin",
+    "group": "Underworld Denizens",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/underworld-denizens/goblin-585622-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/underworld-denizens/goblin-585622-v02-red-front-30x30.png",
+      "/assets/fumbbl/players/underworld-denizens/goblin-585622-v03-red-front-30x30.png",
+      "/assets/fumbbl/players/underworld-denizens/goblin-585622-v04-red-front-30x30.png",
+      "/assets/fumbbl/players/underworld-denizens/goblin-585622-v05-red-front-30x30.png",
+      "/assets/fumbbl/players/underworld-denizens/goblin-585622-v06-red-front-30x30.png",
+      "/assets/fumbbl/players/underworld-denizens/goblin-585622-v07-red-front-30x30.png",
+      "/assets/fumbbl/players/underworld-denizens/goblin-585622-v08-red-front-30x30.png",
+      "/assets/fumbbl/players/underworld-denizens/goblin-585622-v09-red-front-30x30.png",
+      "/assets/fumbbl/players/underworld-denizens/goblin-585622-v10-red-front-30x30.png"
+    ]
+  },
+  "585623": {
+    "label": "Skaven Lineman",
+    "group": "Underworld Denizens",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/underworld-denizens/skaven-lineman-585623-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/underworld-denizens/skaven-lineman-585623-v02-red-front-28x28.png"
+    ]
+  },
+  "585624": {
+    "label": "Skaven Thrower",
+    "group": "Underworld Denizens",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/underworld-denizens/skaven-thrower-585624-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/underworld-denizens/skaven-thrower-585624-v02-red-front-28x28.png"
+    ]
+  },
+  "585625": {
+    "label": "Lineman",
+    "group": "Skaven",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/skaven/lineman-585625-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/skaven/lineman-585625-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/skaven/lineman-585625-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/skaven/lineman-585625-v04-red-front-28x28.png",
+      "/assets/fumbbl/players/skaven/lineman-585625-v05-red-front-28x28.png",
+      "/assets/fumbbl/players/skaven/lineman-585625-v06-red-front-28x28.png",
+      "/assets/fumbbl/players/skaven/lineman-585625-v07-red-front-28x28.png",
+      "/assets/fumbbl/players/skaven/lineman-585625-v08-red-front-28x28.png",
+      "/assets/fumbbl/players/skaven/lineman-585625-v09-red-front-28x28.png"
+    ]
+  },
+  "585626": {
+    "label": "Thrower",
+    "group": "Skaven",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/skaven/thrower-585626-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/skaven/thrower-585626-v02-red-front-28x28.png"
+    ]
+  },
+  "585629": {
+    "label": "Beastman Runner",
+    "group": "Chaos Chosen",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/chaos-chosen/beastman-runner-585629-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-chosen/beastman-runner-585629-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-chosen/beastman-runner-585629-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-chosen/beastman-runner-585629-v04-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-chosen/beastman-runner-585629-v05-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-chosen/beastman-runner-585629-v06-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-chosen/beastman-runner-585629-v07-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-chosen/beastman-runner-585629-v08-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-chosen/beastman-runner-585629-v09-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-chosen/beastman-runner-585629-v10-red-front-28x28.png"
+    ]
+  },
+  "585630": {
+    "label": "Thrall",
+    "group": "Vampire",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/vampire/thrall-585630-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/vampire/thrall-585630-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/vampire/thrall-585630-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/vampire/thrall-585630-v04-red-front-28x28.png",
+      "/assets/fumbbl/players/vampire/thrall-585630-v05-red-front-28x28.png",
+      "/assets/fumbbl/players/vampire/thrall-585630-v06-red-front-28x28.png",
+      "/assets/fumbbl/players/vampire/thrall-585630-v07-red-front-28x28.png",
+      "/assets/fumbbl/players/vampire/thrall-585630-v08-red-front-28x28.png",
+      "/assets/fumbbl/players/vampire/thrall-585630-v09-red-front-28x28.png",
+      "/assets/fumbbl/players/vampire/thrall-585630-v10-red-front-28x28.png"
+    ]
+  },
+  "585631": {
+    "label": "Hobgoblin",
+    "group": "Chaos Dwarf",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/chaos-dwarf/hobgoblin-585631-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-dwarf/hobgoblin-585631-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-dwarf/hobgoblin-585631-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-dwarf/hobgoblin-585631-v04-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-dwarf/hobgoblin-585631-v05-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-dwarf/hobgoblin-585631-v06-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-dwarf/hobgoblin-585631-v07-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-dwarf/hobgoblin-585631-v08-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-dwarf/hobgoblin-585631-v09-red-front-28x28.png",
+      "/assets/fumbbl/players/chaos-dwarf/hobgoblin-585631-v10-red-front-28x28.png"
+    ]
+  },
+  "585634": {
+    "label": "Assassin",
+    "group": "Dark Elf",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/dark-elf/assassin-585634-v01-red-front-32x32.png",
+      "/assets/fumbbl/players/dark-elf/assassin-585634-v02-red-front-32x32.png"
+    ]
+  },
+  "585637": {
+    "label": "Lineman",
+    "group": "Elven Union",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/elven-union/lineman-585637-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/elven-union/lineman-585637-v02-red-front-30x30.png",
+      "/assets/fumbbl/players/elven-union/lineman-585637-v03-red-front-30x30.png",
+      "/assets/fumbbl/players/elven-union/lineman-585637-v04-red-front-30x30.png",
+      "/assets/fumbbl/players/elven-union/lineman-585637-v05-red-front-30x30.png",
+      "/assets/fumbbl/players/elven-union/lineman-585637-v06-red-front-30x30.png",
+      "/assets/fumbbl/players/elven-union/lineman-585637-v07-red-front-30x30.png",
+      "/assets/fumbbl/players/elven-union/lineman-585637-v08-red-front-30x30.png"
+    ]
+  },
+  "585638": {
+    "label": "Lineman",
+    "group": "High Elf",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/high-elf/lineman-585638-v01-red-front-32x32.png",
+      "/assets/fumbbl/players/high-elf/lineman-585638-v02-red-front-32x32.png",
+      "/assets/fumbbl/players/high-elf/lineman-585638-v03-red-front-32x32.png",
+      "/assets/fumbbl/players/high-elf/lineman-585638-v04-red-front-32x32.png",
+      "/assets/fumbbl/players/high-elf/lineman-585638-v05-red-front-32x32.png",
+      "/assets/fumbbl/players/high-elf/lineman-585638-v06-red-front-32x32.png",
+      "/assets/fumbbl/players/high-elf/lineman-585638-v07-red-front-32x32.png",
+      "/assets/fumbbl/players/high-elf/lineman-585638-v08-red-front-32x32.png"
+    ]
+  },
+  "585639": {
+    "label": "Catcher",
+    "group": "High Elf",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/high-elf/catcher-585639-v01-red-front-32x32.png",
+      "/assets/fumbbl/players/high-elf/catcher-585639-v02-red-front-32x32.png",
+      "/assets/fumbbl/players/high-elf/catcher-585639-v03-red-front-32x32.png",
+      "/assets/fumbbl/players/high-elf/catcher-585639-v04-red-front-32x32.png"
+    ]
+  },
+  "585640": {
+    "label": "Lineman",
+    "group": "Human",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/human/lineman-585640-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/human/lineman-585640-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/human/lineman-585640-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/human/lineman-585640-v04-red-front-28x28.png",
+      "/assets/fumbbl/players/human/lineman-585640-v05-red-front-28x28.png",
+      "/assets/fumbbl/players/human/lineman-585640-v06-red-front-28x28.png",
+      "/assets/fumbbl/players/human/lineman-585640-v07-red-front-28x28.png",
+      "/assets/fumbbl/players/human/lineman-585640-v08-red-front-28x28.png"
+    ]
+  },
+  "585645": {
+    "label": "Tribal Linewoman",
+    "group": "Amazon",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/amazon/tribal-linewoman-585645-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/amazon/tribal-linewoman-585645-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/amazon/tribal-linewoman-585645-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/amazon/tribal-linewoman-585645-v04-red-front-28x28.png",
+      "/assets/fumbbl/players/amazon/tribal-linewoman-585645-v05-red-front-28x28.png",
+      "/assets/fumbbl/players/amazon/tribal-linewoman-585645-v06-red-front-28x28.png",
+      "/assets/fumbbl/players/amazon/tribal-linewoman-585645-v07-red-front-28x28.png",
+      "/assets/fumbbl/players/amazon/tribal-linewoman-585645-v08-red-front-28x28.png",
+      "/assets/fumbbl/players/amazon/tribal-linewoman-585645-v09-red-front-28x28.png"
+    ]
+  },
+  "585646": {
+    "label": "Eagle Warrior Thrower",
+    "group": "Amazon",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/amazon/eagle-warrior-thrower-585646-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/amazon/eagle-warrior-thrower-585646-v02-red-front-28x28.png"
+    ]
+  },
+  "585647": {
+    "label": "Piranha Warrior Catcher",
+    "group": "Amazon",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/amazon/piranha-warrior-catcher-585647-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/amazon/piranha-warrior-catcher-585647-v02-red-front-28x28.png"
+    ]
+  },
+  "585648": {
+    "label": "Koka Kalim Blitzer",
+    "group": "Amazon",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/amazon/koka-kalim-blitzer-585648-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/amazon/koka-kalim-blitzer-585648-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/amazon/koka-kalim-blitzer-585648-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/amazon/koka-kalim-blitzer-585648-v04-red-front-28x28.png"
+    ]
+  },
+  "585649": {
+    "label": "Lineman",
+    "group": "Orc",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/orc/lineman-585649-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/orc/lineman-585649-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/orc/lineman-585649-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/orc/lineman-585649-v04-red-front-28x28.png",
+      "/assets/fumbbl/players/orc/lineman-585649-v05-red-front-28x28.png",
+      "/assets/fumbbl/players/orc/lineman-585649-v06-red-front-28x28.png"
+    ]
+  },
+  "585650": {
+    "label": "Goblin",
+    "group": "Orc",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/orc/goblin-585650-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/orc/goblin-585650-v02-red-front-30x30.png",
+      "/assets/fumbbl/players/orc/goblin-585650-v03-red-front-30x30.png",
+      "/assets/fumbbl/players/orc/goblin-585650-v04-red-front-30x30.png"
+    ]
+  },
+  "585651": {
+    "label": "Thrower",
+    "group": "Orc",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/orc/thrower-585651-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/orc/thrower-585651-v02-red-front-28x28.png"
+    ]
+  },
+  "585652": {
+    "label": "Blitzer",
+    "group": "Orc",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/orc/blitzer-585652-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/orc/blitzer-585652-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/orc/blitzer-585652-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/orc/blitzer-585652-v04-red-front-28x28.png"
+    ]
+  },
+  "585653": {
+    "label": "Troll",
+    "group": "Orc",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/orc/troll-585653-v01-red-front-40x40.png"
+    ]
+  },
+  "587005": {
+    "label": "Mordrix Hex",
+    "group": "Star Players",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/star-players/mordrix-hex-587005-v01-red-front-30x30.png"
+    ]
+  },
+  "588599": {
+    "label": "Halfling Catcher",
+    "group": "Halfling",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/halfling/halfling-catcher-588599-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/halfling/halfling-catcher-588599-v02-red-front-30x30.png"
+    ]
+  },
+  "588601": {
+    "label": "Halfling Hefty",
+    "group": "Halfling",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/halfling/halfling-hefty-588601-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/halfling/halfling-hefty-588601-v02-red-front-30x30.png"
+    ]
+  },
+  "588607": {
+    "label": "Big Jobo Hairyfoot",
+    "group": "Star Players",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/star-players/big-jobo-hairyfoot-588607-v01-red-front-30x30.png"
+    ]
+  },
+  "588644": {
+    "label": "Neddley Verrüca",
+    "group": "Star Players",
+    "width": 34,
+    "height": 34,
+    "variants": [
+      "/assets/fumbbl/players/star-players/neddley-verruca-588644-v01-red-front-34x34.png"
+    ]
+  },
+  "591389": {
+    "label": "Cindy Piewhistle",
+    "group": "Star Players",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/star-players/cindy-piewhistle-591389-v01-red-front-30x30.png"
+    ]
+  },
+  "595947": {
+    "label": "Rumblelow Sheepskin",
+    "group": "Star Players",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/star-players/rumblelow-sheepskin-595947-v01-red-front-40x40.png"
+    ]
+  },
+  "596231": {
+    "label": "'Rotten' Rick Bupkeis",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/rotten-rick-bupkeis-596231-v01-red-front-28x28.png"
+    ]
+  },
+  "596232": {
+    "label": "Skrull Halfheight",
+    "group": "Star Players",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/star-players/skrull-halfheight-596232-v01-red-front-28x28.png"
+    ]
+  },
+  "596381": {
+    "label": "Swiftvine Glimmershard",
+    "group": "Star Players",
+    "width": 22,
+    "height": 22,
+    "variants": [
+      "/assets/fumbbl/players/star-players/swiftvine-glimmershard-596381-v01-red-front-22x22.png"
+    ]
+  },
+  "596382": {
+    "label": "Maple Highgrove",
+    "group": "Star Players",
+    "width": 34,
+    "height": 34,
+    "variants": [
+      "/assets/fumbbl/players/star-players/maple-highgrove-596382-v01-red-front-34x34.png"
+    ]
+  },
+  "596383": {
+    "label": "Zolcath the Zoat",
+    "group": "Star Players",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/star-players/zolcath-the-zoat-596383-v01-red-front-40x40.png"
+    ]
+  },
+  "596384": {
+    "label": "Curnoth Darkwold",
+    "group": "Star Players",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/star-players/curnoth-darkwold-596384-v01-red-front-30x30.png"
+    ]
+  },
+  "596385": {
+    "label": "Gloriel Summerbloom",
+    "group": "Star Players",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/star-players/gloriel-summerbloom-596385-v01-red-front-32x32.png"
+    ]
+  },
+  "596386": {
+    "label": "Lucien Swift",
+    "group": "Star Players",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/star-players/lucien-swift-596386-v01-red-front-30x30.png"
+    ]
+  },
+  "596389": {
+    "label": "Valen Swift",
+    "group": "Star Players",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/star-players/valen-swift-596389-v01-red-front-30x30.png"
+    ]
+  },
+  "596628": {
+    "label": "Chameleon Skink",
+    "group": "Lizardmen",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/lizardmen/chameleon-skink-596628-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/lizardmen/chameleon-skink-596628-v02-red-front-30x30.png"
+    ]
+  },
+  "596631": {
+    "label": "Anqi Panqi",
+    "group": "Star Players",
+    "width": 34,
+    "height": 34,
+    "variants": [
+      "/assets/fumbbl/players/star-players/anqi-panqi-596631-v01-red-front-34x34.png"
+    ]
+  },
+  "596632": {
+    "label": "Drull",
+    "group": "Star Players",
+    "width": 20,
+    "height": 20,
+    "variants": [
+      "/assets/fumbbl/players/star-players/drull-596632-v01-red-front-20x20.png"
+    ]
+  },
+  "596634": {
+    "label": "Dribl",
+    "group": "Star Players",
+    "width": 20,
+    "height": 20,
+    "variants": [
+      "/assets/fumbbl/players/star-players/dribl-596634-v01-red-front-20x20.png"
+    ]
+  },
+  "596638": {
+    "label": "Glotl Stop",
+    "group": "Star Players",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/star-players/glotl-stop-596638-v01-red-front-40x40.png"
+    ]
+  },
+  "597744": {
+    "label": "Rasta Tailspike",
+    "group": "Star Players",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/star-players/rasta-tailspike-597744-v01-red-front-30x30.png"
+    ]
+  },
+  "605358": {
+    "label": "Ogre",
+    "group": "Ogre",
+    "width": 39,
+    "height": 39,
+    "variants": [
+      "/assets/fumbbl/players/ogre/ogre-605358-v01-red-front-39x39.png",
+      "/assets/fumbbl/players/ogre/ogre-605358-v02-red-front-39x39.png",
+      "/assets/fumbbl/players/ogre/ogre-605358-v03-red-front-39x39.png",
+      "/assets/fumbbl/players/ogre/ogre-605358-v04-red-front-39x39.png",
+      "/assets/fumbbl/players/ogre/ogre-605358-v05-red-front-39x39.png",
+      "/assets/fumbbl/players/ogre/ogre-605358-v06-red-front-39x39.png"
+    ]
+  },
+  "634872": {
+    "label": "Gutter Runner",
+    "group": "Underworld Denizens",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/underworld-denizens/gutter-runner-634872-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/underworld-denizens/gutter-runner-634872-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/underworld-denizens/gutter-runner-634872-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/underworld-denizens/gutter-runner-634872-v04-red-front-28x28.png"
+    ]
+  },
+  "643392": {
+    "label": "Snotling",
+    "group": "Snotling",
+    "width": 20,
+    "height": 20,
+    "variants": [
+      "/assets/fumbbl/players/snotling/snotling-643392-v01-red-front-20x20.png",
+      "/assets/fumbbl/players/snotling/snotling-643392-v02-red-front-20x20.png",
+      "/assets/fumbbl/players/snotling/snotling-643392-v03-red-front-20x20.png",
+      "/assets/fumbbl/players/snotling/snotling-643392-v04-red-front-20x20.png",
+      "/assets/fumbbl/players/snotling/snotling-643392-v05-red-front-20x20.png",
+      "/assets/fumbbl/players/snotling/snotling-643392-v06-red-front-20x20.png",
+      "/assets/fumbbl/players/snotling/snotling-643392-v07-red-front-20x20.png",
+      "/assets/fumbbl/players/snotling/snotling-643392-v08-red-front-20x20.png",
+      "/assets/fumbbl/players/snotling/snotling-643392-v09-red-front-20x20.png",
+      "/assets/fumbbl/players/snotling/snotling-643392-v10-red-front-20x20.png",
+      "/assets/fumbbl/players/snotling/snotling-643392-v11-red-front-20x20.png",
+      "/assets/fumbbl/players/snotling/snotling-643392-v12-red-front-20x20.png"
+    ]
+  },
+  "643393": {
+    "label": "Fungus Flinga",
+    "group": "Snotling",
+    "width": 22,
+    "height": 22,
+    "variants": [
+      "/assets/fumbbl/players/snotling/fungus-flinga-643393-v01-red-front-22x22.png",
+      "/assets/fumbbl/players/snotling/fungus-flinga-643393-v02-red-front-22x22.png"
+    ]
+  },
+  "643395": {
+    "label": "Fun-hoppa",
+    "group": "Snotling",
+    "width": 22,
+    "height": 22,
+    "variants": [
+      "/assets/fumbbl/players/snotling/fun-hoppa-643395-v01-red-front-22x22.png",
+      "/assets/fumbbl/players/snotling/fun-hoppa-643395-v02-red-front-22x22.png"
+    ]
+  },
+  "643396": {
+    "label": "Stilty Runna",
+    "group": "Snotling",
+    "width": 24,
+    "height": 24,
+    "variants": [
+      "/assets/fumbbl/players/snotling/stilty-runna-643396-v01-red-front-24x24.png",
+      "/assets/fumbbl/players/snotling/stilty-runna-643396-v02-red-front-24x24.png"
+    ]
+  },
+  "643466": {
+    "label": "Troll",
+    "group": "Snotling",
+    "width": 40,
+    "height": 40,
+    "variants": [
+      "/assets/fumbbl/players/snotling/troll-643466-v01-red-front-40x40.png",
+      "/assets/fumbbl/players/snotling/troll-643466-v02-red-front-40x40.png"
+    ]
+  },
+  "645241": {
+    "label": "Human Lineman",
+    "group": "Old World Alliance",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/old-world-alliance/human-lineman-645241-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/old-world-alliance/human-lineman-645241-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/old-world-alliance/human-lineman-645241-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/old-world-alliance/human-lineman-645241-v04-red-front-28x28.png",
+      "/assets/fumbbl/players/old-world-alliance/human-lineman-645241-v05-red-front-28x28.png",
+      "/assets/fumbbl/players/old-world-alliance/human-lineman-645241-v06-red-front-28x28.png"
+    ]
+  },
+  "645242": {
+    "label": "Human Thrower",
+    "group": "Old World Alliance",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/old-world-alliance/human-thrower-645242-v01-red-front-28x28.png"
+    ]
+  },
+  "645243": {
+    "label": "Human Catcher",
+    "group": "Old World Alliance",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/old-world-alliance/human-catcher-645243-v01-red-front-28x28.png"
+    ]
+  },
+  "645244": {
+    "label": "Human Blitzer",
+    "group": "Old World Alliance",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/old-world-alliance/human-blitzer-645244-v01-red-front-28x28.png"
+    ]
+  },
+  "645245": {
+    "label": "Dwarf Blocker",
+    "group": "Old World Alliance",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/old-world-alliance/dwarf-blocker-645245-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/old-world-alliance/dwarf-blocker-645245-v02-red-front-28x28.png"
+    ]
+  },
+  "645246": {
+    "label": "Dwarf Runner",
+    "group": "Old World Alliance",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/old-world-alliance/dwarf-runner-645246-v01-red-front-28x28.png"
+    ]
+  },
+  "645247": {
+    "label": "Dwarf Blitzer",
+    "group": "Old World Alliance",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/old-world-alliance/dwarf-blitzer-645247-v01-red-front-28x28.png"
+    ]
+  },
+  "645248": {
+    "label": "Dwarf Troll Slayer",
+    "group": "Old World Alliance",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/old-world-alliance/dwarf-troll-slayer-645248-v01-red-front-28x28.png"
+    ]
+  },
+  "645249": {
+    "label": "Halfling Hopeful",
+    "group": "Old World Alliance",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/old-world-alliance/halfling-hopeful-645249-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/old-world-alliance/halfling-hopeful-645249-v02-red-front-28x28.png"
+    ]
+  },
+  "645250": {
+    "label": "Ogre",
+    "group": "Old World Alliance",
+    "width": 42,
+    "height": 42,
+    "variants": [
+      "/assets/fumbbl/players/old-world-alliance/ogre-645250-v01-red-front-42x42.png"
+    ]
+  },
+  "645251": {
+    "label": "Blitzer",
+    "group": "Human",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/human/blitzer-645251-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/human/blitzer-645251-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/human/blitzer-645251-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/human/blitzer-645251-v04-red-front-28x28.png"
+    ]
+  },
+  "645253": {
+    "label": "Catcher",
+    "group": "Human",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/human/catcher-645253-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/human/catcher-645253-v02-red-front-28x28.png",
+      "/assets/fumbbl/players/human/catcher-645253-v03-red-front-28x28.png",
+      "/assets/fumbbl/players/human/catcher-645253-v04-red-front-28x28.png"
+    ]
+  },
+  "645254": {
+    "label": "Ogre",
+    "group": "Human",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/human/ogre-645254-v01-red-front-38x38.png"
+    ]
+  },
+  "645274": {
+    "label": "Thrower",
+    "group": "Human",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/human/thrower-645274-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/human/thrower-645274-v02-red-front-28x28.png"
+    ]
+  },
+  "674140": {
+    "label": "Renegade Goblin",
+    "group": "Chaos Renegade",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/chaos-renegade/renegade-goblin-674140-v01-red-front-30x30.png"
+    ]
+  },
+  "674152": {
+    "label": "Runner",
+    "group": "Dark Elf",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/dark-elf/runner-674152-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/dark-elf/runner-674152-v02-red-front-28x28.png"
+    ]
+  },
+  "674153": {
+    "label": "Runt Punter",
+    "group": "Ogre",
+    "width": 38,
+    "height": 38,
+    "variants": [
+      "/assets/fumbbl/players/ogre/runt-punter-674153-v01-red-front-38x38.png"
+    ]
+  },
+  "674154": {
+    "label": "Gnoblar",
+    "group": "Ogre",
+    "width": 20,
+    "height": 20,
+    "variants": [
+      "/assets/fumbbl/players/ogre/gnoblar-674154-v01-red-front-20x20.png",
+      "/assets/fumbbl/players/ogre/gnoblar-674154-v02-red-front-20x20.png",
+      "/assets/fumbbl/players/ogre/gnoblar-674154-v03-red-front-20x20.png",
+      "/assets/fumbbl/players/ogre/gnoblar-674154-v04-red-front-20x20.png",
+      "/assets/fumbbl/players/ogre/gnoblar-674154-v05-red-front-20x20.png",
+      "/assets/fumbbl/players/ogre/gnoblar-674154-v06-red-front-20x20.png",
+      "/assets/fumbbl/players/ogre/gnoblar-674154-v07-red-front-20x20.png",
+      "/assets/fumbbl/players/ogre/gnoblar-674154-v08-red-front-20x20.png",
+      "/assets/fumbbl/players/ogre/gnoblar-674154-v09-red-front-20x20.png",
+      "/assets/fumbbl/players/ogre/gnoblar-674154-v10-red-front-20x20.png",
+      "/assets/fumbbl/players/ogre/gnoblar-674154-v11-red-front-20x20.png",
+      "/assets/fumbbl/players/ogre/gnoblar-674154-v12-red-front-20x20.png"
+    ]
+  },
+  "674155": {
+    "label": "Pump Wagon",
+    "group": "Snotling",
+    "width": 42,
+    "height": 42,
+    "variants": [
+      "/assets/fumbbl/players/snotling/pump-wagon-674155-v01-red-front-42x42.png",
+      "/assets/fumbbl/players/snotling/pump-wagon-674155-v02-red-front-42x42.png"
+    ]
+  },
+  "674156": {
+    "label": "Thrower",
+    "group": "Wood Elf",
+    "width": 28,
+    "height": 28,
+    "variants": [
+      "/assets/fumbbl/players/wood-elf/thrower-674156-v01-red-front-28x28.png",
+      "/assets/fumbbl/players/wood-elf/thrower-674156-v02-red-front-28x28.png"
+    ]
+  },
+  "674157": {
+    "label": "Witch Elf",
+    "group": "Dark Elf",
+    "width": 30,
+    "height": 30,
+    "variants": [
+      "/assets/fumbbl/players/dark-elf/witch-elf-674157-v01-red-front-30x30.png",
+      "/assets/fumbbl/players/dark-elf/witch-elf-674157-v02-red-front-30x30.png"
+    ]
+  },
+  "674158": {
+    "label": "Blitzer",
+    "group": "Dark Elf",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/dark-elf/blitzer-674158-v01-red-front-32x32.png",
+      "/assets/fumbbl/players/dark-elf/blitzer-674158-v02-red-front-32x32.png",
+      "/assets/fumbbl/players/dark-elf/blitzer-674158-v03-red-front-32x32.png",
+      "/assets/fumbbl/players/dark-elf/blitzer-674158-v04-red-front-32x32.png"
+    ]
+  },
+  "674159": {
+    "label": "Lineman",
+    "group": "Dark Elf",
+    "width": 32,
+    "height": 32,
+    "variants": [
+      "/assets/fumbbl/players/dark-elf/lineman-674159-v01-red-front-32x32.png",
+      "/assets/fumbbl/players/dark-elf/lineman-674159-v02-red-front-32x32.png",
+      "/assets/fumbbl/players/dark-elf/lineman-674159-v03-red-front-32x32.png",
+      "/assets/fumbbl/players/dark-elf/lineman-674159-v04-red-front-32x32.png",
+      "/assets/fumbbl/players/dark-elf/lineman-674159-v05-red-front-32x32.png",
+      "/assets/fumbbl/players/dark-elf/lineman-674159-v06-red-front-32x32.png",
+      "/assets/fumbbl/players/dark-elf/lineman-674159-v07-red-front-32x32.png",
+      "/assets/fumbbl/players/dark-elf/lineman-674159-v08-red-front-32x32.png"
+    ]
+  }
+}

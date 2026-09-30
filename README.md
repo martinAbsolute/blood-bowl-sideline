@@ -4,6 +4,8 @@ A bilingual BB2025 team builder for the Ukrainian community. English is the defa
 
 31 rosters, 108 skill/trait facts, 66 star players, and four presets: Default, Matched Play, EuroBowl 2026, NAF World Cup **2027 v2.1** (the edition shown by both reference builders). Guest drafts stay on the device; Telegram-authenticated coaches can save teams in Convex and share public UUID views. Incomplete teams save as drafts. Ownership, costs, legality, and edit revisions are enforced on the backend.
 
+The homepage opens the team catalog at `/teams`; `/rosters` redirects there. Each team type has a full reference page at `/team/[team-name]`. Creation lives at `/builder`, local drafts and account teams at `/my-teams`, and public saved teams keep their `/teams/[uuid]` links. Switching team type in the builder warns before resetting draft progress and keeps the selected ruleset.
+
 ## Run locally
 
 ```sh
@@ -40,7 +42,7 @@ Bot identity is configured through `TELEGRAM_BOT_USERNAME`, `TELEGRAM_BOT_TOKEN`
 
 Register the following OIDC redirect URIs in BotFather's app:
 
-- Production: https://expert-grasshopper-80.convex.site/api/auth/callback/telegram
+- Production: https://blood-bowl-sideline.vercel.app/api/auth/callback/telegram
 - Development: https://pleasant-buffalo-91.convex.site/api/auth/callback/telegram
 - Trusted website origin: https://blood-bowl-sideline.vercel.app
 
@@ -51,6 +53,10 @@ node scripts/setup-telegram.mjs --prod --copy-dev-credentials --client-id=880979
 ```
 
 The script verifies the bot ID, copies credentials securely, creates signing keys only when absent, rotates the webhook secret when changing bots, and verifies the registered webhook. Set NEXT_PUBLIC_TELEGRAM_AUTH_READY=true in Vercel and redeploy after configuration. The frontend sign-in button starts OIDC directly; no legacy login widget or signed-query callback remains.
+
+Production uses `CUSTOM_AUTH_SITE_URL=https://blood-bowl-sideline.vercel.app` in Convex. The Next.js auth route forwards only Telegram sign-in/callback requests to `NEXT_PUBLIC_CONVEX_SITE_URL`, preserving redirects and separate state/PKCE cookies without caching. Register that exact Vercel callback in BotFather. Development without `CUSTOM_AUTH_SITE_URL` uses the Convex callback above. Login from an editable draft persists it, returns to its UUID, and resumes one authenticated account save; failures keep the local draft available.
+
+Authenticated edits sync automatically after a short pause, with one save in flight and optimistic revision checks. Changes made during a save are synced next using the returned revision. Failed saves stay local and offer retry; conflicts require opening the saved version before editing again. A fresh device shows an empty state until the coach chooses a roster.
 
 ## Deployment
 
@@ -69,4 +75,4 @@ When `bbsideline.com.ua` is registered, add it to Vercel, apply the DNS records 
 
 Application libraries were checked against current stable npm releases. TypeScript 7 is the checker; Microsoft's `@typescript/typescript6` compatibility alias supplies the compiler API required by Next.js/ESLint. The latest ESLint uses the official `@eslint/compat` adapter for Next.js's shipped plugins. Cobe stays on 0.6.5 because the installed current Magic UI Globe registry component requires its pre-2.0 API. See `AGENTS.md` for installed Next.js and Convex AI guidance.
 
-Independent community software. Blood Bowl is a Games Workshop trademark; no affiliation or endorsement. No third-party rulebook text or artwork is redistributed.
+Independent community software. Blood Bowl is a Games Workshop trademark; no affiliation or endorsement. English skill definitions reproduce the user-supplied BB2025 export verbatim; see the rules provenance above. No third-party artwork is redistributed.

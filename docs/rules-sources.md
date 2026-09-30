@@ -6,9 +6,10 @@ Snapshot: `bb2025-2026-09-29`. Blood Bowl Third Season (2025). This is an indepe
 
 - [BBTC](https://bbtc.pl/): public BB2025 roster and tournament builder pages, including [EuroBowl Human](https://bbtc.pl/team/bb2025/human?ruleset=EB2026_04) and [World Cup Human](https://bbtc.pl/team/bb2025/human?ruleset=WC2027_03), inspected 29 September 2026.
 - [Ukrainian community rules and builder](https://bb-rules-g2p.pages.dev/): public factual roster, player, skill-category, star, inducement, and preset data, inspected 29 September 2026. Ukrainian UI terminology is based on this reference. Skill and positional proper names remain English.
+- [Mordorbihan BB2025 skills API](https://mordorbihan.fr/api/skills/public/ruleset/BB2025): the user supplied its JSON export on 30 September 2026. All 108 catalog skill and trait names and English definitions match the supplied `name_EN` and `description_EN` strings verbatim, including punctuation, spelling, and paragraph breaks. Existing skill identifiers, categories, elite flags, and Ukrainian descriptions are preserved. The export's inactive characteristic increases (with empty descriptions) and hidden Team Captain entry are outside the selectable skill catalog.
 - [EuroBowl 2026 organiser](https://www.eurobowl.eu/entrance-options/): links BBTC as its roster builder. Event rules and organiser decisions take precedence.
 
-Only factual catalog fields and numerical restrictions are included. Third-party application code, rulebook prose, illustrations, and client assets are not distributed. Temporary research downloads are ignored by Git and Vercel. Our implementation and presentation are original.
+Catalog fields and numerical restrictions are based on the references above. English skill definitions are preserved from the user-supplied export. Third-party application code, illustrations, and client assets are not distributed. Temporary research downloads are ignored by Git and Vercel. Our implementation and presentation are original.
 
 ## Presets
 

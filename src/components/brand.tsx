@@ -1,28 +1,29 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
+export function BrandLogo({ className }: { className?: string }) {
+  return (
+    <Image
+      src="/brand/lockup.svg"
+      width={690}
+      height={156}
+      alt=""
+      aria-hidden="true"
+      unoptimized
+      className={cn("h-9 w-auto shrink-0", className)}
+    />
+  );
+}
 export function BrandMark({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 48 52"
+    <Image
+      src="/brand/logo.svg"
+      width={38}
+      height={52}
+      alt=""
       aria-hidden="true"
-      className={cn("size-10", className)}
-    >
-      <path
-        d="M4 5 24 1 44 5v25c0 10-20 20-20 20S4 40 4 30Z"
-        fill="currentColor"
-      />
-      <path d="m15 14 18 4-4 15-18-4Z" fill="var(--paper)" />
-      <path
-        d="m19 20 9 2m-8-4-2 9m5-8-2 9m5-8-2 9"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path
-        d="m12 36 11 3 12-4"
-        fill="none"
-        stroke="var(--paper)"
-        strokeWidth="2"
-      />
-    </svg>
+      unoptimized
+      className={cn("h-10 w-auto shrink-0", className)}
+    />
   );
 }
 export function PitchArt() {

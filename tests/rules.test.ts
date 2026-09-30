@@ -34,6 +34,7 @@ describe("BB2025 roster checks", () => {
   it("accepts a basic eleven-player team and calculates from catalog costs", () => {
     const t = human();
     t.staff.rerolls = 2;
+    t.captainId = t.players[0].id;
     expect(validateTeam(t).valid).toBe(true);
     expect(summarize(t).teamGold).toBe(
       getRoster("human")!.players[0].cost * 11 +
@@ -73,6 +74,39 @@ describe("BB2025 roster checks", () => {
     expect(codes(t)).toContain("captain");
     t.captainId = randomUUID();
     expect(codes(t)).toContain("captain");
+  });
+  it("requires a captain for captain rosters in every supported preset", () => {
+    for (const roster of rosters.filter((roster) =>
+      roster.specialRules.includes("Team Captain"),
+    )) {
+      for (const ruleset of rulesets) {
+        const t = human(ruleset.id);
+        t.rosterId = roster.id;
+        t.players.forEach((player) => {
+          player.positionId = roster.players[0].id;
+        });
+        expect(codes(t), `${roster.id}/${ruleset.id}`).toContain("captain");
+        expect(validateTeam(t).valid).toBe(false);
+        t.captainId = t.players[0].id;
+        expect(codes(t)).not.toContain("captain");
+        t.players = t.players.filter((player) => player.id !== t.captainId);
+        expect(codes(t)).toContain("captain");
+      }
+    }
+  });
+  it("does not require a captain for other rosters and rejects Big Guy captains", () => {
+    const t = human();
+    t.captainId = t.players[0].id;
+    t.players[0].positionId = getRoster("human")!.players.find((position) =>
+      position.position.includes("Big Guy"),
+    )!.id;
+    expect(codes(t)).toContain("captain");
+    delete t.captainId;
+    t.rosterId = "amazon";
+    t.players.forEach((player) => {
+      player.positionId = getRoster("amazon")!.players[0].id;
+    });
+    expect(codes(t)).not.toContain("captain");
   });
   it("retains invalid selections when changing presets", () => {
     const t = human();
