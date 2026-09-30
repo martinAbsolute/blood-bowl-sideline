@@ -317,6 +317,8 @@ export function validateTeam(input: unknown): {
     if (team.players.filter((x) => x.positionId === p.id).length > max)
       issue("positionLimit", { position: p.position, max });
   }
+  if (team.staff.rerolls > roster.rerolls.max)
+    issue("rerollLimit", { max: roster.rerolls.max });
   if (
     secondaryPlayers >
     (rules.maxSecondaryByTier?.[totals.tier] ?? rules.maxSecondaryPerTeam)
@@ -366,12 +368,12 @@ export function validateTeam(input: unknown): {
   if (team.rulesetId !== "bb2025-default" && team.staff.dedicatedFans)
     issue("fans");
   for (const [id, qty] of Object.entries(team.inducements)) {
-    if (!qty) continue;
     const item = inducements.find((x) => x.id === id);
     if (!item) {
       issue("unknownInducement");
       continue;
     }
+    if (!qty) continue;
     const info = inducementInfo(team, item);
     if (!info.allowed) issue("inducementEligibility", { name: item.name });
     if (qty > info.max)
@@ -387,4 +389,13 @@ export function validateTeam(input: unknown): {
   if (rules.skillCurrency && totals.skills > totals.budget.skillGold)
     issue("skillBudget", { excess: totals.skills - totals.budget.skillGold });
   return { issues, valid: issues.length === 0 };
+}
+
+// Unfinished recruitment is saveable. Every actual rule violation must be fixed
+// before publishing a cloud snapshot; local recovery drafts preserve edits.
+export function teamSaveIssues(team: Team): Issue[] {
+  return validateTeam(team).issues.filter(
+    ({ code }) =>
+      code !== "minPlayers" && !(code === "captain" && !team.captainId),
+  );
 }

@@ -1,7 +1,18 @@
 import { BuilderStart } from "@/components/builder-start";
 import { TeamCatalog } from "@/components/team-catalog";
+import { Suspense } from "react";
+import { WorkspaceLoading } from "@/components/workspace-loading";
 export const metadata = { title: "Rosters" };
-export default async function Page({
+export default function Page(props: {
+  searchParams: Promise<{ roster?: string; draft?: string; new?: string }>;
+}) {
+  return (
+    <Suspense fallback={<WorkspaceLoading />}>
+      <RosterPage {...props} />
+    </Suspense>
+  );
+}
+async function RosterPage({
   searchParams,
 }: {
   searchParams: Promise<{ roster?: string; draft?: string; new?: string }>;

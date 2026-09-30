@@ -13,6 +13,7 @@ import {
 import { useDraftSync } from "./draft-sync-provider";
 import { TeamEditor } from "./team-editor";
 import { SharedTeam } from "./shared-team";
+import { WorkspaceLoading } from "./workspace-loading";
 
 export function TeamPage({ uuid }: { uuid: string }) {
   const t = useTranslations();
@@ -28,6 +29,7 @@ export function TeamPage({ uuid }: { uuid: string }) {
   );
   if (sync.ready && local) return <TeamEditor key={uuid} initial={local} />;
   if (live) return <SharedTeam initial={live} />;
+  if (!sync.ready || live === undefined) return <WorkspaceLoading />;
   return (
     <div className="page-width py-16">
       <h1 className="section-title">

@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useSetLocale, useTranslations } from "gt-next";
 import { useConvexAuth } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
@@ -55,6 +55,9 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     setLocale = useSetLocale();
   const { isAuthenticated } = useConvexAuth(),
     { signOut } = useAuthActions();
+  useEffect(() => {
+    document.documentElement.lang = locale === "uk" ? "uk" : "en";
+  }, [locale]);
   return (
     <>
       <header className="site-header no-print">

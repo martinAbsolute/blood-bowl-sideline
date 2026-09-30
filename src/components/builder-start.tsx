@@ -11,6 +11,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { SharedTeam } from "./shared-team";
 import { useDraftSync } from "./draft-sync-provider";
+import { WorkspaceLoading } from "./workspace-loading";
 const subscribe = () => () => {};
 export function BuilderStart(props: {
   roster?: string;
@@ -18,11 +19,10 @@ export function BuilderStart(props: {
   fresh: boolean;
 }) {
   const hydrated = useSyncExternalStore(
-      subscribe,
-      () => true,
-      () => false,
-    ),
-    t = useTranslations();
+    subscribe,
+    () => true,
+    () => false,
+  );
   const sync = useDraftSync();
   return hydrated && sync.ready ? (
     <LocalBuilder
@@ -31,7 +31,7 @@ export function BuilderStart(props: {
       {...props}
     />
   ) : (
-    <p className="page-width py-20 text-muted-foreground">{t("loading")}</p>
+    <WorkspaceLoading />
   );
 }
 function LocalBuilder({

@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState, type ReactNode } from "react";
+import { useCallback, useId, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "gt-next";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
@@ -25,6 +25,7 @@ export function RuleHelp({
   label,
   href,
   fullDescription = false,
+  skillPreview = false,
 }: {
   title: string;
   description: string;
@@ -34,10 +35,21 @@ export function RuleHelp({
   label?: string;
   href?: string;
   fullDescription?: boolean;
+  skillPreview?: boolean;
 }) {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [truncated, setTruncated] = useState(false);
+  const measurePreview = useCallback(
+    (node: HTMLParagraphElement | null) => {
+      if (node)
+        setTruncated(
+          description.length > 0 && node.scrollHeight > node.clientHeight,
+        );
+    },
+    [description],
+  );
   const trigger = useRef<HTMLButtonElement>(null);
   const descriptionId = useId();
   return (
@@ -66,18 +78,27 @@ export function RuleHelp({
         </TooltipTrigger>
         <TooltipContent
           sideOffset={6}
-          className="w-80 max-w-[calc(100vw-2rem)] space-y-1.5 overflow-hidden px-3 py-2.5 text-sm leading-relaxed"
+          className={cn(
+            "w-80 max-w-[calc(100vw-2rem)] space-y-1.5 overflow-hidden px-3 py-2.5 text-sm leading-relaxed",
+            skillPreview && "block [@media(hover:none)]:hidden",
+          )}
         >
           <p className="font-semibold">{title}</p>
           {meta && <p className="text-xs opacity-80">{meta}</p>}
           <p
+            ref={skillPreview ? measurePreview : undefined}
             className={cn(
               "whitespace-pre-wrap",
-              !fullDescription && "line-clamp-10",
+              skillPreview
+                ? "line-clamp-4"
+                : !fullDescription && "line-clamp-10",
             )}
           >
             {description}
           </p>
+          {skillPreview && truncated && (
+            <p className="text-xs opacity-80">{t("clickToReadFullRule")}</p>
+          )}
         </TooltipContent>
       </Tooltip>
       <Dialog open={open} onOpenChange={setOpen}>

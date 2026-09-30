@@ -7,9 +7,15 @@ import { z } from "zod";
 const updateSchema = z.object({
   message: z
     .object({
-      text: z.string().optional(),
-      chat: z.object({ id: z.number().int(), type: z.literal("private") }),
-      from: z.object({ id: z.number().int(), is_bot: z.boolean() }),
+      text: z.string().max(4096).optional(),
+      chat: z.object({
+        id: z.number().int().positive().safe(),
+        type: z.literal("private"),
+      }),
+      from: z.object({
+        id: z.number().int().positive().safe(),
+        is_bot: z.boolean(),
+      }),
     })
     .optional(),
 });

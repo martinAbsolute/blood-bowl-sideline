@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale, useTranslations } from "gt-next";
+import { useTranslations } from "gt-next";
 import { getSkill, skillName } from "@/domain/catalog";
 import { RuleHelp } from "./rule-help";
 
@@ -14,7 +14,6 @@ export function SkillBox({
   captain?: boolean;
 }) {
   const t = useTranslations();
-  const locale = useLocale();
   const skill = getSkill(id);
   const category = skill?.category ?? "trait";
   const meta = [
@@ -29,7 +28,7 @@ export function SkillBox({
       title={captain ? t("proCaptain") : skillName(id)}
       description={t(`skillDescriptions.${id.split(":")[0]}`)}
       meta={meta}
-      href={`https://bb-rules-g2p.pages.dev/${locale === "uk" ? "uk" : "en"}/skills/${id.split(":")[0]}`}
+      skillPreview
       className={`skill-box skill-${category}${added || captain ? " skill-added" : ""}`}
     >
       {added && (

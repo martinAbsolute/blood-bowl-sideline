@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
-import { getRoster } from "@/domain/catalog";
+import { getRoster, rosters } from "@/domain/catalog";
 import { TeamReference } from "@/components/team-reference";
+export function generateStaticParams() {
+  return rosters.map(({ id }) => ({ slug: id }));
+}
 export async function generateMetadata({
   params,
 }: {

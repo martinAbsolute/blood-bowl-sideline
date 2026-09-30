@@ -25,6 +25,7 @@ import {
   playerSkillCost,
   starEligible,
   summarize,
+  teamSaveIssues,
   validateTeam,
 } from "@/domain/rules";
 import type { Team } from "@/domain/types";
@@ -228,6 +229,7 @@ export function TeamEditor({
     ? stars.find((star) => star.id === selected)
     : undefined;
   const requiresCaptain = roster.specialRules.includes("Team Captain");
+  const saveIssues = teamSaveIssues(team);
   const storageErrorText = t("storageError");
   const reserveEditor = draftSync.editing;
   useEffect(() => {
@@ -328,6 +330,10 @@ export function TeamEditor({
         toast.add({ type: "error", title: t("teamNameRequired") });
         return;
       }
+      if (teamSaveIssues(team).length) {
+        toast.add({ type: "error", title: t("invalidTeamSave") });
+        return;
+      }
       saveInFlight.current = true;
       setSaving(true);
       setSyncError(null);
@@ -387,6 +393,7 @@ export function TeamEditor({
       saving ||
       !dirty ||
       !team.name.trim() ||
+      teamSaveIssues(team).length > 0 ||
       syncError?.conflict ||
       syncError?.team === team
     )
@@ -471,18 +478,22 @@ export function TeamEditor({
   );
   const localPending = (dirty || revision === 0) && localSave?.team !== team;
   const cloudPending =
-    isAuthenticated && (saving || (dirty && !!team.name.trim() && !syncError));
-  const saveStatus = syncError
-    ? "saveStatusError"
-    : localSave?.failed
-      ? "saveStatusLocalError"
-      : cloudPending || localPending
-        ? "saving"
-        : revision > 0 && !dirty
-          ? "savedCloud"
-          : "savedInDrafts";
+    isAuthenticated &&
+    (saving ||
+      (dirty && !!team.name.trim() && !syncError && !saveIssues.length));
+  const cloudInvalid = isAuthenticated && dirty && saveIssues.length > 0;
+  const saveStatus =
+    syncError || cloudInvalid
+      ? "saveStatusError"
+      : localSave?.failed
+        ? "saveStatusLocalError"
+        : cloudPending || localPending
+          ? "saving"
+          : revision > 0 && !dirty
+            ? "savedCloud"
+            : "savedInDrafts";
   const SaveIcon =
-    syncError || localSave?.failed
+    syncError || cloudInvalid || localSave?.failed
       ? CloudOff
       : cloudPending || localPending
         ? LoaderCircle
@@ -537,7 +548,7 @@ export function TeamEditor({
         }
         title={
           <>
-            <h1 className="display-font w-max min-w-0 max-w-full shrink-0 break-words text-2xl leading-tight [overflow-wrap:anywhere] sm:text-3xl">
+            <h1 className="page-heading w-max min-w-0 max-w-full shrink-0">
               {readOnly ? (
                 team.name || t("untitled")
               ) : (
@@ -557,13 +568,15 @@ export function TeamEditor({
                 title={
                   syncError
                     ? t(syncError.conflict ? "conflict" : "saveFailed")
-                    : localSave?.failed
-                      ? t("storageError")
-                      : isAuthenticated && !team.name.trim()
-                        ? t("teamNameRequired")
-                        : !isAuthenticated
-                          ? t("guestText")
-                          : undefined
+                    : cloudInvalid
+                      ? t("invalidTeamSave")
+                      : localSave?.failed
+                        ? t("storageError")
+                        : isAuthenticated && !team.name.trim()
+                          ? t("teamNameRequired")
+                          : !isAuthenticated
+                            ? t("guestText")
+                            : undefined
                 }
               >
                 <SaveIcon
@@ -1221,12 +1234,18 @@ export function TeamEditor({
               </p>
             )}
           </ReadinessCard>
-          {!readOnly && syncError && (
+          {!readOnly && (syncError || cloudInvalid) && (
             <p
               role="alert"
               className="text-xs leading-relaxed text-muted-foreground"
             >
-              {t(syncError.conflict ? "conflict" : "saveFailed")}
+              {t(
+                cloudInvalid
+                  ? "invalidTeamSave"
+                  : syncError?.conflict
+                    ? "conflict"
+                    : "saveFailed",
+              )}
             </p>
           )}
         </aside>
@@ -1453,6 +1472,8 @@ export function TeamEditor({
                   ) : (
                     <PlayerSkillPicker
                       key={currentPlayer.id}
+                      team={team}
+                      playerId={currentPlayer.id}
                       position={position}
                       selected={currentPlayer.skills}
                       captain={team.captainId === currentPlayer.id}

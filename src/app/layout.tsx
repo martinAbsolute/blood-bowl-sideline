@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Roboto_Condensed } from "next/font/google";
 import { GTProvider } from "gt-next";
-import getLocale from "@/getLocale";
+import { Suspense } from "react";
 import { Providers } from "@/components/providers";
 import { SiteShell } from "@/components/site-shell";
 import "./globals.css";
@@ -46,22 +46,30 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang={await getLocale()}
-      className={`${geistSans.variable} ${display.variable}`}
-    >
+    <html lang="en" className={`${geistSans.variable} ${display.variable}`}>
       <body className="bg-background font-sans text-foreground antialiased">
-        <GTProvider>
-          <Providers>
-            <SiteShell>{children}</SiteShell>
-          </Providers>
-        </GTProvider>
+        <Suspense
+          fallback={
+            <div
+              className="page-width flex min-h-screen items-center justify-center text-sm text-muted-foreground"
+              role="status"
+            >
+              Blood Bowl Sideline
+            </div>
+          }
+        >
+          <GTProvider>
+            <Providers>
+              <SiteShell>{children}</SiteShell>
+            </Providers>
+          </GTProvider>
+        </Suspense>
       </body>
     </html>
   );

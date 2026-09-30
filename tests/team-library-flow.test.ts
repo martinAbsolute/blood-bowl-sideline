@@ -41,8 +41,17 @@ vi.mock("convex/react", () => ({
 vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("next/link", () => ({
-  default: ({ children, ...props }: { children: React.ReactNode }) =>
-    createElement("a", props, children),
+  default: ({
+    children,
+    prefetch: _prefetch,
+    ...props
+  }: {
+    children: React.ReactNode;
+    prefetch?: boolean;
+  }) => {
+    void _prefetch;
+    return createElement("a", props, children);
+  },
 }));
 vi.mock("../src/components/site-shell", () => ({
   LoginButton: () => createElement("button", null, "signIn"),

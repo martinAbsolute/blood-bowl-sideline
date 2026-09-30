@@ -1,17 +1,21 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { paginationOptsValidator } from "convex/server";
+import {
+  paginationOptsValidator,
+  paginationResultValidator,
+} from "convex/server";
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { publicTeam, teamValidator } from "./validators";
 import { teamSchema } from "../src/domain/types";
+import { z } from "zod";
 import { getRoster, getRuleset } from "../src/domain/catalog";
-import { validateTeam } from "../src/domain/rules";
+import { teamSaveIssues, validateTeam } from "../src/domain/rules";
 
 export const getByUuid = query({
   args: { uuid: v.string() },
   returns: v.union(v.null(), publicTeam),
   handler: async (ctx, { uuid }) => {
-    if (!/^[a-f\d-]{36}$/i.test(uuid)) return null;
+    if (!z.uuid().safeParse(uuid).success) return null;
     const doc = await ctx.db
       .query("teams")
       .withIndex("by_uuid", (q) => q.eq("uuid", uuid))
@@ -40,26 +44,26 @@ export const listMine = query({
     rosterId: v.optional(v.string()),
     rulesetId: v.optional(teamValidator.fields.rulesetId),
   },
-  returns: v.object({
-    page: v.array(publicTeam),
-    isDone: v.boolean(),
-    continueCursor: v.string(),
-    splitCursor: v.optional(v.union(v.string(), v.null())),
-    pageStatus: v.optional(
-      v.union(
-        v.literal("SplitRecommended"),
-        v.literal("SplitRequired"),
-        v.null(),
-      ),
-    ),
-  }),
+  returns: paginationResultValidator(publicTeam),
   handler: async (
     ctx,
     { paginationOpts, archived, search, rosterId, rulesetId },
   ) => {
     const owner = await getAuthUserId(ctx);
     if (!owner) throw new ConvexError("UNAUTHENTICATED");
-    const text = search?.trim().slice(0, 160);
+    if (
+      (search !== undefined && search.length > 160) ||
+      (rosterId !== undefined && !getRoster(rosterId)) ||
+      !Number.isSafeInteger(paginationOpts.numItems) ||
+      paginationOpts.numItems < 1 ||
+      paginationOpts.numItems > 30 ||
+      [paginationOpts.maximumRowsRead, paginationOpts.maximumBytesRead].some(
+        (limit) =>
+          limit !== undefined && (!Number.isSafeInteger(limit) || limit < 1),
+      )
+    )
+      throw new ConvexError("INVALID_INPUT");
+    const text = search?.trim();
     const table = ctx.db.query("teams");
     const source = text
       ? table.withSearchIndex("search_library", (q) => {
@@ -104,10 +108,7 @@ export const listMine = query({
                   q.eq("ownerId", owner).eq("archived", archived),
                 )
                 .order("desc");
-    const result = await source.paginate({
-      ...paginationOpts,
-      numItems: Math.min(paginationOpts.numItems, 30),
-    });
+    const result = await source.paginate(paginationOpts);
     return {
       ...result,
       page: result.page.map((d) => ({
@@ -126,10 +127,16 @@ export const save = mutation({
   handler: async (ctx, args) => {
     const ownerId = await getAuthUserId(ctx);
     if (!ownerId) throw new ConvexError("UNAUTHENTICATED");
+    if (
+      !Number.isSafeInteger(args.expectedRevision) ||
+      args.expectedRevision < 0
+    )
+      throw new ConvexError("INVALID_INPUT");
     const parsed = teamSchema.safeParse(args.team);
     if (!parsed.success || !getRoster(parsed.data.rosterId))
       throw new ConvexError("INVALID_TEAM");
     const team = parsed.data;
+    if (teamSaveIssues(team).length) throw new ConvexError("INVALID_TEAM");
     const existing = await ctx.db
       .query("teams")
       .withIndex("by_uuid", (q) => q.eq("uuid", team.uuid))
@@ -176,6 +183,8 @@ export const setArchived = mutation({
   handler: async (ctx, { uuid, archived }) => {
     const ownerId = await getAuthUserId(ctx);
     if (!ownerId) throw new ConvexError("UNAUTHENTICATED");
+    if (!z.uuid().safeParse(uuid).success)
+      throw new ConvexError("INVALID_INPUT");
     const doc = await ctx.db
       .query("teams")
       .withIndex("by_uuid", (q) => q.eq("uuid", uuid))

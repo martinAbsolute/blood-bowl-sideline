@@ -1,32 +1,25 @@
 "use client";
-import {
-  useDeferredValue,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useDeferredValue, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "gt-next";
 import { useConvexAuth, useMutation, usePaginatedQuery } from "convex/react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "../../convex/_generated/api";
 import { getRoster, getRuleset, rosters, rulesets } from "@/domain/catalog";
 import { summarize, validateTeam } from "@/domain/rules";
-import { teamSchema, type Team } from "@/domain/types";
+import { type Team } from "@/domain/types";
 import {
   draftAccount,
   draftSnapshot,
   parseDrafts,
   removeDraft,
-  storeDraft,
   subscribeDrafts,
 } from "@/lib/drafts";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import { Card } from "./ui/card";
+import { CreateTeamButton } from "./create-team-button";
 import { EditorSelect } from "./editor-select";
 import {
-  Plus,
-  Upload,
   Archive,
   ArrowUpRight,
   Trash2,
@@ -34,10 +27,8 @@ import {
   CloudCheck,
   FileText,
   Search,
-  Check,
   LoaderCircle,
   CloudOff,
-  Users,
 } from "lucide-react";
 import { LoginButton } from "./site-shell";
 import { toast } from "@/components/ui/toast";
@@ -47,9 +38,7 @@ import { libraryMatches } from "@/lib/team-library";
 
 const selectClass = "h-10 rounded-lg pl-3";
 export function TeamLibrary() {
-  const t = useTranslations(),
-    router = useRouter(),
-    input = useRef<HTMLInputElement>(null);
+  const t = useTranslations();
   const { isAuthenticated, isLoading } = useConvexAuth();
   const sync = useDraftSync();
   const [search, setSearch] = useState("");
@@ -92,21 +81,6 @@ export function TeamLibrary() {
           .map(({ team }) => ({ team, local: false })),
       ];
   const filtered = !!(search || rosterId || rulesetId);
-  async function importFile(file: File | undefined) {
-    if (!file) return;
-    try {
-      if (file.size > 100000) throw new Error();
-      const parsed = teamSchema.parse(JSON.parse(await file.text()));
-      if (!getRoster(parsed.rosterId)) throw new Error();
-      const team = { ...parsed, uuid: crypto.randomUUID() };
-      storeDraft(team, sync.account);
-      router.push(`/teams/${team.uuid}`);
-    } catch {
-      toast.add({ type: "error", title: t("invalidImport") });
-    } finally {
-      if (input.current) input.current.value = "";
-    }
-  }
   async function toggleArchive(team: Team) {
     setBusy(team.uuid);
     try {
@@ -121,30 +95,14 @@ export function TeamLibrary() {
     <div className="page-width py-8 sm:py-10">
       <header className="mb-7 flex flex-wrap items-start justify-between gap-5">
         <div>
-          <h1 className="display-font text-3xl sm:text-4xl">{t("myTeams")}</h1>
+          <h1 className="page-heading">{t("myTeams")}</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             {t(isAuthenticated ? "libraryCloudHint" : "libraryGuestHint")}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <input
-            className="hidden"
-            ref={input}
-            type="file"
-            accept="application/json,.json"
-            onChange={(e) => void importFile(e.target.files?.[0])}
-          />
-          <Button variant="outline" onClick={() => input.current?.click()}>
-            <Upload className="size-4" />
-            {t("import")}
-          </Button>
-          <Button nativeButton={false} render={<Link href="/rosters" />}>
-            <Plus className="size-4" />
-            {t("createTeam")}
-          </Button>
-        </div>
+        <CreateTeamButton />
       </header>
-      {!isAuthenticated && !isLoading && (
+      {!isAuthenticated && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-secondary/30 px-5 py-4">
           <div className="flex items-center gap-3">
             <CloudCheck className="size-5 shrink-0 text-muted-foreground" />
@@ -223,14 +181,22 @@ export function TeamLibrary() {
         )}
       </div>
       <section
+        className="min-h-[320px]"
         aria-label={t("myTeams")}
         aria-busy={
           search !== deferredSearch ||
           (isAuthenticated && status === "LoadingFirstPage")
         }
       >
-        {isLoading || (isAuthenticated && status === "LoadingFirstPage") ? (
-          <p className="py-8 text-sm text-muted-foreground">{t("loading")}</p>
+        {cards.length === 0 &&
+        (isLoading || (isAuthenticated && status === "LoadingFirstPage")) ? (
+          <div
+            role="status"
+            className="flex min-h-[300px] items-center justify-center rounded-xl border bg-card/50 text-sm text-muted-foreground"
+          >
+            <LoaderCircle className="mr-2 size-4 animate-spin" />
+            {t("loading")}
+          </div>
         ) : cards.length === 0 ? (
           <div className="rounded-xl border border-dashed bg-card/50 px-6 py-16 text-center">
             <FileText className="mx-auto mb-4 size-7 text-muted-foreground" />
@@ -265,15 +231,7 @@ export function TeamLibrary() {
                 {t("clearFilters")}
               </Button>
             ) : (
-              !archived && (
-                <Button
-                  className="mt-5"
-                  nativeButton={false}
-                  render={<Link href="/rosters" />}
-                >
-                  {t("createTeam")}
-                </Button>
-              )
+              !archived && <CreateTeamButton className="mt-5" />
             )}
           </div>
         ) : (
@@ -283,13 +241,7 @@ export function TeamLibrary() {
                 key={team.uuid}
                 team={team}
                 archived={archived}
-                href={
-                  archived
-                    ? undefined
-                    : local
-                      ? `/teams/${team.uuid}`
-                      : `/teams/${team.uuid}`
-                }
+                href={archived ? undefined : `/teams/${team.uuid}`}
                 saveState={
                   local
                     ? isAuthenticated
@@ -380,45 +332,79 @@ function TeamCard({
     legal = validateTeam(team).valid;
   const content = (
     <>
-      <div className="mb-5 flex items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <span className="flex size-14 items-center justify-center rounded-xl border bg-secondary/50">
-            <RosterIcon rosterId={team.rosterId} className="size-11" />
-          </span>
-          <span className="text-sm text-muted-foreground">
+      <div className="relative overflow-hidden bg-primary px-5 pb-5 pt-4 text-primary-foreground">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-6 -top-6 size-40 rounded-full border-[24px] border-white/5"
+        />
+        <div className="relative mb-4 flex items-center justify-between gap-3">
+          <span className="text-xs font-medium text-white/75">
             {getRoster(team.rosterId)?.name}
           </span>
+          <span
+            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${legal && !archived ? "bg-lime-200 text-primary" : "bg-white/15 text-white"}`}
+          >
+            {t(archived ? "archived" : legal ? "ready" : "draft")}
+          </span>
         </div>
-        {href && (
-          <ArrowUpRight className="mt-1 size-4 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-        )}
+        <div className="relative flex items-center gap-4">
+          <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-white/90 shadow-sm">
+            <RosterIcon rosterId={team.rosterId} className="size-12" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2
+              className="display-font line-clamp-2 min-h-14 break-words text-2xl leading-7"
+              title={team.name}
+            >
+              {team.name || t("untitled")}
+            </h2>
+            <p className="mt-1 truncate text-xs text-white/70">
+              {team.coach || t("coachNotSet")}
+            </p>
+          </div>
+        </div>
       </div>
-      <h2
-        className="display-font line-clamp-2 min-h-[3.25rem] break-words text-xl leading-snug"
-        title={team.name}
-      >
-        {team.name || t("untitled")}
-      </h2>
-      <p className="mt-2 truncate text-xs text-muted-foreground">
-        {getRuleset(team.rulesetId).name}
-      </p>
-      <div className="mt-6 grid grid-cols-2 gap-4 border-t pt-4">
-        <div>
-          <p className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Users className="size-3.5" />
-            {t("players")}
-          </p>
-          <p className="font-mono text-lg">
-            {totals.playerCount}
-            <span className="text-sm text-muted-foreground"> / 16</span>
-          </p>
-        </div>
-        <div>
-          <p className="mb-1 text-xs text-muted-foreground">{t("teamValue")}</p>
-          <p className="font-mono text-lg">
-            {(totals.teamGold / 1000).toLocaleString("en")}k{" "}
-            <span className="text-xs text-muted-foreground">GP</span>
-          </p>
+      <div className="space-y-4 p-5">
+        <p className="min-h-8 text-xs font-medium text-muted-foreground">
+          {getRuleset(team.rulesetId).name}
+        </p>
+        <dl className="grid grid-cols-3 divide-x rounded-lg border bg-secondary/25 py-3 text-center">
+          <div>
+            <dt className="text-[10px] text-muted-foreground">
+              {t("players")}
+            </dt>
+            <dd className="mt-1 font-mono text-base font-semibold">
+              {totals.playerCount}
+              <span className="text-xs font-normal text-muted-foreground">
+                {" "}
+                / 16
+              </span>
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[10px] text-muted-foreground">
+              {t("teamValue")}
+            </dt>
+            <dd className="mt-1 font-mono text-base font-semibold">
+              {totals.teamGold / 1000}k
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[10px] text-muted-foreground">
+              {t("remaining")}
+            </dt>
+            <dd
+              className={`mt-1 font-mono text-base font-semibold ${totals.remaining < 0 ? "text-destructive" : "text-primary"}`}
+            >
+              {totals.remaining / 1000}k
+            </dd>
+          </div>
+        </dl>
+        <div className="flex items-center justify-between text-xs font-semibold text-primary">
+          <span>{t(href ? "openTeam" : "archived")}</span>
+          {href && (
+            <ArrowUpRight className="size-4 transition-transform motion-safe:group-hover:translate-x-0.5" />
+          )}
         </div>
       </div>
     </>
@@ -432,45 +418,42 @@ function TeamCard({
           ? LoaderCircle
           : CloudOff;
   return (
-    <article className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-[box-shadow,border-color] hover:border-primary/35 hover:shadow-md">
-      {href ? (
-        <Link
-          href={href}
-          className="block flex-1 p-5 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-        >
-          {content}
-        </Link>
-      ) : (
-        <div className="flex-1 p-5 opacity-75">{content}</div>
-      )}
-      <footer className="flex flex-wrap items-center justify-between gap-2 border-t bg-secondary/15 px-5 py-2">
-        <span
-          className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs ${archived ? "bg-secondary text-muted-foreground" : legal ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" : "bg-secondary text-muted-foreground"}`}
-        >
-          {legal && !archived && <Check className="size-3" />}
-          {t(archived ? "archived" : legal ? "ready" : "draft")}
-        </span>
-        <div className="flex items-center gap-2">
-          <span
-            role="status"
-            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
+    <article className="min-w-0">
+      <Card className="group min-w-0 gap-0 rounded-2xl py-0 shadow-sm transition-shadow hover:shadow-lg">
+        {href ? (
+          <Link
+            href={href}
+            prefetch
+            className="block flex-1 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
           >
-            <SaveIcon
-              className={`size-3.5 ${saveState === "pending" ? "animate-spin" : ""}`}
-            />
-            {t(
-              saveState === "cloud"
-                ? "savedCloud"
-                : saveState === "device"
-                  ? "savedInDrafts"
-                  : saveState === "pending"
-                    ? "saving"
-                    : "saveStatusError",
-            )}
-          </span>
-          {action}
-        </div>
-      </footer>
+            {content}
+          </Link>
+        ) : (
+          <div className="flex-1 opacity-75">{content}</div>
+        )}
+        <footer className="flex min-h-14 items-center border-t bg-secondary/15 px-5 py-2 [&>div]:w-full [&>div>button]:ml-auto">
+          <div className="flex items-center gap-2">
+            <span
+              role="status"
+              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
+            >
+              <SaveIcon
+                className={`size-3.5 ${saveState === "pending" ? "animate-spin" : ""}`}
+              />
+              {t(
+                saveState === "cloud"
+                  ? "savedCloud"
+                  : saveState === "device"
+                    ? "savedInDrafts"
+                    : saveState === "pending"
+                      ? "saving"
+                      : "saveStatusError",
+              )}
+            </span>
+            {action}
+          </div>
+        </footer>
+      </Card>
     </article>
   );
 }
