@@ -61,14 +61,21 @@ Production uses `CUSTOM_AUTH_SITE_URL=https://blood-bowl-sideline.vercel.app` in
 
 ## Deployment
 
-GitHub `main` triggers the linked Vercel project, `blood-bowl-sideline`. GitHub Actions runs checks, tests and the build. Backend changes must be deployed before the frontend push:
+GitHub `main` triggers the linked Vercel project, `blood-bowl-sideline`. Its production build runs the lockfile-pinned Convex CLI and builds the frontend together:
 
 ```sh
-pnpm exec convex deploy -y
+pnpm exec convex deploy --cmd 'pnpm run build'
+```
+
+`vercel.json` keeps this build command in source control. `CONVEX_DEPLOY_KEY` is stored as a production-only Vercel secret for `expert-grasshopper-80`; it is never committed. Preview builds remain frontend-only with their configured backend. GitHub Actions runs checks, tests and the build without deploying.
+
+To release, run the checks above and push to `main`:
+
+```sh
 git push origin main
 ```
 
-Confirm the target first: personal development is `pleasant-buffalo-91`; production is `expert-grasshopper-80`. Vercel production must use the production Convex URL. A deployment key, if automation is configured later, belongs in protected platform secrets.
+Personal development is `pleasant-buffalo-91`; production is `expert-grasshopper-80`. Confirm the target before any manual backend deployment.
 
 ## Attribution
 
