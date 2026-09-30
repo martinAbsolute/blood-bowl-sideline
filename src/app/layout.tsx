@@ -28,6 +28,9 @@ export const metadata: Metadata = {
   },
   description:
     "Build BB2025 teams for the Ukrainian Blood Bowl community. English and Ukrainian. Default, Matched Play, EuroBowl 2026 and World Cup 2027 v2.1.",
+  icons: {
+    shortcut: "/icon.svg?brand=sideline-2026",
+  },
   openGraph: {
     type: "website",
     siteName: "Blood Bowl Sideline",

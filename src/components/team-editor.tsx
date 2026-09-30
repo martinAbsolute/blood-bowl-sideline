@@ -922,15 +922,21 @@ export function TeamEditor({
           </CollapsibleSection>
           <section className="rounded-lg border bg-card p-3">
             {!readOnly && (
-              <label className="mb-4 block text-xs font-medium text-muted-foreground">
-                {t("coachName")}
+              <div className="mb-4 grid max-w-sm gap-1">
+                <label
+                  htmlFor={`coach-${team.uuid}`}
+                  className="text-xs font-medium text-muted-foreground"
+                >
+                  {t("coachName")}
+                </label>
                 <Input
-                  className="mt-1 h-9 max-w-sm px-2.5 text-sm font-normal text-foreground md:text-sm"
+                  id={`coach-${team.uuid}`}
+                  className="block h-9 px-2.5 text-sm font-normal text-foreground md:text-sm"
                   value={team.coach}
                   maxLength={80}
                   onChange={(e) => change({ ...team, coach: e.target.value })}
                 />
-              </label>
+              </div>
             )}
             <h2 className="section-title mb-4">{t("notes")}</h2>
             {readOnly ? (
