@@ -63,22 +63,17 @@ export function RosterExplorer() {
             key={r.id}
             className="scroll-mt-4 overflow-hidden rounded-lg border bg-card"
           >
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b bg-secondary/40 px-3 py-2">
-              <h2 className="min-w-0 flex-1 basis-full md:basis-auto">
-                <button
-                  type="button"
-                  aria-expanded={expanded.has(r.id)}
-                  aria-controls={`roster-content-${r.id}`}
-                  onClick={() => toggleRoster(r.id)}
-                  className="flex w-full items-center gap-2 rounded-sm text-left font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"
-                >
-                  <RosterIcon rosterId={r.id} className="size-8" />
-                  {r.name}
-                  <ChevronDown
-                    aria-hidden="true"
-                    className={`ml-auto size-4 shrink-0 text-primary transition-transform ${expanded.has(r.id) ? "rotate-180" : ""}`}
+            <div className="flex items-center gap-1 border-b bg-secondary/40 px-2 py-2 md:gap-2 md:px-3">
+              <h2 className="min-w-0 flex-1">
+                <span className="flex min-w-0 items-center gap-1 text-xs font-semibold md:hidden">
+                  <RosterIcon
+                    rosterId={r.id}
+                    className="size-4 shrink-0 min-[360px]:size-6"
                   />
-                </button>
+                  <span className="truncate" title={r.name}>
+                    {r.name}
+                  </span>
+                </span>
                 <Link
                   href={`/team/${r.id}`}
                   className="hidden items-center gap-2 font-semibold hover:underline md:flex"
@@ -87,21 +82,44 @@ export function RosterExplorer() {
                   {r.name}
                 </Link>
               </h2>
-              <div className="ml-auto flex gap-2">
-                <Button asChild size="sm" variant="ghost">
+              <div className="ml-auto flex shrink-0 gap-1 md:gap-2">
+                <Button
+                  asChild
+                  size="sm"
+                  variant="ghost"
+                  className="gap-0.5 px-1 text-[10px] has-[>svg]:px-1 min-[360px]:gap-1 min-[360px]:px-1.5 min-[360px]:text-xs min-[360px]:has-[>svg]:px-1.5 md:gap-1.5 md:px-3 md:text-sm md:has-[>svg]:px-2.5"
+                >
                   <Link href={`/team/${r.id}`}>
                     <span className="md:hidden">{t("teamDetailsShort")}</span>
                     <span className="hidden md:inline">{t("teamDetails")}</span>
-                    <ArrowUpRight className="size-3.5" />
+                    <ArrowUpRight className="size-3 min-[360px]:size-3.5" />
                   </Link>
                 </Button>
-                <Button asChild size="sm">
+                <Button
+                  asChild
+                  size="sm"
+                  className="gap-1 px-1.5 text-[10px] has-[>svg]:px-1.5 min-[360px]:px-2 min-[360px]:text-xs min-[360px]:has-[>svg]:px-2 md:gap-1.5 md:px-3 md:text-sm md:has-[>svg]:px-2.5"
+                >
                   <Link href={`/builder?roster=${r.id}&new=1`}>
-                    <Plus className="size-3.5" />
+                    <Plus className="hidden size-3.5 md:block" />
                     {t("createTeam")}
                   </Link>
                 </Button>
               </div>
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                aria-label={r.name}
+                aria-expanded={expanded.has(r.id)}
+                aria-controls={`roster-content-${r.id}`}
+                onClick={() => toggleRoster(r.id)}
+                className="h-7 w-5 shrink-0 min-[360px]:w-7 md:hidden"
+              >
+                <ChevronDown
+                  aria-hidden="true"
+                  className={`size-4 text-primary transition-transform ${expanded.has(r.id) ? "rotate-180" : ""}`}
+                />
+              </Button>
             </div>
             <div
               id={`roster-content-${r.id}`}
