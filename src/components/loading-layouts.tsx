@@ -158,26 +158,26 @@ export function LoadingLayout({
                 compact
                 footer
               />
-              <div className="grid items-start gap-6 @min-[780px]:grid-cols-2">
+              <div className="grid items-start gap-4 @min-[780px]:grid-cols-2">
                 {[5, 6].map((count) => (
                   <section key={count}>
-                    <div className="mb-3 flex h-6 items-center justify-between px-1">
+                    <div className="mb-2 flex h-6 items-center justify-between px-1">
                       <Skeleton className="h-5 w-36" />
                       <Skeleton className="h-3 w-12" />
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       {Array.from({ length: count }, (_, index) => (
                         <div
                           key={index}
-                          className="flex h-20 items-center justify-between gap-3 rounded-xl border bg-card px-3 sm:px-4"
+                          className="flex h-14 items-center justify-between gap-2 rounded-lg border bg-card px-3"
                         >
-                          <div className="flex-1 space-y-3">
+                          <div className="flex-1 space-y-1.5">
                             <Skeleton className="h-4 w-3/4" />
                             <Skeleton className="h-3 w-2/3" />
                           </div>
-                          <Skeleton className="size-11" />
+                          <Skeleton className="size-8" />
                           <Skeleton className="h-4 w-5" />
-                          <Skeleton className="size-11" />
+                          <Skeleton className="size-8" />
                         </div>
                       ))}
                     </div>

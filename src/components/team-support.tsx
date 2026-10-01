@@ -38,30 +38,28 @@ function SupportItem({
       : `${gold(cost)} ${t("each")} · ${t("maxQuantity", { max })}`;
   return (
     <li
-      className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-3 transition-colors sm:px-4 ${value > 0 ? "border-primary/25 bg-primary/5" : "bg-card"}`}
+      className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2 transition-colors ${value > 0 ? "border-primary/25 bg-primary/5" : "bg-card"}`}
     >
       <div className="min-w-0 flex-1">
-        <div className="flex items-start gap-1">
-          <p className="min-w-0 pt-1 text-sm font-semibold leading-snug sm:text-base">
-            {label}
-          </p>
+        <div className="flex items-center gap-1">
+          <p className="min-w-0 text-sm font-semibold leading-5">{label}</p>
           <RuleInfo
             title={label}
             description={description}
             meta={meta}
             href={href}
             label={t("explainRule", { name: label })}
-            className="no-print -mr-1"
+            className="no-print -my-1 size-6 [&>svg]:size-3.5"
           />
         </div>
-        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+        <p className="mt-0.5 text-[11px] leading-4 text-muted-foreground">
           {meta}
         </p>
       </div>
       {readOnly ? (
         <output
           aria-label={`${label}: ${value}/${max}`}
-          className="min-w-8 text-center font-mono text-base font-semibold tabular-nums"
+          className="min-w-6 text-center font-mono text-sm font-semibold tabular-nums"
         >
           {value}
         </output>
@@ -71,14 +69,13 @@ function SupportItem({
           disabled={max === 0 && value === 0}
           onCheckedChange={(checked) => onChange(checked ? 1 : 0)}
           aria-label={label}
-          className="mx-1 scale-125"
+          className="mx-1"
         />
       ) : (
         <QuantityStepper
           label={label}
           value={value}
           max={max}
-          size="lg"
           showMax={false}
           onDecrease={() => onChange(value - 1)}
           onIncrease={() => onChange(value + 1)}
@@ -126,9 +123,9 @@ export function TeamSupport({
     0,
   );
   return (
-    <div className="grid items-start gap-6 @min-[780px]:grid-cols-2">
+    <div className="grid items-start gap-4 @min-[780px]:grid-cols-2">
       <section aria-labelledby="sideline-staff-title" className="min-w-0">
-        <div className="mb-3 flex items-center justify-between gap-3 px-1">
+        <div className="mb-2 flex items-center justify-between gap-3 px-1">
           <h2 id="sideline-staff-title" className="section-title">
             {t("staff")}
           </h2>
@@ -136,7 +133,7 @@ export function TeamSupport({
             {gold(staffCost)} GP
           </span>
         </div>
-        <ul className="space-y-2">
+        <ul className="space-y-1.5">
           {staffItems.map(({ key, cost, max }) => (
             <SupportItem
               key={key}
@@ -155,7 +152,7 @@ export function TeamSupport({
         </ul>
       </section>
       <section aria-labelledby="inducements-title" className="min-w-0">
-        <div className="mb-3 flex items-center justify-between gap-3 px-1">
+        <div className="mb-2 flex items-center justify-between gap-3 px-1">
           <h2 id="inducements-title" className="section-title">
             {t("inducements")}
           </h2>
@@ -164,7 +161,7 @@ export function TeamSupport({
           </span>
         </div>
         {eligible.length ? (
-          <ul className="space-y-2">
+          <ul className="space-y-1.5">
             {eligible.map((item) => {
               const info = inducementInfo(team, item);
               return (
@@ -188,7 +185,7 @@ export function TeamSupport({
             })}
           </ul>
         ) : (
-          <p className="rounded-xl border bg-card p-4 text-sm text-muted-foreground">
+          <p className="rounded-lg border bg-card p-3 text-xs text-muted-foreground">
             {t("noInducements")}
           </p>
         )}
