@@ -1,7 +1,9 @@
 import { Skeleton } from "./ui/skeleton";
 import { BrandLogo } from "./brand";
 import { SiteFooter } from "./site-footer";
-import en from "@/i18n/en.json";
+import { ShellFrame } from "./shell-frame";
+import { AccountLoading } from "./account-loading";
+import { Languages, PanelLeftClose, PanelRightOpen } from "lucide-react";
 import { getRoster } from "@/domain/catalog";
 import type { Team } from "@/domain/types";
 
@@ -126,7 +128,7 @@ export function LoadingLayout({
         <span className="sr-only">{label}</span>
         <div aria-hidden="true">
           <div className="mb-4 space-y-3">
-            <div className="flex min-h-8 items-center">
+            <div className="flex min-h-8 items-center lg:pl-8">
               <Skeleton className="h-4 w-20" />
             </div>
             <div className="flex flex-wrap items-end justify-between gap-3">
@@ -296,34 +298,56 @@ export function LoadingLayout({
 /** The initial locale/provider boundary preserves the same shell geometry. */
 export function ShellLoading() {
   return (
-    <>
-      <header className="site-header no-print" aria-hidden="true">
-        <div className="page-width flex min-h-14 flex-wrap items-center justify-between gap-3 py-2">
-          <BrandLogo />
-          <div className="hidden gap-2 lg:flex">
-            <Skeleton className="h-8 w-20 rounded-full" />
-            <Skeleton className="h-8 w-10 rounded-full md:w-[180px]" />
+    <ShellFrame
+      footer={<SiteFooter />}
+      header={
+        <header className="site-header no-print" aria-hidden="true">
+          <div className="site-header-content flex h-full items-center justify-between gap-3">
+            <BrandLogo />
+            <div className="flex size-11 items-center justify-center lg:hidden">
+              <PanelRightOpen className="size-6" />
+            </div>
           </div>
-          <Skeleton className="size-11 rounded-lg lg:hidden" />
-        </div>
-      </header>
-      <div className="lg:grid lg:grid-cols-[240px_minmax(0,1fr)] print:block">
-        <aside
-          className="no-print hidden space-y-4 border-r px-4 py-6 lg:block"
-          aria-hidden="true"
-        >
-          <Skeleton className="mb-6 h-12 w-full" />
-          {[0, 1, 2, 3].map((index) => (
-            <Skeleton key={index} className="h-11 w-full" />
-          ))}
-        </aside>
-        <div className="min-w-0">
-          <main className="min-h-[calc(100vh-245px)]">
-            <LoadingLayout label="Loading…" />
-          </main>
-          <SiteFooter community={en.community} />
-        </div>
-      </div>
-    </>
+        </header>
+      }
+      sidebar={
+        <>
+          <div
+            className="site-sidebar-header flex h-16 shrink-0 items-center"
+            aria-hidden="true"
+          >
+            <div className="site-sidebar-logo flex h-11 items-center overflow-hidden">
+              <BrandLogo className="h-9" />
+            </div>
+            <div className="site-sidebar-toggle flex items-center justify-center text-muted-foreground">
+              <PanelLeftClose className="size-4" />
+            </div>
+          </div>
+          <div
+            className="site-sidebar-content min-h-0 flex-1 space-y-1 overflow-y-auto"
+            aria-hidden="true"
+          >
+            {[0, 1, 2, 3].map((index) => (
+              <div key={index} className="flex h-11 items-center gap-3 px-3">
+                <Skeleton className="size-4 shrink-0" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            ))}
+          </div>
+          <div className="site-sidebar-footer" aria-hidden="true">
+            <div className="shrink-0 space-y-2 border-t pt-4">
+              <div className="flex h-11 items-center gap-3 px-3">
+                <Languages className="size-4 shrink-0 text-muted-foreground" />
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="ml-auto h-4 w-8" />
+              </div>
+              <AccountLoading />
+            </div>
+          </div>
+        </>
+      }
+    >
+      <LoadingLayout label="Loading…" />
+    </ShellFrame>
   );
 }

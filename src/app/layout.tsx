@@ -12,6 +12,7 @@ import {
   shareImage,
 } from "@/lib/site-metadata";
 import { Providers } from "@/components/providers";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteShell } from "@/components/site-shell";
 import { ShellLoading } from "@/components/loading-layouts";
 import "./globals.css";
@@ -77,7 +78,7 @@ export default function RootLayout({
         <Suspense fallback={<ShellLoading />}>
           <GTProvider>
             <Providers>
-              <SiteShell>{children}</SiteShell>
+              <SiteShell footer={<SiteFooter />}>{children}</SiteShell>
             </Providers>
           </GTProvider>
         </Suspense>

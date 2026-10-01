@@ -3,14 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "gt-next";
+import { SidebarTooltip } from "./sidebar-tooltip";
 import { BookOpen, Flag, Shield, Trophy, UsersRound } from "lucide-react";
 
 export function AppNavigation({
   admin = false,
   onNavigate,
+  collapsed = false,
 }: {
   admin?: boolean;
   onNavigate?: () => void;
+  collapsed?: boolean;
 }) {
   const t = useTranslations();
   const pathname = usePathname();
@@ -29,29 +32,54 @@ export function AppNavigation({
           (pathname === href ||
             pathname.startsWith(`${href}/`) ||
             (href === "/teams" && pathname.startsWith("/team/")));
-        const className = `flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`;
+        const className = `sidebar-menu-button flex min-h-11 w-full items-center rounded-lg py-2.5 text-sm font-medium transition-colors ${active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-secondary hover:text-foreground"} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary`;
+        const label = href ? t(key) : `${t(key)} · ${t("comingSoon")}`;
+        const content = (
+          <>
+            <Icon aria-hidden="true" className="size-4 shrink-0" />
+            <span className="sidebar-button-label" aria-hidden={collapsed}>
+              {t(key)}
+            </span>
+            {!href ? (
+              <span
+                className="sidebar-button-badge text-xs"
+                aria-hidden={collapsed}
+              >
+                {t("comingSoon")}
+              </span>
+            ) : null}
+          </>
+        );
         return href ? (
-          <Link
-            key={key}
-            href={href}
-            onClick={onNavigate}
-            aria-current={active ? "page" : undefined}
-            className={className}
-          >
-            <Icon aria-hidden="true" className="size-5" />
-            {t(key)}
-          </Link>
+          <SidebarTooltip key={key} enabled={collapsed} label={label}>
+            <Link
+              href={href}
+              onClick={onNavigate}
+              aria-label={t(key)}
+              aria-current={active ? "page" : undefined}
+              data-collapsed={collapsed}
+              className={className}
+            >
+              {content}
+            </Link>
+          </SidebarTooltip>
         ) : (
-          <button
-            key={key}
-            type="button"
-            disabled
-            className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground opacity-45"
-          >
-            <Icon aria-hidden="true" className="size-5" />
-            {t(key)}
-            <span className="ml-auto text-xs">{t("comingSoon")}</span>
-          </button>
+          <SidebarTooltip key={key} enabled={collapsed} label={label}>
+            <span
+              className="block rounded-lg focus-visible:outline-2 focus-visible:outline-primary"
+              tabIndex={collapsed ? 0 : undefined}
+              aria-label={collapsed ? label : undefined}
+            >
+              <button
+                type="button"
+                disabled
+                data-collapsed={collapsed}
+                className="sidebar-menu-button flex min-h-11 w-full items-center rounded-lg py-2.5 text-sm font-medium text-muted-foreground opacity-45"
+              >
+                {content}
+              </button>
+            </span>
+          </SidebarTooltip>
         );
       })}
     </nav>

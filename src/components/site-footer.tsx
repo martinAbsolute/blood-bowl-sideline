@@ -1,20 +1,17 @@
-import { Heart, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { version } from "../../package.json";
 
-export function SiteFooter({ community }: { community: string }) {
+export function SiteFooter() {
   const linkClass =
     "inline-flex items-center gap-1.5 rounded-sm transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary";
   return (
-    <footer className="no-print border-t border-border py-6">
-      <div className="page-width grid items-center gap-5 text-xs text-muted-foreground md:grid-cols-[1fr_auto_1fr]">
-        <div className="space-y-2">
-          <p className="flex items-start gap-2 text-sm font-medium leading-relaxed text-primary">
-            <Heart
-              aria-hidden="true"
-              className="mt-0.5 size-4 shrink-0 text-orange-500"
-            />
-            {community}
-          </p>
+    <footer className="no-print shrink-0 border-t border-border py-5">
+      <div className="page-width flex flex-col items-start justify-between gap-3 text-xs text-muted-foreground md:flex-row md:items-center md:gap-6">
+        <p className="leading-relaxed">
+          © 2026 Martin Bahniuk · Blood Bowl Sideline
+          <span className="text-orange-500">.</span>
+        </p>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
           <a
             href="https://t.me/martinAbsolute"
             target="_blank"
@@ -22,14 +19,8 @@ export function SiteFooter({ community }: { community: string }) {
             className={linkClass}
           >
             <Send aria-hidden="true" className="size-4" />
-            Martin Bahniuk
+            Telegram
           </a>
-        </div>
-        <p className="text-center">
-          © 2026 Martin Bahniuk · Blood Bowl Sideline
-          <span className="text-orange-500">.</span>
-        </p>
-        <div className="flex items-center gap-5 md:justify-end">
           <a
             href="https://github.com/martinAbsolute/"
             target="_blank"
