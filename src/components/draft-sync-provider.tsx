@@ -15,6 +15,7 @@ import {
   draftAccount,
   draftSnapshot,
   parseDrafts,
+  normalizeStoredDrafts,
   readRevision,
   storeDraft,
   subscribeDrafts,
@@ -26,7 +27,6 @@ import { finishDraftSignIn } from "@/lib/draft-sign-in";
 
 type Sync = {
   account: string | null;
-  coachName?: string;
   ready: boolean;
   editing: (uuid: string) => () => void;
   failed: ReadonlySet<string>;
@@ -82,6 +82,13 @@ export function DraftSyncProvider({ children }: { children: ReactNode }) {
     [],
   );
   useEffect(() => {
+    try {
+      normalizeStoredDrafts();
+    } catch {
+      // Browsers that block storage still allow the editor to work in memory.
+    }
+  }, []);
+  useEffect(() => {
     window.addEventListener("online", controls.retry);
     return () => window.removeEventListener("online", controls.retry);
   }, [controls]);
@@ -122,7 +129,6 @@ export function DraftSyncProvider({ children }: { children: ReactNode }) {
     <Context.Provider
       value={{
         account,
-        coachName: viewer?.name,
         ready: !isAuthenticated || viewer !== undefined,
         failed,
         ...controls,

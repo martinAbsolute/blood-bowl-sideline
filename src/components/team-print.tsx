@@ -89,15 +89,7 @@ function PrintedSkills({
   ));
 }
 
-export function TeamPrint({
-  team,
-  t,
-  coachName,
-}: {
-  team: Team;
-  t: Translate;
-  coachName?: string;
-}) {
+export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
   const roster = getRoster(team.rosterId)!;
   const ruleset = getRuleset(team.rulesetId);
   const totals = summarize(team);
@@ -148,11 +140,6 @@ export function TeamPrint({
           <p>
             {roster.name} · {ruleset.name} · {t("tier")} {totals.tier}
           </p>
-          {coachName && (
-            <p>
-              {t("coachName")}: {coachName}
-            </p>
-          )}
         </header>
         <div className="summary">
           <section>
@@ -314,7 +301,6 @@ export async function printTeam(
   orientation: PrintOrientation,
   t: Translate,
   locale: string,
-  coachName?: string,
 ) {
   const { renderToStaticMarkup } = await import("react-dom/server");
   // This is a standalone iframe document, outside Next.js's page and head manager.
@@ -327,7 +313,7 @@ export async function printTeam(
         <style>{printStyles(orientation)}</style>
       </head>
       <body>
-        <TeamPrint team={team} t={t} coachName={coachName} />
+        <TeamPrint team={team} t={t} />
       </body>
     </html>,
   );

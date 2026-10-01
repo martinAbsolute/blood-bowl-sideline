@@ -19,26 +19,37 @@ async function setup() {
   };
 }
 describe("Convex team ownership and sharing", () => {
-  it("uses the authenticated profile name and discards notes when saving guest drafts", async () => {
+  it("keeps Telegram ownership on the private user record and discards obsolete notes", async () => {
     const { a, b, t } = await setup();
     const team = {
       ...newTeam(randomUUID()),
-      coach: "Forged coach",
       notes: "Obsolete notes",
     };
     const saved = await a.mutation(api.teams.save, {
       team,
       expectedRevision: 0,
     });
-    expect(saved.team.coach).toBe("Olexandr");
+    expect(saved.team).not.toHaveProperty("coach");
     expect(saved.team.notes).toBe("");
-    expect(await a.query(api.teams.viewer, {})).toMatchObject({
-      name: "Olexandr",
+    const viewer = await a.query(api.teams.viewer, {});
+    expect(viewer).toEqual({ id: expect.any(String) });
+    expect(viewer).not.toHaveProperty("name");
+    expect(await b.query(api.teams.viewer, {})).toEqual({
+      id: expect.any(String),
     });
-    expect(await b.query(api.teams.viewer, {})).toMatchObject({ name: "B" });
     expect(await t.query(api.teams.viewer, {})).toBeNull();
     const shared = await t.query(api.teams.getByUuid, { uuid: team.uuid });
-    expect(shared?.team.coach).toBe("Olexandr");
+    expect(shared?.team).not.toHaveProperty("coach");
+    expect(JSON.stringify(shared)).not.toContain("Olexandr");
+    await t.run(async (ctx) => {
+      const doc = await ctx.db
+        .query("teams")
+        .withIndex("by_uuid", (q) => q.eq("uuid", team.uuid))
+        .unique();
+      expect(doc?.team).not.toHaveProperty("coach");
+      expect(doc?.searchText).not.toContain("Olexandr");
+      expect((await ctx.db.get("users", doc!.ownerId))?.name).toBe("Olexandr");
+    });
     expect(shared).not.toHaveProperty("id");
   });
   it("a fresh account starts empty even when another coach has saved teams", async () => {
@@ -175,7 +186,6 @@ describe("Account library search and filters", () => {
     const target = {
       ...newTeam(randomUUID(), "goblin"),
       name: "Needle Squad",
-      coach: "Olexandr",
       rulesetId: "eurobowl-2026" as const,
     };
     await a.mutation(api.teams.save, { team: target, expectedRevision: 0 });
@@ -199,10 +209,8 @@ describe("Account library search and filters", () => {
       (await a.query(api.teams.listMine, args)).page.map((d) => d.team.uuid),
     ).toEqual([target.uuid]);
     expect(
-      (await a.query(api.teams.listMine, { ...args, search: "Olex" })).page.map(
-        (d) => d.team.uuid,
-      ),
-    ).toEqual([target.uuid]);
+      (await a.query(api.teams.listMine, { ...args, search: "Olex" })).page,
+    ).toEqual([]);
     expect(
       (await a.query(api.teams.listMine, { ...args, rosterId: "dwarf" })).page,
     ).toEqual([]);

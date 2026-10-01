@@ -259,17 +259,7 @@ export function TeamEditor({
   async function print(orientation: "portrait" | "landscape") {
     try {
       const { printTeam } = await import("./team-print");
-      await printTeam(
-        team,
-        orientation,
-        t,
-        locale,
-        isAuthenticated
-          ? readOnly
-            ? team.coach
-            : draftSync.coachName
-          : undefined,
-      );
+      await printTeam(team, orientation, t, locale);
     } catch {
       toast.add({ type: "error", title: t("printFailed") });
     }
@@ -779,27 +769,6 @@ export function TeamEditor({
                     ))}
                   </EditorSelect>
                 </label>
-                {!isAuthenticated && (
-                  <label className="text-xs font-medium text-muted-foreground no-print max-[900px]:col-start-2">
-                    {t("coachName")}
-                    <Input
-                      className="mt-1 block h-9 bg-card px-2.5 text-sm font-normal text-foreground md:text-sm"
-                      value={team.coach}
-                      maxLength={80}
-                      onChange={(e) =>
-                        change({ ...team, coach: e.target.value })
-                      }
-                    />
-                  </label>
-                )}
-                {isAuthenticated && draftSync.coachName && (
-                  <div className="text-xs font-medium text-muted-foreground">
-                    {t("coachName")}
-                    <p className="mt-1 text-sm font-normal text-foreground">
-                      {draftSync.coachName}
-                    </p>
-                  </div>
-                )}
                 {["chaos-chosen", "chaos-renegade"].includes(roster.id) && (
                   <label className="text-xs font-medium text-muted-foreground">
                     <SpecialRules names={["Favoured of…"]} />

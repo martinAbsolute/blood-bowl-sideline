@@ -74,27 +74,16 @@ it("prints regular, additional and captain skills distinctly and escapes coach-e
   );
 });
 
-it("omits the guest coach and obsolete notes from printouts and uses an explicit signed-in coach", () => {
-  const team = {
-    ...newTeam(randomUUID()),
-    coach: "Guest coach",
-    notes: "Obsolete notes",
-  };
-  const guest = renderToStaticMarkup(
-    createElement(TeamPrint, { team, t: translator(en) }),
-  );
-  expect(guest).not.toContain("Guest coach");
-  expect(guest).not.toContain(en.coachName);
-  expect(guest).not.toContain("Obsolete notes");
-  const signedIn = renderToStaticMarkup(
-    createElement(TeamPrint, {
-      team,
-      t: translator(en),
-      coachName: "Telegram coach",
-    }),
-  );
-  expect(signedIn).toContain("Telegram coach");
-  expect(signedIn).not.toContain("Guest coach");
+it("omits owner names and obsolete notes from printouts in both languages", () => {
+  const team = { ...newTeam(randomUUID()), notes: "Obsolete notes" };
+  for (const dictionary of [en, uk]) {
+    const html = renderToStaticMarkup(
+      createElement(TeamPrint, { team, t: translator(dictionary) }),
+    );
+    expect(html).not.toContain("Obsolete notes");
+    expect(html).not.toContain("Coach name");
+    expect(html).not.toContain("Ім’я тренера");
+  }
 });
 
 describe.each([

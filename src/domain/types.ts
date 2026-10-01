@@ -15,7 +15,6 @@ export const teamSchema = z
     rulesVersion: z.literal(RULES_VERSION),
     uuid: z.uuid(),
     name: z.string().trim().min(1).max(80),
-    coach: z.string().trim().max(80),
     rosterId: z.string().max(60),
     rulesetId: z.enum(rulesetIds),
     favouredOf: z.enum([

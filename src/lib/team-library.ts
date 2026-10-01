@@ -14,7 +14,6 @@ export function libraryMatches(
     .filter(Boolean);
   const words = [
     team.name,
-    team.coach,
     getRoster(team.rosterId)?.name,
     getRuleset(team.rulesetId).name,
   ]

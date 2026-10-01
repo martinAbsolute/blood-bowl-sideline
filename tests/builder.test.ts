@@ -13,7 +13,6 @@ describe("switching team type", () => {
     );
     for (const update of [
       { name: "My team" },
-      { coach: "Coach" },
       { staff: { ...empty.staff, rerolls: 1 } },
       { inducements: { bribes: 1 } },
       { stars: ["akhorne"] },
@@ -30,7 +29,6 @@ describe("switching team type", () => {
     const team = {
       ...newTeam(uuid),
       name: "Old team",
-      coach: "Coach",
       notes: "Notes",
       rulesetId: "eurobowl-2026" as const,
       captainId: uuid,

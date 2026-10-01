@@ -355,9 +355,6 @@ function TeamCard({
             >
               {team.name || t("untitled")}
             </h2>
-            <p className="mt-1 truncate text-xs text-white/70">
-              {team.coach || t("coachNotSet")}
-            </p>
           </div>
         </div>
       </div>

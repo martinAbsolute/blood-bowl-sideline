@@ -5,7 +5,6 @@ export const teamValidator = v.object({
   rulesVersion: v.literal(RULES_VERSION),
   uuid: v.string(),
   name: v.string(),
-  coach: v.string(),
   rosterId: v.string(),
   rulesetId: v.union(
     v.literal("bb2025-default"),

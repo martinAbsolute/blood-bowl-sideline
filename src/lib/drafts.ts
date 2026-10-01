@@ -1,16 +1,17 @@
 import { teamSchema, type Team } from "@/domain/types";
 import { z } from "zod";
-// Preserve work even while the coach has cleared the team name. Account saves
+// Preserve recovery snapshots while team names are being edited. Account saves
 // still use the stricter shared server validator.
-const localDraftSchema = teamSchema.extend({
-  name: z.string().max(80),
-  coach: z.string().max(80),
-  players: z
-    .array(
-      teamSchema.shape.players.element.extend({ name: z.string().max(80) }),
-    )
-    .max(16),
-});
+const localDraftSchema = teamSchema
+  .extend({
+    name: z.string().max(80),
+    players: z
+      .array(
+        teamSchema.shape.players.element.extend({ name: z.string().max(80) }),
+      )
+      .max(16),
+  })
+  .strip();
 export const DRAFTS_KEY = "bbsideline:drafts:v1";
 const KEY = DRAFTS_KEY;
 const accountKey = (uuid: string) => `bbsideline:draft-account:${uuid}`;
@@ -48,6 +49,16 @@ export function parseDrafts(raw: string): Team[] {
       : [];
   } catch {
     return [];
+  }
+}
+// Keep only the current model on the device; obsolete fields must not stay
+// hidden in local recovery data after they have been removed from teams.
+export function normalizeStoredDrafts() {
+  const raw = draftSnapshot();
+  const normalized = JSON.stringify(parseDrafts(raw));
+  if (raw !== normalized) {
+    localStorage.setItem(KEY, normalized);
+    window.dispatchEvent(new Event("bbs-drafts-changed"));
   }
 }
 export function readRevision(uuid: string) {

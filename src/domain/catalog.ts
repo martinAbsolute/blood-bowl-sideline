@@ -86,7 +86,6 @@ export function newTeam(uuid: string, rosterId = "human"): Team {
     rulesVersion: RULES_VERSION,
     uuid,
     name: "Untitled team",
-    coach: "",
     rosterId,
     rulesetId: "bb2025-default",
     favouredOf: "Undivided",

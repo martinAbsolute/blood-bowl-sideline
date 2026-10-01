@@ -9,6 +9,8 @@ import {
   storeDraft,
   draftAccount,
   readRevision,
+  normalizeStoredDrafts,
+  DRAFTS_KEY,
 } from "../src/lib/drafts";
 import { saveCloudDraft } from "../src/lib/cloud-save";
 import {
@@ -267,8 +269,8 @@ it("filters the guest library by search and roster and lets the coach clear an e
   );
   expect(container.querySelectorAll("article")).toHaveLength(2);
 });
-it("matches coach and ruleset prefixes without ignoring combined filters", () => {
-  const team = { ...newTeam(randomUUID(), "goblin"), coach: "Олександр" };
+it("matches team names and ruleset prefixes without ignoring combined filters", () => {
+  const team = { ...newTeam(randomUUID(), "goblin"), name: "Олександр" };
   expect(
     libraryMatches(team, {
       search: "Олекс",
@@ -323,7 +325,7 @@ it("finishes filename editing with Enter, restores it with Escape, and normalize
 });
 
 it("acknowledges names exactly while they are being typed, without retaining duplicate recovery cards", async () => {
-  const team = { ...newTeam(randomUUID()), name: "Typing ", coach: "Coach " };
+  const team = { ...newTeam(randomUUID()), name: "Typing " };
   storeDraft(team);
   expect(readDrafts()[0]).toEqual(team);
   await saveCloudDraft(team, 0, mocks.save);
@@ -369,4 +371,100 @@ it("keeps queued cloud work protected after leaving the editor, and stops warnin
   expect(protectedByBrowser()).toBe(true);
   await act(async () => complete({ revision: 1 }));
   expect(protectedByBrowser()).toBe(false);
+});
+
+it.each(["Enter", "blur"])(
+  "selects the whole name on focus and restores an empty edit on %s",
+  async (finish) => {
+    let value = "Original team";
+    const change = vi.fn((next: string) => {
+      value = next;
+      render();
+    });
+    const render = () =>
+      root.render(
+        createElement(TeamName, {
+          value,
+          placeholder: "Untitled",
+          label: "Name",
+          onChange: change,
+        }),
+      );
+    await act(async () => render());
+    const name = container.querySelector("textarea")!;
+    await act(async () => name.focus());
+    expect(name.selectionStart).toBe(0);
+    expect(name.selectionEnd).toBe(value.length);
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(
+        HTMLTextAreaElement.prototype,
+        "value",
+      )!.set!.call(name, "");
+      name.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    expect(name.value).toBe("");
+    expect(name.placeholder).toBe("");
+    expect(value).toBe("Original team");
+    expect(change).not.toHaveBeenCalled();
+    await act(async () => {
+      if (finish === "Enter")
+        name.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Enter", bubbles: true }),
+        );
+      else name.blur();
+    });
+    expect(name.value).toBe("Original team");
+    expect(change).not.toHaveBeenCalled();
+  },
+);
+
+it("restores the focus-time name when a changed name is cleared to whitespace", async () => {
+  let value = "Original team";
+  const change = vi.fn((next: string) => {
+    value = next;
+    render();
+  });
+  const render = () =>
+    root.render(
+      createElement(TeamName, {
+        value,
+        placeholder: "Untitled",
+        label: "Name",
+        onChange: change,
+      }),
+    );
+  await act(async () => render());
+  const name = container.querySelector("textarea")!;
+  await act(async () => name.focus());
+  const input = (next: string) => {
+    Object.getOwnPropertyDescriptor(
+      HTMLTextAreaElement.prototype,
+      "value",
+    )!.set!.call(name, next);
+    name.dispatchEvent(new Event("input", { bubbles: true }));
+  };
+  await act(async () => input("Changed name"));
+  expect(value).toBe("Changed name");
+  await act(async () => input("   "));
+  expect(name.value).toBe("   ");
+  expect(value).toBe("Changed name");
+  await act(async () => name.blur());
+  expect(value).toBe("Original team");
+  expect(name.value).toBe("Original team");
+  expect(change.mock.calls.map(([next]) => next)).toEqual([
+    "Changed name",
+    "Original team",
+  ]);
+});
+
+it("removes obsolete fields from local draft data while retaining roster selections", () => {
+  const team = newTeam(randomUUID(), "goblin");
+  team.staff.rerolls = 2;
+  localStorage.setItem(
+    DRAFTS_KEY,
+    JSON.stringify([{ ...team, coach: "Obsolete private name" }]),
+  );
+  normalizeStoredDrafts();
+  expect(readDrafts()).toEqual([team]);
+  expect(JSON.parse(localStorage.getItem(DRAFTS_KEY)!)).toEqual([team]);
 });
