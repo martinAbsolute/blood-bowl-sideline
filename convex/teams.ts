@@ -10,6 +10,7 @@ import { teamSchema } from "../src/domain/types";
 import { z } from "zod";
 import { getRoster, getRuleset } from "../src/domain/catalog";
 import { teamSaveIssues, validateTeam } from "../src/domain/rules";
+import { currentUser, requireUser } from "./roles";
 
 export const getByUuid = query({
   args: { uuid: v.string() },
@@ -21,13 +22,13 @@ export const getByUuid = query({
       .withIndex("by_uuid", (q) => q.eq("uuid", uuid))
       .unique();
     if (!doc || doc.archived) return null;
-    const owner = await getAuthUserId(ctx);
+    const viewer = await currentUser(ctx);
     return {
       team: doc.team,
       revision: doc.revision,
       legal: doc.legal,
       updatedAt: doc.updatedAt,
-      canEdit: owner === doc.ownerId,
+      canEdit: viewer?._id === doc.ownerId || viewer?.role === "admin",
     };
   },
 });
@@ -130,8 +131,8 @@ export const save = mutation({
   args: { team: teamValidator, expectedRevision: v.number() },
   returns: publicTeam,
   handler: async (ctx, args) => {
-    const ownerId = await getAuthUserId(ctx);
-    if (!ownerId) throw new ConvexError("UNAUTHENTICATED");
+    const viewer = await requireUser(ctx);
+    const ownerId = viewer._id;
     if (
       !Number.isSafeInteger(args.expectedRevision) ||
       args.expectedRevision < 0
@@ -149,7 +150,7 @@ export const save = mutation({
       .query("teams")
       .withIndex("by_uuid", (q) => q.eq("uuid", team.uuid))
       .unique();
-    if (existing && existing.ownerId !== ownerId)
+    if (existing && existing.ownerId !== ownerId && viewer.role !== "admin")
       throw new ConvexError("FORBIDDEN");
     if ((existing?.revision ?? 0) !== args.expectedRevision)
       throw new ConvexError("CONFLICT");
@@ -188,15 +189,16 @@ export const setArchived = mutation({
   args: { uuid: v.string(), archived: v.boolean() },
   returns: v.null(),
   handler: async (ctx, { uuid, archived }) => {
-    const ownerId = await getAuthUserId(ctx);
-    if (!ownerId) throw new ConvexError("UNAUTHENTICATED");
+    const viewer = await requireUser(ctx);
+    const ownerId = viewer._id;
     if (!z.uuid().safeParse(uuid).success)
       throw new ConvexError("INVALID_INPUT");
     const doc = await ctx.db
       .query("teams")
       .withIndex("by_uuid", (q) => q.eq("uuid", uuid))
       .unique();
-    if (!doc || doc.ownerId !== ownerId) throw new ConvexError("FORBIDDEN");
+    if (!doc || (doc.ownerId !== ownerId && viewer.role !== "admin"))
+      throw new ConvexError("FORBIDDEN");
     await ctx.db.patch(doc._id, {
       archived,
       updatedAt: Date.now(),

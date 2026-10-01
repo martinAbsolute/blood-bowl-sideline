@@ -300,16 +300,30 @@ export function ShellLoading() {
       <header className="site-header no-print" aria-hidden="true">
         <div className="page-width flex min-h-14 flex-wrap items-center justify-between gap-3 py-2">
           <BrandLogo />
-          <div className="flex gap-2">
+          <div className="hidden gap-2 lg:flex">
             <Skeleton className="h-8 w-20 rounded-full" />
             <Skeleton className="h-8 w-10 rounded-full md:w-[180px]" />
           </div>
+          <Skeleton className="size-11 rounded-lg lg:hidden" />
         </div>
       </header>
-      <main className="min-h-[calc(100vh-245px)]">
-        <LoadingLayout label="Loading…" />
-      </main>
-      <SiteFooter community={en.community} />
+      <div className="lg:grid lg:grid-cols-[240px_minmax(0,1fr)] print:block">
+        <aside
+          className="no-print hidden space-y-4 border-r px-4 py-6 lg:block"
+          aria-hidden="true"
+        >
+          <Skeleton className="mb-6 h-12 w-full" />
+          {[0, 1, 2, 3].map((index) => (
+            <Skeleton key={index} className="h-11 w-full" />
+          ))}
+        </aside>
+        <div className="min-w-0">
+          <main className="min-h-[calc(100vh-245px)]">
+            <LoadingLayout label="Loading…" />
+          </main>
+          <SiteFooter community={en.community} />
+        </div>
+      </div>
     </>
   );
 }

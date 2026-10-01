@@ -2,9 +2,16 @@ import { defineSchema, defineTable } from "convex/server";
 import { authTables } from "@convex-dev/auth/server";
 import { teamValidator } from "./validators";
 import { v } from "convex/values";
+import { roleValidator } from "./roles";
 
 export default defineSchema({
   ...authTables,
+  users: defineTable({
+    ...authTables.users.validator.fields,
+    role: v.optional(roleValidator),
+  })
+    .index("email", ["email"])
+    .index("phone", ["phone"]),
   teams: defineTable({
     ownerId: v.id("users"),
     uuid: v.string(),

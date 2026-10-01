@@ -23,13 +23,14 @@
     "build": "pnpm typecheck && next build",
     "start": "next start",
     "lint": "eslint .",
-    "format": "prettier --write src convex tests scripts docs README.md CONTRIBUTING.md NOTICE.md THIRD_PARTY_NOTICES.md package.json",
-    "format:check": "prettier --check src convex tests scripts docs README.md CONTRIBUTING.md NOTICE.md THIRD_PARTY_NOTICES.md package.json"
+    "format": "prettier --write src convex tests scripts docs README.md package.json",
+    "format:check": "prettier --check src convex tests scripts docs README.md package.json"
   },
   "dependencies": {
     "@auth/core": "^0.41.3",
     "@base-ui/react": "^1.8.0",
     "@convex-dev/auth": "^0.0.95",
+    "@convex-dev/presence": "^0.4.0",
     "@shikijs/transformers": "^4.4.3",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",

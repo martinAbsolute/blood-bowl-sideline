@@ -18,7 +18,8 @@ The roster builder includes:
 - Default, Matched Play, EuroBowl 2026, and NAF World Cup 2027 v2.1 presets, with shared validation of budgets, skills, and eligibility.
 - Guest drafts that save on your device; Telegram sign-in brings all guest teams into your account library.
 - Automatic cloud saving with account-scoped recovery copies for unfinished or failed edits.
-- Team search, filters, duplication, archiving, and shareable UUID links. Owners edit their teams; visitors see the public roster.
+- Team search, filters, duplication, archiving, and shareable UUID links. Owners and admins edit teams; visitors see the public roster.
+- Responsive sidebar navigation, a leagues landing page, and an admin-only user directory with online and last-seen status.
 - Portrait and landscape printouts with full skill references and clearly marked advancements.
 - English and Ukrainian, with a persistent language choice.
 
@@ -36,6 +37,18 @@ pnpm dev
 This command configures and syncs Convex first, then runs its watcher and Next.js together using [Convex's `--start` option](https://docs.convex.dev/cli/reference/dev). Pull the Vercel Development environment to use its development `CONVEX_DEPLOY_KEY`; Convex adds the deployment URLs to `.env.local`. See [.env.example](.env.example). Both processes stop with Ctrl-C. Use `pnpm dev:frontend` or `pnpm dev:backend` to run either server independently.
 
 Open [localhost:3000](http://localhost:3000). Guest team building works without Telegram credentials. To enable sign-in, configure `TELEGRAM_CLIENT_ID`, `TELEGRAM_CLIENT_SECRET`, `JWT_PRIVATE_KEY`, and `JWKS` in your Convex deployment, and set its `SITE_URL` to `http://localhost:3000`. Leave `CUSTOM_AUTH_SITE_URL` unset locally so OAuth uses Convex's HTTPS callback. Register that callback with Telegram. The frontend checks credential availability in Convex when signing in.
+
+## Users and access control
+
+Accounts have either the `admin` or `user` role. Existing accounts without a stored role are treated as users. Admins can edit and archive any team without changing its owner, and can view `/users`. The directory excludes the current admin, loads every account in batches, and sorts online users first, then by most recent activity. Convex's presence component handles multiple tabs, disconnects, and session timeouts. Accounts without recorded activity are displayed with that status.
+
+To grant admin access, open the intended deployment in the Convex dashboard, copy the account's ID from the `users` table, and run the internal mutation `users:setAdmin`:
+
+```json
+{ "userId": "<users document ID>", "enabled": true }
+```
+
+Run it with `enabled: false` to restore the user role. This mutation is internal and cannot be invoked through the public client API. No role controls are exposed in the UI. League and tournament organizer permissions will derive from ownership of those resources; there is no global organizer role. `/leagues` currently provides an empty landing page for ongoing leagues, and Tournaments remains disabled in navigation.
 
 ## Stack and project layout
 

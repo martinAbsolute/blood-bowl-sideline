@@ -10,8 +10,11 @@
 
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
+import type * as presence from "../presence.js";
+import type * as roles from "../roles.js";
 import type * as teams from "../teams.js";
 import type * as telegram from "../telegram.js";
+import type * as users from "../users.js";
 import type * as validators from "../validators.js";
 
 import type {
@@ -23,8 +26,11 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
+  presence: typeof presence;
+  roles: typeof roles;
   teams: typeof teams;
   telegram: typeof telegram;
+  users: typeof users;
   validators: typeof validators;
 }>;
 
@@ -54,4 +60,6 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  presence: import("@convex-dev/presence/_generated/component.js").ComponentApi<"presence">;
+};
