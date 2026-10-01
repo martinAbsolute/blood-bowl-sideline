@@ -19,9 +19,20 @@ The roster builder includes:
 - Guest drafts that save on your device; Telegram sign-in brings all guest teams into your account library.
 - Automatic cloud saving with account-scoped recovery copies for unfinished or failed edits.
 - Team search, filters, duplication, archiving, and shareable UUID links. Owners and admins edit teams; visitors see the public roster.
-- Responsive sidebar navigation, a leagues landing page, and an admin-only user directory with online and last-seen status.
+- Responsive sidebar navigation and an admin-only user directory with online and last-seen status.
 - Portrait and landscape printouts with full skill references and clearly marked advancements.
 - English and Ukrainian, with a persistent language choice.
+- BB2025 leagues with rookie team registration, automatic round-robin fixtures, shared match reports, two-coach confirmation, official standings, player SPP and commissioner history.
+
+## League play
+
+Sign in through Telegram, open **Leagues**, and create a league. The creator is its commissioner and can register a team as a coach. Share the league link with the other participants; each registers a legal BB2025 starting team from their account. Launch the regular-season phase to generate the round robin. Two teams are enough for the minimum testing setup.
+
+Both coaches fill the same match report during or after play, save their player statistics and match details, and confirm the current report. Both confirmations lock the official result and apply standings and player development once. The commissioner can review and correct locked reports with a recorded reason. Team progression, purchases and administrative changes remain in the league history.
+
+Open the official league roster to spend earned SPP, manage the team and complete the post-game sequence. League rosters link to existing Teams but have their own sanctioned state; edits in the exhibition builder do not change official progression. The initial league workflow uses standard BB2025 and chosen skill advancements. See [the two-coach test guide](docs/league-testing.md), [league architecture](docs/league-play-design.md) and [league rules provenance](docs/league-rules-sources.md).
+
+The commissioner can withdraw entrants, resolve unplayed fixtures and correct treasury balances with a recorded reason. Result corrections apply directly before either career progresses further; corrections with later dependencies require reconciliation and are rejected in this release. Random skills, characteristic advancement, automated concession consequences, season redrafting and venue-specific photo enforcement remain future work. Reports accept evidence links.
 
 ## Run locally
 
@@ -38,6 +49,8 @@ This command configures and syncs Convex first, then runs its watcher and Next.j
 
 Open [localhost:3000](http://localhost:3000). Guest team building works without Telegram credentials. To enable sign-in, configure `TELEGRAM_CLIENT_ID`, `TELEGRAM_CLIENT_SECRET`, `JWT_PRIVATE_KEY`, and `JWKS` in your Convex deployment, and set its `SITE_URL` to `http://localhost:3000`. Leave `CUSTOM_AUTH_SITE_URL` unset locally so OAuth uses Convex's HTTPS callback. Register that callback with Telegram. The frontend checks credential availability in Convex when signing in.
 
+For local and preview testing without Telegram, enable [development sign-in](docs/development-auth.md) on both servers. The account menu creates two test coaches and can switch between existing users through normal authenticated sessions. Vercel production flags disable the route; Convex independently checks its opt-in type, deployment binding and secret.
+
 ## Users and access control
 
 Accounts have either the `admin` or `user` role. Existing accounts without a stored role are treated as users. Admins can edit and archive any team without changing its owner, and can view `/users`. The directory excludes the current admin, loads every account in batches, and sorts online users first, then by most recent activity. Convex's presence component handles multiple tabs, disconnects, and session timeouts. Accounts without recorded activity are displayed with that status.
@@ -48,7 +61,7 @@ To grant admin access, open the intended deployment in the Convex dashboard, cop
 { "userId": "<users document ID>", "enabled": true }
 ```
 
-Run it with `enabled: false` to restore the user role. This mutation is internal and cannot be invoked through the public client API. No role controls are exposed in the UI. League and tournament organizer permissions will derive from ownership of those resources; there is no global organizer role. `/leagues` currently provides an empty landing page for ongoing leagues, and Tournaments remains disabled in navigation.
+Run it with `enabled: false` to restore the user role. This mutation is internal and cannot be invoked through the public client API. No role controls are exposed in the UI. Commissioner permissions derive from league ownership; a commissioner can also be a participating coach, and there is no global organizer role. `/leagues` lists competitions, while existing roster-affiliation references retain their URLs. Tournaments remains disabled in navigation.
 
 ## Stack and project layout
 

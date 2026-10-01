@@ -13,6 +13,7 @@ import {
 import { useDraftSync } from "./draft-sync-provider";
 import { TeamEditor } from "./team-editor";
 import { WorkspaceLoading } from "./workspace-loading";
+import { TeamLeagueLinks } from "./team-league-links";
 
 export function TeamPage({ uuid }: { uuid: string }) {
   const t = useTranslations();
@@ -27,12 +28,15 @@ export function TeamPage({ uuid }: { uuid: string }) {
   const editable = !!local || (isAuthenticated && !!live?.canEdit);
   if (sync.ready && (local || live))
     return (
-      <TeamEditor
-        key={`${uuid}:${sync.account ?? "guest"}:${editable ? "edit" : `view-${live?.revision}`}`}
-        initial={local ?? live!.team}
-        revision={local ? 0 : live!.revision}
-        readOnly={!editable}
-      />
+      <>
+        <TeamLeagueLinks uuid={uuid} />
+        <TeamEditor
+          key={`${uuid}:${sync.account ?? "guest"}:${editable ? "edit" : `view-${live?.revision}`}`}
+          initial={local ?? live!.team}
+          revision={local ? 0 : live!.revision}
+          readOnly={!editable}
+        />
+      </>
     );
   if (!sync.ready || live === undefined)
     return <WorkspaceLoading variant="editor" />;

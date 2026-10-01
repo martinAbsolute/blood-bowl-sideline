@@ -2,6 +2,7 @@ import { convexAuth } from "@convex-dev/auth/server";
 import { telegramProvider } from "../src/lib/telegram-oidc";
 import { action } from "./_generated/server";
 import { v } from "convex/values";
+import { devImpersonationProvider } from "./devAuth";
 
 export const isTelegramConfigured = action({
   args: {},
@@ -13,5 +14,5 @@ export const isTelegramConfigured = action({
 });
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [telegramProvider()],
+  providers: [telegramProvider(), devImpersonationProvider()],
 });

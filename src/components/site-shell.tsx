@@ -31,6 +31,7 @@ import {
   SheetTrigger,
 } from "./ui/sheet";
 import { AccountLoading } from "./account-loading";
+import { DevAuthPanel } from "./dev-auth-panel";
 export function LoginButton({
   className,
   compact = false,
@@ -136,6 +137,12 @@ export function SiteShell({
             className="sidebar-menu-button sidebar-login-button h-12 w-full rounded-lg"
           />
         )}
+        {!collapsed ? (
+          <DevAuthPanel
+            currentUserId={viewer?.id}
+            onSignedIn={() => setOpen(false)}
+          />
+        ) : null}
       </div>
     );
   }
