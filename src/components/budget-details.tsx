@@ -7,21 +7,11 @@ import type { Team } from "@/domain/types";
 
 const gold = (n: number) => `${(n / 1000).toLocaleString("en")}k`;
 
-export function BudgetOverview({
-  team,
-  compact = false,
-}: {
-  team: Team;
-  compact?: boolean;
-}) {
+export function BudgetOverview({ team }: { team: Team }) {
   const t = useTranslations();
   const totals = summarize(team);
   return (
-    <span
-      className={
-        compact ? "budget-overview budget-compact" : "budget-overview block p-4"
-      }
-    >
+    <span className="budget-overview block p-4">
       <span className="budget-caption block text-xs font-medium text-muted-foreground">
         {t("summary")}
       </span>
@@ -49,12 +39,10 @@ export function BudgetOverview({
           }}
         />
       </span>
-      {!compact && (
-        <span className="mt-3 flex justify-between text-xs">
-          <span className="text-muted-foreground">{t("remaining")}</span>
-          <span className="font-mono">{gold(totals.remaining)} GP</span>
-        </span>
-      )}
+      <span className="budget-remaining mt-3 flex justify-between text-xs">
+        <span className="text-muted-foreground">{t("remaining")}</span>
+        <span className="font-mono">{gold(totals.remaining)} GP</span>
+      </span>
     </span>
   );
 }

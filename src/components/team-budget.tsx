@@ -1,51 +1,23 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "gt-next";
-import { X } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import type { Team } from "@/domain/types";
 import { BudgetBreakdown, BudgetOverview } from "./budget-details";
 import { Button } from "./ui/button";
 import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "./ui/accordion";
-import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
   DrawerTitle,
-  DrawerTrigger,
 } from "./ui/drawer";
 
-function BudgetContent({
-  team,
-  expanded = false,
-}: {
-  team: Team;
-  expanded?: boolean;
-}) {
-  const t = useTranslations();
+function BudgetDetails({ team }: { team: Team }) {
   return (
-    <>
-      <BudgetOverview team={team} />
-      <Accordion
-        defaultValue={expanded ? ["budget"] : []}
-        className="border-t px-4 text-xs"
-      >
-        <AccordionItem value="budget">
-          <AccordionTrigger className="items-center py-3 text-xs font-normal text-muted-foreground hover:no-underline">
-            {t("budgetBreakdown")}
-          </AccordionTrigger>
-          <AccordionContent className="text-xs motion-reduce:animate-none">
-            <BudgetBreakdown team={team} />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </>
+    <div className="border-t p-4 text-xs">
+      <BudgetBreakdown team={team} />
+    </div>
   );
 }
 
@@ -59,7 +31,34 @@ export function TeamBudget({
   const t = useTranslations();
   const section = useRef<HTMLElement>(null);
   const [aboveBudget, setAboveBudget] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [summaryElement, setSummaryElement] = useState<HTMLDivElement | null>(
+    null,
+  );
+  const [collapsedHeight, setCollapsedHeight] = useState(64);
+  const collapsedPoint = `${collapsedHeight}px`;
+  // 1 clamps to the panel's natural height, rather than forcing a full screen.
+  const snapPoints = useMemo(() => [collapsedPoint, 1], [collapsedPoint]);
+
+  useEffect(() => {
+    if (!summaryElement) return;
+    const observer = new ResizeObserver(() => {
+      const panel = summaryElement.closest<HTMLElement>(
+        ".mobile-budget-drawer",
+      );
+      if (!panel || panel.dataset.expanded !== "false") return;
+      const styles = getComputedStyle(panel);
+      setCollapsedHeight(
+        Math.ceil(
+          summaryElement.getBoundingClientRect().height +
+            parseFloat(styles.borderTopWidth) +
+            parseFloat(styles.paddingBottom),
+        ),
+      );
+    });
+    observer.observe(summaryElement);
+    return () => observer.disconnect();
+  }, [summaryElement]);
 
   useEffect(() => {
     const target = section.current;
@@ -72,7 +71,7 @@ export function TeamBudget({
           mobile.matches &&
           entry.boundingClientRect.top >= (entry.rootBounds?.bottom ?? 0);
         setAboveBudget(above);
-        if (!above) setDrawerOpen(false);
+        if (!above) setExpanded(false);
       },
       { rootMargin: "0px 0px -80px 0px" },
     );
@@ -81,7 +80,7 @@ export function TeamBudget({
       if (mobile.matches) observer.observe(target);
       else {
         setAboveBudget(false);
-        setDrawerOpen(false);
+        setExpanded(false);
       }
     };
     observe();
@@ -99,46 +98,71 @@ export function TeamBudget({
         aria-label={t("summary")}
         className="team-budget budget-panel print-break-avoid overflow-hidden"
       >
-        <BudgetContent team={team} />
+        <BudgetOverview team={team} />
+        <BudgetDetails team={team} />
       </section>
       {floating && (
         <Drawer
-          open={aboveBudget && drawerOpen}
-          onOpenChange={setDrawerOpen}
-          showSwipeHandle
+          open={aboveBudget}
+          modal={expanded}
+          disablePointerDismissal={!expanded}
+          snapPoints={snapPoints}
+          snapToSequentialPoints
+          snapPoint={expanded ? 1 : collapsedPoint}
+          onSnapPointChange={(point, details) => {
+            // Keep the compact budget visible even after a fast downward swipe.
+            if (point === null) details.cancel();
+            setExpanded(point === 1);
+          }}
+          onOpenChange={(open, details) => {
+            if (!open) {
+              // Dismissal returns to the compact resting position.
+              details.cancel();
+              setExpanded(false);
+            }
+          }}
         >
-          <div
-            className="mobile-budget budget-panel no-print"
-            data-visible={aboveBudget}
-            inert={!aboveBudget}
-            aria-hidden={!aboveBudget}
+          <DrawerContent
+            className="mobile-budget-drawer budget-panel no-print"
+            data-expanded={expanded}
+            initialFocus={false}
+            finalFocus={false}
+            swipeHeader={
+              <div ref={setSummaryElement} className="budget-drawer-summary">
+                <span className="budget-drawer-handle" aria-hidden="true" />
+                <button
+                  type="button"
+                  className="block w-full cursor-pointer text-left"
+                  aria-label={t("budgetBreakdown")}
+                  aria-expanded={expanded}
+                  onClick={() => setExpanded(!expanded)}
+                >
+                  <BudgetOverview team={team} />
+                </button>
+              </div>
+            }
           >
-            <DrawerTrigger
-              className="mobile-budget-trigger"
-              aria-label={t("budgetBreakdown")}
-            >
-              <BudgetOverview team={team} compact />
-            </DrawerTrigger>
-          </div>
-          <DrawerContent className="mobile-budget-drawer budget-panel">
             <DrawerTitle className="sr-only">{t("summary")}</DrawerTitle>
             <DrawerDescription className="sr-only">
               {t("budgetBreakdown")}
             </DrawerDescription>
-            <DrawerClose
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  className="absolute right-3 top-1 z-10"
-                  aria-label={t("close")}
-                />
-              }
+            {expanded && (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="absolute right-3 top-1 z-10"
+                aria-label={t("close")}
+                onClick={() => setExpanded(false)}
+              >
+                <ChevronDown />
+              </Button>
+            )}
+            <div
+              className="budget-drawer-breakdown min-h-0 overflow-y-auto overscroll-contain"
+              inert={!expanded}
+              aria-hidden={!expanded}
             >
-              <X />
-            </DrawerClose>
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-              <BudgetContent team={team} expanded />
+              <BudgetDetails team={team} />
             </div>
           </DrawerContent>
         </Drawer>
