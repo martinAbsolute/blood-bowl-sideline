@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useTranslations } from "gt-next";
 import { getRoster } from "@/domain/catalog";
+import { needsPlayerRecruitment } from "@/lib/builder";
 import type { Team } from "@/domain/types";
 import { PlayerIcon } from "./player-icon";
 import {
@@ -42,7 +43,8 @@ export function PlayerRecruitment({
   const t = useTranslations();
   const roster = getRoster(team.rosterId)!;
   const [pendingRemoval, setPendingRemoval] = useState<string | null>(null);
-  const [recruitOpen, setRecruitOpen] = useState<string[]>(["recruit"]);
+  // null follows roster needs; a manual toggle lasts for this roster session.
+  const [recruitOpen, setRecruitOpen] = useState<boolean | null>(null);
   const removalTrigger = useRef<HTMLElement | null>(null);
   const cancelButton = useRef<HTMLButtonElement | null>(null);
   const pendingPlayer = team.players.find((p) => p.id === pendingRemoval);
@@ -50,32 +52,31 @@ export function PlayerRecruitment({
     (p) => p.id === pendingPlayer?.positionId,
   );
   const playerCount = team.players.length + team.stars.length;
+  const needsPlayers = needsPlayerRecruitment(team);
+
+  function updateRecruitment(next: Team) {
+    // Keep the controls in place while recruiting, even at the minimum.
+    setRecruitOpen(true);
+    onChange(next);
+  }
 
   function removePlayer(id: string) {
     const next = { ...team, players: team.players.filter((p) => p.id !== id) };
     if (next.captainId === id) delete next.captainId;
-    onChange(next);
+    updateRecruitment(next);
     setPendingRemoval(null);
   }
 
   return (
     <>
       <Accordion
-        value={recruitOpen}
-        onValueChange={setRecruitOpen}
+        value={(recruitOpen ?? needsPlayers) ? ["recruit"] : []}
+        onValueChange={(value) => setRecruitOpen(value.includes("recruit"))}
         className="no-print recruitment-menu player-recruitment rounded-lg border bg-card"
       >
         <AccordionItem value="recruit">
           <AccordionTrigger className="items-center rounded-none rounded-t-lg aria-[expanded=false]:rounded-b-lg bg-secondary px-4 py-3.5 text-base font-semibold hover:no-underline [&>svg]:text-primary">
-            <span className="flex flex-1 items-center justify-between gap-3 pr-3">
-              <span>{t("recruitPlayers")}</span>
-              <span
-                aria-live="polite"
-                className="font-mono text-xs font-normal tabular-nums text-muted-foreground"
-              >
-                {playerCount}/16
-              </span>
-            </span>
+            {t("recruitPlayers")}
           </AccordionTrigger>
           <AccordionContent className="border-t p-0">
             <Table
@@ -158,7 +159,7 @@ export function PlayerRecruitment({
                             }
                           }}
                           onIncrease={() =>
-                            onChange({
+                            updateRecruitment({
                               ...team,
                               players: [
                                 ...team.players,

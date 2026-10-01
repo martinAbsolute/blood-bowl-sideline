@@ -1,5 +1,15 @@
-import { newTeam } from "@/domain/catalog";
+import { getRuleset, newTeam } from "@/domain/catalog";
 import type { Team } from "@/domain/types";
+
+export function needsPlayerRecruitment(team: Team) {
+  return (
+    team.players.length + team.stars.length <
+      getRuleset(team.rulesetId).minPlayers ||
+    (team.rulesetId === "world-cup-2027" &&
+      team.stars.length > 0 &&
+      team.players.length < 11)
+  );
+}
 
 export function hasTeamProgress(team: Team) {
   const empty = newTeam(team.uuid, team.rosterId);

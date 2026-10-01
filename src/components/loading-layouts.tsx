@@ -6,6 +6,7 @@ import { AccountLoading } from "./account-loading";
 import { Languages, PanelLeftClose, PanelRightOpen } from "lucide-react";
 import { getRoster } from "@/domain/catalog";
 import type { Team } from "@/domain/types";
+import { needsPlayerRecruitment } from "@/lib/builder";
 
 export type LoadingVariant = "library" | "editor" | "catalog";
 
@@ -144,22 +145,34 @@ export function LoadingLayout({
             <div className="flex h-6 gap-2">
               <Skeleton className="h-6 w-20" />
               <Skeleton className="h-6 w-28" />
-              <Skeleton className="h-6 w-20" />
             </div>
           </div>
           <div className="budget-grid">
             <div className="@container space-y-5">
-              <TableLoading
-                rows={getRoster(team?.rosterId ?? "human")!.players.length}
-              />
-              <TableLoading
-                rows={
-                  (team?.players.length ?? 0) + (team?.stars.length ?? 0) || 1
-                }
-                empty={!team?.players.length && !team?.stars.length}
-                compact
-                footer
-              />
+              {team && needsPlayerRecruitment(team) ? (
+                <TableLoading rows={getRoster(team.rosterId)!.players.length} />
+              ) : (
+                <div className="flex h-14 items-center justify-between rounded-lg border bg-secondary px-4">
+                  <Skeleton className="h-5 w-36" />
+                  <Skeleton className="size-4" />
+                </div>
+              )}
+              <div>
+                <div className="mb-2 flex h-6 items-center justify-between px-1">
+                  <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-3 w-10" />
+                </div>
+                <TableLoading
+                  rows={
+                    (team?.players.length ?? 0) + (team?.stars.length ?? 0) || 1
+                  }
+                  empty={!team?.players.length && !team?.stars.length}
+                  title={false}
+                />
+                <div className="-mt-px flex h-12 justify-end rounded-b-lg border bg-card p-2">
+                  <Skeleton className="h-7 w-32" />
+                </div>
+              </div>
               <div className="grid items-start gap-4 @min-[780px]:grid-cols-2">
                 {[5, 6].map((count) => (
                   <section key={count}>

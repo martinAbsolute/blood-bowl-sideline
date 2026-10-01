@@ -56,16 +56,11 @@ import { PlayerRecruitment } from "./player-recruitment";
 import { SkillList, TableSkills } from "./skill-box";
 import { TeamAffiliations, SpecialRules } from "./team-affiliations";
 import { Checkbox } from "./ui/checkbox";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "./ui/accordion";
 import { ScrollArea } from "./ui/scroll-area";
 import { PlayerSkillPicker } from "./player-skill-picker";
 import { positionLabel } from "./position-name";
 import { TeamSupport } from "./team-support";
+import { TeamBudget } from "./team-budget";
 import { shareTeamLink } from "@/lib/share-team";
 import { hasTeamProgress, resetTeamRoster } from "@/lib/builder";
 import {
@@ -79,7 +74,6 @@ import {
   ShieldCheck,
   Star,
   Trash2,
-  Users,
   X,
 } from "lucide-react";
 import { toast } from "@/components/ui/toast";
@@ -289,213 +283,88 @@ export function TeamEditor({
             {roster.name}
           </Badge>
           <Badge variant="outline">{rules.name}</Badge>
-          <Badge variant="secondary">
-            {totals.playerCount}/16 {t("players")}
-          </Badge>
           {readOnly && <Badge variant="outline">{t("viewOnly")}</Badge>}
         </div>
       </TeamHeader>
       <div className="budget-grid">
         <div className="@container space-y-5">
-          {!readOnly && <PlayerRecruitment team={team} onChange={change} />}
-          <section className="overflow-hidden rounded-lg border bg-card">
-            <div className="flex items-center justify-between border-b px-3 py-2.5">
-              <h2 className="section-title flex items-center gap-2">
-                <Users className="size-5 text-muted-foreground" />
+          {!readOnly && (
+            <PlayerRecruitment
+              key={`${team.uuid}:${team.rosterId}`}
+              team={team}
+              onChange={change}
+            />
+          )}
+          <section aria-labelledby="players-title" className="min-w-0">
+            <div className="mb-2 flex items-center justify-between gap-3 px-1">
+              <h2 id="players-title" className="section-title">
                 {t("players")}
               </h2>
               <span className="font-mono text-xs text-muted-foreground">
                 {totals.playerCount}/16
               </span>
             </div>
-            <Table
-              aria-label={t("players")}
-              className="player-table min-w-[740px] table-auto md:table-fixed"
-            >
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-10 pl-3">#</TableHead>
-                  <TableHead className="w-48">{t("player")}</TableHead>
-                  {["MA", "ST", "AG", "PA", "AV"].map((x) => (
-                    <TableHead
-                      key={x}
-                      className="w-8 text-center font-mono text-xs"
-                    >
-                      {x}
-                    </TableHead>
-                  ))}
-                  <TableHead>{t("skills")}</TableHead>
-                  {requiresCaptain && (
-                    <TableHead className="w-16 text-center">
-                      {t("teamCaptain")}
-                    </TableHead>
-                  )}
-                  <TableHead className="w-16 pr-3 text-right">
-                    {t("cost")}
-                  </TableHead>
-                  <TableHead className="w-8">
-                    <span className="sr-only">{t("managePlayer")}</span>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {!team.players.length && !team.stars.length && (
+            <div className="overflow-hidden rounded-lg border bg-card">
+              <Table
+                aria-label={t("players")}
+                className="player-table min-w-[740px] table-auto md:table-fixed"
+              >
+                <TableHeader>
                   <TableRow>
-                    <TableCell
-                      colSpan={requiresCaptain ? 11 : 10}
-                      className="py-8 text-center text-xs text-muted-foreground"
-                    >
-                      {t("emptyRosterHint")}
-                    </TableCell>
+                    <TableHead className="w-10 pl-3">#</TableHead>
+                    <TableHead className="w-48">{t("player")}</TableHead>
+                    {["MA", "ST", "AG", "PA", "AV"].map((x) => (
+                      <TableHead
+                        key={x}
+                        className="w-8 text-center font-mono text-xs"
+                      >
+                        {x}
+                      </TableHead>
+                    ))}
+                    <TableHead>{t("skills")}</TableHead>
+                    {requiresCaptain && (
+                      <TableHead className="w-16 text-center">
+                        {t("teamCaptain")}
+                      </TableHead>
+                    )}
+                    <TableHead className="w-16 pr-3 text-right">
+                      {t("cost")}
+                    </TableHead>
+                    <TableHead className="w-8">
+                      <span className="sr-only">{t("managePlayer")}</span>
+                    </TableHead>
                   </TableRow>
-                )}
-                {team.players.map((p, index) => {
-                  const pos = roster.players.find((x) => x.id === p.positionId);
-                  if (!pos) return null;
-                  return (
-                    <TableRow
-                      key={p.id}
-                      className="group cursor-pointer focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-[-2px]"
-                      tabIndex={0}
-                      aria-label={`${t("managePlayer")} · ${p.name || positionLabel(pos.position)}`}
-                      onClick={(event) => {
-                        if (
-                          (event.target as HTMLElement).closest(
-                            "button, a, input, [role=checkbox]",
-                          )
-                        )
-                          return;
-                        setSelected(p.id);
-                      }}
-                      onKeyDown={(event) => {
-                        if (
-                          event.target === event.currentTarget &&
-                          ["Enter", " "].includes(event.key)
-                        ) {
-                          event.preventDefault();
-                          setSelected(p.id);
-                        }
-                      }}
-                    >
-                      <TableCell className="pl-5 font-mono text-xs text-muted-foreground">
-                        {String(index + 1).padStart(2, "0")}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <PlayerIcon
-                            positionId={pos.id}
-                            variant={index}
-                            className="size-8"
-                          />
-                          <div>
-                            {readOnly ? (
-                              <strong className="text-sm">
-                                {p.name || positionLabel(pos.position)}
-                              </strong>
-                            ) : (
-                              <>
-                                <strong className="hidden text-sm print:block">
-                                  {p.name || positionLabel(pos.position)}
-                                </strong>
-                                <button
-                                  className="no-print inline-flex items-center gap-2 text-left text-sm font-semibold text-primary hover:underline"
-                                  onClick={() => {
-                                    setSelected(p.id);
-                                    setSearch("");
-                                  }}
-                                >
-                                  {p.name || positionLabel(pos.position)}
-                                </button>
-                              </>
-                            )}
-                            {p.name && (
-                              <p className="mt-0.5 text-xs text-muted-foreground">
-                                {positionLabel(pos.position)}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </TableCell>
-                      {[pos.ma, pos.st, pos.ag, pos.pa, pos.av].map((x, i) => (
-                        <TableCell
-                          key={i}
-                          className="text-center font-mono text-xs"
-                        >
-                          {x}
-                        </TableCell>
-                      ))}
-                      <TableCell>
-                        <TableSkills
-                          ids={pos.skills}
-                          additionalIds={p.skills}
-                          captain={team.captainId === p.id}
-                          label={t("skills")}
-                        />
-                      </TableCell>
-                      {requiresCaptain && (
-                        <TableCell className="text-center">
-                          <label
-                            className="inline-flex size-8 items-center justify-center"
-                            onClick={(event) => event.stopPropagation()}
-                          >
-                            <Checkbox
-                              checked={team.captainId === p.id}
-                              disabled={
-                                readOnly || pos.position.includes("Big Guy")
-                              }
-                              aria-label={`${t("teamCaptain")} · ${p.name || positionLabel(pos.position)}`}
-                              onCheckedChange={(checked) => {
-                                const next = { ...team };
-                                if (checked) {
-                                  next.captainId = p.id;
-                                  next.players = team.players.map((player) =>
-                                    player.id === p.id
-                                      ? {
-                                          ...player,
-                                          skills: player.skills.filter(
-                                            (id) => id !== "pro",
-                                          ),
-                                        }
-                                      : player,
-                                  );
-                                } else delete next.captainId;
-                                change(next);
-                              }}
-                            />
-                          </label>
-                        </TableCell>
-                      )}
-                      <TableCell className="pr-5 text-right font-mono text-xs">
-                        {gold(
-                          pos.cost +
-                            (rules.id === "bb2025-default"
-                              ? playerSkillCost(team, pos, p.skills)
-                              : 0),
-                        )}
-                      </TableCell>
-                      <TableCell className="pr-3">
-                        <ChevronRight
-                          aria-hidden="true"
-                          className="size-4 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
-                        />
+                </TableHeader>
+                <TableBody>
+                  {!team.players.length && !team.stars.length && (
+                    <TableRow>
+                      <TableCell
+                        colSpan={requiresCaptain ? 11 : 10}
+                        className="py-8 text-center text-xs text-muted-foreground"
+                      >
+                        {t("emptyRosterHint")}
                       </TableCell>
                     </TableRow>
-                  );
-                })}
-                {team.stars.map((id) => {
-                  const s = stars.find((x) => x.id === id);
-                  return (
-                    s && (
+                  )}
+                  {team.players.map((p, index) => {
+                    const pos = roster.players.find(
+                      (x) => x.id === p.positionId,
+                    );
+                    if (!pos) return null;
+                    return (
                       <TableRow
-                        key={id}
-                        className="group cursor-pointer bg-amber-50/70 focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-[-2px]"
+                        key={p.id}
+                        className="group cursor-pointer focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-[-2px]"
                         tabIndex={0}
-                        aria-label={`${t("managePlayer")} · ${s.name}`}
+                        aria-label={`${t("managePlayer")} · ${p.name || positionLabel(pos.position)}`}
                         onClick={(event) => {
                           if (
-                            !(event.target as HTMLElement).closest("button, a")
+                            (event.target as HTMLElement).closest(
+                              "button, a, input, [role=checkbox]",
+                            )
                           )
-                            setSelected(id);
+                            return;
+                          setSelected(p.id);
                         }}
                         onKeyDown={(event) => {
                           if (
@@ -503,61 +372,107 @@ export function TeamEditor({
                             ["Enter", " "].includes(event.key)
                           ) {
                             event.preventDefault();
-                            setSelected(id);
+                            setSelected(p.id);
                           }
                         }}
                       >
-                        <TableCell className="pl-5 text-amber-700">
-                          <Star className="size-3" />
+                        <TableCell className="pl-5 font-mono text-xs text-muted-foreground">
+                          {String(index + 1).padStart(2, "0")}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <StarPlayerIcon starId={s.id} className="size-10" />
-                            <strong className="hidden text-sm print:block">
-                              {s.name}
-                            </strong>
-                            <button
-                              className="no-print text-left text-sm font-semibold"
-                              onClick={() => setSelected(id)}
-                            >
-                              {s.name}
-                            </button>
-                            {!readOnly && (
-                              <button
-                                className="ml-2 text-muted-foreground"
-                                aria-label={`${t("remove")} ${s.name}`}
-                                onClick={() => {
-                                  const pairs = starPairs;
-                                  const pair = pairs.find((p) =>
-                                    p.includes(id),
-                                  ) ?? [id];
-                                  change({
-                                    ...team,
-                                    stars: team.stars.filter(
-                                      (s) => !pair.includes(s),
-                                    ),
-                                  });
-                                }}
-                              >
-                                <X className="size-3" />
-                              </button>
-                            )}
+                            <PlayerIcon
+                              positionId={pos.id}
+                              variant={index}
+                              className="size-8"
+                            />
+                            <div>
+                              {readOnly ? (
+                                <strong className="text-sm">
+                                  {p.name || positionLabel(pos.position)}
+                                </strong>
+                              ) : (
+                                <>
+                                  <strong className="hidden text-sm print:block">
+                                    {p.name || positionLabel(pos.position)}
+                                  </strong>
+                                  <button
+                                    className="no-print inline-flex items-center gap-2 text-left text-sm font-semibold text-primary hover:underline"
+                                    onClick={() => {
+                                      setSelected(p.id);
+                                      setSearch("");
+                                    }}
+                                  >
+                                    {p.name || positionLabel(pos.position)}
+                                  </button>
+                                </>
+                              )}
+                              {p.name && (
+                                <p className="mt-0.5 text-xs text-muted-foreground">
+                                  {positionLabel(pos.position)}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </TableCell>
-                        {[s.ma, s.st, s.ag, s.pa, s.av].map((x, i) => (
-                          <TableCell
-                            key={i}
-                            className="text-center font-mono text-xs"
-                          >
-                            {x}
-                          </TableCell>
-                        ))}
-                        <TableCell className="whitespace-normal text-xs text-muted-foreground">
-                          <TableSkills ids={s.skills} label={t("skills")} />
+                        {[pos.ma, pos.st, pos.ag, pos.pa, pos.av].map(
+                          (x, i) => (
+                            <TableCell
+                              key={i}
+                              className="text-center font-mono text-xs"
+                            >
+                              {x}
+                            </TableCell>
+                          ),
+                        )}
+                        <TableCell>
+                          <TableSkills
+                            ids={pos.skills}
+                            additionalIds={p.skills}
+                            captain={team.captainId === p.id}
+                            label={t("skills")}
+                          />
                         </TableCell>
-                        {requiresCaptain && <TableCell />}
+                        {requiresCaptain && (
+                          <TableCell className="text-center">
+                            <label
+                              className="inline-flex size-8 items-center justify-center"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              <Checkbox
+                                checked={team.captainId === p.id}
+                                disabled={
+                                  readOnly || pos.position.includes("Big Guy")
+                                }
+                                aria-label={`${t("teamCaptain")} · ${p.name || positionLabel(pos.position)}`}
+                                onCheckedChange={(checked) => {
+                                  const next = { ...team };
+                                  if (checked) {
+                                    next.captainId = p.id;
+                                    next.players = team.players.map((player) =>
+                                      player.id === p.id
+                                        ? {
+                                            ...player,
+                                            skills: player.skills.filter(
+                                              (id) => id !== "pro",
+                                            ),
+                                          }
+                                        : player,
+                                    );
+                                  } else delete next.captainId;
+                                  change(next);
+                                }}
+                              />
+                            </label>
+                          </TableCell>
+                        )}
                         <TableCell className="pr-5 text-right font-mono text-xs">
-                          {gold(s.cost)}
+                          {gold(
+                            pos.cost +
+                              (rules.id === "bb2025-default"
+                                ? playerSkillCost(team, pos, p.skills)
+                                : 0),
+                          )}
                         </TableCell>
                         <TableCell className="pr-3">
                           <ChevronRight
@@ -566,34 +481,124 @@ export function TeamEditor({
                           />
                         </TableCell>
                       </TableRow>
-                    )
-                  );
-                })}
-              </TableBody>
-            </Table>
-            {!readOnly && (
-              <div className="flex items-center justify-between border-t px-5 py-3">
-                <p className="text-xs text-muted-foreground">
-                  {totals.playerCount}/16 {t("players")}
-                </p>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  disabled={
-                    starChoices(team.stars).length >= 2 ||
-                    totals.playerCount >= 16 ||
-                    (rules.id === "world-cup-2027" && team.players.length < 11)
-                  }
-                  onClick={() => {
-                    setDialog("stars");
-                    setSearch("");
-                  }}
-                >
-                  <Star className="size-4 text-amber-700" />
-                  {t("addStar")}
-                </Button>
-              </div>
-            )}
+                    );
+                  })}
+                  {team.stars.map((id) => {
+                    const s = stars.find((x) => x.id === id);
+                    return (
+                      s && (
+                        <TableRow
+                          key={id}
+                          className="group cursor-pointer bg-amber-50/70 focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-[-2px]"
+                          tabIndex={0}
+                          aria-label={`${t("managePlayer")} · ${s.name}`}
+                          onClick={(event) => {
+                            if (
+                              !(event.target as HTMLElement).closest(
+                                "button, a",
+                              )
+                            )
+                              setSelected(id);
+                          }}
+                          onKeyDown={(event) => {
+                            if (
+                              event.target === event.currentTarget &&
+                              ["Enter", " "].includes(event.key)
+                            ) {
+                              event.preventDefault();
+                              setSelected(id);
+                            }
+                          }}
+                        >
+                          <TableCell className="pl-5 text-amber-700">
+                            <Star className="size-3" />
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <StarPlayerIcon
+                                starId={s.id}
+                                className="size-10"
+                              />
+                              <strong className="hidden text-sm print:block">
+                                {s.name}
+                              </strong>
+                              <button
+                                className="no-print text-left text-sm font-semibold"
+                                onClick={() => setSelected(id)}
+                              >
+                                {s.name}
+                              </button>
+                              {!readOnly && (
+                                <button
+                                  className="ml-2 text-muted-foreground"
+                                  aria-label={`${t("remove")} ${s.name}`}
+                                  onClick={() => {
+                                    const pairs = starPairs;
+                                    const pair = pairs.find((p) =>
+                                      p.includes(id),
+                                    ) ?? [id];
+                                    change({
+                                      ...team,
+                                      stars: team.stars.filter(
+                                        (s) => !pair.includes(s),
+                                      ),
+                                    });
+                                  }}
+                                >
+                                  <X className="size-3" />
+                                </button>
+                              )}
+                            </div>
+                          </TableCell>
+                          {[s.ma, s.st, s.ag, s.pa, s.av].map((x, i) => (
+                            <TableCell
+                              key={i}
+                              className="text-center font-mono text-xs"
+                            >
+                              {x}
+                            </TableCell>
+                          ))}
+                          <TableCell className="whitespace-normal text-xs text-muted-foreground">
+                            <TableSkills ids={s.skills} label={t("skills")} />
+                          </TableCell>
+                          {requiresCaptain && <TableCell />}
+                          <TableCell className="pr-5 text-right font-mono text-xs">
+                            {gold(s.cost)}
+                          </TableCell>
+                          <TableCell className="pr-3">
+                            <ChevronRight
+                              aria-hidden="true"
+                              className="size-4 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
+                            />
+                          </TableCell>
+                        </TableRow>
+                      )
+                    );
+                  })}
+                </TableBody>
+              </Table>
+              {!readOnly && (
+                <div className="flex justify-end border-t px-3 py-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={
+                      starChoices(team.stars).length >= 2 ||
+                      totals.playerCount >= 16 ||
+                      (rules.id === "world-cup-2027" &&
+                        team.players.length < 11)
+                    }
+                    onClick={() => {
+                      setDialog("stars");
+                      setSearch("");
+                    }}
+                  >
+                    <Star className="size-4 text-amber-700" />
+                    {t("addStar")}
+                  </Button>
+                </div>
+              )}
+            </div>
           </section>
           <TeamSupport team={team} onChange={change} readOnly={readOnly} />
         </div>
@@ -690,103 +695,7 @@ export function TeamEditor({
             </section>
           )}
 
-          <section className="print-break-avoid overflow-hidden rounded-lg border bg-card">
-            <div className="p-4">
-              <p className="text-xs font-medium text-muted-foreground">
-                {t("summary")}
-              </p>
-              <div className="mt-4 flex items-end justify-between">
-                <span className="display-font text-2xl">
-                  {gold(totals.teamGold)}
-                </span>
-                <span className="pb-1 font-mono text-xs text-muted-foreground">
-                  / {gold(totals.budget.teamBudget)} GP
-                </span>
-              </div>
-              <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-secondary">
-                <div
-                  className={`h-full transition-[width] ${totals.remaining < 0 ? "bg-orange-600" : "bg-primary/60"}`}
-                  style={{
-                    width: `${Math.min(100, (totals.teamGold / totals.budget.teamBudget) * 100)}%`,
-                  }}
-                />
-              </div>
-              <div className="mt-3 flex justify-between text-xs">
-                <span className="text-muted-foreground">{t("remaining")}</span>
-                <span className="font-mono">{gold(totals.remaining)} GP</span>
-              </div>
-            </div>
-            <Accordion className="border-t px-4 text-xs">
-              <AccordionItem value="budget">
-                <AccordionTrigger className="items-center py-3 text-xs font-normal text-muted-foreground hover:no-underline">
-                  {t("budgetBreakdown")}
-                </AccordionTrigger>
-                <AccordionContent className="text-xs motion-reduce:animate-none">
-                  <div className="space-y-3">
-                    {[
-                      [t("players"), totals.players],
-                      [t("staff"), totals.staff],
-                      [t("starPlayers"), totals.starGold],
-                      [t("inducements"), totals.inducements],
-                    ].map(([label, n]) => (
-                      <div className="flex justify-between" key={label}>
-                        <span className="text-muted-foreground">{label}</span>
-                        <span className="font-mono">{gold(n as number)}</span>
-                      </div>
-                    ))}
-                    {rules.id !== "bb2025-default" && (
-                      <div className="border-t pt-3">
-                        <div className="flex justify-between font-semibold">
-                          <span>{t("skillAllowance")}</span>
-                          <span className="font-mono">
-                            {rules.skillCurrency
-                              ? totals.skills
-                              : gold(totals.skills)}{" "}
-                            /{" "}
-                            {rules.skillCurrency
-                              ? totals.budget.skillGold
-                              : gold(totals.budget.skillGold)}{" "}
-                            {rules.skillCurrency === "spp"
-                              ? "SPP"
-                              : rules.skillCurrency === "sp"
-                                ? "SP"
-                                : "GP"}
-                          </span>
-                        </div>
-                        {totals.starTax > 0 && (
-                          <p className="mt-2 text-muted-foreground">
-                            {t("starPlayers")}:{" "}
-                            {rules.skillCurrency
-                              ? totals.starTax
-                              : gold(totals.starTax)}{" "}
-                            {rules.skillCurrency?.toUpperCase() ?? "GP"}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                    {rules.id === "eurobowl-2026" && (
-                      <div className="border-t pt-3">
-                        <div className="flex justify-between">
-                          <span>{t("flowingFunds")}</span>
-                          <span className="font-mono">
-                            {gold(totals.fundsUsed)} /{" "}
-                            {gold(totals.budget.flowingFunds)}
-                          </span>
-                        </div>
-                        <p className="mt-2 leading-relaxed text-muted-foreground">
-                          {t("flowingHint")}
-                        </p>
-                      </div>
-                    )}
-                    <div className="flex justify-between border-t pt-3">
-                      <span>{t("tier")}</span>
-                      <span>{totals.tier || roster.tier}</span>
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </section>
+          <TeamBudget team={team} floating={!readOnly} />
           <ReadinessCard ready={validation.valid}>
             <div className="flex items-center gap-2">
               <ShieldCheck
@@ -803,22 +712,14 @@ export function TeamEditor({
                 </p>
               </>
             ) : (
-              <details
-                className="mt-3 text-xs"
-                open={validation.issues.length <= 2}
-              >
-                <summary className="cursor-pointer text-muted-foreground">
-                  {t("rosterChecks", { count: validation.issues.length })}
-                </summary>
-                <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
-                  {validation.issues.map((issue, index) => (
-                    <li key={`${issue.code}-${index}`} className="flex gap-2">
-                      <span className="mt-1.5 size-1 shrink-0 rounded-full bg-orange-600" />
-                      <span>{t(`issues.${issue.code}`, issue.values)}</span>
-                    </li>
-                  ))}
-                </ul>
-              </details>
+              <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
+                {validation.issues.map((issue, index) => (
+                  <li key={`${issue.code}-${index}`} className="flex gap-2">
+                    <span className="mt-1.5 size-1 shrink-0 rounded-full bg-orange-600" />
+                    <span>{t(`issues.${issue.code}`, issue.values)}</span>
+                  </li>
+                ))}
+              </ul>
             )}
             {rules.id !== "bb2025-default" && (
               <p className="mt-4 border-t pt-3 text-[10px] leading-relaxed text-muted-foreground">

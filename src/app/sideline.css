@@ -586,6 +586,90 @@ html {
   font-size: 16px;
   font-weight: 650;
 }
+.mobile-budget {
+  display: none;
+}
+.budget-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+}
+@media (max-width: 767px) {
+  .mobile-budget {
+    position: fixed;
+    z-index: 40;
+    inset: auto var(--page-gutter) 0;
+    display: block;
+    margin: 0;
+    padding: 8px 16px max(8px, env(safe-area-inset-bottom));
+    border-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: 0 -4px 16px #193e320a;
+    transform: translateY(110%);
+    visibility: hidden;
+    transition:
+      transform 180ms ease,
+      visibility 180ms;
+  }
+  .mobile-budget[data-visible="true"] {
+    transform: translateY(0);
+    visibility: visible;
+  }
+  .mobile-budget-trigger {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    text-align: left;
+    border-radius: 4px;
+  }
+  .mobile-budget-trigger:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 4px;
+  }
+  .budget-compact {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 8px;
+  }
+  .budget-compact .budget-value {
+    margin: 0;
+    gap: 4px;
+    align-items: baseline;
+    font-variant-numeric: tabular-nums;
+  }
+  .budget-compact .budget-spent {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+  }
+  .budget-compact .budget-limit {
+    padding: 0;
+  }
+  .budget-compact .budget-progress {
+    grid-column: 1 / -1;
+    margin: 0;
+    height: 4px;
+  }
+  .mobile-budget-drawer {
+    --drawer-content-height: auto;
+    --drawer-content-max-height: 85dvh;
+    margin: 0 var(--page-gutter);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mobile-budget {
+    transition: none;
+  }
+}
+@media print {
+  .mobile-budget {
+    display: none;
+  }
+}
 .team-builder .budget-grid {
   grid-template-columns: minmax(0, 1fr) 275px;
   gap: 16px;
