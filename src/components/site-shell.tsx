@@ -118,7 +118,7 @@ export function SiteShell({
   }, [locale]);
   function accountControls(collapsed = false, mobile = false) {
     return (
-      <div className="sidebar-account-controls shrink-0 space-y-2 border-t pt-4">
+      <div className="sidebar-account-controls flex shrink-0 flex-col gap-2 border-t pt-4">
         <LanguageSwitch compact={collapsed} />
         {viewer ? (
           <SidebarAccountMenu

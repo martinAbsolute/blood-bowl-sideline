@@ -335,7 +335,7 @@ export function ShellLoading() {
             ))}
           </div>
           <div className="site-sidebar-footer" aria-hidden="true">
-            <div className="shrink-0 space-y-2 border-t pt-4">
+            <div className="flex shrink-0 flex-col gap-2 border-t pt-4">
               <div className="flex h-11 items-center gap-3 px-3">
                 <Languages className="size-4 shrink-0 text-muted-foreground" />
                 <Skeleton className="h-4 w-20" />
