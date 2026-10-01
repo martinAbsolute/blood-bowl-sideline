@@ -50,4 +50,6 @@ export const publicTeam = v.object({
   legal: v.boolean(),
   updatedAt: v.number(),
   canEdit: v.boolean(),
+  leagueLocked: v.boolean(),
+  leagueExperienced: v.boolean(),
 });

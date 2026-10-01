@@ -436,6 +436,8 @@ describe("Direct API input hardening", () => {
     expect(publicView?.revision).toBe(1);
     expect(Object.keys(publicView!).sort()).toEqual([
       "canEdit",
+      "leagueExperienced",
+      "leagueLocked",
       "legal",
       "revision",
       "team",

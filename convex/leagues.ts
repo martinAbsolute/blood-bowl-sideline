@@ -8,6 +8,7 @@ import type { MutationCtx, QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import schema from "./schema";
 import { currentUser, requireUser } from "./roles";
+import { teamLeagueState } from "./teamLeagueState";
 import { playerChangeValidator } from "./leagueValidators";
 import { getRoster } from "../src/domain/catalog";
 import { RULES_VERSION } from "../src/domain/types";
@@ -436,6 +437,8 @@ export const register = mutation({
       .unique();
     if (!source || source.ownerId !== user._id || source.archived)
       throw new ConvexError("FORBIDDEN");
+    if ((await teamLeagueState(ctx, source)).leagueExperienced)
+      throw new ConvexError("TEAM_EXPERIENCED");
     const issues = rookieLeagueIssues(source.team);
     if (issues.length)
       throw new ConvexError({ code: "INVALID_ROOKIE", issues });
@@ -464,6 +467,7 @@ export const register = mutation({
       hiringClosed: false,
       withdrawn: false,
     });
+    await ctx.db.patch("teams", source._id, { leagueExperienced: true });
     for (const player of team.players)
       await ctx.db.insert("leaguePlayers", {
         leagueId,
@@ -2115,10 +2119,15 @@ export const replaceEntryTeam = mutation({
       .unique();
     if (!source || source.ownerId !== entry.coachId || source.archived)
       throw new ConvexError("FORBIDDEN");
+    if ((await teamLeagueState(ctx, source)).leagueExperienced)
+      throw new ConvexError("TEAM_EXPERIENCED");
     const issues = rookieLeagueIssues(source.team);
     if (issues.length)
       throw new ConvexError({ code: "INVALID_ROOKIE", issues });
     const oldPlayers = await entryPlayers(ctx, entryId);
+    // Preserve experience even when replacement removes the old team's career link.
+    await ctx.db.patch("teams", entry.teamId, { leagueExperienced: true });
+    await ctx.db.patch("teams", source._id, { leagueExperienced: true });
     for (const player of oldPlayers)
       await ctx.db.delete("leaguePlayers", player._id);
     const team = {

@@ -12,6 +12,7 @@ import {
   starPairs,
   starChoices,
 } from "@/domain/catalog";
+import { rookieLeagueIssues } from "@/domain/league-rules";
 import {
   playerSkillCost,
   starEligible,
@@ -27,6 +28,7 @@ import { TeamName } from "./team-name";
 import { TeamSaveStatus } from "./team-save-status";
 import { TeamHeader } from "./team-header";
 import { EditorSelect } from "./editor-select";
+import { LeagueTeamIssues } from "./league-team-issues";
 import { ReadinessCard } from "./readiness-card";
 import { Button } from "./ui/button";
 import {
@@ -721,6 +723,16 @@ export function TeamEditor({
                 ))}
               </ul>
             )}
+            {validation.valid &&
+              rules.id === "bb2025-default" &&
+              rookieLeagueIssues(team).length > 0 && (
+                <div className="mt-4 space-y-2 border-t pt-3">
+                  <p className="text-xs font-medium">
+                    {t("leagueUi.rookieEligibility")}
+                  </p>
+                  <LeagueTeamIssues team={team} />
+                </div>
+              )}
             {rules.id !== "bb2025-default" && (
               <p className="mt-4 border-t pt-3 text-[10px] leading-relaxed text-muted-foreground">
                 {t("squadNotice")}

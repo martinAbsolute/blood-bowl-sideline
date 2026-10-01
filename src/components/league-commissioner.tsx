@@ -8,7 +8,7 @@ import type { Id } from "../../convex/_generated/dataModel";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { EditorSelect } from "./editor-select";
+import { LeagueField, LeagueSelect } from "./league-field";
 import { LeagueError, LeagueSection, useLeagueAction } from "./league-ui";
 
 export function CommissionerAdvancementUndo({
@@ -104,7 +104,7 @@ export function CommissionerRuling({
             });
         }}
       >
-        <EditorSelect
+        <LeagueSelect
           aria-label={t("leagueUi.adjudicate")}
           value={outcome}
           onChange={(event) => setOutcome(event.target.value as typeof outcome)}
@@ -117,8 +117,8 @@ export function CommissionerRuling({
               {t("leagueUi." + value)}
             </option>
           ))}
-        </EditorSelect>
-        <label className="block text-sm">
+        </LeagueSelect>
+        <LeagueField>
           {t("leagueUi.reason")}
           <Textarea
             className="mt-1"
@@ -127,7 +127,7 @@ export function CommissionerRuling({
             value={reason}
             onChange={(event) => setReason(event.target.value)}
           />
-        </label>
+        </LeagueField>
         <Button
           className="h-11"
           type="submit"
@@ -179,7 +179,7 @@ export function CommissionerWithdrawal({
             });
         }}
       >
-        <EditorSelect
+        <LeagueSelect
           value={entryId}
           aria-label={t("team")}
           onChange={(event) => setEntryId(event.target.value)}
@@ -192,8 +192,8 @@ export function CommissionerWithdrawal({
                 {entry.team.name}
               </option>
             ))}
-        </EditorSelect>
-        <label className="block text-sm">
+        </LeagueSelect>
+        <LeagueField>
           {t("leagueUi.reason")}
           <Textarea
             className="mt-1"
@@ -202,7 +202,7 @@ export function CommissionerWithdrawal({
             value={reason}
             onChange={(event) => setReason(event.target.value)}
           />
-        </label>
+        </LeagueField>
         <Button
           type="submit"
           className="h-11"
@@ -258,7 +258,7 @@ export function CommissionerTreasury({
             });
         }}
       >
-        <label className="block text-sm">
+        <LeagueField>
           {t("leagueUi.treasury")} (GP)
           <Input
             className="mt-1 h-11"
@@ -272,8 +272,8 @@ export function CommissionerTreasury({
               setDraft({ ...current, amount: Number(event.target.value) })
             }
           />
-        </label>
-        <label className="block text-sm">
+        </LeagueField>
+        <LeagueField>
           {t("leagueUi.reason")}
           <Textarea
             className="mt-1"
@@ -285,7 +285,7 @@ export function CommissionerTreasury({
               setDraft({ ...current, reason: event.target.value })
             }
           />
-        </label>
+        </LeagueField>
         <Button
           type="submit"
           className="h-11"

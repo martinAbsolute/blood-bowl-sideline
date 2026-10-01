@@ -16,7 +16,7 @@ import {
 import { api } from "../../convex/_generated/api";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { EditorSelect } from "./editor-select";
+import { LeagueField, LeagueSelect } from "./league-field";
 import { LoginButton } from "./site-shell";
 import { LeagueError, LeagueStatus, useLeagueAction } from "./league-ui";
 import {
@@ -108,8 +108,8 @@ export function LeaguesPage() {
           <form onSubmit={createLeague} className="space-y-5">
             <LeagueError message={action.error} />
             <div className="grid gap-4 sm:grid-cols-3">
-              <label className="space-y-2 text-sm sm:col-span-3">
-                <span className="font-medium">{t("leagueName")}</span>
+              <LeagueField className="sm:col-span-3">
+                <span>{t("leagueName")}</span>
                 <Input
                   required
                   maxLength={100}
@@ -119,11 +119,9 @@ export function LeaguesPage() {
                   placeholder={t("leagueUx.namePlaceholder")}
                   className="h-11"
                 />
-              </label>
-              <label className="space-y-2 text-sm sm:col-span-2">
-                <span className="font-medium">
-                  {t("leagueUx.plannedStart")}
-                </span>
+              </LeagueField>
+              <LeagueField className="sm:col-span-2">
+                <span>{t("leagueUx.plannedStart")}</span>
                 <Input
                   type="datetime-local"
                   value={startDate}
@@ -131,9 +129,9 @@ export function LeaguesPage() {
                   className="h-11 min-w-0"
                   aria-describedby="league-schedule-hint"
                 />
-              </label>
-              <label className="space-y-2 text-sm">
-                <span className="font-medium">{t("leagueRoundDays")}</span>
+              </LeagueField>
+              <LeagueField>
+                <span>{t("leagueRoundDays")}</span>
                 <Input
                   type="number"
                   min={1}
@@ -144,7 +142,7 @@ export function LeaguesPage() {
                   className="h-11"
                   aria-describedby="league-schedule-hint"
                 />
-              </label>
+              </LeagueField>
             </div>
             <p
               id="league-schedule-hint"
@@ -191,7 +189,7 @@ export function LeaguesPage() {
               className="h-9 pl-9"
             />
           </label>
-          <EditorSelect
+          <LeagueSelect
             className="h-9 w-auto"
             aria-label={t("leagueUx.filterSeason")}
             value={filter}
@@ -206,7 +204,7 @@ export function LeaguesPage() {
                 )}
               </option>
             ))}
-          </EditorSelect>
+          </LeagueSelect>
         </div>
         {status === "LoadingFirstPage" ? (
           <p

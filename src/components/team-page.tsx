@@ -25,21 +25,37 @@ export function TeamPage({ uuid }: { uuid: string }) {
     return team.uuid === uuid && (!account || account === sync.account);
   });
   const live = useQuery(api.teams.getByUuid, sync.ready ? { uuid } : "skip");
-  const editable = !!local || (isAuthenticated && !!live?.canEdit);
+  if (!sync.ready || live === undefined)
+    return <WorkspaceLoading variant="editor" />;
+  const editable = live ? isAuthenticated && live.canEdit : !!local;
   if (sync.ready && (local || live))
     return (
       <>
+        {live?.leagueExperienced && (
+          <div className="page-width pt-6 print:hidden">
+            <p
+              role="status"
+              className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm"
+            >
+              {t(
+                live.leagueLocked
+                  ? "leagueUi.builderLockedHint"
+                  : "leagueUi.experiencedTeamHint",
+              )}
+            </p>
+          </div>
+        )}
         <TeamLeagueLinks uuid={uuid} />
         <TeamEditor
           key={`${uuid}:${sync.account ?? "guest"}:${editable ? "edit" : `view-${live?.revision}`}`}
-          initial={local ?? live!.team}
-          revision={local ? 0 : live!.revision}
+          initial={live?.leagueLocked ? live.team : (local ?? live!.team)}
+          revision={
+            live?.leagueLocked ? live.revision : local ? 0 : live!.revision
+          }
           readOnly={!editable}
         />
       </>
     );
-  if (!sync.ready || live === undefined)
-    return <WorkspaceLoading variant="editor" />;
   return (
     <div className="page-width py-16">
       <h1 className="section-title">

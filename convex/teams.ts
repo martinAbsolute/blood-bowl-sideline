@@ -11,6 +11,7 @@ import { z } from "zod";
 import { getRoster, getRuleset } from "../src/domain/catalog";
 import { teamSaveIssues, validateTeam } from "../src/domain/rules";
 import { currentUser, requireUser } from "./roles";
+import { teamLeagueState } from "./teamLeagueState";
 
 export const getByUuid = query({
   args: { uuid: v.string() },
@@ -23,12 +24,16 @@ export const getByUuid = query({
       .unique();
     if (!doc || doc.archived) return null;
     const viewer = await currentUser(ctx);
+    const leagueState = await teamLeagueState(ctx, doc);
     return {
       team: doc.team,
       revision: doc.revision,
       legal: doc.legal,
       updatedAt: doc.updatedAt,
-      canEdit: viewer?._id === doc.ownerId || viewer?.role === "admin",
+      ...leagueState,
+      canEdit:
+        !leagueState.leagueLocked &&
+        (viewer?._id === doc.ownerId || viewer?.role === "admin"),
     };
   },
 });
@@ -117,13 +122,19 @@ export const listMine = query({
     const result = await source.paginate(paginationOpts);
     return {
       ...result,
-      page: result.page.map((d) => ({
-        team: d.team,
-        revision: d.revision,
-        legal: d.legal,
-        updatedAt: d.updatedAt,
-        canEdit: true,
-      })),
+      page: await Promise.all(
+        result.page.map(async (d) => {
+          const leagueState = await teamLeagueState(ctx, d);
+          return {
+            team: d.team,
+            revision: d.revision,
+            legal: d.legal,
+            updatedAt: d.updatedAt,
+            ...leagueState,
+            canEdit: !leagueState.leagueLocked,
+          };
+        }),
+      ),
     };
   },
 });
@@ -152,6 +163,10 @@ export const save = mutation({
       .unique();
     if (existing && existing.ownerId !== ownerId && viewer.role !== "admin")
       throw new ConvexError("FORBIDDEN");
+    const leagueState = existing
+      ? await teamLeagueState(ctx, existing)
+      : { leagueLocked: false, leagueExperienced: false };
+    if (leagueState.leagueLocked) throw new ConvexError("TEAM_IN_LEAGUE");
     if ((existing?.revision ?? 0) !== args.expectedRevision)
       throw new ConvexError("CONFLICT");
     if (existing?.archived) throw new ConvexError("ARCHIVED");
@@ -182,7 +197,7 @@ export const save = mutation({
         archived: false,
         searchText,
       });
-    return { team, revision, updatedAt, legal, canEdit: true };
+    return { team, revision, updatedAt, legal, canEdit: true, ...leagueState };
   },
 });
 export const setArchived = mutation({
@@ -199,6 +214,8 @@ export const setArchived = mutation({
       .unique();
     if (!doc || (doc.ownerId !== ownerId && viewer.role !== "admin"))
       throw new ConvexError("FORBIDDEN");
+    if (archived && (await teamLeagueState(ctx, doc)).leagueLocked)
+      throw new ConvexError("TEAM_IN_LEAGUE");
     await ctx.db.patch(doc._id, {
       archived,
       updatedAt: Date.now(),

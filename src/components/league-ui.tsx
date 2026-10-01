@@ -1,5 +1,6 @@
 "use client";
 
+import { LeagueField } from "./league-field";
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useTranslations } from "gt-next";
@@ -83,6 +84,7 @@ export function useLeagueAction() {
         "CAPTAIN_ALREADY_ASSIGNED",
         "TEAM_REPLACEMENT_CLOSED",
         "INVALID_ROOKIE",
+        "TEAM_EXPERIENCED",
         "HIRING_CLOSED",
         "CAPTAIN_REQUIRED",
         "ACTIVE_REPORT_MUST_BE_RESOLVED_FIRST",
@@ -342,7 +344,7 @@ export function DiceInput({
   onChange: (value: number | null) => void;
 }) {
   return (
-    <label className="block text-sm">
+    <LeagueField>
       {label}
       <Input
         type="number"
@@ -357,7 +359,7 @@ export function DiceInput({
           )
         }
       />
-    </label>
+    </LeagueField>
   );
 }
 

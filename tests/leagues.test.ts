@@ -6,6 +6,7 @@ import schema from "../convex/schema";
 import { api } from "../convex/_generated/api";
 import { getRoster, newTeam } from "../src/domain/catalog";
 import { emptyPlayerStats } from "../src/domain/league-rules";
+import { validateTeam } from "../src/domain/rules";
 import type { Id } from "../convex/_generated/dataModel";
 
 const modules = import.meta.glob("../convex/**/*.ts");
@@ -118,6 +119,194 @@ async function finalize(s: Awaited<ReturnType<typeof setup>>) {
 }
 
 describe("league registration and fixtures", () => {
+  it("locks builders for participants, including admins, and forbids a second rookie enrollment", async () => {
+    const s = await setup();
+    const team = s.teams[0];
+    expect(
+      await s.coaches[0].query(api.teams.getByUuid, { uuid: team.uuid }),
+    ).toMatchObject({
+      canEdit: false,
+      leagueLocked: true,
+      leagueExperienced: true,
+    });
+    expect(
+      await s.admin.query(api.teams.getByUuid, { uuid: team.uuid }),
+    ).toMatchObject({ canEdit: false, leagueLocked: true });
+    const listed = await s.coaches[0].query(api.teams.listMine, {
+      archived: false,
+      paginationOpts: { numItems: 30, cursor: null },
+    });
+    expect(
+      listed.page.find((row) => row.team.uuid === team.uuid),
+    ).toMatchObject({
+      canEdit: false,
+      leagueLocked: true,
+      leagueExperienced: true,
+    });
+    for (const actor of [s.coaches[0], s.admin]) {
+      await expect(
+        actor.mutation(api.teams.save, {
+          team: { ...team, name: "Bypass" },
+          expectedRevision: 1,
+        }),
+      ).rejects.toThrow("TEAM_IN_LEAGUE");
+      await expect(
+        actor.mutation(api.teams.setArchived, {
+          uuid: team.uuid,
+          archived: true,
+        }),
+      ).rejects.toThrow("TEAM_IN_LEAGUE");
+    }
+    const leagueId = await s.coaches[0].mutation(api.leagues.create, {
+      name: "Another league",
+      startAt: 0,
+    });
+    await expect(
+      s.coaches[0].mutation(api.leagues.register, {
+        leagueId,
+        teamUuid: team.uuid,
+      }),
+    ).rejects.toThrow("TEAM_EXPERIENCED");
+    expect(
+      (await s.coaches[0].query(api.leagues.get, { leagueId })).entries,
+    ).toHaveLength(0);
+  });
+
+  it.each(["withdrawn", "completed"] as const)(
+    "releases the builder after %s but keeps experience permanently",
+    async (ended) => {
+      const s = await setup();
+      const team = s.teams[0];
+      if (ended === "withdrawn")
+        await s.coaches[0].mutation(api.leagues.withdrawEntry, {
+          entryId: s.entries[0],
+          reason: "Coach leaves season",
+        });
+      else
+        await s.t.run((ctx) =>
+          ctx.db.patch("leagues", s.leagueId, { status: "completed" }),
+        );
+      expect(
+        await s.coaches[0].query(api.teams.getByUuid, { uuid: team.uuid }),
+      ).toMatchObject({
+        canEdit: true,
+        leagueLocked: false,
+        leagueExperienced: true,
+      });
+      await s.coaches[0].mutation(api.teams.save, {
+        team: { ...team, name: "Planning again" },
+        expectedRevision: 1,
+      });
+      const leagueId = await s.coaches[0].mutation(api.leagues.create, {
+        name: "New rookie season",
+        startAt: 0,
+      });
+      await expect(
+        s.coaches[0].mutation(api.leagues.register, {
+          leagueId,
+          teamUuid: team.uuid,
+        }),
+      ).rejects.toThrow("TEAM_EXPERIENCED");
+      await s.coaches[0].mutation(api.teams.setArchived, {
+        uuid: team.uuid,
+        archived: true,
+      });
+      await s.coaches[0].mutation(api.teams.setArchived, {
+        uuid: team.uuid,
+        archived: false,
+      });
+      await expect(
+        s.coaches[0].mutation(api.leagues.register, {
+          leagueId,
+          teamUuid: team.uuid,
+        }),
+      ).rejects.toThrow("TEAM_EXPERIENCED");
+    },
+  );
+
+  it("protects existing enrollments without the new metadata and preserves experience on replacement", async () => {
+    const s = await setup();
+    await s.t.run(async (ctx) => {
+      const source = await ctx.db
+        .query("teams")
+        .withIndex("by_uuid", (q) => q.eq("uuid", s.teams[0].uuid))
+        .unique();
+      await ctx.db.patch("teams", source!._id, {
+        leagueExperienced: undefined,
+      });
+    });
+    expect(
+      await s.coaches[0].query(api.teams.getByUuid, { uuid: s.teams[0].uuid }),
+    ).toMatchObject({ canEdit: false, leagueExperienced: true });
+    const replacement = rookie("Fresh replacement");
+    await s.coaches[0].mutation(api.teams.save, {
+      team: replacement,
+      expectedRevision: 0,
+    });
+    await s.coaches[0].mutation(api.leagues.replaceEntryTeam, {
+      entryId: s.entries[0],
+      teamUuid: replacement.uuid,
+      expectedRevision: 1,
+    });
+    expect(
+      await s.coaches[0].query(api.teams.getByUuid, { uuid: s.teams[0].uuid }),
+    ).toMatchObject({ canEdit: true, leagueExperienced: true });
+    expect(
+      await s.coaches[0].query(api.teams.getByUuid, { uuid: replacement.uuid }),
+    ).toMatchObject({ canEdit: false, leagueExperienced: true });
+    const otherLeague = await s.coaches[0].mutation(api.leagues.create, {
+      name: "Other season",
+      startAt: 0,
+    });
+    await expect(
+      s.coaches[0].mutation(api.leagues.register, {
+        leagueId: otherLeague,
+        teamUuid: s.teams[0].uuid,
+      }),
+    ).rejects.toThrow("TEAM_EXPERIENCED");
+    // The replacement endpoint must enforce experience as well as registration.
+    await expect(
+      s.coaches[0].mutation(api.leagues.replaceEntryTeam, {
+        entryId: s.entries[0],
+        teamUuid: s.teams[0].uuid,
+        expectedRevision: 2,
+      }),
+    ).rejects.toThrow("TEAM_EXPERIENCED");
+  });
+  it("rejects exhibition-legal excess fans and enrolls after the coach fixes them", async () => {
+    const t = convexTest(schema, modules);
+    const userId = await t.run((ctx) =>
+      ctx.db.insert("users", { name: "Coach" }),
+    );
+    const coach = t.withIdentity({ subject: userId });
+    const leagueId = await coach.mutation(api.leagues.create, {
+      name: "Rookie League",
+      startAt: 0,
+    });
+    const team = rookie("League Orcs Of Hell");
+    team.staff.dedicatedFans = 4;
+    expect(validateTeam(team).valid).toBe(true);
+    await coach.mutation(api.teams.save, { team, expectedRevision: 0 });
+    await expect(
+      coach.mutation(api.leagues.register, { leagueId, teamUuid: team.uuid }),
+    ).rejects.toThrow("rookieFans");
+    expect(
+      (await coach.query(api.leagues.get, { leagueId })).entries,
+    ).toHaveLength(0);
+    team.staff.dedicatedFans = 2;
+    await coach.mutation(api.teams.save, { team, expectedRevision: 1 });
+    await coach.mutation(api.leagues.register, {
+      leagueId,
+      teamUuid: team.uuid,
+    });
+    const league = await coach.query(api.leagues.get, { leagueId });
+    expect(league.entries).toHaveLength(1);
+    expect(league.entries[0].team.staff.dedicatedFans).toBe(3);
+    expect(
+      (await coach.query(api.teams.getByUuid, { uuid: team.uuid }))?.team.staff
+        .dedicatedFans,
+    ).toBe(2);
+  });
   it.each([
     [6, 15, 5],
     [7, 21, 7],
@@ -186,7 +375,7 @@ describe("league registration and fixtures", () => {
       }),
     ).rejects.toThrow("FORBIDDEN");
   });
-  it("permits team replacement after launch before a match and isolates it from the original builder", async () => {
+  it("permits replacement before a match, unlocking the old builder and locking the new one", async () => {
     const s = await setup(),
       replacement = rookie("Replacement");
     await s.coaches[0].mutation(api.teams.save, {
@@ -198,13 +387,28 @@ describe("league registration and fixtures", () => {
       teamUuid: replacement.uuid,
       expectedRevision: 1,
     });
-    await s.coaches[0].mutation(api.teams.save, {
-      team: { ...replacement, name: "Edited draft" },
-      expectedRevision: 1,
+    await expect(
+      s.coaches[0].mutation(api.teams.save, {
+        team: { ...replacement, name: "Edited draft" },
+        expectedRevision: 1,
+      }),
+    ).rejects.toThrow("TEAM_IN_LEAGUE");
+    await expect(
+      s.coaches[0].mutation(api.teams.setArchived, {
+        uuid: replacement.uuid,
+        archived: true,
+      }),
+    ).rejects.toThrow("TEAM_IN_LEAGUE");
+    expect(
+      await s.coaches[0].query(api.teams.getByUuid, { uuid: s.teams[0].uuid }),
+    ).toMatchObject({
+      canEdit: true,
+      leagueLocked: false,
+      leagueExperienced: true,
     });
-    await s.coaches[0].mutation(api.teams.setArchived, {
-      uuid: replacement.uuid,
-      archived: true,
+    await s.coaches[0].mutation(api.teams.save, {
+      team: { ...s.teams[0], name: "Unlocked builder" },
+      expectedRevision: 1,
     });
     const career = await s.t.query(api.leagues.getCareer, {
       entryId: s.entries[0],
@@ -762,13 +966,19 @@ describe("postgame roster management and administrative results", () => {
         startAt: 0,
       });
     const entries = [];
-    for (let i = 0; i < 3; i++)
+    for (let i = 0; i < 3; i++) {
+      const team = rookie(`New rookie ${i}`);
+      await s.coaches[i].mutation(api.teams.save, {
+        team,
+        expectedRevision: 0,
+      });
       entries.push(
         await s.coaches[i].mutation(api.leagues.register, {
           leagueId: id,
-          teamUuid: s.teams[i].uuid,
+          teamUuid: team.uuid,
         }),
       );
+    }
     await s.coaches[0].mutation(api.leagues.withdrawEntry, {
       entryId: entries[2],
       reason: "Unavailable",

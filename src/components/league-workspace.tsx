@@ -27,14 +27,15 @@ import {
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { getRoster } from "@/domain/catalog";
-import { rookieLeagueIssues } from "@/domain/league-rules";
+import { canEnrollTeam } from "@/lib/league-team-eligibility";
 import {
   leaguePlayerLabel,
   leaguePlayerNumbers,
 } from "@/lib/league-player-label";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { EditorSelect } from "./editor-select";
+import { LeagueField, LeagueSelect } from "./league-field";
+import { LeagueTeamPicker } from "./league-team-picker";
 import { RosterIcon } from "./player-icon";
 import { CommissionerWithdrawal } from "./league-commissioner";
 import {
@@ -124,7 +125,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
   const [copyFailed, setCopyFailed] = useState(false);
   const own = usePaginatedQuery(
     api.teams.listMine,
-    isAuthenticated ? { archived: false, rulesetId: "bb2025-default" } : "skip",
+    isAuthenticated ? { archived: false } : "skip",
     { initialNumItems: 30 },
   );
   const audit = usePaginatedQuery(
@@ -154,9 +155,8 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
   const { league, entries, rounds, matches, standings } = data;
   const base = `/leagues/manage/${leagueId}`;
   const mine = entries.find((entry) => entry.coachId === data.viewerId);
-  const legalTeams = own.results.filter(
-    ({ team }) => rookieLeagueIssues(team).length === 0,
-  );
+  const selectedTeam = own.results.find(({ team }) => team.uuid === teamUuid);
+  const canJoin = selectedTeam && canEnrollTeam(selectedTeam);
   const entryById = new Map(entries.map((entry) => [entry._id, entry]));
   const currentRound =
     rounds.find((round) => round.status === "open") ??
@@ -371,23 +371,17 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                   {t("leagueUi.registrationHint")}
                 </p>
                 <div className="flex flex-wrap items-end gap-3">
-                  <label className="min-w-52 flex-1 text-sm">
-                    {t("myTeams")}
-                    <EditorSelect
-                      value={teamUuid}
-                      onChange={(event) => setTeamUuid(event.target.value)}
-                    >
-                      <option value="">{t("leagueUi.chooseTeam")}</option>
-                      {legalTeams.map(({ team }) => (
-                        <option key={team.uuid} value={team.uuid}>
-                          {team.name} · {getRoster(team.rosterId)?.name}
-                        </option>
-                      ))}
-                    </EditorSelect>
-                  </label>
+                  <LeagueTeamPicker
+                    teams={own.results}
+                    value={teamUuid}
+                    onChange={setTeamUuid}
+                    status={own.status}
+                    loadMore={() => own.loadMore(30)}
+                    disabled={action.busy}
+                  />
                   <Button
-                    className="h-10"
-                    disabled={!teamUuid || action.busy}
+                    className="h-11"
+                    disabled={!canJoin || action.busy}
                     onClick={() =>
                       void action.run(() =>
                         register({ leagueId: id, teamUuid }),
@@ -403,20 +397,6 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                     {t("createTeam")}
                   </Link>
                 </div>
-                {own.status === "CanLoadMore" && (
-                  <Button
-                    variant="ghost"
-                    className="mt-3"
-                    onClick={() => own.loadMore(30)}
-                  >
-                    {t("loadMore")}
-                  </Button>
-                )}
-                {!legalTeams.length && own.status !== "LoadingFirstPage" && (
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    {t("leagueUi.noEligibleTeams")}
-                  </p>
-                )}
               </LeagueSection>
             )}
 
@@ -627,7 +607,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <label className="flex items-center gap-3 text-sm font-medium">
                   {t("leagueUi.round")}
-                  <EditorSelect
+                  <LeagueSelect
                     className="min-w-40"
                     value={visibleRound._id}
                     onChange={(event) => setSelectedRound(event.target.value)}
@@ -638,7 +618,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                         {t(`leagueUi.status.${round.status}`)}
                       </option>
                     ))}
-                  </EditorSelect>
+                  </LeagueSelect>
                 </label>
                 <span className="text-sm text-muted-foreground">
                   {t("leagueUi.deadline")}:{" "}
@@ -814,9 +794,9 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
           )}
           {rounds.length > 0 && (
             <LeagueSection title={t("leagueUx.roundManagement")}>
-              <label className="mb-5 block max-w-sm text-sm">
+              <LeagueField className="mb-5 max-w-sm">
                 {t("leagueUi.round")}
-                <EditorSelect
+                <LeagueSelect
                   value={visibleRound?._id ?? ""}
                   onChange={(event) => setSelectedRound(event.target.value)}
                 >
@@ -826,8 +806,8 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                       {t(`leagueUi.status.${round.status}`)}
                     </option>
                   ))}
-                </EditorSelect>
-              </label>
+                </LeagueSelect>
+              </LeagueField>
               {visibleRound && (
                 <RoundControls
                   key={visibleRound._id}
@@ -1009,7 +989,7 @@ function RoundControls({
           {t("leagueUi.openRound")}
         </Button>
       )}
-      <label className="min-w-48 flex-1 text-xs text-muted-foreground">
+      <LeagueField className="min-w-48 flex-1">
         {t("leagueUi.deadline")}
         <Input
           className="mt-1 h-10"
@@ -1017,7 +997,7 @@ function RoundControls({
           value={deadline || localDateInput(round.deadlineAt)}
           onChange={(event) => setDeadline(event.target.value)}
         />
-      </label>
+      </LeagueField>
       <Button
         className="h-10"
         variant="outline"

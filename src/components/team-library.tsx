@@ -2,10 +2,8 @@
 import { useDeferredValue, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "gt-next";
 import { useConvexAuth, useMutation, usePaginatedQuery } from "convex/react";
-import Link from "next/link";
 import { api } from "../../convex/_generated/api";
-import { getRoster, getRuleset, rosters, rulesets } from "@/domain/catalog";
-import { summarize, validateTeam } from "@/domain/rules";
+import { rosters, rulesets } from "@/domain/catalog";
 import { type Team } from "@/domain/types";
 import {
   draftAccount,
@@ -16,23 +14,20 @@ import {
 } from "@/lib/drafts";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Card } from "./ui/card";
 import { CreateTeamButton } from "./create-team-button";
 import { EditorSelect } from "./editor-select";
 import {
   Archive,
-  ArrowUpRight,
   Trash2,
   Undo2,
   CloudCheck,
   FileText,
   Search,
   LoaderCircle,
-  CloudOff,
 } from "lucide-react";
 import { LoginButton } from "./site-shell";
 import { toast } from "@/components/ui/toast";
-import { RosterIcon } from "./player-icon";
+import { TeamCard } from "./team-card";
 import { useDraftSync } from "./draft-sync-provider";
 import { libraryMatches } from "@/lib/team-library";
 import { LibraryCardsLoading } from "./loading-layouts";
@@ -66,20 +61,32 @@ export function TeamLibrary() {
     const owner = draftAccount(team.uuid);
     return !owner || (isAuthenticated && owner === sync.account);
   });
+  const leagueTeams = new Map(results.map((row) => [row.team.uuid, row]));
   const failedCount = locals.filter((team) =>
     sync.failed.has(team.uuid),
   ).length;
   const filter = { search: deferredSearch, rosterId, rulesetId };
   const pending = new Map(locals.map((team) => [team.uuid, team]));
   const cards = archived
-    ? results.map(({ team }) => ({ team, local: false }))
+    ? results.map((row) => ({ ...row, local: false }))
     : [
         ...locals
-          .filter((team) => libraryMatches(team, filter))
-          .map((team) => ({ team, local: true })),
+          .filter(
+            (team) =>
+              !leagueTeams.get(team.uuid)?.leagueLocked &&
+              libraryMatches(team, filter),
+          )
+          .map((team) => ({
+            team,
+            local: true,
+            leagueLocked: false,
+            leagueExperienced: leagueTeams.get(team.uuid)?.leagueExperienced,
+          })),
         ...results
-          .filter(({ team }) => !pending.has(team.uuid))
-          .map(({ team }) => ({ team, local: false })),
+          .filter(
+            ({ team, leagueLocked }) => leagueLocked || !pending.has(team.uuid),
+          )
+          .map((row) => ({ ...row, local: false })),
       ];
   const filtered = !!(search || rosterId || rulesetId);
   async function toggleArchive(team: Team) {
@@ -233,11 +240,13 @@ export function TeamLibrary() {
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {cards.map(({ team, local }) => (
+            {cards.map(({ team, local, leagueLocked, leagueExperienced }) => (
               <TeamCard
                 key={team.uuid}
                 team={team}
                 archived={archived}
+                leagueLocked={leagueLocked}
+                leagueExperienced={leagueExperienced}
                 href={archived ? undefined : `/teams/${team.uuid}`}
                 saveState={
                   local
@@ -273,7 +282,9 @@ export function TeamLibrary() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      disabled={busy === team.uuid}
+                      disabled={
+                        (!archived && leagueLocked) || busy === team.uuid
+                      }
                       aria-label={`${t(archived ? "restore" : "archive")} ${team.name}`}
                       onClick={() => void toggleArchive(team)}
                     >
@@ -308,146 +319,5 @@ export function TeamLibrary() {
         )}
       </section>
     </div>
-  );
-}
-
-function TeamCard({
-  team,
-  href,
-  action,
-  archived,
-  saveState,
-}: {
-  team: Team;
-  href?: string;
-  action: React.ReactNode;
-  archived: boolean;
-  saveState: "cloud" | "device" | "pending" | "error";
-}) {
-  const t = useTranslations(),
-    totals = summarize(team),
-    legal = validateTeam(team).valid;
-  const content = (
-    <>
-      <div className="relative overflow-hidden bg-primary px-5 pb-5 pt-4 text-primary-foreground">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-6 -top-6 size-40 rounded-full border-[24px] border-white/5"
-        />
-        <div className="relative mb-4 flex items-center justify-between gap-3">
-          <span className="text-xs font-medium text-white/75">
-            {getRoster(team.rosterId)?.name}
-          </span>
-          <span
-            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${legal && !archived ? "bg-lime-200 text-primary" : "bg-white/15 text-white"}`}
-          >
-            {t(archived ? "archived" : legal ? "ready" : "draft")}
-          </span>
-        </div>
-        <div className="relative flex items-center gap-4">
-          <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-white/90 shadow-sm">
-            <RosterIcon rosterId={team.rosterId} className="size-12" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <h2
-              className="display-font line-clamp-2 min-h-14 break-words text-2xl leading-7"
-              title={team.name}
-            >
-              {team.name || t("untitled")}
-            </h2>
-          </div>
-        </div>
-      </div>
-      <div className="space-y-4 p-5">
-        <p className="min-h-8 text-xs font-medium text-muted-foreground">
-          {getRuleset(team.rulesetId).name}
-        </p>
-        <dl className="grid grid-cols-3 divide-x rounded-lg border bg-secondary/25 py-3 text-center">
-          <div>
-            <dt className="text-[10px] text-muted-foreground">
-              {t("players")}
-            </dt>
-            <dd className="mt-1 font-mono text-base font-semibold">
-              {totals.playerCount}
-              <span className="text-xs font-normal text-muted-foreground">
-                {" "}
-                / 16
-              </span>
-            </dd>
-          </div>
-          <div>
-            <dt className="text-[10px] text-muted-foreground">
-              {t("teamValue")}
-            </dt>
-            <dd className="mt-1 font-mono text-base font-semibold">
-              {totals.teamGold / 1000}k
-            </dd>
-          </div>
-          <div>
-            <dt className="text-[10px] text-muted-foreground">
-              {t("remaining")}
-            </dt>
-            <dd
-              className={`mt-1 font-mono text-base font-semibold ${totals.remaining < 0 ? "text-destructive" : "text-primary"}`}
-            >
-              {totals.remaining / 1000}k
-            </dd>
-          </div>
-        </dl>
-        <div className="flex items-center justify-between text-xs font-semibold text-primary">
-          <span>{t(href ? "openTeam" : "archived")}</span>
-          {href && (
-            <ArrowUpRight className="size-4 transition-transform motion-safe:group-hover:translate-x-0.5" />
-          )}
-        </div>
-      </div>
-    </>
-  );
-  const SaveIcon =
-    saveState === "cloud"
-      ? CloudCheck
-      : saveState === "device"
-        ? FileText
-        : saveState === "pending"
-          ? LoaderCircle
-          : CloudOff;
-  return (
-    <article className="min-w-0">
-      <Card className="group min-w-0 gap-0 rounded-2xl py-0 shadow-sm transition-shadow hover:shadow-lg">
-        {href ? (
-          <Link
-            href={href}
-            prefetch
-            className="block flex-1 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-          >
-            {content}
-          </Link>
-        ) : (
-          <div className="flex-1 opacity-75">{content}</div>
-        )}
-        <footer className="flex min-h-14 items-center border-t bg-secondary/15 px-5 py-2 [&>div]:w-full [&>div>button]:ml-auto">
-          <div className="flex items-center gap-2">
-            <span
-              role="status"
-              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
-            >
-              <SaveIcon
-                className={`size-3.5 ${saveState === "pending" ? "animate-spin" : ""}`}
-              />
-              {t(
-                saveState === "cloud"
-                  ? "savedCloud"
-                  : saveState === "device"
-                    ? "savedInDrafts"
-                    : saveState === "pending"
-                      ? "saving"
-                      : "saveStatusError",
-              )}
-            </span>
-            {action}
-          </div>
-        </footer>
-      </Card>
-    </article>
   );
 }

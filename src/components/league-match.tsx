@@ -25,7 +25,7 @@ import {
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { EditorSelect } from "./editor-select";
+import { LeagueField, LeagueSelect } from "./league-field";
 import { PlayerIcon } from "./player-icon";
 import { SkillList } from "./skill-box";
 import { LeagueHelp } from "./league-help";
@@ -482,7 +482,7 @@ export function LeagueMatch({
                   <p className="mb-4 text-sm text-muted-foreground">
                     {t("leagueUi.correctionHint")}
                   </p>
-                  <label className="text-sm">
+                  <LeagueField>
                     {t("leagueUi.reason")}
                     <Textarea
                       value={reason}
@@ -490,7 +490,7 @@ export function LeagueMatch({
                       className="mt-1"
                       onChange={(event) => setReason(event.target.value)}
                     />
-                  </label>
+                  </LeagueField>
                 </LeagueSection>
               )}
               {correction ? (
@@ -835,7 +835,7 @@ function MatchDetails({
           className="grid gap-4 sm:grid-cols-2"
         >
           {(["scoreHome", "scoreAway"] as const).map((field) => (
-            <label key={field} className="text-sm font-medium">
+            <LeagueField key={field}>
               {field === "scoreHome"
                 ? data.home.team.name
                 : data.away?.team.name}
@@ -854,7 +854,7 @@ function MatchDetails({
                 }
                 required
               />
-            </label>
+            </LeagueField>
           ))}
         </fieldset>
         <details className="mt-5 rounded-lg border">
@@ -865,7 +865,7 @@ function MatchDetails({
             disabled={!editable || busy}
             className="grid gap-4 border-t p-4 sm:grid-cols-2"
           >
-            <label className="text-sm font-medium">
+            <LeagueField>
               {t("leagueUi.venue")}
               <Input
                 className="mt-1 h-11"
@@ -873,8 +873,8 @@ function MatchDetails({
                 value={current.venue}
                 onChange={(event) => change({ venue: event.target.value })}
               />
-            </label>
-            <label className="text-sm font-medium">
+            </LeagueField>
+            <LeagueField>
               {t("leagueUi.evidence")}
               <Input
                 type="url"
@@ -886,7 +886,7 @@ function MatchDetails({
                   change({ evidenceUrl: event.target.value })
                 }
               />
-            </label>
+            </LeagueField>
           </fieldset>
         </details>
         <h3 className="mb-3 mt-6 font-semibold">
@@ -1170,7 +1170,7 @@ function MatchPlayerRow({
             className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"
           >
             {fields.slice(0, 6).map((field) => (
-              <label key={field} className="text-xs font-medium">
+              <LeagueField key={field}>
                 <span title={t("leagueUi.statDescriptions." + field)}>
                   {t("leagueUx.reportStatLabels." + field)}
                 </span>
@@ -1191,7 +1191,7 @@ function MatchPlayerRow({
                   }
                   required
                 />
-              </label>
+              </LeagueField>
             ))}
           </fieldset>
           <details className="mt-4 rounded-lg border">
@@ -1203,7 +1203,7 @@ function MatchPlayerRow({
               className="grid grid-cols-2 gap-3 border-t p-4 sm:grid-cols-3"
             >
               {fields.slice(6).map((field) => (
-                <label key={field} className="text-xs font-medium">
+                <LeagueField key={field}>
                   {t("leagueUx.reportStatLabels." + field)}
                   <Input
                     className="mt-1 h-10 tabular-nums"
@@ -1222,7 +1222,7 @@ function MatchPlayerRow({
                     }
                     required
                   />
-                </label>
+                </LeagueField>
               ))}
             </fieldset>
           </details>
@@ -1258,9 +1258,9 @@ function MatchPlayerRow({
                       onChange={(value) => change({ lastingRoll: value })}
                     />
                   )}
-                <label className="text-xs font-medium">
+                <LeagueField>
                   {t("leagueUi.playerStatus")}
-                  <EditorSelect
+                  <LeagueSelect
                     className="h-10"
                     value={current.statusAfter}
                     disabled={current.casualtyRoll !== null}
@@ -1276,9 +1276,9 @@ function MatchPlayerRow({
                         {t("leagueUi.status." + status)}
                       </option>
                     ))}
-                  </EditorSelect>
-                </label>
-                <label className="text-xs font-medium">
+                  </LeagueSelect>
+                </LeagueField>
+                <LeagueField>
                   {t("leagueUi.injuryNotes")}
                   <Input
                     className="mt-1 h-10"
@@ -1288,7 +1288,7 @@ function MatchPlayerRow({
                       change({ injuryNotes: event.target.value })
                     }
                   />
-                </label>
+                </LeagueField>
               </fieldset>
               <p className="mt-3 text-xs text-muted-foreground">
                 {t("leagueUi.casualtyHint")}

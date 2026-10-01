@@ -22,14 +22,16 @@ import {
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { getRoster, skillName } from "@/domain/catalog";
-import { expensiveMistake, rookieLeagueIssues } from "@/domain/league-rules";
+import { expensiveMistake } from "@/domain/league-rules";
+import { canEnrollTeam } from "@/lib/league-team-eligibility";
 import {
   leaguePlayerLabel,
   leaguePlayerNumbers,
 } from "@/lib/league-player-label";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { EditorSelect } from "./editor-select";
+import { LeagueField, LeagueSelect } from "./league-field";
+import { LeagueTeamPicker } from "./league-team-picker";
 import { PlayerIcon, RosterIcon } from "./player-icon";
 import { SkillList, TableSkills } from "./skill-box";
 import { LeagueHelp } from "./league-help";
@@ -59,7 +61,7 @@ function CareerReplacement({ entry }: { entry: CareerData["entry"] }) {
   const viewer = useQuery(api.users.viewer, {});
   const teams = usePaginatedQuery(
     api.teams.listMine,
-    { archived: false, rulesetId: "bb2025-default" },
+    { archived: false },
     { initialNumItems: 30 },
   );
   const replace = useMutation(api.leagues.replaceEntryTeam);
@@ -73,29 +75,26 @@ function CareerReplacement({ entry }: { entry: CareerData["entry"] }) {
       </p>
       <LeagueError message={action.error} />
       <div className="flex flex-wrap gap-3">
-        <EditorSelect
-          wrapperClassName="min-w-48 flex-1"
-          className="h-11"
-          aria-label={t("leagueUi.chooseTeam")}
+        <LeagueTeamPicker
+          teams={teams.results}
           value={uuid}
-          onChange={(event) => setUuid(event.target.value)}
-        >
-          <option value="">{t("leagueUi.chooseTeam")}</option>
-          {teams.results
-            .filter(
-              (row) =>
-                rookieLeagueIssues(row.team).length === 0 &&
-                row.team.uuid !== entry.team.uuid,
-            )
-            .map((row) => (
-              <option key={row.team.uuid} value={row.team.uuid}>
-                {row.team.name}
-              </option>
-            ))}
-        </EditorSelect>
+          onChange={setUuid}
+          status={teams.status}
+          loadMore={() => teams.loadMore(30)}
+          excludeUuid={entry.team.uuid}
+          disabled={action.busy}
+        />
         <Button
           className="h-11"
-          disabled={action.busy || !uuid}
+          disabled={
+            action.busy ||
+            !teams.results.some(
+              (row) =>
+                row.team.uuid === uuid &&
+                row.team.uuid !== entry.team.uuid &&
+                canEnrollTeam(row),
+            )
+          }
           onClick={() =>
             void action.run(() =>
               replace({
@@ -109,15 +108,6 @@ function CareerReplacement({ entry }: { entry: CareerData["entry"] }) {
           {t("leagueUi.replaceTeam")}
         </Button>
       </div>
-      {teams.status === "CanLoadMore" && (
-        <Button
-          variant="ghost"
-          className="mt-3"
-          onClick={() => teams.loadMore(30)}
-        >
-          {t("loadMore")}
-        </Button>
-      )}
     </LeagueSection>
   );
 }
@@ -462,9 +452,9 @@ export function LeagueCareer({
           !entry.team.captainId && (
             <LeagueSection title={t("leagueUi.assignCaptain")}>
               <div className="flex flex-wrap items-end gap-3">
-                <label className="min-w-48 flex-1 text-sm">
+                <LeagueField className="min-w-48 flex-1">
                   {t("leagueUi.chooseCaptain")}
-                  <EditorSelect
+                  <LeagueSelect
                     className="h-11"
                     value={captainId}
                     onChange={(event) => setCaptainId(event.target.value)}
@@ -486,8 +476,8 @@ export function LeagueCareer({
                           {playerLabel(player)}
                         </option>
                       ))}
-                  </EditorSelect>
-                </label>
+                  </LeagueSelect>
+                </LeagueField>
                 <Button
                   className="h-11"
                   disabled={action.busy || !captainId}
@@ -889,9 +879,9 @@ export function LeagueCareer({
                   });
               }}
             >
-              <label className="text-sm">
+              <LeagueField>
                 {t("position")}
-                <EditorSelect
+                <LeagueSelect
                   className="h-11"
                   value={positionId}
                   onChange={(event) => setPositionId(event.target.value)}
@@ -919,9 +909,9 @@ export function LeagueCareer({
                       </option>
                     );
                   })}
-                </EditorSelect>
-              </label>
-              <label className="text-sm">
+                </LeagueSelect>
+              </LeagueField>
+              <LeagueField>
                 {t("leagueUi.playerName")}
                 <Input
                   className="mt-1 h-11"
@@ -929,7 +919,7 @@ export function LeagueCareer({
                   maxLength={80}
                   onChange={(event) => setName(event.target.value)}
                 />
-              </label>
+              </LeagueField>
               <Button
                 type="submit"
                 className="h-11"
@@ -1254,9 +1244,9 @@ function CareerPlayerCard({
                 });
               }}
             >
-              <label className="text-sm font-medium">
+              <LeagueField>
                 {t("leagueUi.spendSpp")}
-                <EditorSelect
+                <LeagueSelect
                   className="h-11"
                   value={skillId}
                   onChange={(event) => setSkillId(event.target.value)}
@@ -1272,8 +1262,8 @@ function CareerPlayerCard({
                       {option.valueIncrease / 1000}k GP
                     </option>
                   ))}
-                </EditorSelect>
-              </label>
+                </LeagueSelect>
+              </LeagueField>
               <Button
                 className="h-10 w-full"
                 type="submit"

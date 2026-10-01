@@ -15,6 +15,7 @@ import type * as leagueValidators from "../leagueValidators.js";
 import type * as leagues from "../leagues.js";
 import type * as presence from "../presence.js";
 import type * as roles from "../roles.js";
+import type * as teamLeagueState from "../teamLeagueState.js";
 import type * as teams from "../teams.js";
 import type * as telegram from "../telegram.js";
 import type * as users from "../users.js";
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   leagues: typeof leagues;
   presence: typeof presence;
   roles: typeof roles;
+  teamLeagueState: typeof teamLeagueState;
   teams: typeof teams;
   telegram: typeof telegram;
   users: typeof users;

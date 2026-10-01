@@ -181,6 +181,7 @@ export default defineSchema({
     .index("by_entryId", ["entryId"])
     .index("by_matchId", ["matchId"]),
   teams: defineTable({
+    leagueExperienced: v.optional(v.boolean()),
     ownerId: v.id("users"),
     uuid: v.string(),
     team: teamValidator,
