@@ -11,6 +11,9 @@ const origin = new URL(`https://${hostname}`).origin;
 const deployment = new URL(process.env.NEXT_PUBLIC_CONVEX_URL).hostname.split(
   ".",
 )[0];
+// Production deploy keys already select their backend. Named selection makes
+// the CLI use its control-plane API, which does not accept deployment keys.
+const selector = production ? [] : ["--deployment", deployment];
 
 function run(args) {
   const result = spawnSync("pnpm", args, { stdio: "inherit" });
@@ -23,16 +26,7 @@ function run(args) {
 console.log(
   `Configuring auth origin for ${production ? "prod" : "preview"}: ${deployment}`,
 );
-run([
-  "exec",
-  "convex",
-  "env",
-  "set",
-  "SITE_URL",
-  origin,
-  "--deployment",
-  deployment,
-]);
+run(["exec", "convex", "env", "set", "SITE_URL", origin, ...selector]);
 run([
   "exec",
   "convex",
@@ -40,7 +34,6 @@ run([
   "set",
   "CUSTOM_AUTH_SITE_URL",
   origin,
-  "--deployment",
-  deployment,
+  ...selector,
 ]);
 run(["run", "build"]);

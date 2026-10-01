@@ -25,17 +25,10 @@ it.each([
     );
     spawnSync.mockReturnValue({ status: 0 });
     await import("../scripts/vercel-build.mjs");
+    const selector =
+      environment === "production" ? [] : ["--deployment", "selected-backend"];
     expect(spawnSync.mock.calls.map((call) => call[1])).toEqual([
-      [
-        "exec",
-        "convex",
-        "env",
-        "set",
-        "SITE_URL",
-        origin,
-        "--deployment",
-        "selected-backend",
-      ],
+      ["exec", "convex", "env", "set", "SITE_URL", origin, ...selector],
       [
         "exec",
         "convex",
@@ -43,8 +36,7 @@ it.each([
         "set",
         "CUSTOM_AUTH_SITE_URL",
         origin,
-        "--deployment",
-        "selected-backend",
+        ...selector,
       ],
       ["run", "build"],
     ]);
