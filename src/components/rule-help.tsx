@@ -80,7 +80,7 @@ export function RuleHelp({
           sideOffset={6}
           className={cn(
             "w-80 max-w-[calc(100vw-2rem)] space-y-1.5 overflow-hidden px-3 py-2.5 text-sm leading-relaxed",
-            skillPreview && "block [@media(hover:none)]:hidden",
+            skillPreview && "[@media(hover:none)]:hidden",
           )}
         >
           <p className="font-semibold">{title}</p>
