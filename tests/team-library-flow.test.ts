@@ -34,7 +34,8 @@ vi.mock("convex/react", () => ({
   }),
   useQuery: () =>
     mocks.account ? { id: mocks.account, name: "Telegram Coach" } : null,
-  useMutation: () => mocks.save,
+  useMutation: () =>
+    Object.assign(mocks.save, { withOptimisticUpdate: () => mocks.save }),
   usePaginatedQuery: () => ({
     results: mocks.results,
     status: "Exhausted",
@@ -343,4 +344,29 @@ it("stores a selected roster before navigating directly to its UUID editor", asy
   );
   expect(mocks.push).toHaveBeenCalledTimes(1);
   expect(readDrafts()).toHaveLength(1);
+});
+
+it("keeps queued cloud work protected after leaving the editor, and stops warning when acknowledged", async () => {
+  mocks.authenticated = true;
+  mocks.account = "account-a";
+  const team = newTeam(randomUUID());
+  storeDraft(team, mocks.account);
+  let complete!: (result: { revision: number }) => void;
+  mocks.save.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        complete = resolve;
+      }),
+  );
+  await act(async () => root.render(renderSync()));
+  function protectedByBrowser() {
+    const event = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(event);
+    return event.defaultPrevented;
+  }
+  expect(protectedByBrowser()).toBe(true);
+  await tick();
+  expect(protectedByBrowser()).toBe(true);
+  await act(async () => complete({ revision: 1 }));
+  expect(protectedByBrowser()).toBe(false);
 });

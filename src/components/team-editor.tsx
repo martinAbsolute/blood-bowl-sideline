@@ -1,15 +1,8 @@
 "use client";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "gt-next";
-import { useConvexAuth, useMutation } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { useConvexAuth } from "convex/react";
 import {
   getRoster,
   getRuleset,
@@ -25,20 +18,15 @@ import {
   playerSkillCost,
   starEligible,
   summarize,
-  teamSaveIssues,
   validateTeam,
 } from "@/domain/rules";
 import type { Team } from "@/domain/types";
-import {
-  storeDraft,
-  readRevision,
-  storeRevision,
-  draftAccount,
-} from "@/lib/drafts";
+import { storeDraft } from "@/lib/drafts";
 import { saveCloudDraft } from "@/lib/cloud-save";
 import { duplicateTeam } from "@/lib/duplicate-team";
 import { useDraftSync } from "./draft-sync-provider";
 import { TeamName } from "./team-name";
+import { TeamSaveStatus } from "./team-save-status";
 import { TeamHeader } from "./team-header";
 import { EditorSelect } from "./editor-select";
 import { ReadinessCard } from "./readiness-card";
@@ -83,10 +71,6 @@ import { positionLabel } from "./position-name";
 import { QuantityStepper } from "./quantity-stepper";
 import { hasTeamProgress, resetTeamRoster } from "@/lib/builder";
 import {
-  Check,
-  CloudCheck,
-  CloudOff,
-  LoaderCircle,
   ArrowLeft,
   ChevronRight,
   Copy,
@@ -103,12 +87,8 @@ import {
 import { toast } from "@/components/ui/toast";
 import Link from "next/link";
 import { PlayerIcon, StarPlayerIcon } from "./player-icon";
-import { useDraftSignIn } from "./draft-sign-in-provider";
-import {
-  finishDraftSignIn,
-  pendingDraftSave,
-  prepareDraftSignIn,
-} from "@/lib/draft-sign-in";
+import { useTeamAutosave } from "@/lib/use-team-autosave";
+import { useTeamSave } from "@/lib/use-team-save";
 const gold = (n: number) => `${(n / 1000).toLocaleString("en")}k`;
 function CollapsibleSection({
   title,
@@ -190,34 +170,17 @@ export function TeamEditor({
   const t = useTranslations(),
     router = useRouter(),
     { isAuthenticated, isLoading } = useConvexAuth(),
-    draftSignIn = useDraftSignIn(),
-    save = useMutation(api.teams.save);
+    save = useTeamSave();
   const draftSync = useDraftSync();
   const locale = useLocale();
   const [duplicating, setDuplicating] = useState(false);
-  const [team, setTeam] = useState(initial),
-    [revision, setRevision] = useState(
-      () => initialRevision || readRevision(initial.uuid),
-    ),
-    [saving, setSaving] = useState(false),
-    [dirty, setDirty] = useState(() => initialRevision === 0);
+  const autosave = useTeamAutosave(initial, initialRevision, readOnly, save);
+  const { team, revision, syncError, cloudInvalid, change } = autosave;
   const [dialog, setDialog] = useState<"stars" | null>(null),
     [selected, setSelected] = useState<string | null>(null),
     [search, setSearch] = useState("");
   const [pendingRoster, setPendingRoster] = useState<string | null>(null);
-  const [syncError, setSyncError] = useState<{
-    team: Team;
-    conflict: boolean;
-  } | null>(null);
-  const [localSave, setLocalSave] = useState<{
-    team: Team;
-    failed: boolean;
-  } | null>(null);
   const playerTitle = useRef<HTMLHeadingElement>(null);
-  const resumedSave = useRef(false);
-  const returnedFromSignIn = useRef(pendingDraftSave(initial.uuid) !== null);
-  const latestTeam = useRef(team);
-  const saveInFlight = useRef(false);
   const roster = getRoster(team.rosterId)!,
     rules = getRuleset(team.rulesetId),
     totals = summarize(team),
@@ -228,66 +191,6 @@ export function TeamEditor({
     ? stars.find((star) => star.id === selected)
     : undefined;
   const requiresCaptain = roster.specialRules.includes("Team Captain");
-  const saveIssues = teamSaveIssues(team);
-  const storageErrorText = t("storageError");
-  const reserveEditor = draftSync.editing;
-  useEffect(() => {
-    if (!readOnly) return reserveEditor(team.uuid);
-  }, [reserveEditor, team.uuid, readOnly]);
-  useEffect(() => {
-    let cancelled = false;
-    if (
-      !readOnly &&
-      (dirty || revision === 0) &&
-      (localSave?.team !== team ||
-        (draftSync.account && draftAccount(team.uuid) !== draftSync.account))
-    ) {
-      let failed = false;
-      try {
-        storeDraft(team, draftSync.account);
-      } catch {
-        failed = true;
-        toast.add({ type: "error", title: storageErrorText });
-      }
-      queueMicrotask(() => {
-        if (!cancelled)
-          setLocalSave((current) =>
-            current?.team === team && current.failed === failed
-              ? current
-              : { team, failed },
-          );
-      });
-    }
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    team,
-    readOnly,
-    storageErrorText,
-    localSave,
-    dirty,
-    revision,
-    draftSync.account,
-  ]);
-  useEffect(() => {
-    if (readOnly || isAuthenticated) return;
-    return draftSignIn.register(() => prepareDraftSignIn(team, revision));
-  }, [draftSignIn, team, revision, readOnly, isAuthenticated]);
-  function change(next: Team) {
-    // Persist before navigation can interrupt React's effect commit.
-    try {
-      storeDraft(next, draftSync.account);
-      if (next.uuid === team.uuid) storeRevision(next.uuid, revision);
-      setLocalSave({ team: next, failed: false });
-    } catch {
-      toast.add({ type: "error", title: storageErrorText });
-      setLocalSave({ team: next, failed: true });
-    }
-    latestTeam.current = next;
-    setTeam(next);
-    setDirty(true);
-  }
   function switchRoster(rosterId: string) {
     const next = resetTeamRoster(
       team,
@@ -302,7 +205,6 @@ export function TeamEditor({
         toast.add({ type: "error", title: t("storageError") });
         return;
       }
-      setRevision(0);
       router.replace(`/teams/${next.uuid}`, { scroll: false });
     }
     change(next);
@@ -320,96 +222,6 @@ export function TeamEditor({
       ),
     });
   }
-  const saveTeam = useCallback(
-    async (
-      expectedRevision = pendingDraftSave(team.uuid)?.revision ?? revision,
-    ) => {
-      if (saveInFlight.current) return;
-      if (!team.name.trim()) {
-        toast.add({ type: "error", title: t("teamNameRequired") });
-        return;
-      }
-      if (teamSaveIssues(team).length) {
-        toast.add({ type: "error", title: t("invalidTeamSave") });
-        return;
-      }
-      saveInFlight.current = true;
-      setSaving(true);
-      setSyncError(null);
-      const pending = pendingDraftSave(team.uuid);
-      try {
-        const result = await saveCloudDraft(team, expectedRevision, save);
-        setRevision(result.revision);
-        finishDraftSignIn(team.uuid);
-        setDirty(latestTeam.current !== team);
-        if (pending) toast.add({ type: "success", title: t("saved") });
-      } catch (error) {
-        const conflict =
-          error instanceof Error && error.message.includes("CONFLICT");
-        setSyncError({ team, conflict });
-        toast.add({
-          type: "error",
-          title: conflict ? t("conflict") : t("saveFailed"),
-        });
-      } finally {
-        saveInFlight.current = false;
-        setSaving(false);
-      }
-    },
-    [revision, save, team, t],
-  );
-  useEffect(() => {
-    if (
-      !readOnly &&
-      returnedFromSignIn.current &&
-      !isLoading &&
-      !isAuthenticated
-    ) {
-      returnedFromSignIn.current = false;
-      toast.add({ type: "error", title: t("loginFailed") });
-    }
-    if (readOnly || !isAuthenticated || !draftSync.ready || resumedSave.current)
-      return;
-    const pending = pendingDraftSave(team.uuid);
-    if (!pending) return;
-    resumedSave.current = true;
-    // Resume the external save after React finishes committing authentication.
-    queueMicrotask(() => void saveTeam(pending.revision));
-  }, [
-    readOnly,
-    isAuthenticated,
-    isLoading,
-    team.uuid,
-    saveTeam,
-    t,
-    draftSync.ready,
-  ]);
-  useEffect(() => {
-    if (
-      readOnly ||
-      !isAuthenticated ||
-      !draftSync.ready ||
-      saving ||
-      !dirty ||
-      !team.name.trim() ||
-      teamSaveIssues(team).length > 0 ||
-      syncError?.conflict ||
-      syncError?.team === team
-    )
-      return;
-    // Coalesce rapid edits and serialize requests using the returned revision.
-    const timer = window.setTimeout(() => void saveTeam(), 400);
-    return () => window.clearTimeout(timer);
-  }, [
-    readOnly,
-    isAuthenticated,
-    saving,
-    dirty,
-    team,
-    syncError,
-    saveTeam,
-    draftSync.ready,
-  ]);
   async function share() {
     try {
       await navigator.clipboard.writeText(
@@ -485,30 +297,6 @@ export function TeamEditor({
   const eligibleInducements = inducements.filter(
     (i) => inducementInfo(team, i).allowed || (team.inducements[i.id] ?? 0) > 0,
   );
-  const localPending = (dirty || revision === 0) && localSave?.team !== team;
-  const cloudPending =
-    isAuthenticated &&
-    (saving ||
-      (dirty && !!team.name.trim() && !syncError && !saveIssues.length));
-  const cloudInvalid = isAuthenticated && dirty && saveIssues.length > 0;
-  const saveStatus =
-    syncError || cloudInvalid
-      ? "saveStatusError"
-      : localSave?.failed
-        ? "saveStatusLocalError"
-        : cloudPending || localPending
-          ? "saving"
-          : revision > 0 && !dirty
-            ? "savedCloud"
-            : "savedInDrafts";
-  const SaveIcon =
-    syncError || cloudInvalid || localSave?.failed
-      ? CloudOff
-      : cloudPending || localPending
-        ? LoaderCircle
-        : revision > 0 && !dirty
-          ? CloudCheck
-          : Check;
   return (
     <div className="page-width team-builder py-5">
       <TeamHeader
@@ -570,40 +358,10 @@ export function TeamEditor({
               )}
             </h1>
             {!readOnly && (
-              <div
-                role="status"
-                aria-live="polite"
-                className="no-print -ml-[18px] mb-[9px] flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground"
-                title={
-                  syncError
-                    ? t(syncError.conflict ? "conflict" : "saveFailed")
-                    : cloudInvalid
-                      ? t("invalidTeamSave")
-                      : localSave?.failed
-                        ? t("storageError")
-                        : isAuthenticated && !team.name.trim()
-                          ? t("teamNameRequired")
-                          : !isAuthenticated
-                            ? t("guestText")
-                            : undefined
-                }
-              >
-                <SaveIcon
-                  aria-hidden="true"
-                  className={`size-3.5 shrink-0 ${saveStatus === "saving" ? "animate-spin" : ""}`}
-                />
-                <span>{t(saveStatus)}</span>
-                {syncError && !syncError.conflict && (
-                  <button
-                    type="button"
-                    className="underline underline-offset-4"
-                    disabled={saving || !team.name.trim()}
-                    onClick={() => void saveTeam()}
-                  >
-                    {t("retry")}
-                  </button>
-                )}
-              </div>
+              <TeamSaveStatus
+                state={autosave}
+                isAuthenticated={isAuthenticated}
+              />
             )}
           </>
         }

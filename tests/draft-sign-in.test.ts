@@ -16,6 +16,7 @@ import { TeamEditor } from "../src/components/team-editor";
 import { LoginButton } from "../src/components/site-shell";
 import { BuilderStart } from "../src/components/builder-start";
 import { SharedTeam } from "../src/components/shared-team";
+import { TeamPage } from "../src/components/team-page";
 
 const mocks = vi.hoisted(() => ({
   auth: { isAuthenticated: false, isLoading: false },
@@ -34,7 +35,8 @@ vi.mock("gt-next", () => ({
 }));
 vi.mock("convex/react", () => ({
   useConvexAuth: () => mocks.auth,
-  useMutation: () => mocks.save,
+  useMutation: () =>
+    Object.assign(mocks.save, { withOptimisticUpdate: () => mocks.save }),
   useQuery: () => mocks.query(),
 }));
 vi.mock("@convex-dev/auth/react", () => ({
@@ -494,4 +496,114 @@ it("shares only an authenticated owner's saved team and reports clipboard denial
     title: "copyFailed",
   });
   expect(action("duplicate")).toBeDefined();
+});
+
+function unloadPrevented() {
+  const event = new Event("beforeunload", { cancelable: true });
+  window.dispatchEvent(event);
+  return event.defaultPrevented;
+}
+
+it("keeps the UUID editor, typing focus mounted across recovery writes and acknowledgements", async () => {
+  vi.useFakeTimers();
+  mocks.auth = { isAuthenticated: true, isLoading: false };
+  const team = newTeam(randomUUID(), "amazon");
+  const live = { team, revision: 3, canEdit: true, legal: false, updatedAt: 1 };
+  mocks.query.mockReturnValue(live);
+  let complete!: (result: { revision: number }) => void;
+  mocks.save.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        complete = resolve;
+      }),
+  );
+  const page = () =>
+    createElement(
+      DraftSignInProvider,
+      null,
+      createElement(TeamPage, { uuid: team.uuid }),
+    );
+  await act(async () => root.render(page()));
+  const name = container.querySelector<HTMLTextAreaElement>(
+    'textarea[aria-label="teamName"]',
+  )!;
+  await act(async () => name.focus());
+  const input = (value: string) => {
+    Object.getOwnPropertyDescriptor(
+      window.HTMLTextAreaElement.prototype,
+      "value",
+    )!.set!.call(name, value);
+    name.dispatchEvent(new Event("input", { bubbles: true }));
+  };
+  await act(async () => input("First edit"));
+  expect(container.querySelector('textarea[aria-label="teamName"]')).toBe(name);
+  expect(document.activeElement).toBe(name);
+  expect(unloadPrevented()).toBe(true);
+  await act(async () => vi.advanceTimersByTimeAsync(450));
+  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({
+    team: { ...team, name: "First edit" },
+    expectedRevision: 3,
+  });
+  await act(async () => input("Second edit"));
+  await act(async () => {
+    mocks.query.mockReturnValue({
+      ...live,
+      team: { ...team, name: "First edit" },
+      revision: 4,
+    });
+    root.render(page());
+    complete({ revision: 4 });
+  });
+  expect(name.value).toBe("Second edit");
+  expect(document.activeElement).toBe(name);
+  expect(unloadPrevented()).toBe(true);
+  mocks.save.mockImplementationOnce(async ({ team }) => {
+    mocks.query.mockReturnValue({ ...live, team, revision: 5 });
+    return { revision: 5 };
+  });
+  await act(async () => vi.advanceTimersByTimeAsync(450));
+  expect(mocks.save.mock.calls[1][0].expectedRevision).toBe(4);
+  expect(readDrafts()).toEqual([]);
+  expect(container.querySelector('textarea[aria-label="teamName"]')).toBe(name);
+  expect(document.activeElement).toBe(name);
+  expect(unloadPrevented()).toBe(false);
+});
+
+it("warns on failed cloud saves and removes the unload warning after a successful retry", async () => {
+  vi.useFakeTimers();
+  mocks.auth = { isAuthenticated: true, isLoading: false };
+  mocks.save.mockRejectedValueOnce(new Error("offline"));
+  await act(async () => root.render(editor()));
+  const add = container.querySelector<HTMLButtonElement>(
+    'button[aria-label="increaseQuantity"]',
+  )!;
+  await act(async () => add.click());
+  expect(unloadPrevented()).toBe(true);
+  await act(async () => vi.advanceTimersByTimeAsync(450));
+  expect(unloadPrevented()).toBe(true);
+  const retry = Array.from(container.querySelectorAll("button")).find(
+    (b) => b.textContent === "retry",
+  )!;
+  await act(async () => retry.click());
+  expect(unloadPrevented()).toBe(false);
+});
+
+it("does not warn when a guest draft is safely stored or a public team is read-only", async () => {
+  await act(async () => root.render(editor()));
+  expect(unloadPrevented()).toBe(false);
+  mocks.auth = { isAuthenticated: true, isLoading: false };
+  await act(async () =>
+    root.render(
+      createElement(
+        DraftSignInProvider,
+        null,
+        createElement(TeamEditor, {
+          initial: newTeam(randomUUID()),
+          revision: 1,
+          readOnly: true,
+        }),
+      ),
+    ),
+  );
+  expect(unloadPrevented()).toBe(false);
 });

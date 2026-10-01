@@ -9,7 +9,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import {
   draftAccount,
@@ -20,6 +20,8 @@ import {
   subscribeDrafts,
 } from "@/lib/drafts";
 import { saveCloudDraft } from "@/lib/cloud-save";
+import { useTeamSave } from "@/lib/use-team-save";
+import { useBeforeUnload } from "@/lib/use-before-unload";
 import { finishDraftSignIn } from "@/lib/draft-sign-in";
 
 type Sync = {
@@ -46,8 +48,17 @@ export function DraftSyncProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useConvexAuth();
   const viewer = useQuery(api.teams.viewer, isAuthenticated ? {} : "skip");
   const account = viewer?.id ?? null;
-  const save = useMutation(api.teams.save);
+  const save = useTeamSave();
   const raw = useSyncExternalStore(subscribeDrafts, draftSnapshot, () => "[]");
+  // This provider outlives route changes, so queued recovery saves remain
+  // protected even after the editor has unmounted.
+  useBeforeUnload(
+    !!account &&
+      parseDrafts(raw).some((team) => {
+        const owner = draftAccount(team.uuid);
+        return !owner || owner === account;
+      }),
+  );
   const active = useRef(new Set<string>());
   const inFlight = useRef(false);
   const failures = useRef(new Map<string, string>());
