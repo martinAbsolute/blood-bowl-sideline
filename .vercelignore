@@ -4,7 +4,6 @@
 .env*
 tests
 docs
-scripts/*
-!scripts/vercel-build.mjs
+scripts
 *.pdf
 *.tsbuildinfo

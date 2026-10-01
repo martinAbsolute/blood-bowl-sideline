@@ -5,11 +5,8 @@ export async function proxyTelegramAuth(request: Request) {
   if (!/^\/api\/auth\/(signin|callback)\/telegram$/.test(url.pathname)) {
     return new Response("Not found", { status: 404 });
   }
-  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-  if (!convexUrl)
-    return new Response("Authentication unavailable", { status: 503 });
-  const site = new URL(convexUrl);
-  site.hostname = site.hostname.replace(/\.convex\.cloud$/, ".convex.site");
+  const site = process.env.NEXT_PUBLIC_CONVEX_SITE_URL;
+  if (!site) return new Response("Authentication unavailable", { status: 503 });
   const target = new URL(url.pathname + url.search, site);
   const headers = new Headers();
   for (const name of ["cookie", "content-type"]) {
