@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 
 export const siteName = "Blood Bowl Sideline";
 export const siteUrl = new URL(
-  process.env.NEXT_PUBLIC_SITE_URL || "https://blood-bowl-sideline.vercel.app",
+  process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "http://localhost:3000",
 );
 export const siteDescription =
   "Your Blood Bowl hub for teams, leagues and tournaments. Build and share rosters, manage advancements and track games in English and Ukrainian.";

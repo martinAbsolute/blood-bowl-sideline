@@ -9,4 +9,4 @@ Read `_generated/ai/guidelines.md` before editing backend code.
 
 Guest drafts are browser-local. Signing in uploads all guest drafts through the same authenticated save mutation as the editor. Local recovery copies are account-scoped and removed only after their exact contents have been acknowledged.
 
-Run `pnpm exec convex dev` during development. Run the root checks and tests before deployment. Pushing to GitHub `main` starts Vercel’s combined Convex/frontend production build. Confirm the intended deployment before any manual `pnpm exec convex deploy -y`. Generated files are managed by Convex; credentials belong in deployment environment variables.
+Run `pnpm dev` to watch Convex and Next.js together during development. Run the root checks and tests before deployment. Pushing to GitHub `main` starts Vercel’s combined Convex/frontend production build. Confirm the intended deployment before any manual `pnpm exec convex deploy -y`. Generated files are managed by Convex; credentials belong in deployment environment variables.

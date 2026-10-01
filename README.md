@@ -29,16 +29,12 @@ Use Node.js 24 and the pnpm version pinned in `package.json`, plus your own Conv
 ```sh
 corepack enable
 pnpm install --frozen-lockfile
-pnpm dev:backend
-```
-
-Keep the backend running. Set up `.env.local` using [.env.example](.env.example), then start the frontend in another terminal:
-
-```sh
 pnpm dev
 ```
 
-Open [localhost:3000](http://localhost:3000). Guest team building works without Telegram credentials. See [CONTRIBUTING.md](CONTRIBUTING.md) for the complete environment and optional authentication setup.
+This command configures and syncs Convex first, then runs its watcher and Next.js together using [Convex's `--start` option](https://docs.convex.dev/cli/reference/dev). Convex creates the local deployment settings in `.env.local`; see [.env.example](.env.example). Both processes stop with Ctrl-C. Use `pnpm dev:frontend` or `pnpm dev:backend` to run either server independently.
+
+Open [localhost:3000](http://localhost:3000). Guest team building works without Telegram credentials. To enable sign-in, configure `TELEGRAM_CLIENT_ID`, `TELEGRAM_CLIENT_SECRET`, `JWT_PRIVATE_KEY`, and `JWKS` in your Convex deployment, and set its `SITE_URL` to `http://localhost:3000`. Leave `CUSTOM_AUTH_SITE_URL` unset locally so OAuth uses Convex's HTTPS callback. Register that callback with Telegram. The frontend checks credential availability in Convex when signing in.
 
 ## Stack and project layout
 
@@ -64,22 +60,16 @@ Both the browser and backend compute costs and validate teams from the same cata
 The live application is [blood-bowl-sideline.vercel.app](https://blood-bowl-sideline.vercel.app/). The linked Vercel project deploys GitHub `main`; its production build deploys Convex functions and builds the frontend together. [vercel.json](vercel.json) defines the command:
 
 ```sh
-pnpm exec convex deploy --cmd 'pnpm run build'
+pnpm exec convex deploy --cmd 'node scripts/vercel-build.mjs' --cmd-url-env-var-name NEXT_PUBLIC_CONVEX_URL
 ```
 
-For your own deployment, import your fork into Vercel and connect your own Convex project. Configure these Vercel environment variables:
+For your own deployment, import your fork into Vercel and connect your own Convex project. The only manually configured Vercel variable is `CONVEX_DEPLOY_KEY`: use a **production deploy key** for Production and a **preview deploy key** for Preview. Local development uses your Convex login and generated `.env.local`; a Vercel Development deploy key is unnecessary.
 
-| Variable                          | Value                                                               |
-| --------------------------------- | ------------------------------------------------------------------- |
-| `CONVEX_DEPLOY_KEY`               | A **Production-only secret** from your Convex production deployment |
-| `NEXT_PUBLIC_CONVEX_URL`          | Your deployment's `https://…convex.cloud` URL                       |
-| `NEXT_PUBLIC_CONVEX_SITE_URL`     | Its `https://…convex.site` URL for the auth proxy                   |
-| `NEXT_PUBLIC_SITE_URL`            | Your application's public origin, used in metadata and the sitemap  |
-| `NEXT_PUBLIC_TELEGRAM_AUTH_READY` | `true` only when Telegram authentication is configured              |
+Keep Vercel's **Automatically expose System Environment Variables** enabled. Metadata and sitemap URLs use `VERCEL_PROJECT_PRODUCTION_URL`, with `http://localhost:3000` for local development. The auth proxy derives its Convex HTTP endpoint from `NEXT_PUBLIC_CONVEX_URL`, which `convex deploy` supplies during the build. Telegram readiness comes from Convex credentials rather than a frontend flag.
 
-Configure authentication secrets in Convex as described in [CONTRIBUTING.md](CONTRIBUTING.md). Production Telegram callbacks use the application's `/api/auth/callback/telegram` route; set Convex `CUSTOM_AUTH_SITE_URL` to that public origin. Set Convex `SITE_URL` to the same origin.
+Configure authentication secrets in Convex as described above. [scripts/vercel-build.mjs](scripts/vercel-build.mjs) copies the Vercel origin into Convex Auth's required `SITE_URL` and `CUSTOM_AUTH_SITE_URL` settings before building. Production uses `VERCEL_PROJECT_PRODUCTION_URL`; previews use `VERCEL_BRANCH_URL`, falling back to `VERCEL_URL`. Register each enabled origin's `/api/auth/callback/telegram` callback with Telegram. The optional bot webhook also needs `TELEGRAM_BOT_TOKEN` and `TELEGRAM_WEBHOOK_SECRET` in Convex.
 
-Preview builds run `pnpm run build` against the backend configured for Preview. Keep Preview pointed at a separate development backend; the production deploy key must not be available there. Preview metadata and robots prevent indexing. The sitemap includes public reference pages and the builder entry, while UUID team pages carry `noindex`.
+Preview builds deploy an isolated Convex preview backend for the Git branch. Set required auth signing keys and optional Telegram credentials in Convex preview environment defaults; never expose the production deploy key to Preview. Preview metadata and robots prevent indexing. The sitemap includes public reference pages and the builder entry, while UUID team pages carry `noindex`.
 
 Enable **Web Analytics** and **Speed Insights** for the Vercel project in its dashboard; the application already includes both SDKs. See Vercel's [Analytics setup](https://vercel.com/docs/analytics/quickstart) and [Speed Insights setup](https://vercel.com/docs/speed-insights/quickstart).
 

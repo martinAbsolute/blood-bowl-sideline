@@ -7,7 +7,7 @@ afterEach(() => {
 });
 
 it("forwards sign-in to Convex without following Telegram redirects and preserves each cookie", async () => {
-  vi.stubEnv("NEXT_PUBLIC_CONVEX_SITE_URL", "https://example.convex.site");
+  vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://example.convex.cloud");
   const upstream = new Response(null, {
     status: 302,
     headers: { location: "https://oauth.telegram.org/auth" },
@@ -45,7 +45,7 @@ it("forwards sign-in to Convex without following Telegram redirects and preserve
 });
 
 it("passes callback cookies and form body to Convex for verification", async () => {
-  vi.stubEnv("NEXT_PUBLIC_CONVEX_SITE_URL", "https://example.convex.site");
+  vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", "https://example.convex.cloud");
   const fetch = vi.fn().mockResolvedValue(
     new Response(null, {
       status: 302,
@@ -85,5 +85,31 @@ it("does not expose arbitrary backend routes through the proxy", async () => {
       )
     ).status,
   ).toBe(404);
+  expect(fetch).not.toHaveBeenCalled();
+});
+
+it("derives regional Convex HTTP endpoints from the cloud URL", async () => {
+  vi.stubEnv(
+    "NEXT_PUBLIC_CONVEX_URL",
+    "https://example.eu-west-1.convex.cloud",
+  );
+  const fetch = vi.fn().mockResolvedValue(new Response(null, { status: 302 }));
+  vi.stubGlobal("fetch", fetch);
+  await proxyTelegramAuth(
+    new Request("https://sideline.example/api/auth/signin/telegram"),
+  );
+  expect(fetch.mock.calls[0][0].origin).toBe(
+    "https://example.eu-west-1.convex.site",
+  );
+});
+
+it("reports unavailable authentication when the Convex URL is missing", async () => {
+  vi.stubEnv("NEXT_PUBLIC_CONVEX_URL", undefined);
+  const fetch = vi.fn();
+  vi.stubGlobal("fetch", fetch);
+  const response = await proxyTelegramAuth(
+    new Request("https://sideline.example/api/auth/signin/telegram"),
+  );
+  expect(response.status).toBe(503);
   expect(fetch).not.toHaveBeenCalled();
 });

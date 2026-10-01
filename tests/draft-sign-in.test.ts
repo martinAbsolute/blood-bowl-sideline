@@ -22,6 +22,7 @@ const mocks = vi.hoisted(() => ({
   auth: { isAuthenticated: false, isLoading: false },
   save: vi.fn(),
   signIn: vi.fn(),
+  isTelegramConfigured: vi.fn(),
   toast: vi.fn(),
   replace: vi.fn(),
   push: vi.fn(),
@@ -38,6 +39,7 @@ vi.mock("convex/react", () => ({
   useMutation: () =>
     Object.assign(mocks.save, { withOptimisticUpdate: () => mocks.save }),
   useQuery: () => mocks.query(),
+  useAction: () => mocks.isTelegramConfigured,
 }));
 vi.mock("@convex-dev/auth/react", () => ({
   useAuthActions: () => ({ signIn: mocks.signIn }),
@@ -73,7 +75,7 @@ beforeEach(() => {
       disconnect() {}
     },
   );
-  vi.stubEnv("NEXT_PUBLIC_TELEGRAM_AUTH_READY", "true");
+  mocks.isTelegramConfigured.mockReset().mockResolvedValue(true);
   localStorage.clear();
   sessionStorage.clear();
   mocks.auth = { isAuthenticated: false, isLoading: false };

@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useLocale, useSetLocale, useTranslations } from "gt-next";
-import { useConvexAuth } from "convex/react";
+import { useAction, useConvexAuth } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { Languages, LogOut, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,15 +14,17 @@ import { SiteFooter } from "./site-footer";
 export function LoginButton({ className }: { className?: string }) {
   const t = useTranslations(),
     { signIn } = useAuthActions(),
+    isTelegramConfigured = useAction(api.auth.isTelegramConfigured),
     draftSignIn = useDraftSignIn(),
     [starting, setStarting] = useState(false);
   async function login() {
-    if (process.env.NEXT_PUBLIC_TELEGRAM_AUTH_READY !== "true") {
-      toast.add({ type: "info", title: t("botPending") });
-      return;
-    }
     setStarting(true);
     try {
+      if (!(await isTelegramConfigured({}))) {
+        toast.add({ type: "info", title: t("botPending") });
+        setStarting(false);
+        return;
+      }
       let redirectTo: string;
       try {
         redirectTo = draftSignIn.prepare();
