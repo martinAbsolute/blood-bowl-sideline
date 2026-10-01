@@ -373,7 +373,7 @@ describe("league registration and fixtures", () => {
         scoreAway: 0,
         expectedRevision: 1,
       }),
-    ).rejects.toThrow("FORBIDDEN");
+    ).resolves.toBe(1);
   });
   it("permits replacement before a match, unlocking the old builder and locking the new one", async () => {
     const s = await setup(),
@@ -600,7 +600,7 @@ describe("one shared revision and atomic match finalization", () => {
           { playerId: player._id, stats: { ...emptyPlayerStats(), mvp: 1 } },
         ],
       }),
-    ).rejects.toThrow("DEPENDENT_CAREER_CHANGES_REQUIRE_RECONCILIATION");
+    ).rejects.toThrow("SPENT_SPP_CONFLICT");
     expect(
       (
         await s.t.query(api.leagues.getCareer, { entryId: career.entry._id })
@@ -913,7 +913,7 @@ describe("postgame roster management and administrative results", () => {
       detail = await s.t.query(api.leagues.get, { leagueId: s.leagueId });
     const match = detail.matches.find((m) => m.awayEntryId)!;
     await expect(
-      s.admin.mutation(api.leagues.adjudicateMatch, {
+      s.coaches[1].mutation(api.leagues.adjudicateMatch, {
         matchId: match._id,
         outcome: "home-win",
         reason: "No cooperation",
@@ -993,5 +993,521 @@ describe("postgame roster management and administrative results", () => {
       (await s.coaches[2].query(api.leagues.getCareer, { entryId: entries[2] }))
         .canManage,
     ).toBe(false);
+  });
+});
+
+describe("live report collaboration and immutable revisions", () => {
+  it("merges simultaneous fields and player counters without a shared draft revision", async () => {
+    const s = await setup(),
+      report = await readyReport(s);
+    await report.home.mutation(api.leagues.confirmMatch, {
+      matchId: report.matchId,
+      expectedRevision: report.revision,
+    });
+    await Promise.all([
+      report.home.mutation(api.leagues.patchMatchPlayer, {
+        matchId: report.matchId,
+        playerId: report.scorer.playerId,
+        stats: { com: 2 },
+      }),
+      report.away.mutation(api.leagues.patchMatchPlayer, {
+        matchId: report.matchId,
+        playerId: report.scorer.playerId,
+        stats: { cas: 1 },
+      }),
+      s.admin.mutation(api.leagues.updateMatchDetails, {
+        matchId: report.matchId,
+        venue: "Shared venue",
+      }),
+      report.away.mutation(api.leagues.updateMatchDetails, {
+        matchId: report.matchId,
+        weather: 11,
+      }),
+    ]);
+    const view = await s.t.query(api.leagues.getMatch, {
+      matchId: report.matchId,
+    });
+    expect(
+      view.players.find((row) => row.playerId === report.scorer.playerId)
+        ?.stats,
+    ).toMatchObject({ td: 1, mvp: 1, com: 2, cas: 1 });
+    expect(view.match).toMatchObject({
+      venue: "Shared venue",
+      weather: 11,
+      confirmedBy: [],
+      revision: report.revision + 4,
+    });
+    // A field echo is not an edit and must not revoke an acknowledgement.
+    await report.home.mutation(api.leagues.confirmMatch, {
+      matchId: report.matchId,
+      expectedRevision: view.match.revision,
+    });
+    await s.admin.mutation(api.leagues.updateMatchDetails, {
+      matchId: report.matchId,
+      venue: "Shared venue",
+    });
+    await report.away.mutation(api.leagues.patchMatchPlayer, {
+      matchId: report.matchId,
+      playerId: report.scorer.playerId,
+      stats: { td: 1 },
+    });
+    expect(
+      (await s.t.query(api.leagues.getMatch, { matchId: report.matchId })).match
+        .confirmedBy,
+    ).toHaveLength(1);
+  });
+
+  it("allows a third commissioner and global admin to edit but only the two coaches to lock in", async () => {
+    const s = await setup(),
+      report = await readyReport(s);
+    const commissionerId = await s.t.run((ctx) =>
+      ctx.db.insert("users", { name: "Third commissioner" }),
+    );
+    const otherId = await s.t.run((ctx) =>
+      ctx.db.insert("users", { name: "Unrelated coach" }),
+    );
+    await s.t.run((ctx) =>
+      ctx.db.patch("leagues", s.leagueId, { ownerId: commissionerId }),
+    );
+    const commissioner = s.t.withIdentity({ subject: commissionerId }),
+      outsider = s.t.withIdentity({ subject: otherId });
+    for (const actor of [commissioner, s.admin]) {
+      expect(
+        await actor.query(api.leagues.getMatch, { matchId: report.matchId }),
+      ).toMatchObject({
+        canEdit: true,
+        canCommission: true,
+        canConfirm: false,
+      });
+      await actor.mutation(api.leagues.updateMatchDetails, {
+        matchId: report.matchId,
+        venue: `Venue ${actor === commissioner ? "A" : "B"}`,
+      });
+      await expect(
+        actor.mutation(api.leagues.confirmMatch, {
+          matchId: report.matchId,
+          expectedRevision: report.revision,
+        }),
+      ).rejects.toThrow("FORBIDDEN");
+    }
+    for (const actor of [outsider, s.t]) {
+      await expect(
+        actor.mutation(api.leagues.updateMatchDetails, {
+          matchId: report.matchId,
+          venue: "Forged",
+        }),
+      ).rejects.toThrow(actor === s.t ? "UNAUTHENTICATED" : "FORBIDDEN");
+      await expect(
+        actor.mutation(api.leagues.patchMatchPlayer, {
+          matchId: report.matchId,
+          playerId: report.scorer.playerId,
+          stats: { td: 5 },
+        }),
+      ).rejects.toThrow(actor === s.t ? "UNAUTHENTICATED" : "FORBIDDEN");
+    }
+    const view = await s.t.query(api.leagues.getMatch, {
+      matchId: report.matchId,
+    });
+    await report.home.mutation(api.leagues.confirmMatch, {
+      matchId: report.matchId,
+      expectedRevision: view.match.revision,
+    });
+    expect(
+      (await s.t.query(api.leagues.getCareer, { entryId: view.home._id })).entry
+        .stats.mp,
+    ).toBe(0);
+    await report.away.mutation(api.leagues.confirmMatch, {
+      matchId: report.matchId,
+      expectedRevision: view.match.revision,
+    });
+    expect(
+      (await s.t.query(api.leagues.getCareer, { entryId: view.home._id })).entry
+        .stats.mp,
+    ).toBe(1);
+    expect(
+      (await s.t.query(api.leagues.getMatch, { matchId: report.matchId })).match
+        .status,
+    ).toBe("completed");
+  });
+
+  it("syncs unfinished text and injury inputs, but refuses to lock in an incomplete report", async () => {
+    const s = await setup(),
+      report = await readyReport(s);
+    await report.home.mutation(api.leagues.updateMatchDetails, {
+      matchId: report.matchId,
+      venue: "Venue with ",
+      evidenceUrl: "htt",
+    });
+    await report.home.mutation(api.leagues.patchMatchPlayer, {
+      matchId: report.matchId,
+      playerId: report.scorer.playerId,
+      casualtyRoll: 13,
+      injuryNotes: "Injury with ",
+    });
+    let view = await s.t.query(api.leagues.getMatch, {
+      matchId: report.matchId,
+    });
+    expect(view.match.venue).toBe("Venue with ");
+    expect(
+      view.players.find((row) => row.playerId === report.scorer.playerId),
+    ).toMatchObject({
+      casualtyRoll: 13,
+      lastingRoll: null,
+      injuryNotes: "Injury with ",
+      stats: { inj: 1 },
+    });
+    await expect(
+      report.home.mutation(api.leagues.confirmMatch, {
+        matchId: report.matchId,
+        expectedRevision: view.match.revision,
+      }),
+    ).rejects.toThrow("INVALID_EVIDENCE_URL");
+    await report.home.mutation(api.leagues.updateMatchDetails, {
+      matchId: report.matchId,
+      evidenceUrl: "",
+    });
+    view = await s.t.query(api.leagues.getMatch, { matchId: report.matchId });
+    await expect(
+      report.home.mutation(api.leagues.confirmMatch, {
+        matchId: report.matchId,
+        expectedRevision: view.match.revision,
+      }),
+    ).rejects.toThrow("INVALID_INPUT");
+    await report.home.mutation(api.leagues.patchMatchPlayer, {
+      matchId: report.matchId,
+      playerId: report.scorer.playerId,
+      lastingRoll: 2,
+    });
+    await s.admin.mutation(api.leagues.patchMatchPlayer, {
+      matchId: report.matchId,
+      playerId: report.otherMvp.playerId,
+      casualtyRoll: 15,
+    });
+    view = await s.t.query(api.leagues.getMatch, { matchId: report.matchId });
+    expect(
+      view.players.find((row) => row.playerId === report.otherMvp.playerId),
+    ).toMatchObject({ statusAfter: "dead", stats: { dth: 1, inj: 1 } });
+    await expect(
+      report.home.mutation(api.leagues.confirmMatch, {
+        matchId: report.matchId,
+        expectedRevision: view.match.revision,
+      }),
+    ).resolves.toMatchObject({ completed: false });
+  });
+
+  it("keeps the original event and compensates corrections after valid skills and purchases", async () => {
+    const s = await setup(),
+      report = await finalize(s);
+    const career = await s.t.query(api.leagues.getCareer, {
+      entryId: report.view.home._id,
+    });
+    const scorer = career.players.find(
+      (player) => player._id === report.scorer.playerId,
+    )!;
+    const choice = scorer.availableAdvancements.find(
+      (choice) => choice.cost === 6,
+    )!;
+    await report.home.mutation(api.leagues.advancePlayer, {
+      playerId: scorer._id,
+      skillId: choice.skillId,
+      expectedRevision: career.entry.revision,
+    });
+    let updated = await s.t.query(api.leagues.getCareer, {
+      entryId: career.entry._id,
+    });
+    await report.home.mutation(api.leagues.manageStaff, {
+      entryId: career.entry._id,
+      staff: "assistantCoaches",
+      change: 1,
+      expectedRevision: updated.entry.revision,
+    });
+    updated = await s.t.query(api.leagues.getCareer, {
+      entryId: career.entry._id,
+    });
+    const newRevision = await s.admin.mutation(api.leagues.correctMatch, {
+      matchId: report.matchId,
+      expectedRevision: report.revision,
+      scoreHome: 2,
+      scoreAway: 0,
+      reason: "Scorer had two touchdowns",
+      playerChanges: [
+        {
+          playerId: scorer._id,
+          stats: { ...emptyPlayerStats(), td: 2, mvp: 1 },
+        },
+      ],
+    });
+    const corrected = await s.t.query(api.leagues.getCareer, {
+      entryId: career.entry._id,
+    });
+    expect(
+      corrected.players.find((player) => player._id === scorer._id),
+    ).toMatchObject({
+      sppEarned: 10,
+      sppSpent: 6,
+      skills: [choice.skillId],
+      stats: { mp: 1, td: 2 },
+    });
+    expect(corrected.entry.team.staff.assistantCoaches).toBe(
+      updated.entry.team.staff.assistantCoaches,
+    );
+    expect(corrected.entry.treasury).toBe(updated.entry.treasury + 10000);
+    expect(corrected.entry.stats.mp).toBe(1);
+    const events = await s.t.run((ctx) =>
+      ctx.db
+        .query("leagueMatchEvents")
+        .withIndex("by_matchId", (q) => q.eq("matchId", report.matchId))
+        .collect(),
+    );
+    expect(events.map((event) => event.kind)).toEqual([
+      "recorded",
+      "corrected",
+    ]);
+    expect(events[0].after.scoreHome).toBe(1);
+    expect(events[1]).toMatchObject({
+      before: { scoreHome: 1 },
+      after: { scoreHome: 2 },
+      actorId: s.ids.outsider,
+      reason: "Scorer had two touchdowns",
+    });
+    await expect(
+      s.admin.mutation(api.leagues.correctMatch, {
+        matchId: report.matchId,
+        expectedRevision: report.revision,
+        scoreHome: 2,
+        scoreAway: 0,
+        reason: "Retry old revision",
+      }),
+    ).rejects.toThrow("CONFLICT");
+    expect(
+      (
+        await s.t.query(api.leagues.getMatchHistory, {
+          matchId: report.matchId,
+        })
+      )[0].revision,
+    ).toBe(newRevision);
+  });
+
+  it("reverses a recorded death without duplicating match awards and restores the captain", async () => {
+    const s = await setup(),
+      report = await readyReport(s);
+    const revision = await report.home.mutation(api.leagues.patchMatchPlayer, {
+      matchId: report.matchId,
+      playerId: report.scorer.playerId,
+      casualtyRoll: 15,
+    });
+    await report.home.mutation(api.leagues.confirmMatch, {
+      matchId: report.matchId,
+      expectedRevision: revision,
+    });
+    await report.away.mutation(api.leagues.confirmMatch, {
+      matchId: report.matchId,
+      expectedRevision: revision,
+    });
+    const before = await s.t.query(api.leagues.getCareer, {
+      entryId: report.view.home._id,
+    });
+    expect(
+      before.players.find((player) => player._id === report.scorer.playerId)
+        ?.status,
+    ).toBe("dead");
+    expect(before.entry.team.captainId).toBeUndefined();
+    await s.admin.mutation(api.leagues.correctMatch, {
+      matchId: report.matchId,
+      expectedRevision: revision,
+      scoreHome: 1,
+      scoreAway: 0,
+      reason: "Apothecary outcome was entered incorrectly",
+      playerChanges: [
+        {
+          playerId: report.scorer.playerId,
+          stats: { ...emptyPlayerStats(), td: 1, mvp: 1 },
+          statusAfter: "active",
+          casualtyRoll: null,
+          lastingRoll: null,
+          injuryNotes: "",
+        },
+      ],
+    });
+    const after = await s.t.query(api.leagues.getCareer, {
+      entryId: report.view.home._id,
+    });
+    expect(
+      after.players.find((player) => player._id === report.scorer.playerId),
+    ).toMatchObject({
+      status: "active",
+      stats: { mp: 1, td: 1, inj: 0, dth: 0 },
+      sppEarned: 7,
+    });
+    expect(after.entry.team.captainId).toBe(
+      report.view.match.homeSnapshot!.captainId,
+    );
+    expect(after.entry.stats).toMatchObject({ mp: 1, inj: 0, dth: 0 });
+    expect(after.entry.treasury).toBe(before.entry.treasury);
+  });
+
+  it("serializes competing corrections and keeps only the winning revision", async () => {
+    const s = await setup(),
+      report = await finalize(s);
+    const results = await Promise.allSettled(
+      ["Venue A", "Venue B"].map((venue) =>
+        s.admin.mutation(api.leagues.correctMatch, {
+          matchId: report.matchId,
+          expectedRevision: report.revision,
+          scoreHome: 1,
+          scoreAway: 0,
+          venue,
+          reason: "Correct venue",
+        }),
+      ),
+    );
+    expect(
+      results.filter((result) => result.status === "fulfilled"),
+    ).toHaveLength(1);
+    const rejected = results.find((result) => result.status === "rejected");
+    expect(
+      rejected?.status === "rejected" && rejected.reason.message,
+    ).toContain("CONFLICT");
+    const events = await s.t.query(api.leagues.getMatchHistory, {
+      matchId: report.matchId,
+    });
+    expect(events).toHaveLength(2);
+    expect(events[0].revision).toBe(report.revision + 1);
+    expect(
+      (
+        await s.t.query(api.leagues.getCareer, {
+          entryId: report.view.home._id,
+        })
+      ).entry.stats.mp,
+    ).toBe(1);
+  });
+
+  it("replays earlier results through later matches and postgame treasury events", async () => {
+    const s = await setup(4),
+      first = await finalize(s);
+    const league = await s.t.query(api.leagues.get, { leagueId: s.leagueId });
+    const other = league.matches.find(
+      (match) =>
+        match.roundId === first.view.match.roundId &&
+        match._id !== first.matchId,
+    )!;
+    const second = await readyReport(s, other._id);
+    await second.home.mutation(api.leagues.confirmMatch, {
+      matchId: other._id,
+      expectedRevision: second.revision,
+    });
+    await second.away.mutation(api.leagues.confirmMatch, {
+      matchId: other._id,
+      expectedRevision: second.revision,
+    });
+    for (const entryId of s.entries) {
+      const career = await s.t.query(api.leagues.getCareer, { entryId });
+      const actor = s.coaches[s.entries.indexOf(entryId)];
+      await actor.mutation(api.leagues.completePostGame, {
+        entryId,
+        expectedRevision: career.entry.revision,
+        mistakeRoll: 6,
+      });
+    }
+    await s.coaches[0].mutation(api.leagues.openRound, {
+      roundId: league.rounds.find((round) => round.number === 2)!._id,
+    });
+    const fixtures = await s.t.query(api.leagues.get, { leagueId: s.leagueId });
+    const roundId = fixtures.rounds.find((round) => round.number === 2)!._id;
+    const laterMatch = fixtures.matches.find(
+      (match) =>
+        match.roundId === roundId &&
+        (match.homeEntryId === first.view.home._id ||
+          match.awayEntryId === first.view.home._id),
+    )!;
+    const later = await readyReport(s, laterMatch._id);
+    await later.home.mutation(api.leagues.confirmMatch, {
+      matchId: laterMatch._id,
+      expectedRevision: later.revision,
+    });
+    await later.away.mutation(api.leagues.confirmMatch, {
+      matchId: laterMatch._id,
+      expectedRevision: later.revision,
+    });
+    const before = await s.t.query(api.leagues.getCareer, {
+      entryId: first.view.home._id,
+    });
+    const laterBefore = await s.t.query(api.leagues.getMatch, {
+      matchId: laterMatch._id,
+    });
+    await s.coaches[0].mutation(api.leagues.correctMatch, {
+      matchId: first.matchId,
+      expectedRevision: first.revision,
+      scoreHome: 0,
+      scoreAway: 0,
+      reason: "First match was actually a draw",
+      playerChanges: [
+        {
+          playerId: first.scorer.playerId,
+          stats: { ...emptyPlayerStats(), mvp: 1 },
+        },
+      ],
+    });
+    const after = await s.t.query(api.leagues.getCareer, {
+      entryId: first.view.home._id,
+    });
+    expect(after.entry.latestMatchId).toBe(laterMatch._id);
+    expect(after.entry.stats).toMatchObject({
+      mp: 2,
+      pts: before.entry.stats.pts - 2,
+      tdFor: before.entry.stats.tdFor - 1,
+    });
+    expect(after.entry.treasury).toBe(before.entry.treasury - 15000);
+    const laterAfter = await s.t.query(api.leagues.getMatch, {
+      matchId: laterMatch._id,
+    });
+    expect(laterAfter.match.homeSnapshot).toEqual(
+      laterBefore.match.homeSnapshot,
+    );
+    expect(laterAfter.match.awaySnapshot).toEqual(
+      laterBefore.match.awaySnapshot,
+    );
+    expect(laterAfter.match.homeWinnings).toBe(
+      laterBefore.match.homeWinnings - 5000,
+    );
+    expect(laterAfter.match.awayWinnings).toBe(
+      laterBefore.match.awayWinnings - 5000,
+    );
+    expect(
+      (
+        await s.t.query(api.leagues.getMatchHistory, {
+          matchId: laterMatch._id,
+        })
+      )[0].kind,
+    ).toBe("replayed");
+    const recorded = await s.t.query(api.leagues.getMatch, {
+      matchId: first.matchId,
+    });
+    const eventsBefore = await s.t.query(api.leagues.getMatchHistory, {
+      matchId: first.matchId,
+    });
+    await expect(
+      s.coaches[0].mutation(api.leagues.correctMatch, {
+        matchId: first.matchId,
+        expectedRevision: recorded.match.revision,
+        scoreHome: 0,
+        scoreAway: 0,
+        reason: "Incompatible later participation",
+        playerChanges: [
+          {
+            playerId: first.scorer.playerId,
+            stats: { ...emptyPlayerStats(), mvp: 1, inj: 1, dth: 1 },
+            statusAfter: "dead",
+            casualtyRoll: 15,
+          },
+        ],
+      }),
+    ).rejects.toThrow("DEPENDENT_CAREER_CHANGES_REQUIRE_RECONCILIATION");
+    expect(
+      await s.t.query(api.leagues.getCareer, { entryId: first.view.home._id }),
+    ).toEqual(after);
+    expect(
+      await s.t.query(api.leagues.getMatchHistory, { matchId: first.matchId }),
+    ).toEqual(eventsBefore);
   });
 });

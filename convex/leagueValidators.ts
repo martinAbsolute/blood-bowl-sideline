@@ -100,3 +100,35 @@ export const playerChangeValidator = v.object({
   casualtyRoll: v.optional(v.union(v.number(), v.null())),
   lastingRoll: v.optional(v.union(v.number(), v.null())),
 });
+
+// Immutable official report revisions; rosters are captured once and remain on
+// the fixture. These events retain every input needed to reverse a contribution.
+export const recordedReportValidator = v.object({
+  scoreHome: v.number(),
+  scoreAway: v.number(),
+  venue: v.string(),
+  evidenceUrl: v.string(),
+  weather: v.union(v.number(), v.null()),
+  homeFanRoll: v.union(v.number(), v.null()),
+  awayFanRoll: v.union(v.number(), v.null()),
+  homeFansRoll: v.union(v.number(), v.null()),
+  awayFansRoll: v.union(v.number(), v.null()),
+  homeStalled: v.boolean(),
+  awayStalled: v.boolean(),
+  homeWinnings: v.number(),
+  awayWinnings: v.number(),
+  homeDedicatedFans: v.number(),
+  awayDedicatedFans: v.number(),
+  players: v.array(
+    v.object({
+      playerId: v.id("leaguePlayers"),
+      entryId: v.id("leagueTeams"),
+      stats: matchStatsValidator,
+      participated: v.boolean(),
+      statusAfter: reportStatusValidator,
+      injuryNotes: v.string(),
+      casualtyRoll: v.union(v.number(), v.null()),
+      lastingRoll: v.union(v.number(), v.null()),
+    }),
+  ),
+});

@@ -21,12 +21,15 @@ const state = vi.hoisted(() => ({
 }));
 vi.mock("convex/react", () => ({
   useConvexAuth: () => ({ isAuthenticated: true, isLoading: false }),
-  useMutation:
-    (reference: Parameters<typeof getFunctionName>[0]) =>
-    async (args: Record<string, unknown>) => {
+  useMutation: (reference: Parameters<typeof getFunctionName>[0]) => {
+    const mutate = async (args: Record<string, unknown>) => {
       state.calls.push({ name: getFunctionName(reference), args });
-    },
-  useQuery: () => {
+    };
+    mutate.withOptimisticUpdate = () => mutate;
+    return mutate;
+  },
+  useQuery: (reference: Parameters<typeof getFunctionName>[0]) => {
+    if (getFunctionName(reference) === "leagues:getMatchHistory") return [];
     const home = {
       _id: "home",
       coachId: "coach",
@@ -190,7 +193,7 @@ it("opens an away coach's own players first and lets them inspect the opponent",
   state.viewerId = "opponent";
   const view = await setup();
   try {
-    await click(button(view.container, "leagueUx.reportNextPlayers"));
+    await click(button(view.container, "leagueUx.reportNextGame"));
     expect(
       button(view.container, "Away Team").getAttribute("aria-pressed"),
     ).toBe("true");
@@ -207,85 +210,107 @@ it("opens an away coach's own players first and lets them inspect the opponent",
   }
 });
 
-it("requires saving or discarding before switching report sections, teams, or players and preserves stale revision protection", async () => {
+it("syncs fields immediately and lets coaches switch steps, teams and rows during edits", async () => {
   const view = await setup();
   try {
-    const score = view.container.querySelector<HTMLInputElement>(
-      '#report-details input[type="number"]',
+    const venue = view.container.querySelector<HTMLInputElement>(
+      "#report-pre-game input",
     )!;
-    await input(score, "2");
-    expect(button(view.container, "leagueUx.reportNextPlayers").disabled).toBe(
-      true,
-    );
-    expect(
-      view.container.querySelector<HTMLButtonElement>(
-        '[aria-controls="report-players"]',
-      )!.disabled,
-    ).toBe(true);
-    await click(button(view.container, "leagueUx.reportDiscardChanges"));
-    await click(button(view.container, "leagueUx.reportNextPlayers"));
+    await input(venue, "Table 3 ");
+    expect(state.calls[0]).toEqual({
+      name: "leagues:updateMatchDetails",
+      args: { matchId: "match", venue: "Table 3 " },
+    });
+    await click(button(view.container, "leagueUx.reportNextGame"));
     const rows = view.container.querySelectorAll<HTMLDetailsElement>(
-      "#report-players details.group\\/player",
+      "#report-game details.group\\/player",
     );
     await click(rows[0].querySelector("summary")!);
     await input(
       rows[0].querySelector<HTMLInputElement>('input[type="number"]')!,
       "1",
     );
-    expect(button(view.container, "Away Team").disabled).toBe(true);
-    expect(button(view.container, "leagueUx.reportNextReview").disabled).toBe(
-      true,
+    expect(state.calls[1]).toEqual({
+      name: "leagues:patchMatchPlayer",
+      args: { matchId: "match", playerId: "first", stats: { td: 1 } },
+    });
+    expect(button(view.container, "Away Team").disabled).toBe(false);
+    expect(button(view.container, "leagueUx.reportNextPostGame").disabled).toBe(
+      false,
     );
     const event = new MouseEvent("click", { bubbles: true, cancelable: true });
     rows[1].querySelector("summary")!.dispatchEvent(event);
-    expect(event.defaultPrevented).toBe(true);
+    expect(event.defaultPrevented).toBe(false);
     state.revision = 2;
     await view.render();
-    expect(rows[0].textContent).toContain("leagueUi.staleDraft");
-    expect(button(rows[0], "leagueUi.savePlayer").disabled).toBe(true);
-    await click(button(view.container, "leagueUx.reportDiscardChanges"));
-    expect(button(view.container, "Away Team").disabled).toBe(false);
-    expect(state.calls).toHaveLength(0);
+    expect(rows[0].textContent).not.toContain("leagueUi.staleDraft");
+    expect(view.container.textContent).not.toContain("leagueUi.savePlayer");
+    expect(view.container.textContent).not.toContain("leagueUi.saveDetails");
+    await click(button(view.container, "leagueUx.reportNextPostGame"));
+    await input(
+      view.container.querySelector<HTMLInputElement>(
+        '#report-post-game input[type="number"]',
+      )!,
+      "2",
+    );
+    expect(state.calls[2]).toEqual({
+      name: "leagues:updateMatchDetails",
+      args: { matchId: "match", scoreHome: 2 },
+    });
   } finally {
     await view.close();
   }
 });
 
-it("discarding staged correction details clears the parent submission payload as well as the visible draft", async () => {
+it("stages a completed report correction, can cancel it and protects against a newer recorded revision", async () => {
   state.status = "completed";
   const view = await setup();
   try {
     await click(button(view.container, "leagueUi.correctReport"));
     const score = view.container.querySelector<HTMLInputElement>(
-      '#report-details input[type="number"]',
+      '#report-post-game input[type="number"]',
     )!;
     await input(score, "3");
-    await act(async () => {
-      score
-        .closest("form")!
-        .dispatchEvent(
-          new Event("submit", { bubbles: true, cancelable: true }),
-        );
-    });
     expect(score.value).toBe("3");
-    await click(button(view.container, "leagueUx.reportDiscardChanges"));
-    expect(score.value).toBe("0");
+    expect(state.calls).toHaveLength(0);
     await click(
       view.container.querySelector<HTMLButtonElement>(
-        '[aria-controls="report-review"]',
+        '[aria-controls="report-post-game"]',
       )!,
     );
     await input(
       view.container.querySelector<HTMLTextAreaElement>("textarea")!,
       "Correct player record",
     );
-    await click(button(view.container, "leagueUi.saveCorrection"));
-    const call = state.calls.find(
-      (call) => call.name === "leagues:correctMatch",
+    state.revision = 2;
+    await view.render();
+    expect(view.container.textContent).toContain("leagueUi.staleDraft");
+    expect(button(view.container, "leagueUi.saveCorrection").disabled).toBe(
+      true,
     );
-    expect(call?.args.scoreHome).toBe(0);
-    expect(call?.args.scoreAway).toBe(0);
-    expect(call?.args).not.toHaveProperty("venue");
+    await click(button(view.container, "cancel"));
+    expect(score.value).toBe("0");
+    expect(state.calls).toHaveLength(0);
+  } finally {
+    await view.close();
+  }
+});
+
+it("disables a completed report until a commissioner explicitly begins a correction", async () => {
+  state.status = "completed";
+  const view = await setup();
+  try {
+    expect(
+      view.container.querySelector<HTMLFieldSetElement>(
+        "#report-pre-game fieldset",
+      )!.disabled,
+    ).toBe(true);
+    await click(button(view.container, "leagueUi.correctReport"));
+    expect(
+      view.container.querySelector<HTMLFieldSetElement>(
+        "#report-pre-game fieldset",
+      )!.disabled,
+    ).toBe(false);
   } finally {
     await view.close();
   }

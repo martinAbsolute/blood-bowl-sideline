@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import type { FunctionArgs, FunctionReturnType } from "convex/server";
+import { ConvexError } from "convex/values";
 import { useTranslations } from "gt-next";
 import {
   ArrowLeft,
@@ -11,6 +12,7 @@ import {
   CheckCircle2,
   ChevronDown,
   Circle,
+  LoaderCircle,
   LockKeyhole,
   ShieldCheck,
 } from "lucide-react";
@@ -22,6 +24,7 @@ import {
   leaguePlayerLabel,
   snapshotPlayerNumber,
 } from "@/lib/league-player-label";
+import { useBeforeUnload } from "@/lib/use-before-unload";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -41,17 +44,18 @@ import {
   useLeagueAction,
 } from "./league-ui";
 
-type MatchData = NonNullable<FunctionReturnType<typeof api.leagues.getMatch>>;
+type MatchData = FunctionReturnType<typeof api.leagues.getMatch>;
 type ReportPlayer = MatchData["players"][number];
-type Stats = ReportPlayer["stats"];
-type PlayerDraft = {
-  stats: Stats;
-  statusAfter: "active" | "missing-next-game" | "dead";
-  injuryNotes: string;
-  revision: number;
-  casualtyRoll: number | null;
-  lastingRoll: number | null;
-};
+type DetailsPatch = Omit<
+  FunctionArgs<typeof api.leagues.updateMatchDetails>,
+  "matchId" | "expectedRevision"
+>;
+type PlayerPatch = Omit<
+  FunctionArgs<typeof api.leagues.patchMatchPlayer>,
+  "matchId" | "playerId"
+>;
+type Step = "pre-game" | "game" | "post-game";
+const steps: Step[] = ["pre-game", "game", "post-game"];
 const fields = [
   "td",
   "cas",
@@ -67,6 +71,34 @@ const fields = [
   "dth",
 ] as const;
 
+function patchedPlayer(player: ReportPlayer, patch: PlayerPatch): ReportPlayer {
+  const next = {
+    ...player,
+    ...patch,
+    stats: { ...player.stats, ...patch.stats },
+  };
+  if (patch.statusAfter !== undefined)
+    next.stats.dth = patch.statusAfter === "dead" ? 1 : 0;
+  if (
+    next.casualtyRoll !== null &&
+    (patch.casualtyRoll !== undefined || patch.lastingRoll !== undefined)
+  ) {
+    try {
+      const result = casualtyOutcome(next.casualtyRoll, next.lastingRoll ?? 1);
+      next.statusAfter = result.dead
+        ? "dead"
+        : result.missNextGame
+          ? "missing-next-game"
+          : "active";
+      next.stats.inj = Math.max(1, next.stats.inj);
+      next.stats.dth = result.dead ? 1 : 0;
+    } catch {
+      /* Invalid input is reported by the mutation. */
+    }
+  }
+  return next;
+}
+
 export function LeagueMatch({
   leagueId,
   matchId,
@@ -81,29 +113,115 @@ export function LeagueMatch({
     api.leagues.getMatch,
     auth.isAuthenticated ? { matchId: id } : "skip",
   );
+  const history = useQuery(
+    api.leagues.getMatchHistory,
+    auth.isAuthenticated ? { matchId: id } : "skip",
+  );
   const start = useMutation(api.leagues.startMatch);
   const confirm = useMutation(api.leagues.confirmMatch);
-  const updateDetails = useMutation(api.leagues.updateMatchDetails);
-  const updatePlayer = useMutation(api.leagues.updateMatchPlayer);
   const correct = useMutation(api.leagues.correctMatch);
+  const updateDetails = useMutation(
+    api.leagues.updateMatchDetails,
+  ).withOptimisticUpdate((store, args) => {
+    const current = store.getQuery(api.leagues.getMatch, {
+      matchId: args.matchId,
+    });
+    if (!current) return;
+    const { matchId: _id, expectedRevision: _revision, ...patch } = args;
+    void _id;
+    void _revision;
+    store.setQuery(
+      api.leagues.getMatch,
+      { matchId: args.matchId },
+      {
+        ...current,
+        match: { ...current.match, ...patch, confirmedBy: [] },
+      },
+    );
+  });
+  const updatePlayer = useMutation(
+    api.leagues.patchMatchPlayer,
+  ).withOptimisticUpdate((store, args) => {
+    const current = store.getQuery(api.leagues.getMatch, {
+      matchId: args.matchId,
+    });
+    if (!current) return;
+    store.setQuery(
+      api.leagues.getMatch,
+      { matchId: args.matchId },
+      {
+        ...current,
+        match: { ...current.match, confirmedBy: [] },
+        players: current.players.map((player) =>
+          player.playerId === args.playerId
+            ? patchedPlayer(player, args)
+            : player,
+        ),
+      },
+    );
+  });
   const action = useLeagueAction();
-  const [step, setStep] = useState<"details" | "players" | "review">("details");
-  const [selectedSide, setTeamSide] = useState<"home" | "away" | null>(null);
-  const [dirty, setDirty] = useState<string[]>([]);
-  const [correction, setCorrection] = useState(false);
+  const [step, setStep] = useState<Step>("pre-game");
+  const [selectedSide, setSide] = useState<"home" | "away" | null>(null);
+  const [correction, setCorrection] = useState<MatchData | null>(null);
   const [reason, setReason] = useState("");
-  const [correctedPlayers, setCorrectedPlayers] = useState<
-    Record<string, PlayerDraft>
-  >({});
-  const [correctedScore, setCorrectedScore] = useState<{
-    home: number;
-    away: number;
-  } | null>(null);
-  const [correctionRevision, setCorrectionRevision] = useState<number | null>(
-    null,
+  const pendingCount = useRef(0);
+  const [pending, setPending] = useState(0);
+  const failedEdits = useRef(
+    new Map<string, { run: () => Promise<unknown>; message: string }>(),
   );
-  const [correctedDetails, setCorrectedDetails] =
-    useState<DetailsPayload | null>(null);
+  const [syncError, setSyncError] = useState("");
+  useBeforeUnload(pending > 0 || !!correction || !!syncError);
+
+  async function edit(key: string, run: () => Promise<unknown>) {
+    // Do not block unrelated fields or navigation while a mutation is in flight.
+    // Lock-in does wait, so it can only acknowledge an entirely persisted report.
+    failedEdits.current.delete(key);
+    pendingCount.current += 1;
+    setPending(pendingCount.current);
+    try {
+      await run();
+    } catch (cause) {
+      const code =
+        cause instanceof ConvexError && typeof cause.data === "string"
+          ? cause.data
+          : "UNKNOWN";
+      failedEdits.current.set(key, {
+        run,
+        message: t(`leagueUi.errors.${code}`),
+      });
+    } finally {
+      pendingCount.current -= 1;
+      setPending(pendingCount.current);
+      setSyncError([...failedEdits.current.values()][0]?.message ?? "");
+    }
+  }
+  function changeDetails(patch: DetailsPatch) {
+    if (correction)
+      setCorrection({
+        ...correction,
+        match: { ...correction.match, ...patch },
+      });
+    else
+      void edit(`details:${Object.keys(patch).join(",")}`, () =>
+        updateDetails({ matchId: id, ...patch }),
+      );
+  }
+  function changePlayer(player: ReportPlayer, patch: PlayerPatch) {
+    if (correction)
+      setCorrection({
+        ...correction,
+        players: correction.players.map((row) =>
+          row._id === player._id ? patchedPlayer(row, patch) : row,
+        ),
+      });
+    else
+      void edit(
+        `player:${player._id}:${Object.keys(patch.stats ?? patch).join(",")}`,
+        () =>
+          updatePlayer({ matchId: id, playerId: player.playerId, ...patch }),
+      );
+  }
   if (auth.isLoading || !auth.isAuthenticated || data === undefined)
     return (
       <LeagueGate
@@ -118,46 +236,73 @@ export function LeagueMatch({
         <p>{t("leagueUi.notFound")}</p>
       </div>
     );
-  const { match, league, home, away } = data;
+
+  const view = correction ?? data;
+  const { match, league, home, away } = view;
   const teamSide =
     selectedSide ?? (away?.coachId === data.viewerId ? "away" : "home");
   const base = `/leagues/manage/${leagueId}`;
-  const locked = match.status === "completed";
-  const editable = data.canEdit && !locked;
-  const validDice = (value: number | null, sides: number) =>
-    value !== null && Number.isInteger(value) && value >= 1 && value <= sides;
-  const confirmationReady =
-    [home, away].every((entry) => {
-      if (!entry) return false;
-      const rows = data.players.filter(
-        (player) => player.entryId === entry._id,
-      );
-      return (
-        rows.reduce((total, player) => total + player.stats.td, 0) ===
-          (entry._id === home._id ? match.scoreHome : match.scoreAway) &&
-        rows.reduce((total, player) => total + player.stats.mvp, 0) === 1
-      );
-    }) &&
-    validDice(match.homeFanRoll, 3) &&
-    validDice(match.awayFanRoll, 3) &&
-    (match.scoreHome === match.scoreAway ||
-      (validDice(match.homeFansRoll, 6) && validDice(match.awayFansRoll, 6)));
-  function setDirtyField(key: string, value: boolean) {
-    setDirty((previous) =>
-      value
-        ? [...new Set([...previous, key])]
-        : previous.filter((item) => item !== key),
-    );
-  }
-  function startCorrection() {
-    setStep("details");
-    setCorrection(true);
-    setCorrectionRevision(match.revision);
-    setCorrectedScore({ home: match.scoreHome, away: match.scoreAway });
-    setCorrectedPlayers({});
-    setCorrectedDetails(null);
-    setReason("");
-  }
+  const locked = data.match.status === "completed";
+  const editable = (data.canEdit && !locked) || !!correction;
+  const staleCorrection =
+    !!correction && correction.match.revision !== data.match.revision;
+  const dice = (value: number | null | undefined, sides: number) =>
+    value != null && Number.isInteger(value) && value >= 1 && value <= sides;
+  const checks = [
+    {
+      ready:
+        dice(match.homeFanRoll, 3) &&
+        dice(match.awayFanRoll, 3) &&
+        (match.scoreHome === match.scoreAway ||
+          (dice(match.homeFansRoll, 6) && dice(match.awayFansRoll, 6))),
+      label: t("leagueUx.reportCheckRolls"),
+      step: (dice(match.homeFanRoll, 3) && dice(match.awayFanRoll, 3)
+        ? "post-game"
+        : "pre-game") as Step,
+    },
+    {
+      ready: [home, away].every(
+        (entry) =>
+          entry &&
+          view.players
+            .filter((player) => player.entryId === entry._id)
+            .reduce((sum, player) => sum + player.stats.td, 0) ===
+            (entry._id === home._id ? match.scoreHome : match.scoreAway),
+      ),
+      label: t("leagueUx.reportCheckTouchdowns"),
+      step: "game" as Step,
+    },
+    {
+      ready: [home, away].every(
+        (entry) =>
+          entry &&
+          view.players
+            .filter((player) => player.entryId === entry._id)
+            .reduce((sum, player) => sum + player.stats.mvp, 0) === 1,
+      ),
+      label: t("leagueUx.reportCheckMvp"),
+      step: "game" as Step,
+    },
+    {
+      ready: view.players.every(
+        (player) =>
+          !(
+            player.casualtyRoll !== null &&
+            player.casualtyRoll >= 13 &&
+            player.casualtyRoll <= 14 &&
+            !dice(player.lastingRoll, 6)
+          ),
+      ),
+      label: t("leagueUx.reportCheckInjuries"),
+      step: "game" as Step,
+    },
+    {
+      ready: !match.evidenceUrl || /^https:\/\//i.test(match.evidenceUrl),
+      label: t("leagueUx.reportCheckEvidence"),
+      step: "post-game" as Step,
+    },
+  ];
+  const ready = checks.every((check) => check.ready);
   return (
     <div className="page-width space-y-4 py-5 sm:py-6">
       <header>
@@ -176,57 +321,63 @@ export function LeagueMatch({
           )}
         </p>
       </header>
-      <LeagueError message={action.error} />
-      {match.administrativeResult && (
-        <p className="rounded-xl border bg-secondary/20 p-4 text-sm">
-          <strong>{t("leagueUi." + match.administrativeResult)}</strong> ·{" "}
-          {t("leagueUi.administrativeHint")}
-        </p>
-      )}
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 overflow-hidden rounded-lg border bg-card p-4 sm:gap-6 sm:p-5">
-        {[home, away].map((entry, index) =>
-          entry ? (
-            <div
-              key={entry._id}
-              className={`min-w-0 ${index ? "col-start-3 text-right" : ""}`}
-            >
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                {t(index ? "leagueUi.away" : "leagueUi.home")}
-              </p>
-              <Link
-                href={`${base}/teams/${entry._id}`}
-                className="mt-2 block break-words text-base font-semibold leading-tight hover:text-primary sm:text-2xl"
-              >
-                {entry.team.name}
-              </Link>
-              <p className="mt-2 text-xs text-muted-foreground sm:text-sm">
-                {entry.coachName} · {getRoster(entry.team.rosterId)?.name}
-              </p>
-              <p
-                className={`mt-3 flex items-center gap-1.5 text-xs text-muted-foreground ${index ? "justify-end" : ""}`}
-              >
-                {match.administrativeResult ? (
-                  t("leagueUi." + match.administrativeResult)
-                ) : match.confirmedBy.includes(entry.coachId) ? (
-                  <>
-                    <CheckCircle2 className="size-4 text-primary" />
-                    {t("leagueUi.confirmed")}
-                  </>
-                ) : match.status !== "scheduled" && match.status !== "void" ? (
-                  t("leagueUi.awaitingConfirmation")
-                ) : null}
-              </p>
-            </div>
-          ) : null,
-        )}
-        <div
-          className={`col-start-2 row-start-1 flex items-center justify-center font-semibold tracking-tight tabular-nums ${match.administrativeResult ? "max-w-24 text-center text-sm sm:max-w-40 sm:text-lg" : "whitespace-nowrap font-mono text-3xl sm:text-4xl"}`}
+      <LeagueError message={action.error || syncError} />
+      {syncError && (
+        <Button
+          variant="outline"
+          onClick={() => {
+            for (const [key, failed] of failedEdits.current)
+              void edit(key, failed.run);
+          }}
         >
-          {match.administrativeResult
-            ? t("leagueUi." + match.administrativeResult)
-            : match.status === "scheduled"
-              ? "— : —"
-              : `${match.scoreHome} : ${match.scoreAway}`}
+          {t("leagueUx.reportRetry")}
+        </Button>
+      )}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-lg border bg-card p-4 sm:gap-6 sm:p-5">
+        {[home, away].map(
+          (entry, index) =>
+            entry && (
+              <div
+                key={entry._id}
+                className={`min-w-0 ${index ? "col-start-3 text-right" : ""}`}
+              >
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  {t(index ? "leagueUi.away" : "leagueUi.home")}
+                </p>
+                <Link
+                  href={`${base}/teams/${entry._id}`}
+                  className="mt-2 block break-words text-base font-semibold hover:text-primary sm:text-2xl"
+                >
+                  {entry.team.name}
+                </Link>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {entry.coachName} · {getRoster(entry.team.rosterId)?.name}
+                </p>
+                <p
+                  className={`mt-3 flex items-center gap-1.5 text-xs text-muted-foreground ${index ? "justify-end" : ""}`}
+                >
+                  {match.confirmedBy.includes(entry.coachId) ? (
+                    <>
+                      <CheckCircle2 className="size-4 text-primary" />
+                      {t("leagueUi.confirmed")}
+                    </>
+                  ) : match.status === "in-progress" ? (
+                    t("leagueUi.awaitingConfirmation")
+                  ) : null}
+                </p>
+              </div>
+            ),
+        )}
+        <div className="col-start-2 row-start-1 text-center font-mono text-3xl font-semibold tabular-nums sm:text-4xl">
+          {match.administrativeResult ? (
+            <span className="text-sm">
+              {t("leagueUi." + match.administrativeResult)}
+            </span>
+          ) : match.status === "scheduled" ? (
+            "— : —"
+          ) : (
+            `${match.scoreHome} : ${match.scoreAway}`
+          )}
         </div>
       </div>
       {match.status === "scheduled" &&
@@ -237,7 +388,6 @@ export function LeagueMatch({
             title={t("leagueUi.startReport")}
             action={
               <Button
-                className="h-11"
                 disabled={action.busy}
                 onClick={() => void action.run(() => start({ matchId: id }))}
               >
@@ -258,79 +408,109 @@ export function LeagueMatch({
               aria-label={t("leagueUi.matchReport")}
               className="grid grid-cols-3 border-b"
             >
-              {(["details", "players", "review"] as const).map(
-                (value, index) => (
-                  <button
-                    key={value}
-                    type="button"
-                    aria-current={step === value ? "step" : undefined}
-                    aria-controls={`report-${value}`}
-                    disabled={
-                      value !== step && (dirty.length > 0 || action.busy)
-                    }
-                    onClick={() => setStep(value)}
-                    className={`-mb-px flex min-h-12 items-center justify-center gap-2 border-b-2 px-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 ${step === value ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"}`}
-                  >
-                    <span className="hidden size-5 items-center justify-center rounded-full border border-current/30 text-xs sm:inline-flex">
-                      {index + 1}
-                    </span>
-                    {t(
-                      `leagueUx.report${value === "details" ? "Details" : value === "players" ? "Players" : "Review"}`,
-                    )}
-                  </button>
-                ),
-              )}
+              {steps.map((value, index) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-current={step === value ? "step" : undefined}
+                  aria-controls={`report-${value}`}
+                  onClick={() => setStep(value)}
+                  className={`-mb-px flex min-h-14 items-center justify-center gap-2 border-b-2 px-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-primary ${step === value ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                >
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-current/30 text-xs">
+                    {index + 1}
+                  </span>
+                  {t(
+                    `leagueUx.report${value === "pre-game" ? "PreGame" : value === "game" ? "Game" : "PostGame"}`,
+                  )}
+                </button>
+              ))}
             </nav>
             <p
               role="status"
-              className={`flex items-center gap-2 text-xs ${dirty.length ? "text-amber-700 dark:text-amber-400" : "text-muted-foreground"}`}
+              aria-live="polite"
+              className="flex items-center gap-2 text-xs text-muted-foreground"
             >
-              {dirty.length ? (
-                <Circle className="size-3" />
+              {pending ? (
+                <LoaderCircle className="size-3.5 animate-spin" />
               ) : (
                 <CheckCircle2 className="size-3.5" />
               )}
               {t(
-                action.busy
-                  ? "leagueUx.reportSaving"
-                  : dirty.length
-                    ? "leagueUx.reportUnsaved"
-                    : correction
-                      ? "leagueUx.reportCorrectionDraft"
-                      : "leagueUx.reportSaved",
+                correction
+                  ? "leagueUx.reportCorrectionDraft"
+                  : pending
+                    ? "leagueUx.reportSaving"
+                    : syncError
+                      ? "leagueUx.reportSyncFailed"
+                      : "leagueUx.reportLive",
               )}
             </p>
-            <div id="report-details" hidden={step !== "details"}>
-              <MatchDetails
-                key={correction ? "correction" : "regular"}
-                data={data}
-                editable={editable || correction}
-                staged={correction}
-                busy={action.busy}
-                onDirty={(value) => setDirtyField("details", value)}
-                onDiscard={() => {
-                  setCorrectedDetails(null);
-                  setCorrectedScore(null);
-                }}
-                onSave={(payload) =>
-                  correction
-                    ? Promise.resolve().then(() => {
-                        setCorrectedDetails(payload);
-                        setCorrectedScore({
-                          home: payload.scoreHome,
-                          away: payload.scoreAway,
-                        });
-                        return true;
-                      })
-                    : action.run(() =>
-                        updateDetails({ matchId: id, ...payload }),
-                      )
-                }
-              />
+            <div id="report-pre-game" hidden={step !== "pre-game"}>
+              <LeagueSection title={t("leagueUx.reportPreGame")}>
+                <fieldset
+                  disabled={!editable || action.busy}
+                  className="grid gap-4 sm:grid-cols-2"
+                >
+                  <LeagueField>
+                    {t("leagueUx.reportWeather")}
+                    <LeagueSelect
+                      value={match.weather ?? ""}
+                      onChange={(event) =>
+                        changeDetails({
+                          weather: event.target.value
+                            ? Number(event.target.value)
+                            : null,
+                        })
+                      }
+                    >
+                      <option value="">
+                        {t("leagueUx.reportWeatherUnknown")}
+                      </option>
+                      {[2, 3, 4, 11, 12].map((roll) => (
+                        <option key={roll} value={roll}>
+                          {t(`leagueUx.reportWeather${roll}`)}
+                        </option>
+                      ))}
+                    </LeagueSelect>
+                  </LeagueField>
+                  <LeagueField>
+                    {t("leagueUi.venue")}
+                    <Input
+                      maxLength={160}
+                      value={match.venue}
+                      onChange={(event) =>
+                        changeDetails({ venue: event.target.value })
+                      }
+                    />
+                  </LeagueField>
+                  {(["home", "away"] as const).map((side) => (
+                    <div key={side} className="space-y-3 rounded-lg border p-4">
+                      <h3 className="font-semibold">
+                        {side === "home" ? home.team.name : away?.team.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {t("leagueUx.reportDedicatedFans")}:{" "}
+                        {match[`${side}DedicatedFans`] ??
+                          match[`${side}Snapshot`]?.staff.dedicatedFans ??
+                          "—"}
+                      </p>
+                      <DiceInput
+                        label={t("leagueUi.fanAttendanceRoll")}
+                        sides={3}
+                        value={match[`${side}FanRoll`]}
+                        onChange={(value) =>
+                          changeDetails({ [`${side}FanRoll`]: value })
+                        }
+                      />
+                    </div>
+                  ))}
+                </fieldset>
+              </LeagueSection>
             </div>
             <div
-              id="report-players"
-              hidden={step !== "players"}
+              id="report-game"
+              hidden={step !== "game"}
               className="space-y-4"
             >
               <div className="flex flex-wrap gap-2">
@@ -344,10 +524,9 @@ export function LeagueMatch({
                             ? "default"
                             : "outline"
                         }
-                        className="h-auto min-h-11 whitespace-normal px-4 py-2"
+                        className="h-auto min-h-11 whitespace-normal"
                         aria-pressed={teamSide === (index ? "away" : "home")}
-                        disabled={dirty.length > 0 || action.busy}
-                        onClick={() => setTeamSide(index ? "away" : "home")}
+                        onClick={() => setSide(index ? "away" : "home")}
                       >
                         {entry.team.name}
                       </Button>
@@ -357,51 +536,36 @@ export function LeagueMatch({
               <p className="text-sm text-muted-foreground">
                 {t("leagueUx.reportPlayersHint")}
               </p>
-              {[home, away].map((entry, sideIndex) =>
-                entry ? (
-                  <div
-                    key={entry._id}
-                    hidden={teamSide !== (sideIndex ? "away" : "home")}
-                  >
-                    <LeagueSection title={entry.team.name}>
-                      <div className="mb-4 flex flex-wrap gap-3 text-xs text-muted-foreground">
-                        <span>
-                          {t("leagueUx.reportTouchdowns")}:{" "}
-                          <strong className="text-foreground">
-                            {data.players
-                              .filter((player) => player.entryId === entry._id)
-                              .reduce(
-                                (sum, player) =>
-                                  sum +
-                                  (correctedPlayers[player.playerId]?.stats
-                                    .td ?? player.stats.td),
-                                0,
-                              )}{" "}
-                            /{" "}
-                            {sideIndex
-                              ? (correctedScore?.away ?? match.scoreAway)
-                              : (correctedScore?.home ?? match.scoreHome)}
-                          </strong>
-                        </span>
-                        <span>
-                          {t("leagueUi.stats.mvp")}:{" "}
-                          <strong className="text-foreground">
-                            {data.players
-                              .filter((player) => player.entryId === entry._id)
-                              .reduce(
-                                (sum, player) =>
-                                  sum +
-                                  (correctedPlayers[player.playerId]?.stats
-                                    .mvp ?? player.stats.mvp),
-                                0,
-                              )}{" "}
-                            / 1
-                          </strong>
-                        </span>
-                      </div>
-                      <div className="overflow-x-auto rounded-lg border">
-                        <div className="min-w-0">
-                          <div className="grid grid-cols-[minmax(0,1fr)_repeat(3,2rem)_1rem] sm:grid-cols-[minmax(12rem,1fr)_repeat(6,3.25rem)_1.5rem] items-center gap-1 border-b bg-secondary/30 px-3 py-1 text-xs text-muted-foreground">
+              {[home, away].map(
+                (entry, sideIndex) =>
+                  entry && (
+                    <div
+                      key={entry._id}
+                      hidden={teamSide !== (sideIndex ? "away" : "home")}
+                    >
+                      <LeagueSection title={entry.team.name}>
+                        <div className="mb-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
+                          <span>
+                            {t("leagueUx.reportTouchdowns")}:{" "}
+                            <strong>
+                              {view.players
+                                .filter((p) => p.entryId === entry._id)
+                                .reduce((sum, p) => sum + p.stats.td, 0)}{" "}
+                              / {sideIndex ? match.scoreAway : match.scoreHome}
+                            </strong>
+                          </span>
+                          <span>
+                            {t("leagueUi.stats.mvp")}:{" "}
+                            <strong>
+                              {view.players
+                                .filter((p) => p.entryId === entry._id)
+                                .reduce((sum, p) => sum + p.stats.mvp, 0)}{" "}
+                              / 1
+                            </strong>
+                          </span>
+                        </div>
+                        <div className="rounded-lg border">
+                          <div className="grid grid-cols-[minmax(0,1fr)_repeat(3,2rem)_1rem] items-center gap-1 border-b bg-secondary/30 px-3 py-2 text-xs text-muted-foreground sm:grid-cols-[minmax(0,1fr)_repeat(6,3.25rem)_1.5rem]">
                             <span>{t("player")}</span>
                             {fields.slice(0, 6).map((field) => (
                               <span
@@ -413,8 +577,8 @@ export function LeagueMatch({
                             ))}
                             <span />
                           </div>
-                          {data.players
-                            .filter((player) => player.entryId === entry._id)
+                          {view.players
+                            .filter((p) => p.entryId === entry._id)
                             .map((player, index) => (
                               <MatchPlayerRow
                                 key={player._id}
@@ -430,271 +594,193 @@ export function LeagueMatch({
                                     index + 1,
                                   ),
                                 )}
-                                revision={match.revision}
-                                editable={editable || correction}
-                                blocked={dirty.some(
-                                  (key) => key !== String(player._id),
-                                )}
-                                busy={action.busy}
-                                correction={correction}
-                                correctionDraft={
-                                  correctedPlayers[player.playerId]
-                                }
-                                onCorrection={(draft) =>
-                                  setCorrectedPlayers((previous) => ({
-                                    ...previous,
-                                    [player.playerId]: draft,
-                                  }))
-                                }
-                                onDirty={(value) =>
-                                  setDirtyField(String(player._id), value)
-                                }
-                                onSave={(draft) =>
-                                  action.run(() =>
-                                    updatePlayer({
-                                      matchId: id,
-                                      playerId: player.playerId,
-                                      stats: draft.stats,
-                                      statusAfter: draft.statusAfter,
-                                      injuryNotes: draft.injuryNotes,
-                                      casualtyRoll: draft.casualtyRoll,
-                                      lastingRoll: draft.lastingRoll,
-                                      expectedRevision: draft.revision,
-                                    }),
-                                  )
+                                editable={editable && !action.busy}
+                                onChange={(patch) =>
+                                  changePlayer(player, patch)
                                 }
                               />
                             ))}
                         </div>
-                      </div>
-                    </LeagueSection>
-                  </div>
-                ) : null,
+                      </LeagueSection>
+                    </div>
+                  ),
               )}
             </div>
             <div
-              id="report-review"
-              hidden={step !== "review"}
+              id="report-post-game"
+              hidden={step !== "post-game"}
               className="space-y-4"
             >
-              {correction && (
-                <LeagueSection title={t("leagueUi.correctReport")}>
-                  <p className="mb-4 text-sm text-muted-foreground">
-                    {t("leagueUi.correctionHint")}
-                  </p>
-                  <LeagueField>
-                    {t("leagueUi.reason")}
-                    <Textarea
-                      value={reason}
-                      maxLength={1000}
-                      className="mt-1"
-                      onChange={(event) => setReason(event.target.value)}
-                    />
-                  </LeagueField>
-                </LeagueSection>
-              )}
-              {correction ? (
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    className="h-11"
-                    disabled={
-                      action.busy ||
-                      dirty.length > 0 ||
-                      reason.trim().length < 3
-                    }
-                    onClick={() =>
-                      void action
-                        .run(() =>
-                          correct({
-                            ...correctedDetails,
-                            matchId: id,
-                            scoreHome: correctedScore?.home ?? match.scoreHome,
-                            scoreAway: correctedScore?.away ?? match.scoreAway,
-                            expectedRevision:
-                              correctionRevision ?? match.revision,
-                            reason: reason.trim(),
-                            playerChanges: Object.entries(correctedPlayers).map(
-                              ([playerId, draft]) => ({
-                                playerId: playerId as Id<"leaguePlayers">,
-                                stats: draft.stats,
-                                statusAfter: draft.statusAfter,
-                                injuryNotes: draft.injuryNotes,
-                                casualtyRoll: draft.casualtyRoll,
-                                lastingRoll: draft.lastingRoll,
-                              }),
-                            ),
-                          }),
-                        )
-                        .then((saved) => {
-                          if (saved) {
-                            setCorrection(false);
-                            setCorrectedPlayers({});
-                            setCorrectedScore(null);
-                            setDirty([]);
-                          }
-                        })
-                    }
-                  >
-                    {t("leagueUi.saveCorrection")}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-11"
-                    disabled={action.busy}
-                    onClick={() => {
-                      setCorrection(false);
-                      setCorrectedPlayers({});
-                      setCorrectedScore(null);
-                      setDirty([]);
-                    }}
-                  >
-                    {t("cancel")}
-                  </Button>
-                </div>
-              ) : (
-                <LeagueSection
-                  title={t("leagueUi.confirmResult")}
-                  action={
-                    data.canConfirm && (
+              <PostGame
+                data={view}
+                editable={editable && !action.busy}
+                onChange={changeDetails}
+              />
+              <LeagueSection
+                title={t(
+                  correction
+                    ? "leagueUi.correctReport"
+                    : "leagueUi.confirmResult",
+                )}
+              >
+                {(!locked || correction) && (
+                  <ul className="mb-5 space-y-2">
+                    {checks.map((check) => (
+                      <li key={check.label}>
+                        <button
+                          type="button"
+                          className="flex min-h-9 items-center gap-3 text-left text-sm hover:text-primary"
+                          onClick={() => setStep(check.step)}
+                        >
+                          {check.ready ? (
+                            <CheckCircle2 className="size-4 shrink-0 text-primary" />
+                          ) : (
+                            <Circle className="size-4 shrink-0 text-muted-foreground" />
+                          )}
+                          {check.label}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {correction ? (
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      {t("leagueUi.correctionHint")}
+                    </p>
+                    <LeagueField>
+                      {t("leagueUi.reason")}
+                      <Textarea
+                        value={reason}
+                        maxLength={1000}
+                        onChange={(event) => setReason(event.target.value)}
+                      />
+                    </LeagueField>
+                    {staleCorrection && (
+                      <p role="alert" className="text-sm text-destructive">
+                        {t("leagueUi.staleDraft")}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap gap-3">
                       <Button
-                        className="h-11"
                         disabled={
                           action.busy ||
-                          dirty.length > 0 ||
-                          !confirmationReady ||
-                          match.confirmedBy.includes(data.viewerId!)
+                          !ready ||
+                          staleCorrection ||
+                          reason.trim().length < 3
                         }
                         onClick={() =>
+                          void action
+                            .run(() =>
+                              correct({
+                                matchId: id,
+                                expectedRevision: correction.match.revision,
+                                reason: reason.trim(),
+                                scoreHome: match.scoreHome,
+                                scoreAway: match.scoreAway,
+                                weather: match.weather ?? null,
+                                venue: match.venue,
+                                evidenceUrl: match.evidenceUrl,
+                                homeFanRoll: match.homeFanRoll,
+                                awayFanRoll: match.awayFanRoll,
+                                homeFansRoll: match.homeFansRoll,
+                                awayFansRoll: match.awayFansRoll,
+                                homeStalled: match.homeStalled,
+                                awayStalled: match.awayStalled,
+                                playerChanges: view.players
+                                  .filter(
+                                    (player) =>
+                                      player.participated &&
+                                      JSON.stringify(player) !==
+                                        JSON.stringify(
+                                          data.players.find(
+                                            (row) =>
+                                              row.playerId === player.playerId,
+                                          ),
+                                        ),
+                                  )
+                                  .map((player) => ({
+                                    playerId: player.playerId,
+                                    stats: player.stats,
+                                    statusAfter: player.statusAfter,
+                                    injuryNotes: player.injuryNotes,
+                                    casualtyRoll: player.casualtyRoll,
+                                    lastingRoll: player.lastingRoll,
+                                  })),
+                              }),
+                            )
+                            .then((saved) => {
+                              if (saved) {
+                                setCorrection(null);
+                                setReason("");
+                              }
+                            })
+                        }
+                      >
+                        {t("leagueUi.saveCorrection")}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        disabled={action.busy}
+                        onClick={() => {
+                          setCorrection(null);
+                          setReason("");
+                        }}
+                      >
+                        {t("cancel")}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="mb-4 flex gap-2 text-sm text-muted-foreground">
+                      {locked && <LockKeyhole className="size-4 shrink-0" />}
+                      {t(
+                        locked ? "leagueUi.lockedHint" : "leagueUi.confirmHint",
+                      )}
+                    </p>
+                    {data.canConfirm && (
+                      <Button
+                        disabled={
+                          action.busy || pending > 0 || !!syncError || !ready
+                        }
+                        onClick={() => {
+                          if (pendingCount.current || failedEdits.current.size)
+                            return;
                           void action.run(() =>
                             confirm({
                               matchId: id,
-                              expectedRevision: match.revision,
+                              expectedRevision: data.match.revision,
                             }),
-                          )
-                        }
+                          );
+                        }}
                       >
-                        <CheckCircle2 className="size-4" />
+                        <LockKeyhole className="size-4" />
                         {t("leagueUi.confirm")}
                       </Button>
-                    )
-                  }
-                >
-                  {!locked && (
-                    <ul className="mb-5 space-y-3">
-                      {[
-                        {
-                          ready: dirty.length === 0,
-                          label: t("leagueUx.reportCheckSaved"),
-                          target: dirty.some((field) => field !== "details")
-                            ? ("players" as const)
-                            : ("details" as const),
-                        },
-                        {
-                          ready:
-                            validDice(match.homeFanRoll, 3) &&
-                            validDice(match.awayFanRoll, 3) &&
-                            (match.scoreHome === match.scoreAway ||
-                              (validDice(match.homeFansRoll, 6) &&
-                                validDice(match.awayFansRoll, 6))),
-                          label: t("leagueUx.reportCheckRolls"),
-                          target: "details" as const,
-                        },
-                        {
-                          ready: [home, away].every(
-                            (entry) =>
-                              entry &&
-                              data.players
-                                .filter(
-                                  (player) => player.entryId === entry._id,
-                                )
-                                .reduce(
-                                  (sum, player) => sum + player.stats.td,
-                                  0,
-                                ) ===
-                                (entry._id === home._id
-                                  ? match.scoreHome
-                                  : match.scoreAway),
-                          ),
-                          label: t("leagueUx.reportCheckTouchdowns"),
-                          target: "players" as const,
-                        },
-                        {
-                          ready: [home, away].every(
-                            (entry) =>
-                              entry &&
-                              data.players
-                                .filter(
-                                  (player) => player.entryId === entry._id,
-                                )
-                                .reduce(
-                                  (sum, player) => sum + player.stats.mvp,
-                                  0,
-                                ) === 1,
-                          ),
-                          label: t("leagueUx.reportCheckMvp"),
-                          target: "players" as const,
-                        },
-                      ].map((check) => (
-                        <li key={check.label}>
-                          <button
-                            type="button"
-                            onClick={() => setStep(check.target)}
-                            className="flex min-h-9 items-center gap-3 text-left text-sm hover:text-primary"
-                          >
-                            {check.ready ? (
-                              <CheckCircle2 className="size-4 shrink-0 text-primary" />
-                            ) : (
-                              <Circle className="size-4 shrink-0 text-muted-foreground" />
-                            )}
-                            <span>{check.label}</span>
-                            {!check.ready && (
-                              <ArrowRight className="size-3.5 shrink-0" />
-                            )}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  <p className="flex items-start gap-2 text-sm text-muted-foreground">
-                    {locked && <LockKeyhole className="size-4 shrink-0" />}
-                    {t(
-                      locked
-                        ? "leagueUi.lockedHint"
-                        : dirty.length
-                          ? "leagueUi.saveBeforeConfirm"
-                          : !confirmationReady
-                            ? "leagueUi.confirmationMissing"
-                            : "leagueUi.confirmHint",
                     )}
-                  </p>
-                </LeagueSection>
-              )}
+                  </>
+                )}
+              </LeagueSection>
             </div>
             <div className="flex items-center justify-between gap-3 border-t pt-4">
               <Button
                 variant="ghost"
-                className="h-11"
-                disabled={step === "details" || dirty.length > 0 || action.busy}
-                onClick={() =>
-                  setStep(step === "review" ? "players" : "details")
-                }
+                disabled={step === "pre-game"}
+                onClick={() => setStep(steps[steps.indexOf(step) - 1])}
               >
                 <ArrowLeft className="size-4" />
                 {t("leagueUx.reportPrevious")}
               </Button>
-              {step !== "review" && (
+              {step !== "post-game" && (
                 <Button
                   variant="outline"
-                  className="h-11"
-                  disabled={dirty.length > 0 || action.busy}
-                  onClick={() =>
-                    setStep(step === "details" ? "players" : "review")
-                  }
+                  onClick={() => setStep(steps[steps.indexOf(step) + 1])}
                 >
                   {t(
-                    step === "details"
-                      ? "leagueUx.reportNextPlayers"
-                      : "leagueUx.reportNextReview",
+                    step === "pre-game"
+                      ? "leagueUx.reportNextGame"
+                      : "leagueUx.reportNextPostGame",
                   )}
                   <ArrowRight className="size-4" />
                 </Button>
@@ -702,6 +788,30 @@ export function LeagueMatch({
             </div>
           </>
         )}
+      {(history?.length ?? 0) > 0 && (
+        <details className="rounded-lg border bg-card p-4">
+          <summary className="cursor-pointer text-sm font-medium">
+            {t("leagueUx.reportHistory")}
+          </summary>
+          <ol className="mt-3 space-y-3 text-sm">
+            {history?.map((event) => (
+              <li key={event.id} className="border-t pt-3">
+                <p>
+                  <strong>
+                    {t(
+                      `leagueUx.reportEvent${event.kind === "recorded" ? "Recorded" : event.kind === "corrected" ? "Corrected" : "Replayed"}`,
+                    )}
+                  </strong>{" "}
+                  · {event.scoreHome} : {event.scoreAway} · {event.actorName}
+                </p>
+                {event.reason && (
+                  <p className="mt-1 text-muted-foreground">{event.reason}</p>
+                )}
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
       {data.canCommission &&
         !correction &&
         (locked ||
@@ -712,14 +822,14 @@ export function LeagueMatch({
             <summary className="flex min-h-14 cursor-pointer list-none items-center gap-2 px-5 text-sm font-medium [&::-webkit-details-marker]:hidden">
               <ShieldCheck className="size-4 text-muted-foreground" />
               {t("leagueUx.reportCommissioner")}
-              <ChevronDown className="ml-auto size-4 text-muted-foreground" />
+              <ChevronDown className="ml-auto size-4" />
             </summary>
             <div className="border-t p-4">
               {(match.status === "scheduled" ||
                 match.status === "void" ||
                 match.administrativeResult) && (
                 <CommissionerRuling
-                  key={`commissioner-ruling:${match._id}:${match.revision}`}
+                  key={`${match._id}:${match.revision}`}
                   matchId={match._id}
                   revision={match.revision}
                 />
@@ -727,8 +837,11 @@ export function LeagueMatch({
               {locked && !match.administrativeResult && (
                 <Button
                   variant="outline"
-                  className="h-11"
-                  onClick={startCorrection}
+                  onClick={() => {
+                    setCorrection(structuredClone(data));
+                    setReason("");
+                    setStep("pre-game");
+                  }}
                 >
                   <ShieldCheck className="size-4" />
                   {t("leagueUi.correctReport")}
@@ -741,250 +854,103 @@ export function LeagueMatch({
   );
 }
 
-type DetailsPayload = Omit<
-  FunctionArgs<typeof api.leagues.updateMatchDetails>,
-  "matchId"
->;
-function MatchDetails({
+function PostGame({
   data,
   editable,
-  staged = false,
-  busy,
-  onDirty,
-  onDiscard,
-  onSave,
+  onChange,
 }: {
   data: MatchData;
   editable: boolean;
-  staged?: boolean;
-  busy: boolean;
-  onDirty: (value: boolean) => void;
-  onDiscard: () => void;
-  onSave: (payload: DetailsPayload) => Promise<boolean>;
+  onChange: (patch: DetailsPatch) => void;
 }) {
   const t = useTranslations();
-  const [draft, setDraft] = useState<DetailsPayload | null>(null);
   const match = data.match;
-  const current = draft ?? {
-    scoreHome: match.scoreHome,
-    scoreAway: match.scoreAway,
-    venue: match.venue,
-    evidenceUrl: match.evidenceUrl,
-    homeFanRoll: match.homeFanRoll,
-    awayFanRoll: match.awayFanRoll,
-    homeStalled: match.homeStalled,
-    awayStalled: match.awayStalled,
-    homeFansRoll: match.homeFansRoll,
-    awayFansRoll: match.awayFansRoll,
-    expectedRevision: match.revision,
-  };
-  function change(patch: Partial<DetailsPayload>) {
-    setDraft({ ...current, ...patch });
-    onDirty(true);
-  }
   const attendance =
-    current.homeFanRoll &&
-    current.awayFanRoll &&
+    match.homeFanRoll &&
+    match.awayFanRoll &&
     match.homeSnapshot &&
     match.awaySnapshot
-      ? match.homeSnapshot.staff.dedicatedFans +
-        current.homeFanRoll +
-        match.awaySnapshot.staff.dedicatedFans +
-        current.awayFanRoll
+      ? (match.homeDedicatedFans ?? match.homeSnapshot.staff.dedicatedFans) +
+        match.homeFanRoll +
+        (match.awayDedicatedFans ?? match.awaySnapshot.staff.dedicatedFans) +
+        match.awayFanRoll
       : null;
-  function winnings(home: boolean) {
-    if (match.status === "completed" && !staged)
-      return home ? match.homeWinnings : match.awayWinnings;
-    const score = home ? current.scoreHome : current.scoreAway;
-    if (
-      attendance === null ||
-      attendance < 4 ||
-      attendance > 20 ||
-      score < 0 ||
-      score > 30
-    )
-      return null;
-    return calculateWinnings(
-      attendance,
-      home ? current.scoreHome : current.scoreAway,
-      home ? !!current.homeStalled : !!current.awayStalled,
-    );
-  }
   return (
-    <LeagueSection title={t("leagueUi.resultDetails")}>
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          void onSave({
-            ...current,
-            venue: current.venue?.trim() || "",
-            evidenceUrl: current.evidenceUrl?.trim() || "",
-          }).then((saved) => {
-            if (saved) {
-              if (!staged) setDraft(null);
-              onDirty(false);
-            }
-          });
-        }}
-      >
-        <p className="mb-5 text-sm text-muted-foreground">
-          {t("leagueUx.reportDetailsHint")}
-        </p>
-        <fieldset
-          disabled={!editable || busy}
-          className="grid gap-4 sm:grid-cols-2"
-        >
-          {(["scoreHome", "scoreAway"] as const).map((field) => (
-            <LeagueField key={field}>
-              {field === "scoreHome"
-                ? data.home.team.name
-                : data.away?.team.name}
-              <span className="ml-2 text-xs font-normal text-muted-foreground">
+    <LeagueSection title={t("leagueUx.reportPostGame")}>
+      <fieldset disabled={!editable} className="grid gap-4 sm:grid-cols-2">
+        {(["home", "away"] as const).map((side) => {
+          const scoreKey = side === "home" ? "scoreHome" : "scoreAway";
+          const score = match[scoreKey];
+          const earned =
+            attendance === null ||
+            attendance < 4 ||
+            attendance > 20 ||
+            !Number.isInteger(score) ||
+            score < 0 ||
+            score > 30
+              ? null
+              : calculateWinnings(attendance, score, match[`${side}Stalled`]);
+          return (
+            <div key={side} className="space-y-4 rounded-lg border p-4">
+              <h3 className="break-words font-semibold">
+                {side === "home" ? data.home.team.name : data.away?.team.name}
+              </h3>
+              <LeagueField>
                 {t("leagueUx.reportTouchdowns")}
-              </span>
-              <Input
-                type="number"
-                min={0}
-                max={30}
-                step={1}
-                className="mt-2 h-16 text-center text-3xl font-semibold tabular-nums"
-                value={current[field]}
-                onChange={(event) =>
-                  change({ [field]: Number(event.target.value) })
-                }
-                required
-              />
-            </LeagueField>
-          ))}
-        </fieldset>
-        <details className="mt-5 rounded-lg border">
-          <summary className="cursor-pointer px-4 py-3 text-sm font-medium">
-            {t("leagueUx.reportExtraDetails")}
-          </summary>
-          <fieldset
-            disabled={!editable || busy}
-            className="grid gap-4 border-t p-4 sm:grid-cols-2"
-          >
-            <LeagueField>
-              {t("leagueUi.venue")}
-              <Input
-                className="mt-1 h-11"
-                maxLength={160}
-                value={current.venue}
-                onChange={(event) => change({ venue: event.target.value })}
-              />
-            </LeagueField>
-            <LeagueField>
-              {t("leagueUi.evidence")}
-              <Input
-                type="url"
-                className="mt-1 h-11"
-                maxLength={1000}
-                value={current.evidenceUrl}
-                placeholder="https://"
-                onChange={(event) =>
-                  change({ evidenceUrl: event.target.value })
-                }
-              />
-            </LeagueField>
-          </fieldset>
-        </details>
-        <h3 className="mb-3 mt-6 font-semibold">
-          {t("leagueUi.postgameEconomy")}
-        </h3>
-        <p className="mb-4 text-sm text-muted-foreground">
-          {t("leagueUi.economyHint")}
-        </p>
-        <fieldset
-          disabled={!editable || busy}
-          className="grid gap-4 sm:grid-cols-2"
-        >
-          {(["home", "away"] as const).map((side) => {
-            const isHome = side === "home",
-              entry = isHome ? data.home : data.away,
-              earned = winnings(isHome);
-            const fanKey = isHome ? "homeFanRoll" : "awayFanRoll",
-              fansKey = isHome ? "homeFansRoll" : "awayFansRoll",
-              stalledKey = isHome ? "homeStalled" : "awayStalled";
-            return (
-              <div key={side} className="space-y-3 rounded-lg border p-4">
-                <h4 className="break-words font-semibold">
-                  {entry?.team.name}
-                </h4>
-                <DiceInput
-                  label={t("leagueUi.fanAttendanceRoll")}
-                  sides={3}
-                  value={current[fanKey]}
-                  onChange={(value) => change({ [fanKey]: value })}
+                <Input
+                  type="number"
+                  min={0}
+                  max={30}
+                  step={1}
+                  className="h-14 text-center text-2xl font-semibold tabular-nums"
+                  value={score}
+                  onChange={(event) =>
+                    onChange({ [scoreKey]: Number(event.target.value) })
+                  }
                 />
-                <label className="flex min-h-10 items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    className="size-4 accent-primary"
-                    checked={!!current[stalledKey]}
-                    onChange={(event) =>
-                      change({ [stalledKey]: event.target.checked })
-                    }
-                  />
-                  {t("leagueUi.stalled")}
-                </label>
-                {current.scoreHome !== current.scoreAway && (
-                  <DiceInput
-                    label={t("leagueUi.fanProgressionRoll")}
-                    sides={6}
-                    value={current[fansKey]}
-                    onChange={(value) => change({ [fansKey]: value })}
-                  />
-                )}
-                <p className="text-sm">
-                  {t("leagueUi.winnings")}:{" "}
-                  <span className="font-mono font-semibold">
-                    {earned === null ? "—" : earned / 1000 + "k GP"}
-                  </span>
-                </p>
-              </div>
-            );
-          })}
-        </fieldset>
-        <p className="mt-3 text-xs text-muted-foreground">
-          {t("leagueUi.winningsHint")}
-        </p>
-        {draft && draft.expectedRevision !== match.revision && (
-          <p
-            role="status"
-            className="mt-3 text-sm text-amber-700 dark:text-amber-400"
-          >
-            {t("leagueUi.staleDraft")}
-          </p>
-        )}
-        {editable && (
-          <div className="mt-4 flex gap-3">
-            <Button
-              type="submit"
-              className="h-11"
-              disabled={
-                !draft || busy || draft.expectedRevision !== match.revision
-              }
-            >
-              {t("leagueUi.saveDetails")}
-            </Button>
-            {draft && (
-              <Button
-                type="button"
-                variant="outline"
-                className="h-11"
-                onClick={() => {
-                  setDraft(null);
-                  onDiscard();
-                  onDirty(false);
-                }}
-              >
-                {t("leagueUx.reportDiscardChanges")}
-              </Button>
-            )}
-          </div>
-        )}
-      </form>
+              </LeagueField>
+              <label className="flex min-h-10 items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="size-4 accent-primary"
+                  checked={match[`${side}Stalled`]}
+                  onChange={(event) =>
+                    onChange({ [`${side}Stalled`]: event.target.checked })
+                  }
+                />
+                {t("leagueUi.stalled")}
+              </label>
+              {match.scoreHome !== match.scoreAway && (
+                <DiceInput
+                  label={t("leagueUi.fanProgressionRoll")}
+                  sides={6}
+                  value={match[`${side}FansRoll`]}
+                  onChange={(value) => onChange({ [`${side}FansRoll`]: value })}
+                />
+              )}
+              <p className="text-sm">
+                {t("leagueUi.winnings")}:{" "}
+                <span className="font-mono font-semibold">
+                  {earned === null ? "—" : `${earned / 1000}k GP`}
+                </span>
+              </p>
+            </div>
+          );
+        })}
+        <LeagueField className="sm:col-span-2">
+          {t("leagueUi.evidence")}
+          <Input
+            type="url"
+            maxLength={1000}
+            placeholder="https://"
+            value={match.evidenceUrl}
+            onChange={(event) => onChange({ evidenceUrl: event.target.value })}
+          />
+        </LeagueField>
+      </fieldset>
+      <p className="mt-3 text-xs text-muted-foreground">
+        {t("leagueUi.winningsHint")}
+      </p>
     </LeagueSection>
   );
 }
@@ -992,86 +958,19 @@ function MatchDetails({
 function MatchPlayerRow({
   player,
   displayName,
-  revision,
   editable,
-  blocked,
-  busy,
-  correction,
-  correctionDraft,
-  onCorrection,
-  onDirty,
-  onSave,
+  onChange,
 }: {
   player: ReportPlayer;
   displayName: string;
-  revision: number;
   editable: boolean;
-  blocked: boolean;
-  busy: boolean;
-  correction: boolean;
-  correctionDraft?: PlayerDraft;
-  onCorrection: (draft: PlayerDraft) => void;
-  onDirty: (value: boolean) => void;
-  onSave: (draft: PlayerDraft) => Promise<boolean>;
+  onChange: (patch: PlayerPatch) => void;
 }) {
   const t = useTranslations();
-  const [draft, setDraft] = useState<PlayerDraft | null>(null);
-  const saved: PlayerDraft = {
-    stats: player.stats,
-    statusAfter: player.statusAfter,
-    injuryNotes: player.injuryNotes ?? "",
-    revision,
-    casualtyRoll: player.casualtyRoll,
-    lastingRoll: player.lastingRoll,
-  };
-  const current = correction ? (correctionDraft ?? saved) : (draft ?? saved);
-  const canEdit = editable && player.participated && !blocked;
-  function change(patch: Partial<PlayerDraft>) {
-    const next = { ...current, ...patch };
-    if (patch.casualtyRoll !== undefined || patch.lastingRoll !== undefined) {
-      if (
-        next.casualtyRoll !== null &&
-        (next.casualtyRoll < 13 ||
-          next.casualtyRoll > 14 ||
-          next.lastingRoll !== null)
-      ) {
-        try {
-          const outcome = casualtyOutcome(
-            next.casualtyRoll,
-            next.lastingRoll ?? undefined,
-          );
-          next.statusAfter = outcome.dead
-            ? "dead"
-            : outcome.missNextGame
-              ? "missing-next-game"
-              : "active";
-          next.stats = {
-            ...next.stats,
-            inj: Math.max(1, next.stats.inj),
-            dth: outcome.dead ? 1 : 0,
-          };
-        } catch {
-          /* Keep invalid input editable; the backend validates on save. */
-        }
-      }
-    }
-    if (patch.statusAfter)
-      next.stats = { ...next.stats, dth: patch.statusAfter === "dead" ? 1 : 0 };
-    if (correction) onCorrection(next);
-    else {
-      setDraft(next);
-      onDirty(true);
-    }
-  }
+  const canEdit = editable && player.participated;
   return (
     <details className="group/player border-b bg-card last:border-b-0">
-      <summary
-        aria-disabled={blocked || !!draft}
-        onClick={(event) => {
-          if (blocked || draft) event.preventDefault();
-        }}
-        className="grid min-h-12 cursor-pointer list-none grid-cols-[minmax(0,1fr)_repeat(3,2rem)_1rem] sm:grid-cols-[minmax(12rem,1fr)_repeat(6,3.25rem)_1.5rem] items-center gap-1 px-3 py-2 transition-colors hover:bg-secondary/30 aria-disabled:cursor-default [&::-webkit-details-marker]:hidden"
-      >
+      <summary className="grid min-h-12 cursor-pointer list-none grid-cols-[minmax(0,1fr)_repeat(3,2rem)_1rem] items-center gap-1 px-3 py-2 hover:bg-secondary/30 sm:grid-cols-[minmax(0,1fr)_repeat(6,3.25rem)_1.5rem] [&::-webkit-details-marker]:hidden">
         <span className="flex min-w-0 items-center gap-2">
           <PlayerIcon
             positionId={player.positionId}
@@ -1079,23 +978,17 @@ function MatchPlayerRow({
           />
           <span className="min-w-0">
             <span className="block text-sm font-semibold">{displayName}</span>
-            {player.name && (
-              <span className="block text-xs text-muted-foreground">
-                {positionLabel(player.snapshot.positionName)}
-              </span>
-            )}
-            {!player.participated ? (
+            <span className="block text-xs text-muted-foreground">
+              {positionLabel(player.snapshot.positionName)}
+            </span>
+            {(!player.participated || player.statusAfter !== "active") && (
               <span className="text-[11px] text-destructive">
-                {t("leagueUi.status." + player.snapshot.status)}
-              </span>
-            ) : current.statusAfter !== "active" ? (
-              <span className="text-[11px] text-destructive">
-                {t("leagueUi.status." + current.statusAfter)}
-              </span>
-            ) : null}
-            {draft && (
-              <span className="block text-[11px] text-amber-700">
-                {t("leagueUx.reportUnsavedShort")}
+                {t(
+                  "leagueUi.status." +
+                    (player.participated
+                      ? player.statusAfter
+                      : player.snapshot.status),
+                )}
               </span>
             )}
           </span>
@@ -1103,231 +996,147 @@ function MatchPlayerRow({
         {fields.slice(0, 6).map((field) => (
           <span
             key={field}
-            className={`text-center font-mono text-xs ${["td", "cas", "mvp"].includes(field) ? "" : "hidden sm:block"} ${current.stats[field] ? "font-semibold" : "text-muted-foreground/60"}`}
+            className={`text-center font-mono text-xs ${["td", "cas", "mvp"].includes(field) ? "" : "hidden sm:block"}`}
           >
             <span className="sr-only">{t("leagueUi.stats." + field)} </span>
-            {current.stats[field] || "—"}
+            {player.stats[field] || "—"}
           </span>
         ))}
-        <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open/player:rotate-180" />
+        <ChevronDown className="size-4 text-muted-foreground group-open/player:rotate-180" />
       </summary>
-      <div className="border-t bg-secondary/10 p-3 sm:p-4">
-        <details className="mb-5 rounded-lg bg-secondary/20 p-3">
+      <div className="space-y-4 border-t bg-secondary/10 p-3 sm:p-4">
+        <details className="rounded-lg bg-secondary/20 p-3">
           <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
             {t("leagueUx.reportPlayerProfile")}
           </summary>
-          <div className="my-4 flex items-center gap-3">
-            <PlayerIcon
-              positionId={player.positionId}
-              className="size-10 shrink-0"
-            />
-            <div className="min-w-0">
-              <h3 className="break-words font-semibold">{displayName}</h3>
-              <p className="mb-2 text-xs text-muted-foreground">
-                {player.snapshot.positionName} · {t("leagueUi.playerValue")}:{" "}
-                {(player.snapshot.baseCost + player.snapshot.valueIncrease) /
-                  1000}
-                k GP
-              </p>
-              <SkillList
-                ids={player.snapshot.baseSkills}
-                additionalIds={player.skills}
-              />
-            </div>
-          </div>
-          {!player.participated && (
-            <p className="mb-4 text-sm text-muted-foreground">
-              {t("leagueUi.ineligibleHint")} ·{" "}
-              {t("leagueUi.status." + player.snapshot.status)}
-            </p>
-          )}
-          <dl className="mb-4 grid grid-cols-5 rounded-lg border bg-card p-2 text-center text-xs">
-            {(["ma", "st", "ag", "pa", "av"] as const).map((label) => (
-              <div key={label}>
-                <dt className="text-muted-foreground">
-                  <LeagueHelp stat={label} profile />
-                </dt>
-                <dd className="mt-1 font-mono font-semibold">
-                  {player.snapshot.profile[label]}
-                </dd>
-              </div>
+          <div className="my-3 flex flex-wrap gap-4 font-mono text-sm">
+            {Object.entries(player.snapshot.profile).map(([key, value]) => (
+              <span key={key}>
+                {key.toUpperCase()} {value}
+              </span>
             ))}
-          </dl>
+          </div>
+          <SkillList ids={[...player.snapshot.baseSkills, ...player.skills]} />
         </details>
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            void onSave(current).then((saved) => {
-              if (saved) {
-                setDraft(null);
-                onDirty(false);
-              }
-            });
-          }}
+        <p className="text-xs text-muted-foreground">
+          {t("leagueUx.reportStatsHint")}
+        </p>
+        <fieldset
+          disabled={!canEdit}
+          className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"
         >
+          {fields.slice(0, 6).map((field) => (
+            <LeagueField key={field}>
+              <span title={t("leagueUi.statDescriptions." + field)}>
+                {t("leagueUx.reportStatLabels." + field)}
+              </span>
+              <Input
+                className="h-10 tabular-nums"
+                type="number"
+                min={0}
+                max={field === "mvp" ? 1 : 99}
+                step={1}
+                value={player.stats[field]}
+                onChange={(event) =>
+                  onChange({ stats: { [field]: Number(event.target.value) } })
+                }
+              />
+            </LeagueField>
+          ))}
+        </fieldset>
+        <details className="rounded-lg border">
+          <summary className="cursor-pointer px-4 py-3 text-sm font-medium">
+            {t("leagueUx.reportMoreStats")}
+          </summary>
           <fieldset
-            disabled={!canEdit || busy}
-            className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"
+            disabled={!canEdit}
+            className="grid grid-cols-2 gap-3 border-t p-4 sm:grid-cols-3"
           >
-            {fields.slice(0, 6).map((field) => (
+            {fields.slice(6).map((field) => (
               <LeagueField key={field}>
-                <span title={t("leagueUi.statDescriptions." + field)}>
-                  {t("leagueUx.reportStatLabels." + field)}
-                </span>
+                {t("leagueUx.reportStatLabels." + field)}
                 <Input
-                  className="mt-1 h-10 tabular-nums"
+                  className="h-10 tabular-nums"
                   type="number"
                   min={0}
-                  max={field === "mvp" || field === "dth" ? 1 : 99}
+                  max={field === "dth" ? 1 : 99}
                   step={1}
-                  value={current.stats[field]}
+                  disabled={field === "dth"}
+                  value={player.stats[field]}
                   onChange={(event) =>
-                    change({
-                      stats: {
-                        ...current.stats,
-                        [field]: Number(event.target.value),
-                      },
-                    })
+                    onChange({ stats: { [field]: Number(event.target.value) } })
                   }
-                  required
                 />
               </LeagueField>
             ))}
           </fieldset>
-          <details className="mt-4 rounded-lg border">
-            <summary className="cursor-pointer px-4 py-3 text-sm font-medium">
-              {t("leagueUx.reportMoreStats")}
-            </summary>
-            <fieldset
-              disabled={!canEdit || busy}
-              className="grid grid-cols-2 gap-3 border-t p-4 sm:grid-cols-3"
-            >
-              {fields.slice(6).map((field) => (
-                <LeagueField key={field}>
-                  {t("leagueUx.reportStatLabels." + field)}
-                  <Input
-                    className="mt-1 h-10 tabular-nums"
-                    type="number"
-                    min={0}
-                    max={field === "dth" ? 1 : 99}
-                    step={1}
-                    value={current.stats[field]}
-                    onChange={(event) =>
-                      change({
-                        stats: {
-                          ...current.stats,
-                          [field]: Number(event.target.value),
-                        },
-                      })
-                    }
-                    required
+        </details>
+        <details
+          className="rounded-lg border"
+          open={
+            player.casualtyRoll !== null ||
+            player.statusAfter !== "active" ||
+            undefined
+          }
+        >
+          <summary className="cursor-pointer px-4 py-3 text-sm font-medium">
+            {t("leagueUx.reportInjuries")}
+          </summary>
+          <div className="border-t p-4">
+            <fieldset disabled={!canEdit} className="grid gap-3 sm:grid-cols-2">
+              <DiceInput
+                label={t("leagueUi.casualtyRoll")}
+                sides={99}
+                value={player.casualtyRoll}
+                onChange={(value) =>
+                  onChange({ casualtyRoll: value, lastingRoll: null })
+                }
+              />
+              {player.casualtyRoll !== null &&
+                player.casualtyRoll >= 13 &&
+                player.casualtyRoll <= 14 && (
+                  <DiceInput
+                    label={t("leagueUi.lastingRoll")}
+                    sides={6}
+                    value={player.lastingRoll}
+                    onChange={(value) => onChange({ lastingRoll: value })}
                   />
-                </LeagueField>
-              ))}
-            </fieldset>
-          </details>
-          <details
-            className="mt-3 rounded-lg border"
-            open={
-              current.casualtyRoll !== null ||
-              current.statusAfter !== "active" ||
-              undefined
-            }
-          >
-            <summary className="cursor-pointer px-4 py-3 text-sm font-medium">
-              {t("leagueUx.reportInjuries")}
-            </summary>
-            <div className="border-t p-4">
-              <fieldset
-                disabled={!canEdit || busy}
-                className="grid gap-3 sm:grid-cols-2"
-              >
-                <DiceInput
-                  label={t("leagueUi.casualtyRoll")}
-                  sides={99}
-                  value={current.casualtyRoll}
-                  onChange={(value) => change({ casualtyRoll: value })}
-                />
-                {current.casualtyRoll !== null &&
-                  current.casualtyRoll >= 13 &&
-                  current.casualtyRoll <= 14 && (
-                    <DiceInput
-                      label={t("leagueUi.lastingRoll")}
-                      sides={6}
-                      value={current.lastingRoll}
-                      onChange={(value) => change({ lastingRoll: value })}
-                    />
-                  )}
-                <LeagueField>
-                  {t("leagueUi.playerStatus")}
-                  <LeagueSelect
-                    className="h-10"
-                    value={current.statusAfter}
-                    disabled={current.casualtyRoll !== null}
-                    onChange={(event) =>
-                      change({
-                        statusAfter: event.target
-                          .value as PlayerDraft["statusAfter"],
-                      })
-                    }
-                  >
-                    {["active", "missing-next-game", "dead"].map((status) => (
-                      <option key={status} value={status}>
-                        {t("leagueUi.status." + status)}
-                      </option>
-                    ))}
-                  </LeagueSelect>
-                </LeagueField>
-                <LeagueField>
-                  {t("leagueUi.injuryNotes")}
-                  <Input
-                    className="mt-1 h-10"
-                    value={current.injuryNotes}
-                    maxLength={500}
-                    onChange={(event) =>
-                      change({ injuryNotes: event.target.value })
-                    }
-                  />
-                </LeagueField>
-              </fieldset>
-              <p className="mt-3 text-xs text-muted-foreground">
-                {t("leagueUi.casualtyHint")}
-              </p>
-            </div>
-          </details>
-          {draft && draft.revision !== revision && !correction && (
-            <p
-              role="status"
-              className="mt-3 text-sm text-amber-700 dark:text-amber-400"
-            >
-              {t("leagueUi.staleDraft")}
-            </p>
-          )}
-          {canEdit && !correction && (
-            <div className="mt-4 flex gap-3">
-              <Button
-                className="h-11"
-                type="submit"
-                disabled={!draft || busy || draft.revision !== revision}
-              >
-                {t("leagueUi.savePlayer")}
-              </Button>
-              {draft && (
-                <Button
-                  type="button"
-                  className="h-11"
-                  variant="outline"
-                  onClick={() => {
-                    setDraft(null);
-                    onDirty(false);
-                  }}
+                )}
+              <LeagueField>
+                {t("leagueUi.playerStatus")}
+                <LeagueSelect
+                  value={player.statusAfter}
+                  disabled={player.casualtyRoll !== null}
+                  onChange={(event) =>
+                    onChange({
+                      statusAfter: event.target
+                        .value as ReportPlayer["statusAfter"],
+                    })
+                  }
                 >
-                  {t("leagueUx.reportDiscardChanges")}
-                </Button>
-              )}
-            </div>
-          )}
-        </form>
+                  {["active", "missing-next-game", "dead"].map((status) => (
+                    <option key={status} value={status}>
+                      {t("leagueUi.status." + status)}
+                    </option>
+                  ))}
+                </LeagueSelect>
+              </LeagueField>
+              <LeagueField>
+                {t("leagueUi.injuryNotes")}
+                <Input
+                  value={player.injuryNotes}
+                  maxLength={500}
+                  onChange={(event) =>
+                    onChange({ injuryNotes: event.target.value })
+                  }
+                />
+              </LeagueField>
+            </fieldset>
+            <p className="mt-3 text-xs text-muted-foreground">
+              {t("leagueUi.casualtyHint")}
+            </p>
+          </div>
+        </details>
       </div>
     </details>
   );

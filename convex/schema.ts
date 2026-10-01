@@ -11,6 +11,7 @@ import {
   playerStatusValidator,
   reductionsValidator,
   reportStatusValidator,
+  recordedReportValidator,
   teamStatsValidator,
 } from "./leagueValidators";
 
@@ -119,11 +120,15 @@ export default defineSchema({
     revision: v.number(),
     scoreHome: v.number(),
     scoreAway: v.number(),
+    weather: v.optional(v.union(v.number(), v.null())),
+    homeDedicatedFans: v.optional(v.number()),
+    awayDedicatedFans: v.optional(v.number()),
     venue: v.string(),
     evidenceUrl: v.string(),
     confirmedBy: v.array(v.id("users")),
     startedAt: v.union(v.number(), v.null()),
     completedAt: v.union(v.number(), v.null()),
+    recordedOrder: v.optional(v.number()),
     homeSnapshot: v.union(teamValidator, v.null()),
     awaySnapshot: v.union(teamValidator, v.null()),
     homeCareerRevision: v.union(v.number(), v.null()),
@@ -166,7 +171,23 @@ export default defineSchema({
     lastingRoll: v.union(v.number(), v.null()),
   })
     .index("by_matchId", ["matchId"])
+    .index("by_playerId", ["playerId"])
     .index("by_matchId_and_playerId", ["matchId", "playerId"]),
+  leagueMatchEvents: defineTable({
+    leagueId: v.id("leagues"),
+    matchId: v.id("leagueMatches"),
+    revision: v.number(),
+    actorId: v.id("users"),
+    actorName: v.string(),
+    kind: v.union(
+      v.literal("recorded"),
+      v.literal("corrected"),
+      v.literal("replayed"),
+    ),
+    reason: v.string(),
+    before: v.union(recordedReportValidator, v.null()),
+    after: recordedReportValidator,
+  }).index("by_matchId", ["matchId"]),
   leagueAudit: defineTable({
     leagueId: v.id("leagues"),
     entryId: v.optional(v.id("leagueTeams")),

@@ -22,7 +22,7 @@ async function LeagueContent({
   params: Promise<{ leagueId: string; matchId: string }>;
 }) {
   const { leagueId, matchId } = await params;
-  return <LeagueMatch leagueId={leagueId} matchId={matchId} />;
+  return <LeagueMatch key={matchId} leagueId={leagueId} matchId={matchId} />;
 }
 
 export default function Page({
