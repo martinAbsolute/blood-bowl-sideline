@@ -146,7 +146,7 @@ export function LoadingLayout({
             </div>
           </div>
           <div className="budget-grid">
-            <div className="space-y-3">
+            <div className="@container space-y-5">
               <TableLoading
                 rows={getRoster(team?.rosterId ?? "human")!.players.length}
               />
@@ -158,21 +158,32 @@ export function LoadingLayout({
                 compact
                 footer
               />
-              {[5, 6].map((count) => (
-                <section
-                  key={count}
-                  className="overflow-hidden rounded-lg border bg-card"
-                >
-                  <div className="flex h-[54px] items-center bg-secondary/50 px-4">
-                    <Skeleton className="h-5 w-36" />
-                  </div>
-                  <div className="grid grid-cols-1 gap-3 border-t p-3 min-[380px]:grid-cols-2 sm:grid-cols-3">
-                    {Array.from({ length: count }, (_, index) => (
-                      <Skeleton key={index} className="h-[126px]" />
-                    ))}
-                  </div>
-                </section>
-              ))}
+              <div className="grid items-start gap-6 @min-[780px]:grid-cols-2">
+                {[5, 6].map((count) => (
+                  <section key={count}>
+                    <div className="mb-3 flex h-6 items-center justify-between px-1">
+                      <Skeleton className="h-5 w-36" />
+                      <Skeleton className="h-3 w-12" />
+                    </div>
+                    <div className="space-y-2">
+                      {Array.from({ length: count }, (_, index) => (
+                        <div
+                          key={index}
+                          className="flex h-20 items-center justify-between gap-3 rounded-xl border bg-card px-3 sm:px-4"
+                        >
+                          <div className="flex-1 space-y-3">
+                            <Skeleton className="h-4 w-3/4" />
+                            <Skeleton className="h-3 w-2/3" />
+                          </div>
+                          <Skeleton className="size-11" />
+                          <Skeleton className="h-4 w-5" />
+                          <Skeleton className="size-11" />
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
             </div>
             <aside className="budget-side space-y-3">
               <section className="rounded-lg border bg-card p-3">

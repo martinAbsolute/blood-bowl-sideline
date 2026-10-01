@@ -91,7 +91,7 @@
   "saveFailed": "Could not save. Your local draft is safe. Please try again.",
   "conflict": "This team changed in another tab. Your edits are kept in a local recovery draft. Print them before reloading the saved team.",
   "savedHint": "Anyone with your UUID link can view this team. Only you can edit it.",
-  "share": "Copy team link",
+  "share": "Share",
   "copied": "Team link copied",
   "copyFailed": "Could not copy. Copy the URL from your browser address bar.",
   "print": "Print / PDF",
@@ -325,7 +325,7 @@
     "halfling-master-chef": "Each half, roll three dice; each 4+ gives you a re-roll and removes one from the opponent.",
     "biased-referee-dodgy-league-rep": "Gain +1 to Argue the Call and a chance to send off opponents after unpunished fouls.",
     "infamous-coaching-staff-josef-bugman": "Improve knockout recovery and once per game reposition D3 players before kick-off.",
-    "wizard-sports-wizard": "Once per game, cast Fireball or Thunderbolt at the timing specified for that spell."
+    "wizard-sports-wizard": "Once per game, cast Fireball or Zap! between turns. Fireball hits players in a chosen square and adjacent squares on 4+, with +1 to armour. Zap! can turn a player into a frog until the drive ends."
   },
   "staffDescriptions": {
     "rerolls": "Re-roll eligible team dice during your turn; the allowance refreshes each half.",
@@ -380,5 +380,9 @@
   "printFailed": "Could not open the print dialog. Please try again.",
   "openTeam": "Open team",
   "sp": "SP",
-  "invalidTeamSave": "Fix the roster checks before syncing. Invalid selections stay on this device until corrected."
+  "invalidTeamSave": "Fix the roster checks before syncing. Invalid selections stay on this device until corrected.",
+  "each": "each",
+  "maxQuantity": "max {max}",
+  "supportUnavailable": "Unavailable for this roster or ruleset",
+  "explainRule": "Explain {name}"
 }

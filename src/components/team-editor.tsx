@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "gt-next";
 import { useConvexAuth } from "convex/react";
@@ -7,14 +7,12 @@ import {
   getRoster,
   getRuleset,
   rosters,
-  inducements,
   rulesets,
   stars,
   starPairs,
   starChoices,
 } from "@/domain/catalog";
 import {
-  inducementInfo,
   playerSkillCost,
   starEligible,
   summarize,
@@ -56,7 +54,6 @@ import {
 } from "./ui/table";
 import { PlayerRecruitment } from "./player-recruitment";
 import { SkillList, TableSkills } from "./skill-box";
-import { RuleInfo } from "./rule-help";
 import { TeamAffiliations, SpecialRules } from "./team-affiliations";
 import { Checkbox } from "./ui/checkbox";
 import {
@@ -68,13 +65,14 @@ import {
 import { ScrollArea } from "./ui/scroll-area";
 import { PlayerSkillPicker } from "./player-skill-picker";
 import { positionLabel } from "./position-name";
-import { QuantityStepper } from "./quantity-stepper";
+import { TeamSupport } from "./team-support";
+import { shareTeamLink } from "@/lib/share-team";
 import { hasTeamProgress, resetTeamRoster } from "@/lib/builder";
 import {
   ArrowLeft,
   ChevronRight,
   Copy,
-  Clipboard,
+  Share2,
   ChevronDown,
   Plus,
   Printer,
@@ -90,74 +88,6 @@ import { PlayerIcon, StarPlayerIcon } from "./player-icon";
 import { useTeamAutosave } from "@/lib/use-team-autosave";
 import { useTeamSave } from "@/lib/use-team-save";
 const gold = (n: number) => `${(n / 1000).toLocaleString("en")}k`;
-function CollapsibleSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <Accordion
-      defaultValue={["content"]}
-      className="recruitment-menu overflow-hidden rounded-lg border bg-card"
-    >
-      <AccordionItem value="content">
-        <AccordionTrigger className="items-center rounded-none bg-secondary/50 px-4 py-3.5 text-base font-semibold hover:no-underline [&>svg]:text-primary">
-          {title}
-        </AccordionTrigger>
-        <AccordionContent className="border-t p-0">{children}</AccordionContent>
-      </AccordionItem>
-    </Accordion>
-  );
-}
-function Counter({
-  label,
-  value,
-  max,
-  onChange,
-  disabled = false,
-  cost,
-  description,
-}: {
-  label: string;
-  value: number;
-  max: number;
-  onChange: (v: number) => void;
-  disabled?: boolean;
-  cost?: number;
-  description?: string;
-}) {
-  return (
-    <div className="relative flex flex-col justify-between gap-3 rounded-md border bg-background/40 p-3">
-      {description && (
-        <RuleInfo
-          title={label}
-          description={description}
-          className="absolute right-2 top-2"
-        />
-      )}
-      <div className="pr-7">
-        <p className="text-sm font-semibold leading-snug">{label}</p>
-        {cost !== undefined && (
-          <p className="mt-1 font-mono text-xs text-muted-foreground">
-            {gold(cost)} GP
-          </p>
-        )}
-      </div>
-      <div className="border-t pt-3">
-        <QuantityStepper
-          label={label}
-          value={value}
-          max={max}
-          disabled={disabled}
-          onDecrease={() => onChange(value - 1)}
-          onIncrease={() => onChange(value + 1)}
-        />
-      </div>
-    </div>
-  );
-}
 export function TeamEditor({
   initial,
   revision: initialRevision = 0,
@@ -211,9 +141,6 @@ export function TeamEditor({
     setSelected(null);
     setPendingRoster(null);
   }
-  function staff(key: keyof Team["staff"], value: number) {
-    change({ ...team, staff: { ...team.staff, [key]: value } });
-  }
   function editPlayer(update: Partial<Team["players"][number]>) {
     change({
       ...team,
@@ -224,10 +151,11 @@ export function TeamEditor({
   }
   async function share() {
     try {
-      await navigator.clipboard.writeText(
+      const result = await shareTeamLink(
         `${window.location.origin}/teams/${team.uuid}`,
       );
-      toast.add({ type: "success", title: t("copied") });
+      if (result === "copied")
+        toast.add({ type: "success", title: t("copied") });
     } catch {
       toast.add({ type: "error", title: t("copyFailed") });
     }
@@ -284,9 +212,6 @@ export function TeamEditor({
       !team.stars.includes(s.id) &&
       s.name.toLowerCase().includes(search.toLowerCase()),
   );
-  const eligibleInducements = inducements.filter(
-    (i) => inducementInfo(team, i).allowed || (team.inducements[i.id] ?? 0) > 0,
-  );
   return (
     <div className="page-width team-builder py-5">
       <TeamHeader
@@ -301,6 +226,21 @@ export function TeamEditor({
         }
         actions={
           <>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={duplicating || isLoading || !draftSync.ready}
+              onClick={() => void copy()}
+            >
+              <Copy className="size-4" />
+              {t("duplicate")}
+            </Button>
+            {!readOnly && isAuthenticated && revision > 0 && (
+              <Button variant="outline" size="sm" onClick={share}>
+                <Share2 className="size-4" />
+                {t("share")}
+              </Button>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger render={<Button size="sm" />}>
                 <Printer className="size-4" />
@@ -316,21 +256,6 @@ export function TeamEditor({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={duplicating || isLoading || !draftSync.ready}
-              onClick={() => void copy()}
-            >
-              <Copy className="size-4" />
-              {t("duplicate")}
-            </Button>
-            {!readOnly && isAuthenticated && revision > 0 && (
-              <Button variant="outline" size="sm" onClick={share}>
-                <Clipboard className="size-4" />
-                {t("share")}
-              </Button>
-            )}
           </>
         }
         title={
@@ -371,7 +296,7 @@ export function TeamEditor({
         </div>
       </TeamHeader>
       <div className="budget-grid">
-        <div className="space-y-3">
+        <div className="@container space-y-5">
           {!readOnly && <PlayerRecruitment team={team} onChange={change} />}
           <section className="overflow-hidden rounded-lg border bg-card">
             <div className="flex items-center justify-between border-b px-3 py-2.5">
@@ -670,64 +595,7 @@ export function TeamEditor({
               </div>
             )}
           </section>
-          <CollapsibleSection title={t("staff")}>
-            <div className="grid grid-cols-1 gap-3 p-3 min-[380px]:grid-cols-2 sm:grid-cols-3">
-              {(
-                [
-                  ["rerolls", roster.rerolls.cost, roster.rerolls.max],
-                  ["apothecary", 50000, roster.apothecary ? 1 : 0],
-                  ["assistantCoaches", 10000, 6],
-                  ["cheerleaders", 10000, 6],
-                  [
-                    "dedicatedFans",
-                    5000,
-                    team.rulesetId === "bb2025-default" ? 6 : 0,
-                  ],
-                ] as const
-              ).map(([key, cost, max]) => (
-                <Counter
-                  key={key}
-                  label={t(key)}
-                  description={t(`staffDescriptions.${key}`)}
-                  value={team.staff[key]}
-                  cost={cost}
-                  max={max}
-                  disabled={readOnly}
-                  onChange={(v) => staff(key, v)}
-                />
-              ))}
-            </div>
-          </CollapsibleSection>
-          <CollapsibleSection title={t("inducements")}>
-            {eligibleInducements.length ? (
-              <div className="grid grid-cols-1 gap-3 p-3 min-[380px]:grid-cols-2 sm:grid-cols-3">
-                {eligibleInducements.map((i) => {
-                  const info = inducementInfo(team, i);
-                  return (
-                    <Counter
-                      key={i.id}
-                      label={i.name}
-                      description={t(`inducementDescriptions.${i.id}`)}
-                      value={team.inducements[i.id] ?? 0}
-                      max={info.allowed ? info.max : 0}
-                      cost={info.cost}
-                      disabled={readOnly}
-                      onChange={(v) =>
-                        change({
-                          ...team,
-                          inducements: { ...team.inducements, [i.id]: v },
-                        })
-                      }
-                    />
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="py-5 text-sm text-muted-foreground">
-                {t("noInducements")}
-              </p>
-            )}
-          </CollapsibleSection>
+          <TeamSupport team={team} onChange={change} readOnly={readOnly} />
         </div>
         <aside className="budget-side space-y-3">
           {!readOnly && (

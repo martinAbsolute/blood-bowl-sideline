@@ -12,6 +12,8 @@ export function QuantityStepper({
   onIncrease,
   disabled = false,
   increaseDisabled = false,
+  size = "default",
+  showMax = true,
 }: {
   label: string;
   value: number;
@@ -20,6 +22,8 @@ export function QuantityStepper({
   onIncrease: () => void;
   disabled?: boolean;
   increaseDisabled?: boolean;
+  size?: "default" | "lg";
+  showMax?: boolean;
 }) {
   const t = useTranslations();
   return (
@@ -32,7 +36,11 @@ export function QuantityStepper({
         type="button"
         variant="outline"
         size="icon"
-        className="size-8 shrink-0 bg-card"
+        className={
+          size === "lg"
+            ? "size-11 shrink-0 bg-secondary/60"
+            : "size-8 shrink-0 bg-card"
+        }
         disabled={disabled || value <= 0}
         aria-label={t("decreaseQuantity", { name: label })}
         onClick={onDecrease}
@@ -41,16 +49,22 @@ export function QuantityStepper({
       </Button>
       <output
         aria-label={`${label}: ${value}/${max}`}
-        className="min-w-10 text-center font-mono text-sm tabular-nums"
+        className={
+          size === "lg"
+            ? "min-w-8 text-center font-mono text-base tabular-nums"
+            : "min-w-10 text-center font-mono text-sm tabular-nums"
+        }
       >
         <span className="font-semibold">{value}</span>
-        <span className="text-xs text-muted-foreground">/{max}</span>
+        {showMax && (
+          <span className="text-xs text-muted-foreground">/{max}</span>
+        )}
       </output>
       <Button
         type="button"
         variant="default"
         size="icon"
-        className="size-8 shrink-0"
+        className={size === "lg" ? "size-11 shrink-0" : "size-8 shrink-0"}
         disabled={disabled || increaseDisabled || value >= max}
         aria-label={t("increaseQuantity", { name: label })}
         onClick={onIncrease}

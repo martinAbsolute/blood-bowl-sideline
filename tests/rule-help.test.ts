@@ -62,6 +62,19 @@ describe("rule explanations", () => {
       );
     }
   });
+  it("uses the BB2025 Sports-Wizard spells in both languages", () => {
+    for (const dictionary of [en, uk]) {
+      expect(
+        dictionary.inducementDescriptions["wizard-sports-wizard"],
+      ).toContain("Fireball");
+      expect(
+        dictionary.inducementDescriptions["wizard-sports-wizard"],
+      ).toContain("Zap!");
+      expect(
+        dictionary.inducementDescriptions["wizard-sports-wizard"],
+      ).not.toContain("Thunderbolt");
+    }
+  });
   it("keeps complete Ukrainian exceptions and paragraph breaks in long skill definitions", () => {
     expect(uk.skillDescriptions.pro).toContain("Armour Roll");
     expect(uk.skillDescriptions.pro).toContain("Argue the Call");

@@ -20,7 +20,7 @@ export function TeamHeader({
           {title}
         </div>
         <div
-          className="no-print mb-1 flex shrink-0 flex-wrap gap-2"
+          className="no-print mb-1 ml-auto flex max-w-full shrink-0 flex-wrap justify-end gap-2"
           data-title-actions
         >
           {actions}
