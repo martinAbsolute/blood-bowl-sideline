@@ -689,11 +689,8 @@ html {
   border-radius: 999px;
   background: var(--border);
 }
-.mobile-budget-drawer[data-expanded="false"] .budget-overview {
+.mobile-budget-drawer .budget-overview {
   padding: 0 12px 10px;
-}
-.mobile-budget-drawer[data-expanded="false"] .budget-drawer-breakdown {
-  visibility: hidden;
 }
 @media (prefers-reduced-motion: reduce) {
   .mobile-budget-drawer {

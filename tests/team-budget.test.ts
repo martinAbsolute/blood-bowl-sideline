@@ -114,6 +114,9 @@ it("expands the same drawer and progress bar, then hands off to the inline budge
   const button = popup.querySelector<HTMLButtonElement>(
     ".budget-drawer-summary button",
   )!;
+  const header = popup.querySelector(".budget-drawer-summary")!;
+  const headerContent = header.innerHTML;
+  const breakdown = popup.querySelector(".budget-drawer-breakdown");
   expect(popup.dataset.expanded).toBe("false");
   expect(
     popup.querySelector(".budget-drawer-breakdown")!.hasAttribute("inert"),
@@ -126,14 +129,15 @@ it("expands the same drawer and progress bar, then hands off to the inline budge
   expect(document.querySelector(".mobile-budget-drawer")).toBe(popup);
   expect(popup.dataset.expanded).toBe("true");
   expect(popup.querySelector('[role="progressbar"]')).toBe(progress);
-  expect(popup.querySelector('[data-slot="accordion-trigger"]')).toBeNull();
-  await act(async () =>
-    popup
-      .querySelector<HTMLButtonElement>('button[aria-label="close"]')!
-      .click(),
+  expect(popup.querySelector(".budget-drawer-breakdown")).toBe(breakdown);
+  expect(header.innerHTML).toBe(
+    headerContent.replace('aria-expanded="false"', 'aria-expanded="true"'),
   );
+  expect(popup.querySelector('[data-slot="accordion-trigger"]')).toBeNull();
+  await act(async () => button.click());
   expect(popup.dataset.expanded).toBe("false");
   expect(popup.querySelector('[role="progressbar"]')).toBe(progress);
+  expect(header.innerHTML).toBe(headerContent);
   await reportBudgetPosition(600);
   expect(document.querySelector(".mobile-budget-drawer")).toBeNull();
   expect(container.querySelector(".team-budget")).not.toBeNull();
@@ -189,4 +193,17 @@ it("surfaces skill-only overspending in the closed drawer", async () => {
   expect(popup.querySelector(".budget-overview")?.textContent).toContain(
     "treasuryOver",
   );
+  const header = popup.querySelector(".budget-overview")!;
+  const headerContent = header.innerHTML;
+  await act(async () =>
+    popup
+      .querySelector<HTMLButtonElement>(".budget-drawer-summary button")!
+      .click(),
+  );
+  expect(header.innerHTML).toBe(headerContent);
+  expect(
+    Array.from(popup.querySelectorAll("[data-budget-meter]"), (meter) =>
+      meter.getAttribute("data-budget-meter"),
+    ),
+  ).toEqual(["skills", "team"]);
 });

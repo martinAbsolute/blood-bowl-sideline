@@ -2,11 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "gt-next";
-import { ChevronDown } from "lucide-react";
 import type { Team } from "@/domain/types";
 import { budgetSummary } from "@/domain/budget";
 import { BudgetBreakdown, BudgetOverview } from "./budget-details";
-import { Button } from "./ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -23,6 +21,11 @@ export function TeamBudget({
 }) {
   const t = useTranslations();
   const summary = budgetSummary(team);
+  // Keep the same allowance in the header throughout opening and closing.
+  const drawerPool =
+    summary.issues[0] ??
+    summary.pools.find((pool) => pool.id === "funds" && pool.used > 0) ??
+    summary.pools[0];
   const section = useRef<HTMLElement>(null);
   const [aboveBudget, setAboveBudget] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -40,7 +43,7 @@ export function TeamBudget({
       const panel = summaryElement.closest<HTMLElement>(
         ".mobile-budget-drawer",
       );
-      if (!panel || panel.dataset.expanded !== "false") return;
+      if (!panel) return;
       const styles = getComputedStyle(panel);
       setCollapsedHeight(
         Math.ceil(
@@ -92,7 +95,7 @@ export function TeamBudget({
         aria-label={t("treasury")}
         className="team-budget budget-panel print-break-avoid overflow-hidden"
       >
-        <BudgetOverview summary={summary} />
+        <BudgetOverview pool={summary.pools[0]} />
         <BudgetBreakdown summary={summary} />
       </section>
       {floating && (
@@ -131,7 +134,7 @@ export function TeamBudget({
                   aria-expanded={expanded}
                   onClick={() => setExpanded(!expanded)}
                 >
-                  <BudgetOverview summary={summary} compact={!expanded} />
+                  <BudgetOverview pool={drawerPool} />
                 </button>
               </div>
             }
@@ -140,23 +143,12 @@ export function TeamBudget({
             <DrawerDescription className="sr-only">
               {t("budgetBreakdown")}
             </DrawerDescription>
-            {expanded && (
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                className="absolute right-3 top-1 z-10"
-                aria-label={t("close")}
-                onClick={() => setExpanded(false)}
-              >
-                <ChevronDown />
-              </Button>
-            )}
             <div
               className="budget-drawer-breakdown min-h-0 overflow-y-auto overscroll-contain"
               inert={!expanded}
               aria-hidden={!expanded}
             >
-              <BudgetBreakdown summary={summary} />
+              <BudgetBreakdown summary={summary} drawerPool={drawerPool} />
             </div>
           </DrawerContent>
         </Drawer>

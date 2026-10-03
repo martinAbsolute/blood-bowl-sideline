@@ -20,13 +20,7 @@ function usePoolLabel() {
             : t("spp");
 }
 
-function BudgetMeter({
-  pool,
-  compact = false,
-}: {
-  pool: BudgetPool;
-  compact?: boolean;
-}) {
+function BudgetMeter({ pool }: { pool: BudgetPool }) {
   const t = useTranslations();
   const label = usePoolLabel()(pool);
   const excess = Math.max(0, pool.used - pool.limit);
@@ -54,66 +48,47 @@ function BudgetMeter({
       <span className="flex items-baseline justify-between gap-2 text-xs leading-4">
         <span className="min-w-0 truncate font-medium">{label}</span>
         <span className={`shrink-0 whitespace-nowrap tabular-nums ${tone}`}>
-          {compact ? (
-            status
-          ) : (
-            <>
-              {amount(pool.used, pool.unit)}{" "}
-              <span className="text-muted-foreground">
-                / {amount(pool.limit, pool.unit)}
-              </span>
-            </>
-          )}
-        </span>
-      </span>
-      <span
-        className="budget-progress mt-2 block h-1 overflow-hidden rounded-full bg-secondary"
-        role="progressbar"
-        aria-label={label}
-        aria-valuemin={0}
-        aria-valuemax={Math.max(1, pool.limit)}
-        aria-valuenow={Math.min(pool.used, Math.max(1, pool.limit))}
-        aria-valuetext={`${amount(pool.used, pool.unit)} / ${amount(pool.limit, pool.unit)}`}
-      >
-        <span
-          className={`block h-full transition-[width] motion-reduce:transition-none ${excess ? (pool.shared ? "bg-amber-600" : "bg-destructive") : "bg-primary/70"}`}
-          style={{ width: `${progress}%` }}
-        />
-      </span>
-      {!compact && (
-        <span
-          className={`mt-1.5 block text-right text-[11px] leading-4 ${tone}`}
-        >
           {status}
         </span>
-      )}
+      </span>
+      <span className="mt-1.5 grid grid-cols-[minmax(0,1fr)_6rem] items-center gap-3">
+        <span
+          className="budget-progress block h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-secondary"
+          role="progressbar"
+          aria-label={label}
+          aria-valuemin={0}
+          aria-valuemax={Math.max(1, pool.limit)}
+          aria-valuenow={Math.min(pool.used, Math.max(1, pool.limit))}
+          aria-valuetext={`${amount(pool.used, pool.unit)} / ${amount(pool.limit, pool.unit)}`}
+        >
+          <span
+            className={`block h-full transition-[width] motion-reduce:transition-none ${excess ? (pool.shared ? "bg-amber-600" : "bg-destructive") : "bg-primary/70"}`}
+            style={{ width: `${progress}%` }}
+          />
+        </span>
+        <span className="whitespace-nowrap text-right text-[10px] leading-3 tabular-nums text-muted-foreground">
+          {amount(pool.used, pool.unit)} / {amount(pool.limit, pool.unit)}
+        </span>
+      </span>
     </span>
   );
 }
 
-export function BudgetOverview({
-  summary,
-  compact = false,
-}: {
-  summary: BudgetSummary;
-  compact?: boolean;
-}) {
-  // In the closed drawer, surface an exceeded allowance first. Otherwise show
-  // the shared reserve once it is in use, or the remaining treasury.
-  const reserve = summary.pools.find(
-    (pool) => pool.id === "funds" && pool.used > 0,
-  );
-  const pool = compact
-    ? (summary.issues[0] ?? reserve ?? summary.pools[0])
-    : summary.pools[0];
+export function BudgetOverview({ pool }: { pool: BudgetPool }) {
   return (
     <span className="budget-overview block p-3">
-      <BudgetMeter pool={pool} compact={compact} />
+      <BudgetMeter pool={pool} />
     </span>
   );
 }
 
-export function BudgetBreakdown({ summary }: { summary: BudgetSummary }) {
+export function BudgetBreakdown({
+  summary,
+  drawerPool,
+}: {
+  summary: BudgetSummary;
+  drawerPool?: BudgetPool;
+}) {
   const t = useTranslations();
   const { totals, pools, counts } = summary;
   const skillUnit = pools.find((pool) => pool.id === "skills")?.unit ?? "GP";
@@ -129,9 +104,11 @@ export function BudgetBreakdown({ summary }: { summary: BudgetSummary }) {
   if (pools.length === 1 && spent.length === 0) return null;
   return (
     <div className="space-y-3 px-3 pb-3 text-xs">
-      {pools.slice(1).map((pool) => (
-        <BudgetMeter key={pool.id} pool={pool} />
-      ))}
+      {pools
+        .filter((pool) => pool.id !== (drawerPool ?? pools[0]).id)
+        .map((pool) => (
+          <BudgetMeter key={pool.id} pool={pool} />
+        ))}
       {pools.some((pool) => pool.id === "funds") && (
         <p className="text-[11px] leading-relaxed text-muted-foreground">
           {t("flowingHint")}
