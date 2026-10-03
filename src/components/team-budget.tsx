@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "gt-next";
 import { ChevronDown } from "lucide-react";
 import type { Team } from "@/domain/types";
+import { budgetSummary, type BudgetSummary } from "@/domain/budget";
 import { BudgetBreakdown, BudgetOverview } from "./budget-details";
 import { Button } from "./ui/button";
 import {
@@ -13,10 +14,10 @@ import {
   DrawerTitle,
 } from "./ui/drawer";
 
-function BudgetDetails({ team }: { team: Team }) {
+function BudgetDetails({ summary }: { summary: BudgetSummary }) {
   return (
-    <div className="border-t p-4 text-xs">
-      <BudgetBreakdown team={team} />
+    <div className="border-t p-3 text-xs">
+      <BudgetBreakdown summary={summary} />
     </div>
   );
 }
@@ -29,6 +30,7 @@ export function TeamBudget({
   floating?: boolean;
 }) {
   const t = useTranslations();
+  const summary = budgetSummary(team);
   const section = useRef<HTMLElement>(null);
   const [aboveBudget, setAboveBudget] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -98,8 +100,8 @@ export function TeamBudget({
         aria-label={t("summary")}
         className="team-budget budget-panel print-break-avoid overflow-hidden"
       >
-        <BudgetOverview team={team} />
-        <BudgetDetails team={team} />
+        <BudgetOverview summary={summary} />
+        <BudgetDetails summary={summary} />
       </section>
       {floating && (
         <Drawer
@@ -137,7 +139,7 @@ export function TeamBudget({
                   aria-expanded={expanded}
                   onClick={() => setExpanded(!expanded)}
                 >
-                  <BudgetOverview team={team} />
+                  <BudgetOverview summary={summary} />
                 </button>
               </div>
             }
@@ -162,7 +164,7 @@ export function TeamBudget({
               inert={!expanded}
               aria-hidden={!expanded}
             >
-              <BudgetDetails team={team} />
+              <BudgetDetails summary={summary} />
             </div>
           </DrawerContent>
         </Drawer>

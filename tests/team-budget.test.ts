@@ -2,7 +2,7 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { newTeam } from "../src/domain/catalog";
+import { newTeam, getRoster } from "../src/domain/catalog";
 import { TeamBudget } from "../src/components/team-budget";
 
 vi.mock("gt-next", () => ({
@@ -66,6 +66,44 @@ it("shows the inline breakdown directly without an accordion", async () => {
   expect(container.textContent).toContain("starPlayers");
   expect(container.querySelector('[data-slot="accordion-trigger"]')).toBeNull();
   expect(container.querySelector("button")).toBeNull();
+});
+
+it("switches the rendered meters and currencies with the ruleset", async () => {
+  const team = newTeam("budget-test");
+  team.players = [
+    {
+      id: "player",
+      positionId: getRoster("human")!.players[0].id,
+      name: "",
+      skills: ["block"],
+    },
+  ];
+  for (const [rulesetId, meters, unit] of [
+    ["bb2025-default", 1, "k"],
+    ["bb2025-matched-play", 2, "SP"],
+    ["eurobowl-2026", 3, "k"],
+    ["world-cup-2027", 2, "SPP"],
+  ] as const) {
+    await act(async () =>
+      root.render(
+        createElement(TeamBudget, {
+          team: { ...team, rulesetId },
+          floating: false,
+        }),
+      ),
+    );
+    const bars = container.querySelectorAll('[role="progressbar"]');
+    expect(bars).toHaveLength(meters);
+    expect(bars[meters === 1 ? 0 : 1].getAttribute("aria-valuetext")).toContain(
+      unit,
+    );
+    expect(container.textContent).toContain("budgetPrimarySkills1");
+    expect(container.textContent).toContain("budgetSecondarySkills0");
+    for (const bar of bars)
+      expect(Number(bar.getAttribute("aria-valuenow"))).toBeLessThanOrEqual(
+        Number(bar.getAttribute("aria-valuemax")),
+      );
+  }
 });
 
 it("expands the same drawer and progress bar, then hands off to the inline budget", async () => {

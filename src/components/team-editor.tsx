@@ -74,6 +74,8 @@ import {
   ChevronDown,
   Plus,
   Printer,
+  RectangleVertical,
+  RectangleHorizontal,
   ShieldCheck,
   Star,
   Trash2,
@@ -270,12 +272,14 @@ export function TeamEditor({
                   className="min-h-11 sm:min-h-8"
                   onClick={() => void print("portrait")}
                 >
+                  <RectangleVertical aria-hidden="true" className="size-4" />
                   {t("verticalPdf")}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="min-h-11 sm:min-h-8"
                   onClick={() => void print("landscape")}
                 >
+                  <RectangleHorizontal aria-hidden="true" className="size-4" />
                   {t("horizontalPdf")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -366,200 +370,61 @@ export function TeamEditor({
               </span>
             </div>
             <div className="overflow-hidden rounded-lg border bg-card">
-              <Table
-                aria-label={t("players")}
-                className="player-table min-w-[740px] table-auto md:table-fixed"
-              >
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-10 pl-3">#</TableHead>
-                    <TableHead className="w-48">{t("player")}</TableHead>
-                    {["MA", "ST", "AG", "PA", "AV"].map((x) => (
-                      <TableHead
-                        key={x}
-                        className="w-8 text-center font-mono text-xs"
-                      >
-                        {x}
-                      </TableHead>
-                    ))}
-                    <TableHead>{t("skills")}</TableHead>
-                    {requiresCaptain && (
-                      <TableHead className="w-16 text-center">
-                        {t("teamCaptain")}
-                      </TableHead>
-                    )}
-                    <TableHead className="w-16 pr-3 text-right">
-                      {t("cost")}
-                    </TableHead>
-                    <TableHead className="w-8">
-                      <span className="sr-only">{t("managePlayer")}</span>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {!team.players.length && !team.stars.length && (
+              {!team.players.length && !team.stars.length ? (
+                <p className="px-4 py-6 text-center text-xs leading-relaxed text-muted-foreground">
+                  {t("emptyRosterHint")}
+                </p>
+              ) : (
+                <Table
+                  aria-label={t("players")}
+                  className="player-table min-w-[740px] table-auto md:table-fixed"
+                >
+                  <TableHeader>
                     <TableRow>
-                      <TableCell
-                        colSpan={requiresCaptain ? 11 : 10}
-                        className="py-8 text-center text-xs text-muted-foreground"
-                      >
-                        {t("emptyRosterHint")}
-                      </TableCell>
+                      <TableHead className="w-10 pl-3">#</TableHead>
+                      <TableHead className="w-48">{t("player")}</TableHead>
+                      {["MA", "ST", "AG", "PA", "AV"].map((x) => (
+                        <TableHead
+                          key={x}
+                          className="w-8 text-center font-mono text-xs"
+                        >
+                          {x}
+                        </TableHead>
+                      ))}
+                      <TableHead>{t("skills")}</TableHead>
+                      {requiresCaptain && (
+                        <TableHead className="w-16 text-center">
+                          {t("teamCaptain")}
+                        </TableHead>
+                      )}
+                      <TableHead className="w-16 pr-3 text-right">
+                        {t("cost")}
+                      </TableHead>
+                      <TableHead className="w-8">
+                        <span className="sr-only">{t("managePlayer")}</span>
+                      </TableHead>
                     </TableRow>
-                  )}
-                  {team.players.map((p, index) => {
-                    const pos = roster.players.find(
-                      (x) => x.id === p.positionId,
-                    );
-                    if (!pos) return null;
-                    return (
-                      <TableRow
-                        key={p.id}
-                        className="group cursor-pointer focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-[-2px]"
-                        tabIndex={0}
-                        aria-label={`${t("managePlayer")} · ${p.name || positionLabel(pos.position)}`}
-                        onClick={(event) => {
-                          if (
-                            (event.target as HTMLElement).closest(
-                              "button, a, input, [role=checkbox]",
-                            )
-                          )
-                            return;
-                          setSelected(p.id);
-                        }}
-                        onKeyDown={(event) => {
-                          if (
-                            event.target === event.currentTarget &&
-                            ["Enter", " "].includes(event.key)
-                          ) {
-                            event.preventDefault();
-                            setSelected(p.id);
-                          }
-                        }}
-                      >
-                        <TableCell className="pl-5 font-mono text-xs text-muted-foreground">
-                          {String(index + 1).padStart(2, "0")}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <PlayerIcon
-                              positionId={pos.id}
-                              variant={index}
-                              className="size-8"
-                            />
-                            <div>
-                              {readOnly ? (
-                                <strong className="text-sm">
-                                  {p.name || positionLabel(pos.position)}
-                                </strong>
-                              ) : (
-                                <>
-                                  <strong className="hidden text-sm print:block">
-                                    {p.name || positionLabel(pos.position)}
-                                  </strong>
-                                  <button
-                                    className="no-print inline-flex items-center gap-2 text-left text-sm font-semibold text-primary hover:underline"
-                                    onClick={() => {
-                                      setSelected(p.id);
-                                      setSearch("");
-                                    }}
-                                  >
-                                    {p.name || positionLabel(pos.position)}
-                                  </button>
-                                </>
-                              )}
-                              {p.name && (
-                                <p className="mt-0.5 text-xs text-muted-foreground">
-                                  {positionLabel(pos.position)}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </TableCell>
-                        {[pos.ma, pos.st, pos.ag, pos.pa, pos.av].map(
-                          (x, i) => (
-                            <TableCell
-                              key={i}
-                              className="text-center font-mono text-xs"
-                            >
-                              {x}
-                            </TableCell>
-                          ),
-                        )}
-                        <TableCell>
-                          <TableSkills
-                            ids={pos.skills}
-                            additionalIds={p.skills}
-                            captain={team.captainId === p.id}
-                            label={t("skills")}
-                          />
-                        </TableCell>
-                        {requiresCaptain && (
-                          <TableCell className="text-center">
-                            <label
-                              className="inline-flex size-8 items-center justify-center"
-                              onClick={(event) => event.stopPropagation()}
-                            >
-                              <Checkbox
-                                checked={team.captainId === p.id}
-                                disabled={
-                                  readOnly || pos.position.includes("Big Guy")
-                                }
-                                aria-label={`${t("teamCaptain")} · ${p.name || positionLabel(pos.position)}`}
-                                onCheckedChange={(checked) => {
-                                  const next = { ...team };
-                                  if (checked) {
-                                    next.captainId = p.id;
-                                    next.players = team.players.map((player) =>
-                                      player.id === p.id
-                                        ? {
-                                            ...player,
-                                            skills: player.skills.filter(
-                                              (id) => id !== "pro",
-                                            ),
-                                          }
-                                        : player,
-                                    );
-                                  } else delete next.captainId;
-                                  change(next);
-                                }}
-                              />
-                            </label>
-                          </TableCell>
-                        )}
-                        <TableCell className="pr-5 text-right font-mono text-xs">
-                          {gold(
-                            pos.cost +
-                              (rules.id === "bb2025-default"
-                                ? playerSkillCost(team, pos, p.skills)
-                                : 0),
-                          )}
-                        </TableCell>
-                        <TableCell className="pr-3">
-                          <ChevronRight
-                            aria-hidden="true"
-                            className="size-4 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
-                          />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                  {team.stars.map((id) => {
-                    const s = stars.find((x) => x.id === id);
-                    return (
-                      s && (
+                  </TableHeader>
+                  <TableBody>
+                    {team.players.map((p, index) => {
+                      const pos = roster.players.find(
+                        (x) => x.id === p.positionId,
+                      );
+                      if (!pos) return null;
+                      return (
                         <TableRow
-                          key={id}
-                          className="group cursor-pointer bg-amber-50/70 focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-[-2px]"
+                          key={p.id}
+                          className="group cursor-pointer focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-[-2px]"
                           tabIndex={0}
-                          aria-label={`${t("managePlayer")} · ${s.name}`}
+                          aria-label={`${t("managePlayer")} · ${p.name || positionLabel(pos.position)}`}
                           onClick={(event) => {
                             if (
-                              !(event.target as HTMLElement).closest(
-                                "button, a",
+                              (event.target as HTMLElement).closest(
+                                "button, a, input, [role=checkbox]",
                               )
                             )
-                              setSelected(id);
+                              return;
+                            setSelected(p.id);
                           }}
                           onKeyDown={(event) => {
                             if (
@@ -567,64 +432,108 @@ export function TeamEditor({
                               ["Enter", " "].includes(event.key)
                             ) {
                               event.preventDefault();
-                              setSelected(id);
+                              setSelected(p.id);
                             }
                           }}
                         >
-                          <TableCell className="pl-5 text-amber-700">
-                            <Star className="size-3" />
+                          <TableCell className="pl-5 font-mono text-xs text-muted-foreground">
+                            {String(index + 1).padStart(2, "0")}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              <StarPlayerIcon
-                                starId={s.id}
-                                className="size-10"
+                              <PlayerIcon
+                                positionId={pos.id}
+                                variant={index}
+                                className="size-8"
                               />
-                              <strong className="hidden text-sm print:block">
-                                {s.name}
-                              </strong>
-                              <button
-                                className="no-print text-left text-sm font-semibold"
-                                onClick={() => setSelected(id)}
-                              >
-                                {s.name}
-                              </button>
-                              {!readOnly && (
-                                <button
-                                  className="ml-2 text-muted-foreground"
-                                  aria-label={`${t("remove")} ${s.name}`}
-                                  onClick={() => {
-                                    const pairs = starPairs;
-                                    const pair = pairs.find((p) =>
-                                      p.includes(id),
-                                    ) ?? [id];
-                                    change({
-                                      ...team,
-                                      stars: team.stars.filter(
-                                        (s) => !pair.includes(s),
-                                      ),
-                                    });
-                                  }}
-                                >
-                                  <X className="size-3" />
-                                </button>
-                              )}
+                              <div>
+                                {readOnly ? (
+                                  <strong className="text-sm">
+                                    {p.name || positionLabel(pos.position)}
+                                  </strong>
+                                ) : (
+                                  <>
+                                    <strong className="hidden text-sm print:block">
+                                      {p.name || positionLabel(pos.position)}
+                                    </strong>
+                                    <button
+                                      className="no-print inline-flex items-center gap-2 text-left text-sm font-semibold text-primary hover:underline"
+                                      onClick={() => {
+                                        setSelected(p.id);
+                                        setSearch("");
+                                      }}
+                                    >
+                                      {p.name || positionLabel(pos.position)}
+                                    </button>
+                                  </>
+                                )}
+                                {p.name && (
+                                  <p className="mt-0.5 text-xs text-muted-foreground">
+                                    {positionLabel(pos.position)}
+                                  </p>
+                                )}
+                              </div>
                             </div>
                           </TableCell>
-                          {[s.ma, s.st, s.ag, s.pa, s.av].map((x, i) => (
-                            <TableCell
-                              key={i}
-                              className="text-center font-mono text-xs"
-                            >
-                              {x}
-                            </TableCell>
-                          ))}
-                          <TableCell className="whitespace-normal text-xs text-muted-foreground">
-                            <TableSkills ids={s.skills} label={t("skills")} />
+                          {[pos.ma, pos.st, pos.ag, pos.pa, pos.av].map(
+                            (x, i) => (
+                              <TableCell
+                                key={i}
+                                className="text-center font-mono text-xs"
+                              >
+                                {x}
+                              </TableCell>
+                            ),
+                          )}
+                          <TableCell>
+                            <TableSkills
+                              ids={pos.skills}
+                              additionalIds={p.skills}
+                              captain={team.captainId === p.id}
+                              label={t("skills")}
+                            />
                           </TableCell>
-                          {requiresCaptain && <TableCell />}
+                          {requiresCaptain && (
+                            <TableCell className="text-center">
+                              <label
+                                className="inline-flex size-8 items-center justify-center"
+                                onClick={(event) => event.stopPropagation()}
+                              >
+                                <Checkbox
+                                  checked={team.captainId === p.id}
+                                  disabled={
+                                    readOnly || pos.position.includes("Big Guy")
+                                  }
+                                  aria-label={`${t("teamCaptain")} · ${p.name || positionLabel(pos.position)}`}
+                                  onCheckedChange={(checked) => {
+                                    const next = { ...team };
+                                    if (checked) {
+                                      next.captainId = p.id;
+                                      next.players = team.players.map(
+                                        (player) =>
+                                          player.id === p.id
+                                            ? {
+                                                ...player,
+                                                skills: player.skills.filter(
+                                                  (id) => id !== "pro",
+                                                ),
+                                              }
+                                            : player,
+                                      );
+                                    } else delete next.captainId;
+                                    change(next);
+                                  }}
+                                />
+                              </label>
+                            </TableCell>
+                          )}
                           <TableCell className="pr-5 text-right font-mono text-xs">
-                            {gold(s.cost)}
+                            {gold(
+                              pos.cost +
+                                (rules.id === "bb2025-default"
+                                  ? playerSkillCost(team, pos, p.skills)
+                                  : 0),
+                            )}
                           </TableCell>
                           <TableCell className="pr-3">
                             <ChevronRight
@@ -633,11 +542,103 @@ export function TeamEditor({
                             />
                           </TableCell>
                         </TableRow>
-                      )
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                      );
+                    })}
+                    {team.stars.map((id) => {
+                      const s = stars.find((x) => x.id === id);
+                      return (
+                        s && (
+                          <TableRow
+                            key={id}
+                            className="group cursor-pointer bg-amber-50/70 focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-[-2px]"
+                            tabIndex={0}
+                            aria-label={`${t("managePlayer")} · ${s.name}`}
+                            onClick={(event) => {
+                              if (
+                                !(event.target as HTMLElement).closest(
+                                  "button, a",
+                                )
+                              )
+                                setSelected(id);
+                            }}
+                            onKeyDown={(event) => {
+                              if (
+                                event.target === event.currentTarget &&
+                                ["Enter", " "].includes(event.key)
+                              ) {
+                                event.preventDefault();
+                                setSelected(id);
+                              }
+                            }}
+                          >
+                            <TableCell className="pl-5 text-amber-700">
+                              <Star className="size-3" />
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <StarPlayerIcon
+                                  starId={s.id}
+                                  className="size-10"
+                                />
+                                <strong className="hidden text-sm print:block">
+                                  {s.name}
+                                </strong>
+                                <button
+                                  className="no-print text-left text-sm font-semibold"
+                                  onClick={() => setSelected(id)}
+                                >
+                                  {s.name}
+                                </button>
+                                {!readOnly && (
+                                  <button
+                                    className="ml-2 text-muted-foreground"
+                                    aria-label={`${t("remove")} ${s.name}`}
+                                    onClick={() => {
+                                      const pairs = starPairs;
+                                      const pair = pairs.find((p) =>
+                                        p.includes(id),
+                                      ) ?? [id];
+                                      change({
+                                        ...team,
+                                        stars: team.stars.filter(
+                                          (s) => !pair.includes(s),
+                                        ),
+                                      });
+                                    }}
+                                  >
+                                    <X className="size-3" />
+                                  </button>
+                                )}
+                              </div>
+                            </TableCell>
+                            {[s.ma, s.st, s.ag, s.pa, s.av].map((x, i) => (
+                              <TableCell
+                                key={i}
+                                className="text-center font-mono text-xs"
+                              >
+                                {x}
+                              </TableCell>
+                            ))}
+                            <TableCell className="whitespace-normal text-xs text-muted-foreground">
+                              <TableSkills ids={s.skills} label={t("skills")} />
+                            </TableCell>
+                            {requiresCaptain && <TableCell />}
+                            <TableCell className="pr-5 text-right font-mono text-xs">
+                              {gold(s.cost)}
+                            </TableCell>
+                            <TableCell className="pr-3">
+                              <ChevronRight
+                                aria-hidden="true"
+                                className="size-4 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
+                              />
+                            </TableCell>
+                          </TableRow>
+                        )
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
               {!readOnly && (
                 <div className="flex justify-end border-t px-3 py-2">
                   <Button
