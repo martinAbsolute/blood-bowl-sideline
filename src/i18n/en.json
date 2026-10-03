@@ -218,7 +218,6 @@
   "rulesets": "Rulesets",
   "teamName": "Team name",
   "teamActions": "Actions",
-  "teamNameLimit": "Use up to {limit} characters.",
   "teamNameRequired": "Give your team a name before saving it to your account. Your local draft is safe.",
   "untitled": "Untitled team",
   "newRoster": "New team",

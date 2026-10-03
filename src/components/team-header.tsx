@@ -15,22 +15,20 @@ export function TeamHeader({
   children: ReactNode;
 }) {
   return (
-    <header className="mb-5 space-y-3">
-      <div className="flex min-h-11 flex-wrap items-center justify-between gap-x-4 gap-y-1">
-        {back}
-        {status}
+    <header className="team-header mb-4">
+      <div className="team-header-back">{back}</div>
+      <div className="team-header-identity">
+        <div className="team-header-title-row">
+          <div className="team-header-title">{title}</div>
+          {status && <div className="team-header-status">{status}</div>}
+        </div>
+        <div className="team-header-tags">{children}</div>
       </div>
-      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-6">
-        <div className="min-w-0 space-y-2">
-          {title}
-          {children}
-        </div>
-        <div
-          className="no-print flex min-w-0 items-center gap-2 lg:pt-1"
-          data-title-actions
-        >
-          {actions}
-        </div>
+      <div
+        className="team-header-actions no-print flex min-w-0 items-center gap-2"
+        data-title-actions
+      >
+        {actions}
       </div>
     </header>
   );

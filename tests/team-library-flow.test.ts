@@ -285,7 +285,7 @@ it("matches team names and ruleset prefixes without ignoring combined filters", 
     libraryMatches(team, { search: "Олекс", rosterId: "dwarf", rulesetId: "" }),
   ).toBe(false);
 });
-it("limits name edits, exposes the counter, and keeps maximum-length copies valid", async () => {
+it("limits name edits without helper text and keeps maximum-length copies valid", async () => {
   let value = "Orcs";
   const render = () =>
     root.render(
@@ -311,10 +311,7 @@ it("limits name edits, exposes the counter, and keeps maximum-length copies vali
     name.dispatchEvent(new Event("input", { bubbles: true }));
   });
   expect(value).toHaveLength(TEAM_NAME_MAX_LENGTH);
-  expect(
-    document.getElementById(name.getAttribute("aria-describedby")!)
-      ?.textContent,
-  ).toContain("40/40");
+  expect(container.textContent).not.toContain("40/40");
   await act(async () => name.blur());
   expect(name.hasAttribute("aria-describedby")).toBe(false);
   const team = { ...newTeam(randomUUID()), name: value };

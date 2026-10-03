@@ -257,6 +257,63 @@ body {
   font-size: clamp(1.25rem, 5.5vw, 1.5rem);
   line-height: 1.2;
 }
+.team-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 12px;
+}
+.team-header-back {
+  grid-area: 1 / 1;
+}
+.team-header-identity,
+.team-header-title-row {
+  display: contents;
+}
+.team-header-title {
+  grid-area: 2 / 1 / auto / -1;
+  min-width: 0;
+}
+.team-header-status {
+  grid-area: 1 / 2;
+}
+.team-header-tags {
+  grid-area: 3 / 1 / auto / -1;
+}
+.team-header-actions {
+  grid-area: 4 / 1 / auto / -1;
+  margin-top: 4px;
+}
+@media (min-width: 1024px) {
+  .team-header {
+    align-items: start;
+    column-gap: 24px;
+    row-gap: 4px;
+  }
+  .team-header-back {
+    grid-column: 1 / -1;
+  }
+  .team-header-identity {
+    display: block;
+    grid-area: 2 / 1;
+    min-width: 0;
+  }
+  .team-header-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .team-header-status {
+    flex-shrink: 0;
+  }
+  .team-header-tags {
+    margin-top: 4px;
+  }
+  .team-header-actions {
+    grid-area: 2 / 2;
+    margin-top: 4px;
+  }
+}
 @media (min-width: 640px) {
   .page-heading {
     font-size: 1.875rem;
