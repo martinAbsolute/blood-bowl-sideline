@@ -6,6 +6,13 @@ import type { useTeamAutosave } from "@/lib/use-team-autosave";
 
 type SaveState = ReturnType<typeof useTeamAutosave>;
 
+// Lucide paths leave different amounts of space below their strokes in the
+// 24-unit viewBox. At 14px, these optical offsets put the ink on the baseline.
+const iconBaselineOffset = new Map([
+  [CloudCheck, 1.5],
+  [Check, 3],
+]);
+
 export function TeamSaveStatus({
   state,
   isAuthenticated,
@@ -26,29 +33,21 @@ export function TeamSaveStatus({
     cloudInvalid,
     saveTeam,
   } = state;
-  const saveStatus =
+  const { label: saveStatus, Icon } =
     syncError || cloudInvalid
-      ? "saveStatusError"
+      ? { label: "saveStatusError", Icon: CloudOff }
       : localSave?.failed
-        ? "saveStatusLocalError"
+        ? { label: "saveStatusLocalError", Icon: CloudOff }
         : cloudPending || localPending
-          ? "saving"
+          ? { label: "saving", Icon: LoaderCircle }
           : revision > 0 && !dirty
-            ? "savedCloud"
-            : "savedInDrafts";
-  const SaveIcon =
-    syncError || cloudInvalid || localSave?.failed
-      ? CloudOff
-      : cloudPending || localPending
-        ? LoaderCircle
-        : revision > 0 && !dirty
-          ? CloudCheck
-          : Check;
+            ? { label: "savedCloud", Icon: CloudCheck }
+            : { label: "savedInDrafts", Icon: Check };
   return (
     <div
       role="status"
       aria-live="polite"
-      className="no-print flex min-h-6 flex-wrap items-center gap-1.5 text-xs text-muted-foreground"
+      className="no-print flex flex-wrap items-baseline gap-1.5 text-xs text-muted-foreground"
       title={
         syncError
           ? t(syncError.conflict ? "conflict" : "saveFailed")
@@ -63,9 +62,10 @@ export function TeamSaveStatus({
                   : undefined
       }
     >
-      <SaveIcon
+      <Icon
         aria-hidden="true"
         className={`size-3.5 shrink-0 ${saveStatus === "saving" ? "animate-spin" : ""}`}
+        style={{ translate: `0 ${iconBaselineOffset.get(Icon) ?? 0.5}px` }}
       />
       <span>{t(saveStatus)}</span>
       {syncError && !syncError.conflict && (

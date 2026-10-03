@@ -300,7 +300,8 @@ body {
   }
   .team-header-title-row {
     display: flex;
-    align-items: center;
+    /* Use the sizing text's last baseline, including when the name wraps. */
+    align-items: last baseline;
     gap: 12px;
   }
   .team-header-status {
