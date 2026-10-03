@@ -691,6 +691,8 @@ html {
 }
 .mobile-budget-drawer .budget-overview {
   padding: 0 12px 10px;
+  pointer-events: none;
+  position: relative;
 }
 @media (prefers-reduced-motion: reduce) {
   .mobile-budget-drawer {

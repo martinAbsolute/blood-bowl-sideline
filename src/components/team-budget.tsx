@@ -127,15 +127,16 @@ export function TeamBudget({
             swipeHeader={
               <div ref={setSummaryElement} className="budget-drawer-summary">
                 <span className="budget-drawer-handle" aria-hidden="true" />
-                <button
-                  type="button"
-                  className="block w-full cursor-pointer text-left"
-                  aria-label={t("budgetBreakdown")}
-                  aria-expanded={expanded}
-                  onClick={() => setExpanded(!expanded)}
-                >
+                <div className="relative">
+                  <button
+                    type="button"
+                    className="absolute inset-0 w-full cursor-pointer rounded-sm"
+                    aria-label={t("budgetBreakdown")}
+                    aria-expanded={expanded}
+                    onClick={() => setExpanded(!expanded)}
+                  />
                   <BudgetOverview pool={drawerPool} />
-                </button>
+                </div>
               </div>
             }
           >

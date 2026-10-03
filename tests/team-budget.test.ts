@@ -157,7 +157,8 @@ it("reports an exceeded treasury once and keeps the collapsed meter structure un
   const popup = document.querySelector<HTMLElement>(".mobile-budget-drawer")!;
   const summary = popup.querySelector(".budget-overview")!;
   const elementCount = summary.querySelectorAll("*").length;
-  expect(summary.textContent).toContain("treasuryLeft");
+  expect(summary.textContent).toContain("1,000k / 1,000k");
+  expect(summary.textContent).not.toContain("treasuryLeft");
   await act(async () =>
     root.render(
       createElement(TeamBudget, {
@@ -206,4 +207,41 @@ it("surfaces skill-only overspending in the closed drawer", async () => {
       meter.getAttribute("data-budget-meter"),
     ),
   ).toEqual(["skills", "team"]);
+});
+
+it("opens Flowing Funds help from the drawer header without nesting buttons or toggling the drawer", async () => {
+  const team = newTeam("budget-test");
+  team.rulesetId = "eurobowl-2026";
+  team.players = Array.from({ length: 16 }, (_, i) => ({
+    id: `p${i}`,
+    positionId: "human-0",
+    name: "",
+    skills: [],
+  }));
+  team.staff = {
+    ...team.staff,
+    rerolls: 4,
+    apothecary: 1,
+    assistantCoaches: 4,
+  };
+  await act(async () => root.render(createElement(TeamBudget, { team })));
+  await reportBudgetPosition(1000);
+  const popup = document.querySelector<HTMLElement>(".mobile-budget-drawer")!;
+  expect(popup.querySelector("button button")).toBeNull();
+  expect(popup.textContent).not.toContain("flowingHint");
+  const toggle = popup.querySelector<HTMLButtonElement>(
+    '.budget-drawer-summary button[aria-label="budgetBreakdown"]',
+  )!;
+  await act(async () => toggle.click());
+  const help = popup.querySelector<HTMLButtonElement>(
+    '.budget-drawer-summary button[aria-label="explainRule"]',
+  )!;
+  expect(help).not.toBeNull();
+  await act(async () => help.click());
+  expect(popup.dataset.expanded).toBe("true");
+  expect(
+    Array.from(document.querySelectorAll('[role="dialog"]')).some((dialog) =>
+      dialog.textContent?.includes("flowingHint"),
+    ),
+  ).toBe(true);
 });

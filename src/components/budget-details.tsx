@@ -1,6 +1,7 @@
 "use client";
 import { useTranslations } from "gt-next";
 import type { BudgetPool, BudgetSummary } from "@/domain/budget";
+import { RuleInfo } from "./rule-help";
 
 const gold = (n: number) => `${(n / 1000).toLocaleString("en")}k`;
 const amount = (n: number, unit: BudgetPool["unit"]) =>
@@ -37,6 +38,7 @@ function BudgetMeter({ pool }: { pool: BudgetPool }) {
       : "treasuryLeft",
     { amount: amount(Math.abs(pool.limit - pool.used), pool.unit) },
   );
+  const values = `${amount(pool.used, pool.unit)} / ${amount(pool.limit, pool.unit)}`;
   const progress =
     pool.limit > 0
       ? Math.min(100, (pool.used / pool.limit) * 100)
@@ -45,30 +47,38 @@ function BudgetMeter({ pool }: { pool: BudgetPool }) {
         : 0;
   return (
     <span className="budget-meter block" data-budget-meter={pool.id}>
-      <span className="flex items-baseline justify-between gap-2 text-xs leading-4">
-        <span className="min-w-0 truncate font-medium">{label}</span>
-        <span className={`shrink-0 whitespace-nowrap tabular-nums ${tone}`}>
-          {status}
+      <span className="budget-meter-top flex items-baseline justify-between gap-2 text-xs leading-4">
+        <span className="budget-meter-label flex min-w-0 items-center gap-0.5 font-medium">
+          <span className="truncate">{label}</span>
+          {pool.id === "funds" && (
+            <RuleInfo
+              title={label}
+              description={t("flowingHint")}
+              label={t("explainRule", { name: label })}
+              className="pointer-events-auto relative z-10 -my-1 size-6 [&>svg]:size-3.5"
+            />
+          )}
+        </span>
+        <span
+          className={`shrink-0 whitespace-nowrap tabular-nums ${tone}`}
+          title={excess && !pool.shared ? values : status}
+        >
+          {excess && !pool.shared ? status : values}
         </span>
       </span>
-      <span className="mt-1.5 grid grid-cols-[minmax(0,1fr)_6rem] items-center gap-3">
+      <span
+        className="budget-progress mt-1.5 block h-1 overflow-hidden rounded-full bg-secondary"
+        role="progressbar"
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={Math.max(1, pool.limit)}
+        aria-valuenow={Math.min(pool.used, Math.max(1, pool.limit))}
+        aria-valuetext={`${values} · ${status}`}
+      >
         <span
-          className="budget-progress block h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-secondary"
-          role="progressbar"
-          aria-label={label}
-          aria-valuemin={0}
-          aria-valuemax={Math.max(1, pool.limit)}
-          aria-valuenow={Math.min(pool.used, Math.max(1, pool.limit))}
-          aria-valuetext={`${amount(pool.used, pool.unit)} / ${amount(pool.limit, pool.unit)}`}
-        >
-          <span
-            className={`block h-full transition-[width] motion-reduce:transition-none ${excess ? (pool.shared ? "bg-amber-600" : "bg-destructive") : "bg-primary/70"}`}
-            style={{ width: `${progress}%` }}
-          />
-        </span>
-        <span className="whitespace-nowrap text-right text-[10px] leading-3 tabular-nums text-muted-foreground">
-          {amount(pool.used, pool.unit)} / {amount(pool.limit, pool.unit)}
-        </span>
+          className={`block h-full transition-[width] motion-reduce:transition-none ${excess ? (pool.shared ? "bg-amber-600" : "bg-destructive") : "bg-primary/70"}`}
+          style={{ width: `${progress}%` }}
+        />
       </span>
     </span>
   );
@@ -109,11 +119,6 @@ export function BudgetBreakdown({
         .map((pool) => (
           <BudgetMeter key={pool.id} pool={pool} />
         ))}
-      {pools.some((pool) => pool.id === "funds") && (
-        <p className="text-[11px] leading-relaxed text-muted-foreground">
-          {t("flowingHint")}
-        </p>
-      )}
       {spent.length > 0 && (
         <dl className="space-y-1.5 border-t pt-3">
           {spent.map(([name, value, unit]) => (
