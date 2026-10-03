@@ -47,7 +47,7 @@ export function TeamSaveStatus({
     <div
       role="status"
       aria-live="polite"
-      className="no-print flex flex-wrap items-baseline gap-1.5 text-xs text-muted-foreground"
+      className="no-print flex flex-wrap items-baseline gap-1.5 text-[11px] text-muted-foreground sm:text-xs"
       title={
         syncError
           ? t(syncError.conflict ? "conflict" : "saveFailed")

@@ -259,33 +259,31 @@ body {
 }
 .team-header {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 8px 12px;
-}
-.team-header-back {
-  grid-area: 1 / 1;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
 }
 .team-header-identity,
-.team-header-title-row {
-  display: contents;
-}
 .team-header-title {
-  grid-area: 2 / 1 / auto / -1;
   min-width: 0;
 }
+.team-header-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
 .team-header-status {
-  grid-area: 1 / 2;
+  flex-shrink: 0;
+  max-width: 60%;
 }
 .team-header-tags {
-  grid-area: 3 / 1 / auto / -1;
+  margin-top: 4px;
 }
 .team-header-actions {
-  grid-area: 4 / 1 / auto / -1;
   margin-top: 4px;
 }
 @media (min-width: 1024px) {
   .team-header {
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
     column-gap: 24px;
     row-gap: 4px;
@@ -294,25 +292,13 @@ body {
     grid-column: 1 / -1;
   }
   .team-header-identity {
-    display: block;
     grid-area: 2 / 1;
-    min-width: 0;
   }
   .team-header-title-row {
-    display: flex;
-    /* Use the sizing text's last baseline, including when the name wraps. */
-    align-items: last baseline;
     gap: 12px;
-  }
-  .team-header-status {
-    flex-shrink: 0;
-  }
-  .team-header-tags {
-    margin-top: 4px;
   }
   .team-header-actions {
     grid-area: 2 / 2;
-    margin-top: 4px;
   }
 }
 @media (min-width: 640px) {

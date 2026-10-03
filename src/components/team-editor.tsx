@@ -313,7 +313,10 @@ export function TeamEditor({
           </>
         }
         title={
-          <h1 className="page-heading team-heading min-w-0 [overflow-wrap:anywhere]">
+          <h1
+            className="page-heading team-heading min-w-0 truncate"
+            title={team.name || t("untitled")}
+          >
             {readOnly ? (
               team.name || t("untitled")
             ) : (

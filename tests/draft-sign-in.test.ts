@@ -198,10 +198,10 @@ it("opens owned UUID teams directly for editing and keeps local edits when live 
       createElement(SharedTeam, { initial }),
     );
   await act(async () => root.render(shared()));
-  expect(container.querySelector('textarea[aria-label="teamName"]')).toBeNull();
+  expect(container.querySelector('input[aria-label="teamName"]')).toBeNull();
   mocks.query.mockReturnValue({ ...initial, canEdit: true });
   await act(async () => root.render(shared()));
-  const name = container.querySelector('textarea[aria-label="teamName"]');
+  const name = container.querySelector('input[aria-label="teamName"]');
   expect(name).not.toBeNull();
   expect(container.textContent).not.toContain("editTeam");
   const add = container.querySelector<HTMLButtonElement>(
@@ -210,22 +210,20 @@ it("opens owned UUID teams directly for editing and keeps local edits when live 
   await act(async () => add.click());
   mocks.query.mockReturnValue({ ...initial, canEdit: true, revision: 2 });
   await act(async () => root.render(shared()));
-  expect(container.querySelector('textarea[aria-label="teamName"]')).toBe(name);
+  expect(container.querySelector('input[aria-label="teamName"]')).toBe(name);
   expect(readDrafts()[0].players).toHaveLength(1);
   await act(async () => vi.advanceTimersByTimeAsync(450));
   expect(mocks.save.mock.calls[0][0].team.players).toHaveLength(1);
   mocks.query.mockReturnValue({ ...initial, canEdit: false });
   await act(async () => root.render(shared()));
-  expect(container.querySelector('textarea[aria-label="teamName"]')).toBeNull();
+  expect(container.querySelector('input[aria-label="teamName"]')).toBeNull();
 });
 
 it("shows a local draft status in the team header without claiming a cloud save", async () => {
   await act(async () => root.render(editor(newTeam(randomUUID(), "amazon"))));
   const status = container.querySelector('[role="status"]');
   expect(status?.textContent).toBe("savedInDrafts");
-  expect(
-    status?.closest("header")?.querySelector("h1 textarea"),
-  ).not.toBeNull();
+  expect(status?.closest("header")?.querySelector("h1 input")).not.toBeNull();
   expect(mocks.save).not.toHaveBeenCalled();
 });
 
@@ -528,19 +526,19 @@ it("keeps the UUID editor, typing focus mounted across recovery writes and ackno
       createElement(TeamPage, { uuid: team.uuid }),
     );
   await act(async () => root.render(page()));
-  const name = container.querySelector<HTMLTextAreaElement>(
-    'textarea[aria-label="teamName"]',
+  const name = container.querySelector<HTMLInputElement>(
+    'input[aria-label="teamName"]',
   )!;
   await act(async () => name.focus());
   const input = (value: string) => {
     Object.getOwnPropertyDescriptor(
-      window.HTMLTextAreaElement.prototype,
+      window.HTMLInputElement.prototype,
       "value",
     )!.set!.call(name, value);
     name.dispatchEvent(new Event("input", { bubbles: true }));
   };
   await act(async () => input("First edit"));
-  expect(container.querySelector('textarea[aria-label="teamName"]')).toBe(name);
+  expect(container.querySelector('input[aria-label="teamName"]')).toBe(name);
   expect(document.activeElement).toBe(name);
   expect(unloadPrevented()).toBe(true);
   await act(async () => vi.advanceTimersByTimeAsync(450));
@@ -568,7 +566,7 @@ it("keeps the UUID editor, typing focus mounted across recovery writes and ackno
   await act(async () => vi.advanceTimersByTimeAsync(450));
   expect(mocks.save.mock.calls[1][0].expectedRevision).toBe(4);
   expect(readDrafts()).toEqual([]);
-  expect(container.querySelector('textarea[aria-label="teamName"]')).toBe(name);
+  expect(container.querySelector('input[aria-label="teamName"]')).toBe(name);
   expect(document.activeElement).toBe(name);
   expect(unloadPrevented()).toBe(false);
 });

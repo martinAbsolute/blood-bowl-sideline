@@ -300,12 +300,12 @@ it("limits name edits without helper text and keeps maximum-length copies valid"
       }),
     );
   await act(async () => render());
-  const name = container.querySelector("textarea")!;
+  const name = container.querySelector("input")!;
   expect(name.maxLength).toBe(TEAM_NAME_MAX_LENGTH);
   await act(async () => name.focus());
   await act(async () => {
     Object.getOwnPropertyDescriptor(
-      HTMLTextAreaElement.prototype,
+      HTMLInputElement.prototype,
       "value",
     )!.set!.call(name, "W".repeat(TEAM_NAME_MAX_LENGTH + 1));
     name.dispatchEvent(new Event("input", { bubbles: true }));
@@ -325,7 +325,7 @@ it("limits name edits without helper text and keeps maximum-length copies valid"
   }
 });
 
-it("finishes filename editing with Enter, restores it with Escape, and normalizes pasted newlines", async () => {
+it("finishes name editing with Enter, restores it with Escape, and stays single-line", async () => {
   let value = "Original team";
   const change = vi.fn((next: string) => {
     value = next;
@@ -341,16 +341,16 @@ it("finishes filename editing with Enter, restores it with Escape, and normalize
       }),
     );
   await act(async () => render());
-  const name = container.querySelector("textarea")!;
+  const name = container.querySelector("input")!;
   await act(async () => {
     name.focus();
     Object.getOwnPropertyDescriptor(
-      HTMLTextAreaElement.prototype,
+      HTMLInputElement.prototype,
       "value",
     )!.set!.call(name, "Changed\nname");
     name.dispatchEvent(new Event("input", { bubbles: true }));
   });
-  expect(value).toBe("Changed name");
+  expect(value).toBe("Changedname");
   await act(async () =>
     name.dispatchEvent(
       new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
@@ -434,13 +434,13 @@ it.each(["Enter", "blur"])(
         }),
       );
     await act(async () => render());
-    const name = container.querySelector("textarea")!;
+    const name = container.querySelector("input")!;
     await act(async () => name.focus());
     expect(name.selectionStart).toBe(0);
     expect(name.selectionEnd).toBe(value.length);
     await act(async () => {
       Object.getOwnPropertyDescriptor(
-        HTMLTextAreaElement.prototype,
+        HTMLInputElement.prototype,
         "value",
       )!.set!.call(name, "");
       name.dispatchEvent(new Event("input", { bubbles: true }));
@@ -477,11 +477,11 @@ it("restores the focus-time name when a changed name is cleared to whitespace", 
       }),
     );
   await act(async () => render());
-  const name = container.querySelector("textarea")!;
+  const name = container.querySelector("input")!;
   await act(async () => name.focus());
   const input = (next: string) => {
     Object.getOwnPropertyDescriptor(
-      HTMLTextAreaElement.prototype,
+      HTMLInputElement.prototype,
       "value",
     )!.set!.call(name, next);
     name.dispatchEvent(new Event("input", { bubbles: true }));

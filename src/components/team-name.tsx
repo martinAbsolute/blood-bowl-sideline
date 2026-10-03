@@ -21,20 +21,20 @@ export function TeamName({
     <span className="relative grid w-max min-w-[1ch] max-w-full grid-cols-[minmax(0,1fr)]">
       <span
         aria-hidden="true"
-        className="invisible min-w-0 whitespace-pre-wrap py-1"
-        style={{ overflowWrap: "anywhere" }}
+        className="invisible min-w-0 overflow-hidden whitespace-pre py-1"
       >
         {displayed || (editing === null ? placeholder : "\u00a0")}
         {"\u200b"}
       </span>
-      <textarea
+      <input
+        type="text"
         aria-label={label}
+        title={value || placeholder}
         value={displayed}
         placeholder={editing === null ? placeholder : ""}
-        rows={1}
         maxLength={TEAM_NAME_MAX_LENGTH}
         spellCheck={false}
-        style={{ font: "inherit", overflowWrap: "anywhere" }}
+        style={{ font: "inherit" }}
         onFocus={(event) => {
           beforeFocus.current = value;
           cancelled.current = false;
@@ -42,9 +42,7 @@ export function TeamName({
           event.currentTarget.select();
         }}
         onChange={(event) => {
-          const next = event.target.value
-            .replace(/[\r\n]+/g, " ")
-            .slice(0, TEAM_NAME_MAX_LENGTH);
+          const next = event.target.value.slice(0, TEAM_NAME_MAX_LENGTH);
           setEditing(next);
           // An empty editing buffer isn't a team rename or a recovery draft.
           if (next.trim()) onChange(next);
@@ -69,7 +67,7 @@ export function TeamName({
             event.currentTarget.blur();
           }
         }}
-        className="absolute inset-0 h-full w-full resize-none overflow-hidden border-0 bg-transparent px-0 py-1 text-foreground outline-none placeholder:text-muted-foreground"
+        className="absolute inset-0 h-full w-full min-w-0 overflow-hidden border-0 bg-transparent px-0 py-1 text-ellipsis text-foreground outline-none placeholder:text-muted-foreground focus:text-clip"
       />
     </span>
   );
