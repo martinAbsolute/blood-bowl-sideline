@@ -692,12 +692,6 @@ html {
 .mobile-budget-drawer[data-expanded="false"] .budget-overview {
   padding: 0 12px 10px;
 }
-.mobile-budget-drawer[data-expanded="false"] .budget-progress {
-  height: 4px;
-}
-.mobile-budget-drawer[data-expanded="false"] .budget-remaining {
-  display: none;
-}
 .mobile-budget-drawer[data-expanded="false"] .budget-drawer-breakdown {
   visibility: hidden;
 }

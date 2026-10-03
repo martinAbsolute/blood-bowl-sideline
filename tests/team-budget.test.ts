@@ -63,7 +63,8 @@ async function reportBudgetPosition(top: number) {
 
 it("shows the inline breakdown directly without an accordion", async () => {
   await render(false);
-  expect(container.textContent).toContain("starPlayers");
+  expect(container.textContent).toContain("treasury");
+  expect(container.textContent).not.toContain("starPlayers");
   expect(container.querySelector('[data-slot="accordion-trigger"]')).toBeNull();
   expect(container.querySelector("button")).toBeNull();
 });
@@ -97,8 +98,7 @@ it("switches the rendered meters and currencies with the ruleset", async () => {
     expect(bars[meters === 1 ? 0 : 1].getAttribute("aria-valuetext")).toContain(
       unit,
     );
-    expect(container.textContent).toContain("budgetPrimarySkills1");
-    expect(container.textContent).toContain("budgetSecondarySkills0");
+    expect(container.textContent).toContain("addedSkillsCount");
     for (const bar of bars)
       expect(Number(bar.getAttribute("aria-valuenow"))).toBeLessThanOrEqual(
         Number(bar.getAttribute("aria-valuemax")),
@@ -137,4 +137,56 @@ it("expands the same drawer and progress bar, then hands off to the inline budge
   await reportBudgetPosition(600);
   expect(document.querySelector(".mobile-budget-drawer")).toBeNull();
   expect(container.querySelector(".team-budget")).not.toBeNull();
+});
+
+it("reports an exceeded treasury once and keeps the collapsed meter structure unchanged", async () => {
+  const team = newTeam("budget-test");
+  team.players = Array.from({ length: 16 }, (_, i) => ({
+    id: `p${i}`,
+    positionId: "human-0",
+    name: "",
+    skills: [],
+  }));
+  team.staff.rerolls = 4;
+  await act(async () => root.render(createElement(TeamBudget, { team })));
+  await reportBudgetPosition(1000);
+  const popup = document.querySelector<HTMLElement>(".mobile-budget-drawer")!;
+  const summary = popup.querySelector(".budget-overview")!;
+  const elementCount = summary.querySelectorAll("*").length;
+  expect(summary.textContent).toContain("treasuryLeft");
+  await act(async () =>
+    root.render(
+      createElement(TeamBudget, {
+        team: { ...team, staff: { ...team.staff, assistantCoaches: 1 } },
+      }),
+    ),
+  );
+  expect(document.querySelector(".mobile-budget-drawer")).toBe(popup);
+  expect(popup.dataset.expanded).toBe("false");
+  expect(summary.querySelectorAll("*")).toHaveLength(elementCount);
+  expect(summary.textContent).toContain("treasuryOver");
+  expect(container.textContent?.match(/treasuryOver/g)).toHaveLength(1);
+  expect(container.querySelector('[aria-label="budgetIssues"]')).toBeNull();
+});
+
+it("surfaces skill-only overspending in the closed drawer", async () => {
+  const team = newTeam("budget-test");
+  team.rulesetId = "bb2025-matched-play";
+  team.players = Array.from({ length: 9 }, (_, i) => ({
+    id: `p${i}`,
+    positionId: "human-0",
+    name: "",
+    skills: ["block"],
+  }));
+  await act(async () => root.render(createElement(TeamBudget, { team })));
+  await reportBudgetPosition(1000);
+  const popup = document.querySelector(".mobile-budget-drawer")!;
+  expect(
+    popup
+      .querySelector(".budget-overview [data-budget-meter]")
+      ?.getAttribute("data-budget-meter"),
+  ).toBe("skills");
+  expect(popup.querySelector(".budget-overview")?.textContent).toContain(
+    "treasuryOver",
+  );
 });

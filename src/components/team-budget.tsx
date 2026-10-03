@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "gt-next";
 import { ChevronDown } from "lucide-react";
 import type { Team } from "@/domain/types";
-import { budgetSummary, type BudgetSummary } from "@/domain/budget";
+import { budgetSummary } from "@/domain/budget";
 import { BudgetBreakdown, BudgetOverview } from "./budget-details";
 import { Button } from "./ui/button";
 import {
@@ -13,14 +13,6 @@ import {
   DrawerDescription,
   DrawerTitle,
 } from "./ui/drawer";
-
-function BudgetDetails({ summary }: { summary: BudgetSummary }) {
-  return (
-    <div className="border-t p-3 text-xs">
-      <BudgetBreakdown summary={summary} />
-    </div>
-  );
-}
 
 export function TeamBudget({
   team,
@@ -97,11 +89,11 @@ export function TeamBudget({
     <>
       <section
         ref={section}
-        aria-label={t("summary")}
+        aria-label={t("treasury")}
         className="team-budget budget-panel print-break-avoid overflow-hidden"
       >
         <BudgetOverview summary={summary} />
-        <BudgetDetails summary={summary} />
+        <BudgetBreakdown summary={summary} />
       </section>
       {floating && (
         <Drawer
@@ -139,12 +131,12 @@ export function TeamBudget({
                   aria-expanded={expanded}
                   onClick={() => setExpanded(!expanded)}
                 >
-                  <BudgetOverview summary={summary} />
+                  <BudgetOverview summary={summary} compact={!expanded} />
                 </button>
               </div>
             }
           >
-            <DrawerTitle className="sr-only">{t("summary")}</DrawerTitle>
+            <DrawerTitle className="sr-only">{t("treasury")}</DrawerTitle>
             <DrawerDescription className="sr-only">
               {t("budgetBreakdown")}
             </DrawerDescription>
@@ -164,7 +156,7 @@ export function TeamBudget({
               inert={!expanded}
               aria-hidden={!expanded}
             >
-              <BudgetDetails summary={summary} />
+              <BudgetBreakdown summary={summary} />
             </div>
           </DrawerContent>
         </Drawer>
