@@ -69,6 +69,7 @@ import {
   ArrowLeft,
   ChevronRight,
   Copy,
+  Ellipsis,
   Share2,
   ChevronDown,
   Plus,
@@ -214,17 +215,26 @@ export function TeamEditor({
         back={
           <Link
             href="/teams"
-            className="no-print inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:underline"
+            className="no-print inline-flex min-h-11 items-center gap-1.5 rounded-sm text-sm text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
           >
             <ArrowLeft className="size-3.5" />
             {t("myTeams")}
           </Link>
+        }
+        status={
+          !readOnly && (
+            <TeamSaveStatus
+              state={autosave}
+              isAuthenticated={isAuthenticated}
+            />
+          )
         }
         actions={
           <>
             <Button
               variant="outline"
               size="sm"
+              className="hidden h-9 sm:inline-flex"
               disabled={duplicating || isLoading || !draftSync.ready}
               onClick={() => void copy()}
             >
@@ -232,59 +242,105 @@ export function TeamEditor({
               {t("duplicate")}
             </Button>
             {!readOnly && isAuthenticated && revision > 0 && (
-              <Button variant="outline" size="sm" onClick={share}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden h-9 sm:inline-flex"
+                onClick={share}
+              >
                 <Share2 className="size-4" />
                 {t("share")}
               </Button>
             )}
             <DropdownMenu>
-              <DropdownMenuTrigger render={<Button size="sm" />}>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    size="sm"
+                    className="h-11 flex-1 sm:h-9 sm:flex-none"
+                  />
+                }
+              >
                 <Printer className="size-4" />
                 {t("print")}
                 <ChevronDown className="size-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-44">
-                <DropdownMenuItem onClick={() => void print("portrait")}>
+                <DropdownMenuItem
+                  className="min-h-11 sm:min-h-8"
+                  onClick={() => void print("portrait")}
+                >
                   {t("verticalPdf")}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => void print("landscape")}>
+                <DropdownMenuItem
+                  className="min-h-11 sm:min-h-8"
+                  onClick={() => void print("landscape")}
+                >
                   {t("horizontalPdf")}
                 </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-11 flex-1 sm:hidden"
+                  />
+                }
+              >
+                <Ellipsis className="size-4" />
+                {t("teamActions")}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-44">
+                <DropdownMenuItem
+                  className="min-h-11"
+                  disabled={duplicating || isLoading || !draftSync.ready}
+                  onClick={() => void copy()}
+                >
+                  <Copy className="size-4" />
+                  {t("duplicate")}
+                </DropdownMenuItem>
+                {!readOnly && isAuthenticated && revision > 0 && (
+                  <DropdownMenuItem className="min-h-11" onClick={share}>
+                    <Share2 className="size-4" />
+                    {t("share")}
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </>
         }
         title={
-          <>
-            <h1 className="page-heading w-max min-w-0 max-w-full shrink-0">
-              {readOnly ? (
-                team.name || t("untitled")
-              ) : (
-                <TeamName
-                  label={t("teamName")}
-                  value={team.name}
-                  placeholder={t("untitled")}
-                  onChange={(name) => change({ ...team, name })}
-                />
-              )}
-            </h1>
-            {!readOnly && (
-              <TeamSaveStatus
-                state={autosave}
-                isAuthenticated={isAuthenticated}
+          <h1 className="page-heading team-heading min-w-0 [overflow-wrap:anywhere]">
+            {readOnly ? (
+              team.name || t("untitled")
+            ) : (
+              <TeamName
+                label={t("teamName")}
+                value={team.name}
+                placeholder={t("untitled")}
+                onChange={(name) => change({ ...team, name })}
               />
             )}
-          </>
+          </h1>
         }
       >
         <div className="flex flex-wrap gap-2">
           <Badge
             variant="outline"
+            className="h-auto min-h-6 max-w-full whitespace-normal text-left"
             render={<Link href={`/rosters/${roster.id}`} />}
           >
             {roster.name}
           </Badge>
-          <Badge variant="outline">{rules.name}</Badge>
+          <Badge
+            variant="outline"
+            className="h-auto min-h-6 max-w-full whitespace-normal text-left"
+          >
+            {rules.name}
+          </Badge>
           {readOnly && <Badge variant="outline">{t("viewOnly")}</Badge>}
         </div>
       </TeamHeader>

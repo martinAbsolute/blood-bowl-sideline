@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TEAM_NAME_MAX_LENGTH } from "./team-name";
 
 export const RULES_VERSION = "bb2025-2026-09-30";
 export const rulesetIds = [
@@ -14,7 +15,7 @@ export const teamSchema = z
     schemaVersion: z.literal(1),
     rulesVersion: z.literal(RULES_VERSION),
     uuid: z.uuid(),
-    name: z.string().trim().min(1).max(80),
+    name: z.string().trim().min(1).max(TEAM_NAME_MAX_LENGTH),
     rosterId: z.string().max(60),
     rulesetId: z.enum(rulesetIds),
     favouredOf: z.enum([

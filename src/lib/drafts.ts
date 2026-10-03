@@ -1,10 +1,11 @@
 import { teamSchema, type Team } from "@/domain/types";
 import { z } from "zod";
+import { TEAM_NAME_MAX_LENGTH } from "@/domain/team-name";
 // Preserve recovery snapshots while team names are being edited. Account saves
 // still use the stricter shared server validator.
 const localDraftSchema = teamSchema
   .extend({
-    name: z.string().max(80),
+    name: z.string().max(TEAM_NAME_MAX_LENGTH),
     players: z
       .array(
         teamSchema.shape.players.element.extend({ name: z.string().max(80) }),

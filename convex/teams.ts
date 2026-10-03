@@ -149,6 +149,8 @@ export const save = mutation({
       args.expectedRevision < 0
     )
       throw new ConvexError("INVALID_INPUT");
+    // The shared schema enforces the same name limit as the editor, including
+    // requests that bypass the UI. Never silently truncate a saved name.
     const parsed = teamSchema.safeParse(args.team);
     if (!parsed.success || !getRoster(parsed.data.rosterId))
       throw new ConvexError("INVALID_TEAM");

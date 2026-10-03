@@ -21,6 +21,9 @@ import { TeamName } from "../src/components/team-name";
 import { CreateTeamButton } from "../src/components/create-team-button";
 import { TeamLibrary } from "../src/components/team-library";
 import { libraryMatches } from "../src/lib/team-library";
+import { TEAM_NAME_MAX_LENGTH } from "../src/domain/team-name";
+import { duplicateTeam } from "../src/lib/duplicate-team";
+import { teamSchema } from "../src/domain/types";
 
 const mocks = vi.hoisted(() => ({
   authenticated: false,
@@ -282,6 +285,49 @@ it("matches team names and ruleset prefixes without ignoring combined filters", 
     libraryMatches(team, { search: "Олекс", rosterId: "dwarf", rulesetId: "" }),
   ).toBe(false);
 });
+it("limits name edits, exposes the counter, and keeps maximum-length copies valid", async () => {
+  let value = "Orcs";
+  const render = () =>
+    root.render(
+      createElement(TeamName, {
+        value,
+        placeholder: "Untitled",
+        label: "Name",
+        onChange: (next: string) => {
+          value = next;
+          render();
+        },
+      }),
+    );
+  await act(async () => render());
+  const name = container.querySelector("textarea")!;
+  expect(name.maxLength).toBe(TEAM_NAME_MAX_LENGTH);
+  await act(async () => name.focus());
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(
+      HTMLTextAreaElement.prototype,
+      "value",
+    )!.set!.call(name, "W".repeat(TEAM_NAME_MAX_LENGTH + 1));
+    name.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  expect(value).toHaveLength(TEAM_NAME_MAX_LENGTH);
+  expect(
+    document.getElementById(name.getAttribute("aria-describedby")!)
+      ?.textContent,
+  ).toContain("40/40");
+  await act(async () => name.blur());
+  expect(name.hasAttribute("aria-describedby")).toBe(false);
+  const team = { ...newTeam(randomUUID()), name: value };
+  storeDraft(team);
+  expect(readDrafts()[0].name).toBe(value);
+  for (const suffix of ["Copy", "Копія"]) {
+    const copy = duplicateTeam(team, suffix);
+    expect(copy.name).toHaveLength(TEAM_NAME_MAX_LENGTH);
+    expect(copy.name.endsWith(` (${suffix})`)).toBe(true);
+    expect(teamSchema.safeParse(copy).success).toBe(true);
+  }
+});
+
 it("finishes filename editing with Enter, restores it with Escape, and normalizes pasted newlines", async () => {
   let value = "Original team";
   const change = vi.fn((next: string) => {

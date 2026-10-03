@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import schema from "../convex/schema";
 import { api } from "../convex/_generated/api";
 import { getRoster, newTeam } from "../src/domain/catalog";
+import { TEAM_NAME_MAX_LENGTH } from "../src/domain/team-name";
 const modules = import.meta.glob("../convex/**/*.ts");
 async function setup() {
   const t = convexTest(schema, modules);
@@ -19,6 +20,35 @@ async function setup() {
   };
 }
 describe("Convex team ownership and sharing", () => {
+  it("enforces the team-name boundary for both creates and renames", async () => {
+    const { a } = await setup();
+    const team = {
+      ...newTeam(randomUUID()),
+      name: "Ж".repeat(TEAM_NAME_MAX_LENGTH),
+    };
+    const saved = await a.mutation(api.teams.save, {
+      team,
+      expectedRevision: 0,
+    });
+    expect(saved.team.name).toBe(team.name);
+    for (const name of ["x".repeat(TEAM_NAME_MAX_LENGTH + 1), "   "]) {
+      await expect(
+        a.mutation(api.teams.save, {
+          team: { ...team, uuid: randomUUID(), name },
+          expectedRevision: 0,
+        }),
+      ).rejects.toThrow("INVALID_TEAM");
+      await expect(
+        a.mutation(api.teams.save, {
+          team: { ...team, name },
+          expectedRevision: saved.revision,
+        }),
+      ).rejects.toThrow("INVALID_TEAM");
+    }
+    expect(
+      (await a.query(api.teams.getByUuid, { uuid: team.uuid }))?.team.name,
+    ).toBe(team.name);
+  });
   it("keeps Telegram ownership on the private user record and discards obsolete notes", async () => {
     const { a, b, t } = await setup();
     const team = {

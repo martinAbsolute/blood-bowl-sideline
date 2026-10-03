@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import { newTeam, rosters, skillName, stars } from "../src/domain/catalog";
 import { TeamPrint, printStyles } from "../src/components/team-print";
 import { duplicateTeam } from "../src/lib/duplicate-team";
+import { TEAM_NAME_MAX_LENGTH } from "../src/domain/team-name";
 import en from "../src/i18n/en.json";
 import uk from "../src/i18n/uk.json";
 
@@ -21,7 +22,7 @@ function translator(dictionary: typeof en) {
 
 it("duplicates independent player identities while preserving the captain and all selections", () => {
   const team = newTeam(randomUUID(), "orc");
-  team.name = "A".repeat(80);
+  team.name = "A".repeat(TEAM_NAME_MAX_LENGTH);
   const captain = randomUUID();
   team.players = [
     { id: captain, positionId: "orc-0", name: "Captain", skills: ["block"] },
@@ -30,7 +31,7 @@ it("duplicates independent player identities while preserving the captain and al
   team.staff.rerolls = 3;
   team.notes = "A game plan";
   const copy = duplicateTeam(team, "Copy");
-  expect(copy.name).toHaveLength(80);
+  expect(copy.name).toHaveLength(TEAM_NAME_MAX_LENGTH);
   expect(copy.name.endsWith(" (Copy)")).toBe(true);
   expect(copy.uuid).not.toBe(team.uuid);
   expect(copy.captainId).toBe(copy.players[0].id);

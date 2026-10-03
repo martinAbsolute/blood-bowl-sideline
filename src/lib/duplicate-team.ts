@@ -1,4 +1,5 @@
 import type { Team } from "@/domain/types";
+import { TEAM_NAME_MAX_LENGTH } from "@/domain/team-name";
 
 export function duplicateTeam(team: Team, suffix: string): Team {
   const ending = ` (${suffix})`;
@@ -11,7 +12,7 @@ export function duplicateTeam(team: Team, suffix: string): Team {
   return {
     ...team,
     uuid: crypto.randomUUID(),
-    name: `${team.name.slice(0, 80 - ending.length)}${ending}`,
+    name: `${team.name.slice(0, TEAM_NAME_MAX_LENGTH - ending.length).trimEnd()}${ending}`,
     players,
     captainId: captainIndex < 0 ? undefined : players[captainIndex].id,
     stars: [...team.stars],

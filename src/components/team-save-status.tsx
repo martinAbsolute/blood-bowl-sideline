@@ -48,7 +48,7 @@ export function TeamSaveStatus({
     <div
       role="status"
       aria-live="polite"
-      className="no-print -ml-[18px] mb-[9px] flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground"
+      className="no-print flex min-h-6 flex-wrap items-center gap-1.5 text-xs text-muted-foreground"
       title={
         syncError
           ? t(syncError.conflict ? "conflict" : "saveFailed")
@@ -71,7 +71,7 @@ export function TeamSaveStatus({
       {syncError && !syncError.conflict && (
         <button
           type="button"
-          className="underline underline-offset-4"
+          className="min-h-11 px-2 underline underline-offset-4"
           disabled={saving || !team.name.trim()}
           onClick={() => void saveTeam()}
         >

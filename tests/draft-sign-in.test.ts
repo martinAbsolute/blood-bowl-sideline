@@ -219,11 +219,13 @@ it("opens owned UUID teams directly for editing and keeps local edits when live 
   expect(container.querySelector('textarea[aria-label="teamName"]')).toBeNull();
 });
 
-it("shows a local draft status beside the editable title without claiming a cloud save", async () => {
+it("shows a local draft status in the team header without claiming a cloud save", async () => {
   await act(async () => root.render(editor(newTeam(randomUUID(), "amazon"))));
   const status = container.querySelector('[role="status"]');
   expect(status?.textContent).toBe("savedInDrafts");
-  expect(status?.parentElement?.querySelector("h1 textarea")).not.toBeNull();
+  expect(
+    status?.closest("header")?.querySelector("h1 textarea"),
+  ).not.toBeNull();
   expect(mocks.save).not.toHaveBeenCalled();
 });
 

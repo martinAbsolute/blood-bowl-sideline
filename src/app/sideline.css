@@ -105,7 +105,7 @@ body {
 .site-sidebar-toggle {
   position: absolute;
   top: 16px;
-  left: calc(100% + 8px);
+  right: 8px;
   z-index: 10;
   width: 32px;
   height: 32px;
@@ -204,9 +204,16 @@ body {
     --site-sidebar-padding: 8px;
   }
   .site-shell[data-sidebar-open="false"] .site-sidebar-header {
+    height: 112px;
+    align-items: flex-start;
+    padding-top: 10px;
     padding-inline: calc(
       (var(--site-sidebar-icon-width) - 1px - 36px * 38 / 52) / 2
     );
+  }
+  .site-shell[data-sidebar-open="false"] .site-sidebar-toggle {
+    top: 64px;
+    right: 16px;
   }
   .site-shell[data-sidebar-open="false"] .site-sidebar-logo {
     width: calc(36px * 38 / 52);
@@ -245,6 +252,10 @@ body {
   font-size: 1.5rem;
   line-height: 1.25;
   overflow-wrap: anywhere;
+}
+.team-heading {
+  font-size: clamp(1.25rem, 5.5vw, 1.5rem);
+  line-height: 1.2;
 }
 @media (min-width: 640px) {
   .page-heading {

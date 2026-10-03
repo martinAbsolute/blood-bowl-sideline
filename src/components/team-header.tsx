@@ -3,30 +3,35 @@ import type { ReactNode } from "react";
 
 export function TeamHeader({
   back,
+  status,
   actions,
   title,
   children,
 }: {
   back: ReactNode;
+  status?: ReactNode;
   actions: ReactNode;
   title: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <div className="mb-4 space-y-3">
-      <div className="flex min-h-8 items-center lg:pl-8">{back}</div>
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="flex min-w-0 max-w-full flex-wrap items-end gap-x-0 gap-y-2">
+    <header className="mb-5 space-y-3">
+      <div className="flex min-h-11 flex-wrap items-center justify-between gap-x-4 gap-y-1">
+        {back}
+        {status}
+      </div>
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-6">
+        <div className="min-w-0 space-y-2">
           {title}
+          {children}
         </div>
         <div
-          className="no-print mb-1 ml-auto flex max-w-full shrink-0 flex-wrap justify-end gap-2"
+          className="no-print flex min-w-0 items-center gap-2 lg:pt-1"
           data-title-actions
         >
           {actions}
         </div>
       </div>
-      {children}
-    </div>
+    </header>
   );
 }
