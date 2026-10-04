@@ -122,6 +122,6 @@ Copyright © 2026 martinAbsolute. Original project code and documentation are li
 
 Blood Bowl is a trademark of Games Workshop. This independent community project is not affiliated with, endorsed by, or sponsored by Games Workshop or FUMBBL. Game names, rules, and third-party artwork remain subject to their respective rights; this project's license does not grant rights to them.
 
-Player icons come from the **[FUMBBL community icon collection](https://fumbbl.com/p/icons)**. Source URLs, labels, checksums, and crop mappings are preserved in the asset manifest. See the [player artwork notes](public/assets/fumbbl/README.md) and [third-party notices](THIRD_PARTY_NOTICES.md); attribution does not relicense that artwork.
+Player icons come from the **[FUMBBL BB2025 roster pages](https://fumbbl.com/help:BB25RaceStrategy)** and **[Star Player league lists](https://fumbbl.com/help:Rosters+Special+Rules)**. Source URLs, labels, checksums, and crop mappings are preserved in the asset manifest. See the [player artwork notes](public/assets/fumbbl/README.md) and [third-party notices](THIRD_PARTY_NOTICES.md); attribution does not relicense that artwork.
 
 Created by [martinAbsolute on GitHub](https://github.com/martinAbsolute/) · [@martinAbsolute on Telegram](https://t.me/martinAbsolute).

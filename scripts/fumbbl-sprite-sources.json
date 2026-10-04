@@ -1,0 +1,2288 @@
+{
+  "retrievedOn": "2026-10-04",
+  "rosterIndex": "https://fumbbl.com/help:BB25RaceStrategy",
+  "leagueIndex": "https://fumbbl.com/help:Rosters+Special+Rules",
+  "leaguePages": [
+    "https://fumbbl.com/p/stars?for=Badlands+Brawl",
+    "https://fumbbl.com/p/stars?for=Elven+Kingdoms+League",
+    "https://fumbbl.com/p/stars?for=Favoured+of+Chaos+Undivided",
+    "https://fumbbl.com/p/stars?for=Favoured+of+Hashut",
+    "https://fumbbl.com/p/stars?for=Favoured+of+Khorne",
+    "https://fumbbl.com/p/stars?for=Favoured+of+Nurgle",
+    "https://fumbbl.com/p/stars?for=Favoured+of+Slaanesh",
+    "https://fumbbl.com/p/stars?for=Favoured+of+Tzeentch",
+    "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+    "https://fumbbl.com/p/stars?for=Lustrian+Superleague",
+    "https://fumbbl.com/p/stars?for=Old+World+Classic",
+    "https://fumbbl.com/p/stars?for=Sylvanian+Spotlight",
+    "https://fumbbl.com/p/stars?for=Underworld+Challenge",
+    "https://fumbbl.com/p/stars?for=Worlds+Edge+Superleague",
+    "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+    "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+    "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+    "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+    "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague",
+    "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+    "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+    "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+    "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+    "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague",
+    "https://fumbbl.com/p/stars?for=Woodland+League"
+  ],
+  "rosters": [
+    {
+      "id": "amazon",
+      "name": "Amazon",
+      "sourcePage": "https://fumbbl.com/help:BB25AmazonSetUp",
+      "representative": "amazon-0",
+      "players": [
+        {
+          "id": "amazon-0",
+          "label": "Eagle Warrior (Human, Lineman)",
+          "sourceUrl": "https://fumbbl.com/i/591924",
+          "layout": "single"
+        },
+        {
+          "id": "amazon-1",
+          "label": "Python Warrior (Human, Thrower)",
+          "sourceUrl": "https://fumbbl.com/i/591925",
+          "layout": "single"
+        },
+        {
+          "id": "amazon-2",
+          "label": "Piranha Warrior (Blitzer, Human)",
+          "sourceUrl": "https://fumbbl.com/i/699717",
+          "layout": "single"
+        },
+        {
+          "id": "amazon-3",
+          "label": "Jaguar Warrior (Blocker, Human)",
+          "sourceUrl": "https://fumbbl.com/i/699718",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "black-orc",
+      "name": "Black Orc",
+      "sourcePage": "https://fumbbl.com/help:BB25BlackOrcSetUp",
+      "representative": "black-orc-1",
+      "players": [
+        {
+          "id": "black-orc-0",
+          "label": "Goblin Bruiser (Goblin, Lineman)",
+          "sourceUrl": "https://fumbbl.com/i/680046",
+          "layout": "single"
+        },
+        {
+          "id": "black-orc-1",
+          "label": "Black Orc (Blocker, Orc)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/oblackorc2.gif",
+          "layout": "single"
+        },
+        {
+          "id": "black-orc-2",
+          "label": "Trained Troll (Big Guy, Troll)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/chaostroll1.gif",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "bretonnian",
+      "name": "Bretonnian",
+      "sourcePage": "https://fumbbl.com/help:BB25BretonnianSetUp",
+      "representative": "bretonnian-3",
+      "players": [
+        {
+          "id": "bretonnian-0",
+          "label": "Bretonnian Squire (Human, Linemen)",
+          "sourceUrl": "https://fumbbl.com/i/375676.png",
+          "layout": "single"
+        },
+        {
+          "id": "bretonnian-1",
+          "label": "Bretonnian Knight Catcher (Catcher, Human)",
+          "sourceUrl": "https://fumbbl.com/i/779173",
+          "layout": "single"
+        },
+        {
+          "id": "bretonnian-2",
+          "label": "Knight Thrower (Human, Thrower)",
+          "sourceUrl": "https://fumbbl.com/i/779172",
+          "layout": "single"
+        },
+        {
+          "id": "bretonnian-3",
+          "label": "Grail Knight (Blitzer, Human)",
+          "sourceUrl": "https://fumbbl.com/i/375672.png",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "chaos-chosen",
+      "name": "Chaos Chosen",
+      "sourcePage": "https://fumbbl.com/help:BB25ChaosSetUp",
+      "representative": "chaos-chosen-1",
+      "players": [
+        {
+          "id": "chaos-chosen-0",
+          "label": "Beastman Lineman (Beastman, Lineman)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/cbeastman2.gif",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-chosen-1",
+          "label": "Chaos Chosen (Blocker, Human)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/cwarrior1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-chosen-2",
+          "label": "Chaos Troll (Big Guy, Troll)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/chaostroll1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-chosen-3",
+          "label": "Chaos Ogre (Big Guy, Ogre)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/pact_ogre1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-chosen-4",
+          "label": "Minotaur (Big Guy, Minotaur)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/minotaur1.gif",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "chaos-dwarf",
+      "name": "Chaos Dwarf",
+      "sourcePage": "https://fumbbl.com/help:BB25ChaosDwarfSetUp",
+      "representative": "chaos-dwarf-2",
+      "players": [
+        {
+          "id": "chaos-dwarf-0",
+          "label": "Hobgoblin Linemen (Goblin, Lineman)",
+          "sourceUrl": "https://fumbbl.com/i/701251",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-dwarf-1",
+          "label": "Hobgoblin Sneaky Stabbas (Goblin, Special)",
+          "sourceUrl": "https://fumbbl.com/i/745936",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-dwarf-2",
+          "label": "Chaos Dwarf Blockers (Blocker, Dwarf)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/cddwarf1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-dwarf-3",
+          "label": "Chaos Dwarf Flamesmiths (Dwarf, Special)",
+          "sourceUrl": "https://fumbbl.com/i/745935",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-dwarf-4",
+          "label": "Bull Centaur (Blitzer, Dwarf)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/centaur1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-dwarf-5",
+          "label": "Enslaved Minotaur (Big Guy, Minotaur)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/minotaur2.gif",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "chaos-renegade",
+      "name": "Chaos Renegade",
+      "sourcePage": "https://fumbbl.com/help:BB25ChaosPactSetUp",
+      "representative": "chaos-renegade-0",
+      "players": [
+        {
+          "id": "chaos-renegade-0",
+          "label": "Renegade Human (Human, Lineman)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/marauder4.gif",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-renegade-1",
+          "label": "Renegade Goblin (Goblin, Lineman)",
+          "sourceUrl": "https://fumbbl.com/i/680249",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-renegade-2",
+          "label": "Renegade Orc (lineman, Orc)",
+          "sourceUrl": "https://fumbbl.com/i/578629",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-renegade-3",
+          "label": "Renegade Skaven (Lineman, Skaven)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/skavenrenegade1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-renegade-4",
+          "label": "Renegade Dark Elf (Elf, Lineman)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/delfrenegade1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-renegade-5",
+          "label": "Renegade Human Thrower (Human, Thrower)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/marauder6.gif",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-renegade-6",
+          "label": "Troll (Big Guy, Troll)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/chaostroll1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-renegade-7",
+          "label": "Ogre (Big Guy, Ogre)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/pact_ogre1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-renegade-8",
+          "label": "Minotaur (Big Guy, Minotaur)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/minotaur3.gif",
+          "layout": "single"
+        },
+        {
+          "id": "chaos-renegade-9",
+          "label": "Rat Ogre (Big Guy, Skaven)",
+          "sourceUrl": "https://fumbbl.com/i/639121",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "dark-elf",
+      "name": "Dark Elf",
+      "sourcePage": "https://fumbbl.com/help:BB25DarkElfSetUp",
+      "representative": "dark-elf-4",
+      "players": [
+        {
+          "id": "dark-elf-0",
+          "label": "Dark Elf Linemen (Elf, Lineman)",
+          "sourceUrl": "https://fumbbl.com/i/466033",
+          "layout": "single"
+        },
+        {
+          "id": "dark-elf-1",
+          "label": "Dark Elf Runners (Elf, Runner)",
+          "sourceUrl": "https://fumbbl.com/i/466036",
+          "layout": "single"
+        },
+        {
+          "id": "dark-elf-2",
+          "label": "Dark Elf Assassin (Elf, Special)",
+          "sourceUrl": "https://fumbbl.com/i/466032",
+          "layout": "single"
+        },
+        {
+          "id": "dark-elf-3",
+          "label": "Dark Elf Blitzer (Blitzer, Elf)",
+          "sourceUrl": "https://fumbbl.com/i/466034",
+          "layout": "single"
+        },
+        {
+          "id": "dark-elf-4",
+          "label": "Witch Elf (Elf, Special)",
+          "sourceUrl": "https://fumbbl.com/i/466035",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "dwarf",
+      "name": "Dwarf",
+      "sourcePage": "https://fumbbl.com/help:BB25DwarfSetUp",
+      "representative": "dwarf-0",
+      "players": [
+        {
+          "id": "dwarf-0",
+          "label": "Dwarf Linemen (Dwarf, Lineman)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/dlongbeard2.gif",
+          "layout": "single"
+        },
+        {
+          "id": "dwarf-1",
+          "label": "Dwarf Runner (Dwarf, Runner)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/drunner2.gif",
+          "layout": "single"
+        },
+        {
+          "id": "dwarf-2",
+          "label": "Dwarf Blitzer (Blitzer, Dwarf)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/dblitzer2.gif",
+          "layout": "single"
+        },
+        {
+          "id": "dwarf-3",
+          "label": "Troll Slayers (Dwarf, Special)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/dslayer1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "dwarf-4",
+          "label": "Deathroller (Big Guy, Dwarf, Special)",
+          "sourceUrl": "https://fumbbl.com/i/376939",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "elven-union",
+      "name": "Elven Union",
+      "sourcePage": "https://fumbbl.com/help:BB25ElfSetUp",
+      "representative": "elven-union-3",
+      "players": [
+        {
+          "id": "elven-union-0",
+          "label": "Elf Linemen (Elf, Lineman)",
+          "sourceUrl": "https://fumbbl.com/i/466039",
+          "layout": "single"
+        },
+        {
+          "id": "elven-union-1",
+          "label": "Elf Thrower (Elf, Thrower)",
+          "sourceUrl": "https://fumbbl.com/i/466040",
+          "layout": "single"
+        },
+        {
+          "id": "elven-union-2",
+          "label": "Elf Catcher (Catcher, Elf)",
+          "sourceUrl": "https://fumbbl.com/i/466038",
+          "layout": "single"
+        },
+        {
+          "id": "elven-union-3",
+          "label": "Elf Blitzer (Blitzer, Elf)",
+          "sourceUrl": "https://fumbbl.com/i/466037",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "gnome",
+      "name": "Gnome",
+      "sourcePage": "https://fumbbl.com/help:BB25GnomeSetUp",
+      "representative": "gnome-0",
+      "players": [
+        {
+          "id": "gnome-0",
+          "label": "Gnome Lineman (Gnome, Lineman)",
+          "sourceUrl": "https://fumbbl.com/i/735055",
+          "layout": "single"
+        },
+        {
+          "id": "gnome-1",
+          "label": "Woodland Foxes (Animal, Runner)",
+          "sourceUrl": "https://fumbbl.com/i/735054",
+          "layout": "single"
+        },
+        {
+          "id": "gnome-2",
+          "label": "Gnome Illusionists (Gnome, Special)",
+          "sourceUrl": "https://fumbbl.com/i/735052",
+          "layout": "single"
+        },
+        {
+          "id": "gnome-3",
+          "label": "Gnome Beastmasters (Blocker, Gnome)",
+          "sourceUrl": "https://fumbbl.com/i/735053",
+          "layout": "single"
+        },
+        {
+          "id": "gnome-4",
+          "label": "Altern Forest Treemen (Big Guy, Treeman)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/treeman1.gif",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "goblin",
+      "name": "Goblin",
+      "sourcePage": "https://fumbbl.com/help:BB25GoblinSetUp",
+      "representative": "goblin-0",
+      "players": [
+        {
+          "id": "goblin-0",
+          "label": "Goblin Linemen (Goblin, Lineman)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/goblin1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "goblin-1",
+          "label": "Looney (Goblin, Special)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/looney1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "goblin-2",
+          "label": "Bomma (Goblin, Special)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/bombardier1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "goblin-3",
+          "label": "'Ooligan (Goblin, Special)",
+          "sourceUrl": "https://fumbbl.com/i/578628",
+          "layout": "single"
+        },
+        {
+          "id": "goblin-4",
+          "label": "Doom Diver (Goblin, Special)",
+          "sourceUrl": "https://fumbbl.com/i/578400",
+          "layout": "single"
+        },
+        {
+          "id": "goblin-5",
+          "label": "Fanatic (Goblin, Special)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/fanatic1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "goblin-6",
+          "label": "Pogoer (Goblin, Special)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/goscrappa1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "goblin-7",
+          "label": "Trained Trolls (Big Guy, Troll)",
+          "sourceUrl": "https://fumbbl.com/i/466043",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "halfling",
+      "name": "Halfling",
+      "sourcePage": "https://fumbbl.com/help:BB25HalflingSetUp",
+      "representative": "halfling-0",
+      "players": [
+        {
+          "id": "halfling-0",
+          "label": "Halfling Hopeful (Halfling, Linemen)",
+          "sourceUrl": "https://fumbbl.com/i/466045",
+          "layout": "single"
+        },
+        {
+          "id": "halfling-1",
+          "label": "Halfling Hefty (Blocker, Halfling)",
+          "sourceUrl": "https://fumbbl.com/i/588657",
+          "layout": "single"
+        },
+        {
+          "id": "halfling-2",
+          "label": "Halfling Catcher (Catcher, Halfling)",
+          "sourceUrl": "https://fumbbl.com/i/588658",
+          "layout": "single"
+        },
+        {
+          "id": "halfling-3",
+          "label": "Altern Forest Treeman (Big Guy, Treeman)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/treeman1.gif",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "high-elf",
+      "name": "High Elf",
+      "sourcePage": "https://fumbbl.com/help:BB25HighElfSetUp",
+      "representative": "high-elf-2",
+      "players": [
+        {
+          "id": "high-elf-0",
+          "label": "Lineman (Elf, Lineman)",
+          "sourceUrl": "https://fumbbl.com/i/466058",
+          "layout": "single"
+        },
+        {
+          "id": "high-elf-1",
+          "label": "Phoenix Warrior (Elf, Thrower)",
+          "sourceUrl": "https://fumbbl.com/i/466059",
+          "layout": "single"
+        },
+        {
+          "id": "high-elf-2",
+          "label": "White Lion (Blitzer, Elf)",
+          "sourceUrl": "https://fumbbl.com/i/466057",
+          "layout": "single"
+        },
+        {
+          "id": "high-elf-3",
+          "label": "Dragon Prince (Blitzer, Elf, Runner)",
+          "sourceUrl": "https://fumbbl.com/i/466056",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "human",
+      "name": "Human",
+      "sourcePage": "https://fumbbl.com/help:BB25HumanSetUp",
+      "representative": "human-4",
+      "players": [
+        {
+          "id": "human-0",
+          "label": "Human Lineman (Human, Lineman)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/hlineman1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "human-1",
+          "label": "Halfling Hopefuls (Halfling, Lineman)",
+          "sourceUrl": "https://fumbbl.com/i/639130",
+          "layout": "single"
+        },
+        {
+          "id": "human-2",
+          "label": "Catcher (Catcher, Human)",
+          "sourceUrl": "https://fumbbl.com/i/639411",
+          "layout": "single"
+        },
+        {
+          "id": "human-3",
+          "label": "Throwers (Human, Thrower)",
+          "sourceUrl": "https://fumbbl.com/i/639412",
+          "layout": "single"
+        },
+        {
+          "id": "human-4",
+          "label": "Blitzer (Blitzer, Human)",
+          "sourceUrl": "https://fumbbl.com/i/639410",
+          "layout": "single"
+        },
+        {
+          "id": "human-5",
+          "label": "Ogre (Big Guy, Human)",
+          "sourceUrl": "https://fumbbl.com/i/639413",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "imperial-nobility",
+      "name": "Imperial Nobility",
+      "sourcePage": "https://fumbbl.com/help:BB25ImperialSetUp",
+      "representative": "imperial-nobility-3",
+      "players": [
+        {
+          "id": "imperial-nobility-0",
+          "label": "Imperial Retainer (Human, Lineman)",
+          "sourceUrl": "https://fumbbl.com/i/643329",
+          "layout": "single"
+        },
+        {
+          "id": "imperial-nobility-1",
+          "label": "Imperial Thrower (Human, Thrower)",
+          "sourceUrl": "https://fumbbl.com/i/643330",
+          "layout": "single"
+        },
+        {
+          "id": "imperial-nobility-2",
+          "label": "Bodyguard (Blocker, Human)",
+          "sourceUrl": "https://fumbbl.com/i/643331",
+          "layout": "single"
+        },
+        {
+          "id": "imperial-nobility-3",
+          "label": "Noble Blitzer (Blitzer, Human)",
+          "sourceUrl": "https://fumbbl.com/i/643332",
+          "layout": "single"
+        },
+        {
+          "id": "imperial-nobility-4",
+          "label": "Ogre (Big Guy, Ogre)",
+          "sourceUrl": "https://fumbbl.com/i/643334",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "khorne",
+      "name": "Khorne",
+      "sourcePage": "https://fumbbl.com/help:BB25KhorneSetUp",
+      "representative": "khorne-2",
+      "players": [
+        {
+          "id": "khorne-0",
+          "label": "Bloodborn Marauder (Human, Lineman)",
+          "sourceUrl": "https://fumbbl.com/i/682108",
+          "layout": "single"
+        },
+        {
+          "id": "khorne-1",
+          "label": "Khorngor (Beastman, Runner)",
+          "sourceUrl": "https://fumbbl.com/i/682107",
+          "layout": "single"
+        },
+        {
+          "id": "khorne-2",
+          "label": "Bloodseekers (Blocker, Human)",
+          "sourceUrl": "https://fumbbl.com/i/682106",
+          "layout": "single"
+        },
+        {
+          "id": "khorne-3",
+          "label": "Bloodspawn (Big Guy, Spawn)",
+          "sourceUrl": "https://fumbbl.com/i/682105",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "lizardmen",
+      "name": "Lizardmen",
+      "sourcePage": "https://fumbbl.com/help:BB25LizardmenSetUp",
+      "representative": "lizardmen-2",
+      "players": [
+        {
+          "id": "lizardmen-0",
+          "label": "Skink Lineman (Lineman, Lizardman)",
+          "sourceUrl": "https://fumbbl.com/i/466062",
+          "layout": "single"
+        },
+        {
+          "id": "lizardmen-1",
+          "label": "Chameleon Skink (Lizardman, Thrower)",
+          "sourceUrl": "https://fumbbl.com/i/596788",
+          "layout": "single"
+        },
+        {
+          "id": "lizardmen-2",
+          "label": "Saurus Blocker (Blocker, Lizardman)",
+          "sourceUrl": "https://fumbbl.com/i/466061",
+          "layout": "single"
+        },
+        {
+          "id": "lizardmen-3",
+          "label": "Kroxigor (Big Guy, Lizardman)",
+          "sourceUrl": "https://fumbbl.com/i/466060",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "necromantic-horror",
+      "name": "Necromantic Horror",
+      "sourcePage": "https://fumbbl.com/help:BB25NecromanticSetUp",
+      "representative": "necromantic-horror-4",
+      "players": [
+        {
+          "id": "necromantic-horror-0",
+          "label": "Zombie Lineman (Lineman, Human, Undead, Zombie)",
+          "sourceUrl": "https://fumbbl.com/i/466067",
+          "layout": "single"
+        },
+        {
+          "id": "necromantic-horror-1",
+          "label": "Ghoul Runner (Ghoul, Runner, Undead)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/nghoul2.gif",
+          "layout": "single"
+        },
+        {
+          "id": "necromantic-horror-2",
+          "label": "Wraith (Blocker, Undead, Wraith)",
+          "sourceUrl": "https://fumbbl.com/i/679068",
+          "layout": "single"
+        },
+        {
+          "id": "necromantic-horror-3",
+          "label": "Flesh Golem (Blocker, Construct, Undead)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/ngolem1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "necromantic-horror-4",
+          "label": "Werewolves (Blitzer, Undead, Werewolf)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/nwerewolf1.gif",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "norse",
+      "name": "Norse",
+      "sourcePage": "https://fumbbl.com/help:BB25NorseSetUp",
+      "representative": "norse-2",
+      "players": [
+        {
+          "id": "norse-0",
+          "label": "Norse Raider (Human, Lineman)",
+          "sourceUrl": "https://fumbbl.com/i/466068",
+          "layout": "single"
+        },
+        {
+          "id": "norse-1",
+          "label": "Beer Boar (Animal, Special)",
+          "sourceUrl": "https://fumbbl.com/i/692265",
+          "layout": "single"
+        },
+        {
+          "id": "norse-2",
+          "label": "Norse Berserker (Blitzer, Human)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/noberserker1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "norse-3",
+          "label": "Valkyrie (Catcher, Human, Thrower)",
+          "sourceUrl": "https://fumbbl.com/i/692266",
+          "layout": "single"
+        },
+        {
+          "id": "norse-4",
+          "label": "Ulfwereners (Blocker, Human)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/noulfwerener1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "norse-5",
+          "label": "Yhetee (Big Guy, Special)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/snowtroll1.gif",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "nurgle",
+      "name": "Nurgle",
+      "sourcePage": "https://fumbbl.com/help:BB25Nurgle%27sRottersSetUp",
+      "representative": "nurgle-2",
+      "players": [
+        {
+          "id": "nurgle-0",
+          "label": "Rotter Lineman (Human, Lineman",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/rotter1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "nurgle-1",
+          "label": "Pestigor (Beastman, Runner)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/rtpestigor1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "nurgle-2",
+          "label": "Bloater (Blocker, Human)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/rtrotter3.gif",
+          "layout": "single"
+        },
+        {
+          "id": "nurgle-3",
+          "label": "Rotspawn (Big Guy, Spawn)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/rtbeast1.gif",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "ogre",
+      "name": "Ogre",
+      "sourcePage": "https://fumbbl.com/help:BB25OgreSetUp",
+      "representative": "ogre-1",
+      "players": [
+        {
+          "id": "ogre-0",
+          "label": "Gnoblar Linemen (Gnoblar, Linemen)",
+          "sourceUrl": "https://fumbbl.com/i/643079",
+          "layout": "single"
+        },
+        {
+          "id": "ogre-1",
+          "label": "Ogre Blocker (Big Guy, Blocker, Ogre)",
+          "sourceUrl": "https://fumbbl.com/i/638906",
+          "layout": "single"
+        },
+        {
+          "id": "ogre-2",
+          "label": "Ogre Runt Punter (Big Guy, Ogre, Thrower )",
+          "sourceUrl": "https://fumbbl.com/i/639494",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "old-world-alliance",
+      "name": "Old World Alliance",
+      "sourcePage": "https://fumbbl.com/help:BB25OldworldSetUp",
+      "representative": "old-world-alliance-6",
+      "players": [
+        {
+          "id": "old-world-alliance-0",
+          "label": "Human Lineman (Human, Lineman)",
+          "sourceUrl": "https://fumbbl.com/i/639545",
+          "layout": "single"
+        },
+        {
+          "id": "old-world-alliance-1",
+          "label": "Halfling Hopeful (Halfling, Lineman)",
+          "sourceUrl": "https://fumbbl.com/i/639551",
+          "layout": "single"
+        },
+        {
+          "id": "old-world-alliance-2",
+          "label": "Human Catcher (Catcher, Human)",
+          "sourceUrl": "https://fumbbl.com/i/639547",
+          "layout": "single"
+        },
+        {
+          "id": "old-world-alliance-3",
+          "label": "Dwarf Lineman (Dwarf, Lineman)",
+          "sourceUrl": "https://fumbbl.com/i/639548",
+          "layout": "single"
+        },
+        {
+          "id": "old-world-alliance-4",
+          "label": "Human Thrower (Human, Thrower)",
+          "sourceUrl": "https://fumbbl.com/i/639544",
+          "layout": "single"
+        },
+        {
+          "id": "old-world-alliance-5",
+          "label": "Dwarf Runner (Dwarf, Runner)",
+          "sourceUrl": "https://fumbbl.com/i/639549",
+          "layout": "single"
+        },
+        {
+          "id": "old-world-alliance-6",
+          "label": "Human Blitzer (Blitzer, Human)",
+          "sourceUrl": "https://fumbbl.com/i/639546",
+          "layout": "single"
+        },
+        {
+          "id": "old-world-alliance-7",
+          "label": "Dwarf Blitzer (Blitzer, Dwarf)",
+          "sourceUrl": "https://fumbbl.com/i/639550",
+          "layout": "single"
+        },
+        {
+          "id": "old-world-alliance-8",
+          "label": "Troll Slayer (Dwarf, Special)",
+          "sourceUrl": "https://fumbbl.com/i/639552",
+          "layout": "single"
+        },
+        {
+          "id": "old-world-alliance-9",
+          "label": "Ogre (Big Guy, Ogre)",
+          "sourceUrl": "https://fumbbl.com/i/639553",
+          "layout": "single"
+        },
+        {
+          "id": "old-world-alliance-10",
+          "label": "Altern Forest Treemen (Big Guy, Treeman)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/treeman1.gif",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "orc",
+      "name": "Orc",
+      "sourcePage": "https://fumbbl.com/help:BB25OrcSetUp",
+      "representative": "orc-3",
+      "players": [
+        {
+          "id": "orc-0",
+          "label": "Orc Lineman (Lineman, Orc)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/olineman2.gif",
+          "layout": "single"
+        },
+        {
+          "id": "orc-1",
+          "label": "Goblin Lineman (Goblin, Lineman)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/goblin1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "orc-2",
+          "label": "Orc Thrower (Orc, Thrower)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/othrower1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "orc-3",
+          "label": "Orc Blitzer (Blitzer, Orc)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/oblitzer1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "orc-4",
+          "label": "Big Un Blocker (Blocker, Orc)",
+          "sourceUrl": "https://fumbbl.com/i/638903",
+          "layout": "single"
+        },
+        {
+          "id": "orc-5",
+          "label": "Troll (Big Guy, Troll)",
+          "sourceUrl": "https://fumbbl.com/i/639554",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "shambling-undead",
+      "name": "Shambling Undead",
+      "sourcePage": "https://fumbbl.com/help:BB25UndeadSetUp",
+      "representative": "shambling-undead-4",
+      "players": [
+        {
+          "id": "shambling-undead-0",
+          "label": "Skeleton Lineman (Human, Lineman, Skeleton, Undead)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/uskeleton1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "shambling-undead-1",
+          "label": "Zombie Lineman (Human, Lineman, Undead, Zombie)",
+          "sourceUrl": "https://fumbbl.com/i/466067",
+          "layout": "single"
+        },
+        {
+          "id": "shambling-undead-2",
+          "label": "Ghoul Runner (Ghoul, Runner, Undead)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/ughoul2.gif",
+          "layout": "single"
+        },
+        {
+          "id": "shambling-undead-3",
+          "label": "Wight Blitzer (Blitzer, Human, Skeleton, Undead)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/uwight1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "shambling-undead-4",
+          "label": "Mummy (Big Guy, Blocker, Human, Undead)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/umummy2.gif",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "skaven",
+      "name": "Skaven",
+      "sourcePage": "https://fumbbl.com/help:BB25SkavenSetUp",
+      "representative": "skaven-3",
+      "players": [
+        {
+          "id": "skaven-0",
+          "label": "Skaven Clanrat (Lineman, Skaven)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/sklineman2.gif",
+          "layout": "single"
+        },
+        {
+          "id": "skaven-1",
+          "label": "Skaven Thrower (Skaven, Thrower)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/skthrower1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "skaven-2",
+          "label": "Gutter Runner (Runner, Skaven)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/skrunner2.gif",
+          "layout": "single"
+        },
+        {
+          "id": "skaven-3",
+          "label": "Skaven Blitzer (Blitzer, Skaven)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/skstorm1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "skaven-4",
+          "label": "Rat Ogre (Big Guy, Skaven)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/ratogre1.gif",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "snotling",
+      "name": "Snotling",
+      "sourcePage": "https://fumbbl.com/help:BB25SnotlingSetUp",
+      "representative": "snotling-0",
+      "players": [
+        {
+          "id": "snotling-0",
+          "label": "Snotling Lineman (Lineman, Snotling)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/Snotling1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "snotling-1",
+          "label": "Fun Hoppa (Snotling, Special)",
+          "sourceUrl": "https://fumbbl.com/i/642765",
+          "layout": "single"
+        },
+        {
+          "id": "snotling-2",
+          "label": "Stilty Runner (Runner, Snotling)",
+          "sourceUrl": "https://fumbbl.com/i/642766",
+          "layout": "single"
+        },
+        {
+          "id": "snotling-3",
+          "label": "Fungus Flingers (Snotling, Special)",
+          "sourceUrl": "https://fumbbl.com/i/642768",
+          "layout": "single"
+        },
+        {
+          "id": "snotling-4",
+          "label": "Pump Wagon (Big Guy, Snotling, Special)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/snotling_pumpwagon1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "snotling-5",
+          "label": "Trained Troll (Big Guy, Troll)",
+          "sourceUrl": "https://fumbbl.com/i/643464",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "tomb-kings",
+      "name": "Tomb Kings",
+      "sourcePage": "https://fumbbl.com/help:BB25KhemriSetUp",
+      "representative": "tomb-kings-3",
+      "players": [
+        {
+          "id": "tomb-kings-0",
+          "label": "Skeleton Linemen (Human, Lineman, Skeleton, Undead)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/kmskeleton1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "tomb-kings-1",
+          "label": "Tomb Kings Thrower (Human, Skeleton, Thrower, Undead)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/kmthrower1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "tomb-kings-2",
+          "label": "Tomb Kings Blitzer (Blitzer, Human, Skeleton, Undead",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/kmblitzer1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "tomb-kings-3",
+          "label": "Tomb Guardian (Big Guy, Blocker, Human, Undead)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/tomb_guardian1.gif",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "underworld-denizens",
+      "name": "Underworld Denizens",
+      "sourcePage": "https://fumbbl.com/help:BB25UnderworldSetUp",
+      "representative": "underworld-denizens-6",
+      "players": [
+        {
+          "id": "underworld-denizens-0",
+          "label": "Goblin Lineman (Goblin, Lineman)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/uwgoblin1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "underworld-denizens-1",
+          "label": "Snotling Lineman (Lineman, Snotling)",
+          "sourceUrl": "https://fumbbl.com/i/357471",
+          "layout": "single"
+        },
+        {
+          "id": "underworld-denizens-2",
+          "label": "Skaven Clanrats (Lineman, Skaven)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/sklineman1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "underworld-denizens-3",
+          "label": "Skaven Thrower (Skaven, Thrower)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/skthrower1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "underworld-denizens-4",
+          "label": "Gutter Runner (Runner, Skaven)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/skrunner2.gif",
+          "layout": "single"
+        },
+        {
+          "id": "underworld-denizens-5",
+          "label": "Skaven Blitzer (Blitzer, Skaven)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/skstorm1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "underworld-denizens-6",
+          "label": "Troll (Big Guy, Troll)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/warptroll1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "underworld-denizens-7",
+          "label": "Rat Ogre (Big Guy, Skaven)",
+          "sourceUrl": "https://fumbbl.com/i/680047",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "vampire",
+      "name": "Vampire",
+      "sourcePage": "https://fumbbl.com/help:BB25VampireSetUp",
+      "representative": "vampire-1",
+      "players": [
+        {
+          "id": "vampire-0",
+          "label": "Thrall (Human, Lineman, Thrall)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/vthrall3.gif",
+          "layout": "single"
+        },
+        {
+          "id": "vampire-1",
+          "label": "Vampire Runner (Runner, Undead, Vampire)",
+          "sourceUrl": "https://fumbbl.com/i/719300",
+          "layout": "single"
+        },
+        {
+          "id": "vampire-2",
+          "label": "Vampire Thrower (Thrower, Undead, Vampire)",
+          "sourceUrl": "https://fumbbl.com/i/719303",
+          "layout": "single"
+        },
+        {
+          "id": "vampire-3",
+          "label": "Vampire Blitzer (Blitzer, Undead, Vampire)",
+          "sourceUrl": "https://fumbbl.com/FUMBBL/Images/PlayerIcons/vampire2.gif",
+          "layout": "single"
+        },
+        {
+          "id": "vampire-4",
+          "label": "Vargheist (Big Guy, Undead, Vampire)",
+          "sourceUrl": "https://fumbbl.com/i/719301",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "wood-elf",
+      "name": "Wood Elf",
+      "sourcePage": "https://fumbbl.com/help:BB25WoodElfSetUp",
+      "representative": "wood-elf-3",
+      "players": [
+        {
+          "id": "wood-elf-0",
+          "label": "Wood Elf Lineman (Elf, Lineman)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/welineman1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "wood-elf-1",
+          "label": "Wood Elf Thrower (Elf, Thrower)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/wethrower1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "wood-elf-2",
+          "label": "Wood Elf Catcher (Catcher, Elf)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/wecatcher1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "wood-elf-3",
+          "label": "Wardancer (Blitzer, Elf)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/weblitzer1.gif",
+          "layout": "single"
+        },
+        {
+          "id": "wood-elf-4",
+          "label": "Treeman (Big Guy, Treeman)",
+          "sourceUrl": "http://fumbbl.com/FUMBBL/Images/PlayerIcons/treeman1.gif",
+          "layout": "single"
+        }
+      ]
+    },
+    {
+      "id": "slann",
+      "name": "Slann",
+      "sourcePage": "https://fumbbl.com/help:BB20SlannSetUp",
+      "representative": "slann-2",
+      "players": [
+        {
+          "id": "slann-0",
+          "label": "Linemen",
+          "sourceUrl": "https://fumbbl.com/i/466074",
+          "layout": "single"
+        },
+        {
+          "id": "slann-1",
+          "label": "Catchers",
+          "sourceUrl": "https://fumbbl.com/i/466072",
+          "layout": "single"
+        },
+        {
+          "id": "slann-2",
+          "label": "Blitzers",
+          "sourceUrl": "https://fumbbl.com/i/466071",
+          "layout": "single"
+        },
+        {
+          "id": "slann-3",
+          "label": "Kroxigor",
+          "sourceUrl": "https://fumbbl.com/i/466073",
+          "layout": "single"
+        }
+      ]
+    }
+  ],
+  "stars": [
+    {
+      "id": "akhorne-the-squirrel",
+      "label": "Akhorne the Squirrel",
+      "sourceUrl": "https://fumbbl.com/i/682638",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl",
+        "https://fumbbl.com/p/stars?for=Elven+Kingdoms+League",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Chaos+Undivided",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Khorne",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Nurgle",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Slaanesh",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Tzeentch",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Lustrian+Superleague",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Sylvanian+Spotlight",
+        "https://fumbbl.com/p/stars?for=Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "bomber-dribblesnot",
+      "label": "Bomber Dribblesnot",
+      "sourceUrl": "https://fumbbl.com/i/688971",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl",
+        "https://fumbbl.com/p/stars?for=Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "crumbleberry",
+      "label": "Crumbleberry",
+      "sourceUrl": "https://fumbbl.com/i/674106",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl",
+        "https://fumbbl.com/p/stars?for=Elven+Kingdoms+League",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Chaos+Undivided",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Khorne",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Nurgle",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Slaanesh",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Tzeentch",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Lustrian+Superleague",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Sylvanian+Spotlight",
+        "https://fumbbl.com/p/stars?for=Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "fungus-the-loon",
+      "label": "Fungus the Loon",
+      "sourceUrl": "https://fumbbl.com/i/688969",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl",
+        "https://fumbbl.com/p/stars?for=Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "grak",
+      "label": "Grak",
+      "sourceUrl": "https://fumbbl.com/i/674105",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl",
+        "https://fumbbl.com/p/stars?for=Elven+Kingdoms+League",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Chaos+Undivided",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Khorne",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Nurgle",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Slaanesh",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Tzeentch",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Lustrian+Superleague",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Sylvanian+Spotlight",
+        "https://fumbbl.com/p/stars?for=Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "hthark-the-unstoppable",
+      "label": "H'Thark the Unstoppable",
+      "sourceUrl": "https://fumbbl.com/i/745758",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "helmut-wulf",
+      "label": "Helmut Wulf",
+      "sourceUrl": "https://fumbbl.com/i/674066",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl",
+        "https://fumbbl.com/p/stars?for=Elven+Kingdoms+League",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Chaos+Undivided",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Khorne",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Nurgle",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Slaanesh",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Tzeentch",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Lustrian+Superleague",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Sylvanian+Spotlight",
+        "https://fumbbl.com/p/stars?for=Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "morg-n-thorg",
+      "label": "Morg 'n' Thorg",
+      "sourceUrl": "https://fumbbl.com/i/674075",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl",
+        "https://fumbbl.com/p/stars?for=Elven+Kingdoms+League",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Chaos+Undivided",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Khorne",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Nurgle",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Slaanesh",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Tzeentch",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Lustrian+Superleague",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "nobbla-blackwart",
+      "label": "Nobbla Blackwart",
+      "sourceUrl": "https://fumbbl.com/i/705139",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl",
+        "https://fumbbl.com/p/stars?for=Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "rashnak-backstabber",
+      "label": "Rashnak Backstabber",
+      "sourceUrl": "https://fumbbl.com/i/745760",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "ripper-bolgrot",
+      "label": "Ripper Bolgrot",
+      "sourceUrl": "https://fumbbl.com/i/705137",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl",
+        "https://fumbbl.com/p/stars?for=Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "scrappa-sorehead",
+      "label": "Scrappa Sorehead",
+      "sourceUrl": "https://fumbbl.com/i/705141",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl",
+        "https://fumbbl.com/p/stars?for=Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "the-black-gobbo",
+      "label": "The Black Gobbo",
+      "sourceUrl": "https://fumbbl.com/i/686417",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl",
+        "https://fumbbl.com/p/stars?for=Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "varag-ghoul-chewer",
+      "label": "Varag Ghoul-Chewer",
+      "sourceUrl": "https://fumbbl.com/i/674088",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl",
+        "https://fumbbl.com/p/stars?for=Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "zzharg-madeye",
+      "label": "Zzharg Madeye",
+      "sourceUrl": "https://fumbbl.com/i/745756",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "eldril-sidewinder",
+      "label": "Eldril Sidewinder",
+      "sourceUrl": "https://fumbbl.com/i/674096",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Elven+Kingdoms+League"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "gloriel-summerbloom",
+      "label": "Gloriel Summerbloom",
+      "sourceUrl": "https://fumbbl.com/i/674101",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Elven+Kingdoms+League"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "jeremiah-kool",
+      "label": "Jeremiah Kool",
+      "sourceUrl": "https://fumbbl.com/i/751135",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Elven+Kingdoms+League"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "jordell-freshbreeze",
+      "label": "Jordell Freshbreeze",
+      "sourceUrl": "https://fumbbl.com/i/743121",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Elven+Kingdoms+League"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "kiroth-krakeneye",
+      "label": "Kiroth Krakeneye",
+      "sourceUrl": "https://fumbbl.com/i/720866",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Elven+Kingdoms+League"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "lucien-swift",
+      "label": "Lucien Swift",
+      "sourceUrl": "https://fumbbl.com/i/674084",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Elven+Kingdoms+League"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "maple-highgrove",
+      "label": "Maple Highgrove",
+      "sourceUrl": "https://fumbbl.com/i/751131",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Elven+Kingdoms+League",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "roxanna-darknail",
+      "label": "Roxanna Darknail",
+      "sourceUrl": "https://fumbbl.com/i/674077",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Elven+Kingdoms+League"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "swiftvine-glimmershard",
+      "label": "Swiftvine Glimmershard",
+      "sourceUrl": "https://fumbbl.com/i/751133",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Elven+Kingdoms+League",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "valen-swift",
+      "label": "Valen Swift",
+      "sourceUrl": "https://fumbbl.com/i/674085",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Elven+Kingdoms+League"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "willow-rosebark",
+      "label": "Willow Rosebark",
+      "sourceUrl": "https://fumbbl.com/i/674090",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Elven+Kingdoms+League"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "zolcath-the-zoat",
+      "label": "Zolcath the Zoat",
+      "sourceUrl": "https://fumbbl.com/i/674092",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Elven+Kingdoms+League",
+        "https://fumbbl.com/p/stars?for=Lustrian+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "glart-smashrip",
+      "label": "Glart Smashrip",
+      "sourceUrl": "https://fumbbl.com/i/674098",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Favoured+of+Chaos+Undivided",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Khorne",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Nurgle",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Slaanesh",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Tzeentch",
+        "https://fumbbl.com/p/stars?for=Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "grashnak-blackhoof",
+      "label": "Grashnak Blackhoof",
+      "sourceUrl": "https://fumbbl.com/i/682645",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Favoured+of+Chaos+Undivided",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Khorne",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Nurgle",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Slaanesh",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Tzeentch",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "hakflem-skuttlespike",
+      "label": "Hakflem Skuttlespike",
+      "sourceUrl": "https://fumbbl.com/i/674063",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Favoured+of+Chaos+Undivided",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Khorne",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Nurgle",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Slaanesh",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Tzeentch",
+        "https://fumbbl.com/p/stars?for=Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "kreek-rustgouger",
+      "label": "Kreek Rustgouger",
+      "sourceUrl": "https://fumbbl.com/i/688966",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Favoured+of+Chaos+Undivided",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Khorne",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Nurgle",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Slaanesh",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Tzeentch",
+        "https://fumbbl.com/p/stars?for=Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "lord-borak-the-despoiler",
+      "label": "Lord Borak the Despoiler",
+      "sourceUrl": "https://fumbbl.com/i/674071",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Favoured+of+Chaos+Undivided",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Khorne",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Nurgle",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Slaanesh",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Tzeentch",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "skitter-stab-stab",
+      "label": "Skitter Stab-Stab",
+      "sourceUrl": "https://fumbbl.com/i/727735",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Favoured+of+Chaos+Undivided",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Khorne",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Nurgle",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Slaanesh",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Tzeentch",
+        "https://fumbbl.com/p/stars?for=Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Underworld+Challenge",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "withergrasp-doubledrool",
+      "label": "Withergrasp Doubledrool",
+      "sourceUrl": "https://fumbbl.com/i/705142",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Favoured+of+Chaos+Undivided",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Khorne",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Nurgle",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Slaanesh",
+        "https://fumbbl.com/p/stars?for=Favoured+of+Tzeentch",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Hashut",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "max-spleenripper",
+      "label": "Max Spleenripper",
+      "sourceUrl": "https://fumbbl.com/i/682976",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Favoured+of+Khorne",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "scyla-anfingrimm",
+      "label": "Scyla Anfingrimm",
+      "sourceUrl": "https://fumbbl.com/i/682974",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Favoured+of+Khorne",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "bilerot-vomitflesh",
+      "label": "Bilerot Vomitflesh",
+      "sourceUrl": "https://fumbbl.com/i/705135",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Favoured+of+Nurgle",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "guffle-pusmaw",
+      "label": "Guffle Pusmaw",
+      "sourceUrl": "https://fumbbl.com/i/751139",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Favoured+of+Nurgle",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "barik-farblast",
+      "label": "Barik Farblast",
+      "sourceUrl": "https://fumbbl.com/i/693216",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "cindy-piewhistle",
+      "label": "Cindy Piewhistle",
+      "sourceUrl": "https://fumbbl.com/i/705129",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "deeproot-strongbranch",
+      "label": "Deeproot Strongbranch",
+      "sourceUrl": "https://fumbbl.com/i/674094",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "griff-oberwald",
+      "label": "Griff Oberwald",
+      "sourceUrl": "https://fumbbl.com/i/674059",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "grim-ironjaw",
+      "label": "Grim Ironjaw",
+      "sourceUrl": "https://fumbbl.com/i/674061",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "grombrindal",
+      "label": "Grombrindal, the White Dwarf",
+      "sourceUrl": "https://fumbbl.com/i/686414",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Lustrian+Superleague",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "karla-von-kill",
+      "label": "Karla Von Kill",
+      "sourceUrl": "https://fumbbl.com/i/674068",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Lustrian+Superleague",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "the-mighty-zug",
+      "label": "Mighty Zug",
+      "sourceUrl": "https://fumbbl.com/i/674073",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Lustrian+Superleague",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "puggy-baconbreath",
+      "label": "Puggy Baconbreath",
+      "sourceUrl": "https://fumbbl.com/i/707557",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "rodney-roachbait",
+      "label": "Rodney Roachbait",
+      "sourceUrl": "https://fumbbl.com/i/735010",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "rowana-forestfoot",
+      "label": "Rowana Forestfoot",
+      "sourceUrl": "https://fumbbl.com/i/735011",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "rumbelow-sheepskin",
+      "label": "Rumbelow Sheepskin",
+      "sourceUrl": "https://fumbbl.com/i/674079",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "anqi-panqi",
+      "label": "Anqi Panqi",
+      "sourceUrl": "https://fumbbl.com/i/751137",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Lustrian+Superleague"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "boa-konsstriktr",
+      "label": "Boa Kon'sstriktr",
+      "sourceUrl": "https://fumbbl.com/i/699700",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Lustrian+Superleague"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "dribl",
+      "label": "Dribl",
+      "sourceUrl": "https://fumbbl.com/i/705131",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Lustrian+Superleague"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "drull",
+      "label": "Drull",
+      "sourceUrl": "https://fumbbl.com/i/705132",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Lustrian+Superleague"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "estelle-la-veneaux",
+      "label": "Estelle la Veneaux",
+      "sourceUrl": "https://fumbbl.com/i/699702",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Lustrian+Superleague"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "glotl-stop",
+      "label": "Glotl Stop",
+      "sourceUrl": "https://fumbbl.com/i/699704",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Lustrian+Superleague"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "frank-n-stein",
+      "label": "Frank 'n' Stein",
+      "sourceUrl": "https://fumbbl.com/i/674161",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Sylvanian+Spotlight",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "ivar-eriksson",
+      "label": "Ivar Eriksson",
+      "sourceUrl": "https://fumbbl.com/i/695526",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "skrorg-snowpelt",
+      "label": "Skrorg Snowpelt",
+      "sourceUrl": "https://fumbbl.com/i/695529",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "thorsson-stoutmead",
+      "label": "Thorsson Stoutmead",
+      "sourceUrl": "https://fumbbl.com/i/695531",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Halfling+Thimble+Cup,Old+World+Classic",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "captain-karina-von-riesz",
+      "label": "'Captain' Karina von Riesz",
+      "sourceUrl": "https://fumbbl.com/i/719444",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Sylvanian+Spotlight"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "bryce-the-slice-cambuel",
+      "label": "Bryce 'the Slice' Cambuel",
+      "sourceUrl": "https://fumbbl.com/i/674165",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Sylvanian+Spotlight"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "count-luthor-von-drakenforg",
+      "label": "Count Luthor von Drakenborg",
+      "sourceUrl": "https://fumbbl.com/i/719294",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Sylvanian+Spotlight"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "gretchen-wachter",
+      "label": "Gretchen Wächter 'The Blood Bowl Widow'",
+      "sourceUrl": "https://fumbbl.com/i/674103",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Sylvanian+Spotlight"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "ivan-the-animal-deathshroud",
+      "label": "Ivan 'The Animal' Deathshroud",
+      "sourceUrl": "https://fumbbl.com/i/719299",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Sylvanian+Spotlight"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "skrull-halfheight",
+      "label": "Skrull Halfheight",
+      "sourceUrl": "https://fumbbl.com/i/674082",
+      "sourcePages": [
+        "https://fumbbl.com/p/stars?for=Sylvanian+Spotlight",
+        "https://fumbbl.com/p/stars?for=Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Old+World+Classic,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Chaos+Undivided,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Khorne,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Nurgle,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Slaanesh,Worlds+Edge+Superleague",
+        "https://fumbbl.com/p/stars?for=Badlands+Brawl,Favoured+of+Tzeentch,Worlds+Edge+Superleague"
+      ],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "wilhelm-chaney",
+      "label": "Wilhelm Chaney",
+      "sourceUrl": "https://fumbbl.com/i/674164",
+      "sourcePages": ["https://fumbbl.com/p/stars?for=Sylvanian+Spotlight"],
+      "group": "Star Players",
+      "layout": "four-poses"
+    },
+    {
+      "id": "josef-bugman",
+      "label": "Josef Bugman the brewer",
+      "group": "Star Players",
+      "sourceUrl": "https://fumbbl.com/i/693925",
+      "sourcePages": ["https://fumbbl.com/p/notes?id=9260&op=view"],
+      "layout": "four-poses",
+      "note": "The official FUMBBL league lists do not include Josef Bugman. This community roster explicitly labels this sprite as Josef Bugman; it is a documented supplemental source, not a canonical league-list sprite."
+    }
+  ]
+}

@@ -1,22 +1,38 @@
-import { readFile, writeFile, mkdir, copyFile } from "node:fs/promises";
+import {
+  readFile,
+  writeFile,
+  mkdir,
+  mkdtemp,
+  rm,
+  rename,
+} from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import sharp from "sharp";
+import { format } from "prettier";
 
-// Run with a pageAssets bundle manifest, or with no argument to re-slice originals.
+// Offline by default: rebuild from checked-in originals. --download refreshes
+// the reviewed URLs, or --cache <directory> imports a previously downloaded set.
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const assetsRoot = path.join(root, "public/assets/fumbbl");
-const sourcePath = process.argv[2];
-const sourceAssets = sourcePath
-  ? JSON.parse(await readFile(sourcePath, "utf8")).assets
-  : JSON.parse(
-      await readFile(path.join(assetsRoot, "manifest.json"), "utf8"),
-    ).sheets.map((sheet) => ({
-      name: sheet.id,
-      path: path.join(root, "public", sheet.src),
-    }));
-const sources = new Map(sourceAssets.map((asset) => [asset.name, asset.path]));
+const sources = JSON.parse(
+  await readFile(path.join(root, "scripts/fumbbl-sprite-sources.json"), "utf8"),
+);
+const rosters = JSON.parse(
+  await readFile(path.join(root, "src/domain/data/rosters.json"), "utf8"),
+);
+const stars = JSON.parse(
+  await readFile(path.join(root, "src/domain/data/stars.json"), "utf8"),
+);
+const cacheIndex = process.argv.indexOf("--cache");
+const cache = cacheIndex === -1 ? undefined : process.argv[cacheIndex + 1];
+if (cacheIndex !== -1 && !cache)
+  throw new Error("--cache requires a directory");
+const download = process.argv.includes("--download");
+const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const slug = (text) =>
   text
     .normalize("NFKD")
@@ -24,124 +40,189 @@ const slug = (text) =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
-const labels = await readFile(
-  path.join(root, "scripts/fumbbl-icon-labels.txt"),
-  "utf8",
-);
-const entries = [];
-let group;
-for (const line of labels.split(/\r?\n/)) {
-  if (line.startsWith("[")) group = line.slice(1, -1);
-  else if (/^\d+\|/.test(line)) {
-    const [id, label] = line.split("|");
-    entries.push({ id, label, group });
-  }
-}
-if (entries.length !== 227 || new Set(entries.map((e) => e.id)).size !== 227)
-  throw new Error("Expected 227 uniquely labeled catalog sheets");
-if (
-  sources.size !== entries.length ||
-  entries.some((entry) => !sources.has(entry.id))
-)
-  throw new Error("Source bundle does not match the complete labeled catalog");
-const sheets = [],
-  preview = {};
-let frameCount = 0;
+const fetchUrl = (url) => {
+  const parsed = new URL(url);
+  if (parsed.hostname !== "fumbbl.com")
+    throw new Error(`Unexpected sprite host: ${url}`);
+  parsed.protocol = "https:";
+  return parsed.href;
+};
+const json = (value) => format(JSON.stringify(value), { parser: "json" });
+const run = promisify(execFile);
+const previous =
+  !download && !cache
+    ? JSON.parse(await readFile(path.join(assetsRoot, "manifest.json"), "utf8"))
+    : undefined;
+const entries = [
+  ...sources.rosters.flatMap((roster) =>
+    roster.players.map((player) => ({
+      ...player,
+      group: roster.name,
+      sourcePages: [roster.sourcePage],
+      kind: "position",
+    })),
+  ),
+  ...sources.stars.map((star) => ({ ...star, kind: "star" })),
+];
+const ids = new Set();
 for (const entry of entries) {
-  const bytes = await readFile(sources.get(entry.id));
-  const metadata = await sharp(bytes).metadata();
-  const { width, height, format } = metadata;
-  // All sheets have four columns: red front/side, blue front/side.
-  // Hubris Rakarth uniquely uses 28x32 rectangular cells.
-  const frameWidth = width / 4,
-    frameHeight = entry.id === "436462" ? 32 : frameWidth;
-  if (!Number.isInteger(frameWidth) || height % frameHeight !== 0)
-    throw new Error(
-      `Unrecognized sheet layout: ${entry.id} (${width}x${height})`,
-    );
-  const directory = slug(entry.group),
-    basename = `${slug(entry.label)}-${entry.id}`;
-  const original = `assets/fumbbl/sheets/${directory}/${basename}-${width}x${height}.${format}`;
-  await mkdir(path.dirname(path.join(root, "public", original)), {
-    recursive: true,
-  });
+  if (ids.has(entry.id)) throw new Error(`Duplicate player ID: ${entry.id}`);
+  ids.add(entry.id);
+}
+for (const roster of rosters) {
+  const source = sources.rosters.find((r) => r.id === roster.id);
   if (
-    path.resolve(sources.get(entry.id)) !==
-    path.resolve(root, "public", original)
+    source?.players.length !== roster.players.length ||
+    roster.players.some(
+      (player) => !source.players.some((p) => p.id === player.id),
+    ) ||
+    !source.players.some((p) => p.id === source.representative)
   )
-    await copyFile(sources.get(entry.id), path.join(root, "public", original));
-  const frames = [];
-  for (let row = 0; row < height / frameHeight; row++) {
-    for (let column = 0; column < 4; column++) {
-      const teamColor = column < 2 ? "red" : "blue",
-        pose = column % 2 === 0 ? "front" : "side";
-      const variant = row + 1;
-      const src = `assets/fumbbl/players/${directory}/${basename}-v${String(variant).padStart(2, "0")}-${teamColor}-${pose}-${frameWidth}x${frameHeight}.png`;
-      await mkdir(path.dirname(path.join(root, "public", src)), {
+    throw new Error(`Incomplete roster mapping: ${roster.id}`);
+}
+for (const star of stars) {
+  if (!sources.stars.some((entry) => entry.id === star.id))
+    throw new Error(`Missing star mapping: ${star.id}`);
+}
+
+// Validate and build everything in a temporary directory before replacing assets.
+const staged = await mkdtemp(path.join(root, "public/assets/.fumbbl-"));
+const assets = [];
+const byUrl = new Map();
+const catalog = { positions: {}, stars: {}, rosters: {} };
+try {
+  for (const entry of entries) {
+    const url = fetchUrl(entry.sourceUrl);
+    let asset = byUrl.get(url);
+    if (!asset) {
+      let bytes;
+      if (cache) bytes = await readFile(path.join(cache, hash(url)));
+      else if (download) {
+        const result = await run(
+          "curl",
+          ["-sSL", "--fail", "--retry", "2", "--max-time", "30", url],
+          { encoding: "buffer", maxBuffer: 10 * 1024 * 1024 },
+        );
+        bytes = result.stdout;
+      } else {
+        const original = previous.assets.find((a) => a.sourceUrl === url);
+        if (!original) throw new Error(`No saved original for ${url}`);
+        bytes = await readFile(path.join(root, "public", original.src));
+        if (hash(bytes) !== original.sha256)
+          throw new Error(`Original checksum mismatch: ${url}`);
+      }
+      const { width, height, format, pages } = await sharp(bytes).metadata();
+      if (!width || !height || !["png", "gif"].includes(format) || pages > 1)
+        throw new Error(`Unsupported image: ${url}`);
+      const columns = entry.layout === "four-poses" ? 4 : 1;
+      const frameWidth = width / columns;
+      if (
+        !Number.isInteger(frameWidth) ||
+        frameWidth > 48 ||
+        height > 48 ||
+        (columns === 4 && frameWidth !== height)
+      )
+        throw new Error(
+          `Unexpected ${entry.layout} dimensions: ${url} (${width}x${height})`,
+        );
+      const imageId = path
+        .basename(new URL(url).pathname)
+        .replace(/\.[^.]+$/, "");
+      const directory = entry.kind === "star" ? "stars" : slug(entry.group);
+      const basename = `${slug(entry.label)}-${imageId}`;
+      const original = `originals/${directory}/${basename}-${width}x${height}.${format}`;
+      await mkdir(path.dirname(path.join(staged, original)), {
         recursive: true,
       });
-      await sharp(bytes)
-        .extract({
-          left: column * frameWidth,
-          top: row * frameHeight,
+      await writeFile(path.join(staged, original), bytes);
+      const frames = [];
+      for (let column = 0; column < columns; column++) {
+        const pose =
+          columns === 1
+            ? "front"
+            : ["red-front", "red-side", "blue-front", "blue-side"][column];
+        const src = `players/${directory}/${basename}-${pose}-${frameWidth}x${height}.png`;
+        await mkdir(path.dirname(path.join(staged, src)), { recursive: true });
+        await sharp(bytes)
+          .extract({
+            left: column * frameWidth,
+            top: 0,
+            width: frameWidth,
+            height,
+          })
+          .png()
+          .toFile(path.join(staged, src));
+        frames.push({
+          src: `/assets/fumbbl/${src}`,
+          pose,
+          x: column * frameWidth,
+          y: 0,
           width: frameWidth,
-          height: frameHeight,
-        })
-        .png()
-        .toFile(path.join(root, "public", src));
-      frames.push({
-        src: `/${src}`,
-        variant,
-        teamColor,
-        pose,
-        x: column * frameWidth,
-        y: row * frameHeight,
-        width: frameWidth,
-        height: frameHeight,
-      });
-      frameCount++;
+          height,
+        });
+      }
+      asset = {
+        sourceUrl: url,
+        src: `/assets/fumbbl/${original}`,
+        width,
+        height,
+        sha256: hash(bytes),
+        layout: entry.layout,
+        frames,
+        players: [],
+      };
+      assets.push(asset);
+      byUrl.set(url, asset);
     }
+    if (asset.layout !== entry.layout)
+      throw new Error(`Conflicting sprite layout for ${url}`);
+    asset.players.push({
+      id: entry.id,
+      label: entry.label,
+      group: entry.group,
+      sourcePages: entry.sourcePages,
+      ...(entry.note ? { note: entry.note } : {}),
+    });
+    const frame = asset.frames[0];
+    catalog[entry.kind === "star" ? "stars" : "positions"][entry.id] = {
+      label: entry.label,
+      group: entry.group,
+      width: frame.width,
+      height: frame.height,
+      variants: [frame.src],
+    };
   }
-  sheets.push({
-    ...entry,
-    sourceUrl: `https://fumbbl.com/i/${entry.id}`,
-    src: `/${original}`,
-    width,
-    height,
-    sha256: createHash("sha256").update(bytes).digest("hex"),
-    frameWidth,
-    frameHeight,
-    variants: height / frameHeight,
-    frames,
-  });
-  preview[entry.id] = {
-    label: entry.label,
-    group: entry.group,
-    width: frameWidth,
-    height: frameHeight,
-    variants: frames
-      .filter((f) => f.teamColor === "red" && f.pose === "front")
-      .map((f) => f.src),
-  };
+  for (const roster of sources.rosters)
+    catalog.rosters[roster.id] = roster.representative;
+  await writeFile(
+    path.join(staged, "manifest.json"),
+    await json({
+      retrievedOn: sources.retrievedOn,
+      sourcePages: [sources.rosterIndex, sources.leagueIndex],
+      rosterPages: sources.rosters.map((roster) => roster.sourcePage),
+      leaguePages: sources.leaguePages,
+      positionCount: Object.keys(catalog.positions).length,
+      catalogStarCount: stars.length,
+      sourceStarCount: Object.keys(catalog.stars).length,
+      assetCount: assets.length,
+      frameCount: assets.reduce((sum, asset) => sum + asset.frames.length, 0),
+      assets,
+    }),
+  );
+  await writeFile(
+    path.join(staged, "README.md"),
+    await readFile(path.join(assetsRoot, "README.md")),
+  );
+  await rm(assetsRoot, { recursive: true });
+  await rename(staged, assetsRoot);
+  await writeFile(
+    path.join(root, "src/domain/data/player-icons.json"),
+    await json(catalog),
+  );
+  console.log(
+    `Imported ${assets.length} originals; ${Object.keys(catalog.positions).length} positions and ${stars.length} catalog stars have sprites (${Object.keys(catalog.stars).length} source stars total).`,
+  );
+} catch (error) {
+  await rm(staged, { recursive: true, force: true });
+  throw error;
 }
-await writeFile(
-  path.join(assetsRoot, "manifest.json"),
-  JSON.stringify(
-    {
-      sourcePage: "https://fumbbl.com/p/icons",
-      retrievedOn: "2026-09-30",
-      sheetCount: sheets.length,
-      frameCount,
-      sheets,
-    },
-    null,
-    2,
-  ) + "\n",
-);
-await writeFile(
-  path.join(root, "src/domain/data/player-icons.json"),
-  JSON.stringify(preview, null, 2) + "\n",
-);
-console.log(
-  `Imported ${sheets.length} original sheets and ${frameCount} frames.`,
-);
