@@ -961,9 +961,8 @@ html {
   .player-dialog-header {
     padding: 12px;
   }
-  .player-skill-toolbar > div:first-child,
-  .player-skill-toolbar > p:not([data-limit-reached]) {
-    /* Keep the status available to assistive technology on short screens. */
+  .player-skill-toolbar > div:first-child {
+    /* Keep the heading available to assistive technology on short screens. */
     position: absolute;
     width: 1px;
     height: 1px;

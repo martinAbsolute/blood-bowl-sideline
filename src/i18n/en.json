@@ -21,8 +21,8 @@
     "noAddedSkills": "No added skills yet. Choose skills from the list to develop this player.",
     "done": "Done",
     "clearSearch": "Clear search",
-    "resetFilters": "Reset filters",
-    "skillHint": "Tap a skill to read its rules. Use + to add it."
+    "showAllSkills": "Show all skills",
+    "unavailable": "Skill unavailable"
   },
   "leagueUx": {
     "careerRoster": "Team roster",

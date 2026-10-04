@@ -1,8 +1,8 @@
 "use client";
 
-import { useDeferredValue, useId, useRef, useState } from "react";
+import { useDeferredValue, useRef, useState } from "react";
 import { useTranslations } from "gt-next";
-import { Check, Plus, Search, X } from "lucide-react";
+import { Check, LockKeyhole, Plus, Search, X } from "lucide-react";
 import {
   categories,
   getRuleset,
@@ -15,6 +15,7 @@ import type { Position, Team } from "@/domain/types";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { SkillBox } from "./skill-box";
+import { RuleHelp } from "./rule-help";
 
 const orderedSkills = sortSkillIds(skills.map((skill) => skill.id));
 const skillsById = new Map(skills.map((skill) => [skill.id, skill]));
@@ -41,7 +42,6 @@ export function PlayerSkillPicker({
   const [category, setCategory] = useState("all");
   const listRef = useRef<HTMLUListElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
-  const statusId = useId();
   const deferredSearch = useDeferredValue(search).trim().toLowerCase();
   const rules = getRuleset(team.rulesetId);
   const unit = rules.skillCurrency ? t(rules.skillCurrency) : "GP";
@@ -150,13 +150,8 @@ export function PlayerSkillPicker({
             </button>
           ))}
         </div>
-        <p
-          id={statusId}
-          data-limit-reached={full ? "" : undefined}
-          role="status"
-          className="mt-3 text-xs leading-relaxed text-muted-foreground"
-        >
-          {t(full ? "skillLimitReached" : "playerModal.skillHint")}
+        <p role="status" className="sr-only">
+          {full ? t("skillLimitReached") : ""}
         </p>
       </div>
       <ul
@@ -174,6 +169,13 @@ export function PlayerSkillPicker({
               : [...selected, id],
           );
           const issue = chosen || full ? undefined : blocked(next);
+          const restriction = chosen
+            ? undefined
+            : full
+              ? t("skillLimitReached")
+              : issue
+                ? t(`issues.${issue.code}`, issue.values)
+                : undefined;
           const delta = playerSkillCost(team, position, next) - cost;
           return (
             <li
@@ -186,67 +188,62 @@ export function PlayerSkillPicker({
                   {t(skillAccess(position, id)!)}
                   {skill.isElite ? ` · ${t("elite")}` : ""}
                 </p>
-                {issue && (
-                  <p
-                    id={`${statusId}-${id}`}
-                    className="mt-1 text-xs text-muted-foreground"
-                  >
-                    {t(`issues.${issue.code}`, issue.values)}
-                  </p>
-                )}
               </div>
               <span className="shrink-0 font-mono text-xs text-muted-foreground">
                 {chosen ? "−" : "+"}
                 {formatCost(Math.abs(delta))}
               </span>
-              <Button
-                variant={chosen ? "default" : "outline"}
-                size="icon"
-                className="group size-11 shrink-0 sm:size-8"
-                disabled={!chosen && (full || !!issue)}
-                aria-pressed={chosen}
-                aria-describedby={
-                  !chosen
-                    ? issue
-                      ? `${statusId}-${id}`
-                      : full
-                        ? statusId
-                        : undefined
-                    : undefined
-                }
-                aria-label={`${t(chosen ? "removeSkill" : "addSkill")} · ${skillName(id)}`}
-                onClick={() => {
-                  if (chosen || (!full && !blocked(next))) onChange(next);
-                }}
-              >
-                {chosen ? (
-                  <>
-                    <Check className="size-4 group-hover:hidden" />
-                    <X className="hidden size-4 group-hover:block" />
-                  </>
-                ) : (
-                  <Plus className="size-4" />
-                )}
-              </Button>
+              {restriction ? (
+                <RuleHelp
+                  title={skillName(id)}
+                  meta={t("playerModal.unavailable")}
+                  description={restriction}
+                  label={`${t("playerModal.unavailable")} · ${skillName(id)}`}
+                  className="flex size-11 shrink-0 items-center justify-center rounded-md border border-dashed text-muted-foreground hover:bg-secondary hover:text-foreground sm:size-8"
+                >
+                  <LockKeyhole aria-hidden="true" className="size-4" />
+                </RuleHelp>
+              ) : (
+                <Button
+                  variant={chosen ? "default" : "outline"}
+                  size="icon"
+                  className="group size-11 shrink-0 sm:size-8"
+                  aria-pressed={chosen}
+                  aria-label={`${t(chosen ? "removeSkill" : "addSkill")} · ${skillName(id)}`}
+                  onClick={() => {
+                    if (chosen || (!full && !blocked(next))) onChange(next);
+                  }}
+                >
+                  {chosen ? (
+                    <>
+                      <Check className="size-4 group-hover:hidden" />
+                      <X className="hidden size-4 group-hover:block" />
+                    </>
+                  ) : (
+                    <Plus className="size-4" />
+                  )}
+                </Button>
+              )}
             </li>
           );
         })}
         {!available.length && (
-          <li className="space-y-3 px-4 py-8 text-center text-sm text-muted-foreground">
-            <Search className="mx-auto size-5" aria-hidden="true" />
-            {t("noMatchingSkills")}
-            <div>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSearch("");
-                  setCategory("all");
-                  searchRef.current?.focus();
-                }}
-              >
-                {t("playerModal.resetFilters")}
-              </Button>
+          <li className="flex flex-col items-center gap-4 px-4 py-8 text-center text-sm text-muted-foreground">
+            <div className="space-y-2">
+              <Search className="mx-auto size-5" aria-hidden="true" />
+              <p>{t("noMatchingSkills")}</p>
             </div>
+            <Button
+              variant="outline"
+              className="h-11 sm:h-8"
+              onClick={() => {
+                setSearch("");
+                setCategory("all");
+                searchRef.current?.focus();
+              }}
+            >
+              {t("playerModal.showAllSkills")}
+            </Button>
           </li>
         )}
       </ul>

@@ -183,12 +183,39 @@ it("enforces the player limit against staged skills", async () => {
   team.rulesetId = "eurobowl-2026";
   team.players[0].skills = ["block", "wrestle"];
   await render();
-  expect(button("addSkill · Fend").disabled).toBe(true);
+  expect(button("addSkill · Fend")).toBeUndefined();
+  await click("playerModal.unavailable · Fend");
+  expect(confirmation().textContent).toContain("skillLimitReached");
+  await click("ok", confirmation());
   await click("removeSkill · Block");
   expect(button("addSkill · Fend").disabled).toBe(false);
   await click("addSkill · Fend");
-  expect(button("addSkill · Pro").disabled).toBe(true);
+  expect(button("addSkill · Pro")).toBeUndefined();
+  expect(button("playerModal.unavailable · Pro")).toBeDefined();
   expect(team.players[0].skills).toEqual(["block", "wrestle"]);
+});
+
+it("explains star restrictions on demand without applying a blocked skill", async () => {
+  team.rulesetId = "eurobowl-2026";
+  team.stars = ["griff-oberwald"];
+  await render();
+  expect(button("addSkill · Dodge")).toBeUndefined();
+  expect(
+    document.querySelector(".player-skill-results")?.textContent,
+  ).not.toContain("issues.starSkills");
+  await click("playerModal.unavailable · Dodge");
+  expect(confirmation().textContent).toContain("issues.starSkills");
+  expect(onChange).not.toHaveBeenCalled();
+  await click("ok", confirmation());
+  await click("addSkill · Block");
+  expect(button("addSkill · Fend")).toBeUndefined();
+  await click("playerModal.unavailable · Fend");
+  expect(confirmation().textContent).toContain("issues.starSkills");
+  await click("ok", confirmation());
+  await click("removeSkill · Block");
+  expect(button("addSkill · Fend")).toBeDefined();
+  expect(button("playerModal.save").disabled).toBe(true);
+  expect(team.players[0].skills).toEqual([]);
 });
 
 it("removes an untouched player directly without an irrelevant warning", async () => {

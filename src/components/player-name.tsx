@@ -18,13 +18,13 @@ export function PlayerName({
   const beforeFocus = useRef(value);
   const [editing, setEditing] = useState(false);
   return (
-    <span className="player-name-editor group inline-flex w-max max-w-full items-center gap-2">
+    <span className="player-name-editor flex w-max max-w-full items-baseline gap-2">
       <span className="relative grid min-w-[1ch] max-w-full grid-cols-[minmax(0,1fr)]">
         <span
           aria-hidden="true"
-          className="invisible min-w-0 overflow-hidden whitespace-pre py-1"
+          className="invisible min-w-0 overflow-hidden whitespace-pre"
         >
-          {value || (editing ? "\u00a0" : placeholder)}
+          {value || placeholder}
           {"\u200b"}
         </span>
         <input
@@ -36,7 +36,7 @@ export function PlayerName({
           placeholder={editing ? "" : placeholder}
           spellCheck={false}
           style={{ font: "inherit" }}
-          className="absolute inset-0 h-full w-full min-w-0 rounded-sm border-0 bg-transparent py-1 text-ellipsis text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className="absolute inset-0 h-full w-full min-w-0 border-0 bg-transparent p-0 text-ellipsis text-foreground outline-none placeholder:text-muted-foreground"
           onFocus={(event) => {
             beforeFocus.current = value;
             setEditing(true);
@@ -57,7 +57,7 @@ export function PlayerName({
       </span>
       <Pencil
         aria-hidden="true"
-        className="pointer-events-none size-3.5 shrink-0 text-muted-foreground group-focus-within:invisible"
+        className="pointer-events-none size-3.5 shrink-0 text-muted-foreground"
       />
     </span>
   );
