@@ -24,6 +24,7 @@ export function RuleHelp({
   className,
   label,
   href,
+  action,
   fullDescription = false,
   skillPreview = false,
 }: {
@@ -34,6 +35,11 @@ export function RuleHelp({
   className?: string;
   label?: string;
   href?: string;
+  action?: {
+    label: string;
+    onClick: () => void;
+    finalFocus?: () => HTMLElement | null;
+  };
   fullDescription?: boolean;
   skillPreview?: boolean;
 }) {
@@ -107,7 +113,7 @@ export function RuleHelp({
           className="max-h-[85dvh] overflow-y-auto sm:max-w-md"
           finalFocus={() => {
             setHovered(false);
-            return trigger.current;
+            return action?.finalFocus?.() ?? trigger.current;
           }}
         >
           <DialogHeader className="pr-6">
@@ -129,9 +135,28 @@ export function RuleHelp({
               {t("fullRule")}
             </a>
           )}
-          <DialogClose render={<Button variant="outline" className="mt-2" />}>
-            {t("ok")}
-          </DialogClose>
+          {action ? (
+            <div className="mt-2 flex flex-wrap justify-end gap-2">
+              <DialogClose
+                render={<Button variant="outline" className="h-11 sm:h-8" />}
+              >
+                {t("cancel")}
+              </DialogClose>
+              <Button
+                className="h-auto min-h-11 whitespace-normal sm:min-h-8"
+                onClick={() => {
+                  setOpen(false);
+                  action.onClick();
+                }}
+              >
+                {action.label}
+              </Button>
+            </div>
+          ) : (
+            <DialogClose render={<Button variant="outline" className="mt-2" />}>
+              {t("ok")}
+            </DialogClose>
+          )}
         </DialogContent>
       </Dialog>
     </>

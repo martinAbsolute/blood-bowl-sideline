@@ -24,7 +24,7 @@ export function PlayerName({
           aria-hidden="true"
           className="invisible min-w-0 overflow-hidden whitespace-pre"
         >
-          {value || placeholder}
+          {value || (editing ? "\u00a0" : placeholder)}
           {"\u200b"}
         </span>
         <input

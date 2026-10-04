@@ -204,18 +204,52 @@ it("explains star restrictions on demand without applying a blocked skill", asyn
     document.querySelector(".player-skill-results")?.textContent,
   ).not.toContain("issues.starSkills");
   await click("playerModal.unavailable · Dodge");
-  expect(confirmation().textContent).toContain("issues.starSkills");
+  expect(confirmation().textContent).toContain("playerModal.starSecondaryHint");
+  expect(button("playerModal.replaceSkill", confirmation())).toBeUndefined();
   expect(onChange).not.toHaveBeenCalled();
   await click("ok", confirmation());
   await click("addSkill · Block");
   expect(button("addSkill · Fend")).toBeUndefined();
   await click("playerModal.unavailable · Fend");
-  expect(confirmation().textContent).toContain("issues.starSkills");
-  await click("ok", confirmation());
+  expect(confirmation().textContent).toContain("playerModal.replaceSkillHint");
+  await click("cancel", confirmation());
   await click("removeSkill · Block");
   expect(button("addSkill · Fend")).toBeDefined();
   expect(button("playerModal.save").disabled).toBe(true);
   expect(team.players[0].skills).toEqual([]);
+});
+
+it("replaces an existing primary skill locally and applies the replacement only on Save", async () => {
+  team.rulesetId = "eurobowl-2026";
+  team.stars = ["griff-oberwald"];
+  team.players[0].skills = ["block"];
+  await render();
+  await click("playerModal.unavailable · Fend");
+  await click("playerModal.replaceSkill", confirmation());
+  expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+  expect(button("removeSkill · Fend")).toBeDefined();
+  expect(button("removeSkill · Block")).toBeUndefined();
+  await vi.waitFor(() =>
+    expect(document.activeElement?.closest(".player-dialog")).not.toBeNull(),
+  );
+  expect(onChange).not.toHaveBeenCalled();
+  expect(team.players[0].skills).toEqual(["block"]);
+  await click("playerModal.save");
+  expect(team.players[0].skills).toEqual(["fend"]);
+  expect(onChange).toHaveBeenCalledOnce();
+});
+
+it("discards a staged skill replacement when the player modal is cancelled", async () => {
+  team.rulesetId = "eurobowl-2026";
+  team.stars = ["griff-oberwald"];
+  team.players[0].skills = ["block"];
+  await render();
+  await click("playerModal.unavailable · Fend");
+  await click("playerModal.replaceSkill", confirmation());
+  await click("cancel");
+  expect(team.players[0].skills).toEqual(["block"]);
+  expect(onChange).not.toHaveBeenCalled();
+  expect(onClose).toHaveBeenCalledOnce();
 });
 
 it("removes an untouched player directly without an irrelevant warning", async () => {

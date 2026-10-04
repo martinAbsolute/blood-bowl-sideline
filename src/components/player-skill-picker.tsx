@@ -169,18 +169,33 @@ export function PlayerSkillPicker({
               : [...selected, id],
           );
           const issue = chosen || full ? undefined : blocked(next);
+          const canReplace =
+            issue?.code === "starSkills" &&
+            selected.length === 1 &&
+            skillAccess(position, id) === "primary" &&
+            !blocked([id]);
           const restriction = chosen
             ? undefined
             : full
-              ? t("skillLimitReached")
-              : issue
-                ? t(`issues.${issue.code}`, issue.values)
-                : undefined;
+              ? `${t("skillLimitReached")} ${t("playerModal.makeRoom")}`
+              : canReplace
+                ? t("playerModal.replaceSkillHint", {
+                    current: skillName(selected[0]),
+                    next: skillName(id),
+                  })
+                : issue?.code === "starSkills" &&
+                    skillAccess(position, id) === "secondary"
+                  ? t("playerModal.starSecondaryHint", { skill: skillName(id) })
+                  : issue
+                    ? t(`issues.${issue.code}`, issue.values)
+                    : undefined;
           const delta = playerSkillCost(team, position, next) - cost;
           return (
             <li
               key={id}
-              className={`flex items-center gap-3 px-4 py-2.5 sm:py-1.5 ${chosen ? "bg-primary/5" : ""}`}
+              data-skill-row={id}
+              tabIndex={-1}
+              className={`flex items-center gap-3 px-4 py-2.5 outline-none sm:py-1.5 ${chosen ? "bg-primary/5" : ""}`}
             >
               <div className="min-w-0 flex-1">
                 <SkillBox id={id} added={chosen} />
@@ -198,6 +213,22 @@ export function PlayerSkillPicker({
                   title={skillName(id)}
                   meta={t("playerModal.unavailable")}
                   description={restriction}
+                  action={
+                    canReplace
+                      ? {
+                          label: t("playerModal.replaceSkill", {
+                            skill: skillName(id),
+                          }),
+                          onClick: () => {
+                            if (!blocked([id])) onChange([id]);
+                          },
+                          finalFocus: () =>
+                            listRef.current?.querySelector<HTMLElement>(
+                              `[data-skill-row="${id}"]`,
+                            ) ?? null,
+                        }
+                      : undefined
+                  }
                   label={`${t("playerModal.unavailable")} · ${skillName(id)}`}
                   className="flex size-11 shrink-0 items-center justify-center rounded-md border border-dashed text-muted-foreground hover:bg-secondary hover:text-foreground sm:size-8"
                 >

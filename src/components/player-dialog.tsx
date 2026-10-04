@@ -316,11 +316,6 @@ export function PlayerDialog({
                   </span>
                 )}
               </div>
-              {player && draft.skills.length > 0 && (
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  {t("playerModal.skillsHint")}
-                </p>
-              )}
               {captain && (
                 <p className="flex items-center gap-1.5 text-xs font-medium text-primary">
                   <ShieldCheck className="size-3.5" />
@@ -345,11 +340,6 @@ export function PlayerDialog({
         </div>
 
         <div className="player-dialog-footer flex-wrap">
-          {dirty && (
-            <p className="w-full text-xs text-muted-foreground" role="status">
-              {t("playerModal.unsaved")}
-            </p>
-          )}
           {!readOnly && (
             <Button
               variant="ghost"
