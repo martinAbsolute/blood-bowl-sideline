@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "gt-next";
 import { useConvexAuth } from "convex/react";
@@ -55,11 +55,10 @@ import {
   TableRow,
 } from "./ui/table";
 import { PlayerRecruitment } from "./player-recruitment";
-import { SkillList, TableSkills } from "./skill-box";
+import { TableSkills } from "./skill-box";
 import { TeamAffiliations, SpecialRules } from "./team-affiliations";
 import { Checkbox } from "./ui/checkbox";
-import { ScrollArea } from "./ui/scroll-area";
-import { PlayerSkillPicker } from "./player-skill-picker";
+import { PlayerDialog } from "./player-dialog";
 import { positionLabel } from "./position-name";
 import { TeamSupport } from "./team-support";
 import { TeamBudget } from "./team-budget";
@@ -78,7 +77,6 @@ import {
   RectangleHorizontal,
   ShieldCheck,
   Star,
-  Trash2,
   X,
 } from "lucide-react";
 import { toast } from "@/components/ui/toast";
@@ -109,16 +107,10 @@ export function TeamEditor({
     [selected, setSelected] = useState<string | null>(null),
     [search, setSearch] = useState("");
   const [pendingRoster, setPendingRoster] = useState<string | null>(null);
-  const playerTitle = useRef<HTMLHeadingElement>(null);
   const roster = getRoster(team.rosterId)!,
     rules = getRuleset(team.rulesetId),
     totals = summarize(team),
     validation = validateTeam(team);
-  const currentPlayer = team.players.find((p) => p.id === selected),
-    position = roster.players.find((p) => p.id === currentPlayer?.positionId);
-  const currentStar = team.stars.includes(selected ?? "")
-    ? stars.find((star) => star.id === selected)
-    : undefined;
   const requiresCaptain = roster.specialRules.includes("Team Captain");
   function switchRoster(rosterId: string) {
     const next = resetTeamRoster(
@@ -139,14 +131,6 @@ export function TeamEditor({
     change(next);
     setSelected(null);
     setPendingRoster(null);
-  }
-  function editPlayer(update: Partial<Team["players"][number]>) {
-    change({
-      ...team,
-      players: team.players.map((p) =>
-        p.id === selected ? { ...p, ...update } : p,
-      ),
-    });
   }
   async function share() {
     try {
@@ -977,152 +961,16 @@ export function TeamEditor({
           </Button>
         </DialogContent>
       </Dialog>
-      <Dialog
-        open={!!currentPlayer || !!currentStar}
-        onOpenChange={(open) => {
-          if (!open) setSelected(null);
-        }}
-      >
-        <DialogContent
-          className="player-dialog flex max-h-[90dvh] flex-col overflow-hidden p-4 sm:max-w-2xl sm:p-6"
-          initialFocus={playerTitle}
-        >
-          <DialogHeader className="pr-8 text-left">
-            <p className="eyebrow">{t("managePlayer")}</p>
-            <DialogTitle
-              ref={playerTitle}
-              tabIndex={-1}
-              className="display-font break-words text-2xl leading-tight outline-none"
-            >
-              {currentStar?.name ||
-                currentPlayer?.name.trim() ||
-                (position && positionLabel(position.position))}
-            </DialogTitle>
-            <DialogDescription className="flex items-center gap-2 font-medium text-foreground">
-              {position && <PlayerIcon positionId={position.id} />}
-              {position && positionLabel(position.position)}
-              {currentStar && (
-                <>
-                  <StarPlayerIcon starId={currentStar.id} />
-                  {t("starPlayers")}
-                </>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          {currentPlayer && position && (
-            <>
-              <ScrollArea className="h-[min(65dvh,40rem)] min-h-0">
-                <div className="space-y-5 py-1 pl-1 pr-3">
-                  <label className="block text-xs font-medium">
-                    {t("playerName")}
-                    <Input
-                      value={currentPlayer.name}
-                      maxLength={80}
-                      className="mt-2"
-                      disabled={readOnly}
-                      onChange={(event) =>
-                        editPlayer({ name: event.target.value })
-                      }
-                    />
-                  </label>
-                  <div>
-                    <p className="eyebrow mb-2">{t("builtInSkills")}</p>
-                    <SkillList ids={position.skills} />
-                  </div>
-                  {readOnly ? (
-                    <div>
-                      <p className="eyebrow mb-2">{t("addedSkills")}</p>
-                      <SkillList ids={currentPlayer.skills} added />
-                    </div>
-                  ) : (
-                    <PlayerSkillPicker
-                      key={currentPlayer.id}
-                      team={team}
-                      playerId={currentPlayer.id}
-                      position={position}
-                      selected={currentPlayer.skills}
-                      captain={team.captainId === currentPlayer.id}
-                      max={Math.min(
-                        6,
-                        rules.teamOverrides?.[roster.id]?.maxSkillsPerPlayer ??
-                          (rules.id === "eurobowl-2026"
-                            ? 2
-                            : rules.maxAdvancementsPerPlayer),
-                      )}
-                      onChange={(skills) => editPlayer({ skills })}
-                    />
-                  )}
-                  {team.captainId === currentPlayer.id && (
-                    <div>
-                      <p className="eyebrow mb-2">{t("teamCaptain")}</p>
-                      <SkillList ids={[]} captain />
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-              <div className="flex justify-between gap-3 border-t pt-4">
-                {!readOnly && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => {
-                      const next = {
-                        ...team,
-                        players: team.players.filter(
-                          (player) => player.id !== selected,
-                        ),
-                      };
-                      if (next.captainId === selected) delete next.captainId;
-                      change(next);
-                      setSelected(null);
-                    }}
-                  >
-                    <Trash2 className="size-4" />
-                    {t("removePlayer")}
-                  </Button>
-                )}
-                <Button className="ml-auto" onClick={() => setSelected(null)}>
-                  {t("close")}
-                </Button>
-              </div>
-            </>
-          )}
-          {currentStar && (
-            <>
-              <ScrollArea className="h-[min(50dvh,24rem)] min-h-0">
-                <div className="space-y-5 py-1 pl-1 pr-3">
-                  <p className="font-mono text-sm">
-                    {gold(currentStar.cost)} GP
-                  </p>
-                  <dl className="grid grid-cols-5 gap-2 text-center font-mono">
-                    {[
-                      ["MA", currentStar.ma],
-                      ["ST", currentStar.st],
-                      ["AG", currentStar.ag],
-                      ["PA", currentStar.pa],
-                      ["AV", currentStar.av],
-                    ].map(([label, value]) => (
-                      <div key={label}>
-                        <dt className="text-xs text-muted-foreground">
-                          {label}
-                        </dt>
-                        <dd className="mt-1 text-sm">{value}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                  <div>
-                    <p className="eyebrow mb-2">{t("builtInSkills")}</p>
-                    <SkillList ids={currentStar.skills} />
-                  </div>
-                </div>
-              </ScrollArea>
-              <Button className="ml-auto" onClick={() => setSelected(null)}>
-                {t("close")}
-              </Button>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      {selected && (
+        <PlayerDialog
+          key={selected}
+          team={team}
+          selected={selected}
+          readOnly={readOnly}
+          onChange={change}
+          onClose={() => setSelected(null)}
+        />
+      )}
     </div>
   );
 }

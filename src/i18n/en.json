@@ -1,4 +1,15 @@
 {
+  "playerModal": {
+    "browseSkills": "Add skills",
+    "allSkills": "All",
+    "filterCategory": "Filter by skill category",
+    "skillSpend": "Skill spend",
+    "noAddedSkills": "No added skills yet. Choose skills from the list to develop this player.",
+    "done": "Done",
+    "clearSearch": "Clear search",
+    "resetFilters": "Reset filters",
+    "skillHint": "Tap a skill to read its rules. Use + to add it."
+  },
   "leagueUx": {
     "careerRoster": "Team roster",
     "careerRosterHint": "Select a player to manage their career.",
