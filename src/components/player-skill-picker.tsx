@@ -94,11 +94,11 @@ export function PlayerSkillPicker({
         <div className="relative">
           <Search
             aria-hidden="true"
-            className="pointer-events-none absolute left-3 top-3.5 size-4 text-muted-foreground"
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
           />
           <Input
             ref={searchRef}
-            className="h-11 bg-card pl-9 pr-11"
+            className="h-11 bg-card pl-9 pr-11 sm:h-8 sm:pr-8"
             maxLength={80}
             value={search}
             onChange={(event) => {
@@ -112,7 +112,7 @@ export function PlayerSkillPicker({
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-0 top-0 size-11"
+              className="absolute right-0 top-0 size-11 sm:size-8"
               aria-label={t("playerModal.clearSearch")}
               onClick={() => {
                 setSearch("");
@@ -178,7 +178,7 @@ export function PlayerSkillPicker({
           return (
             <li
               key={id}
-              className={`flex items-center gap-3 px-4 py-2.5 ${chosen ? "bg-primary/5" : ""}`}
+              className={`flex items-center gap-3 px-4 py-2.5 sm:py-1.5 ${chosen ? "bg-primary/5" : ""}`}
             >
               <div className="min-w-0 flex-1">
                 <SkillBox id={id} added={chosen} />
@@ -202,7 +202,7 @@ export function PlayerSkillPicker({
               <Button
                 variant={chosen ? "default" : "outline"}
                 size="icon"
-                className="group size-11 shrink-0"
+                className="group size-11 shrink-0 sm:size-8"
                 disabled={!chosen && (full || !!issue)}
                 aria-pressed={chosen}
                 aria-describedby={

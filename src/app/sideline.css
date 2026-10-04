@@ -917,12 +917,12 @@ html {
 }
 .player-skill-filter {
   display: inline-flex;
-  min-height: 36px;
+  min-height: 28px;
   align-items: center;
   gap: 6px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 6px 9px;
+  padding: 4px 8px;
   font-size: 12px;
   font-weight: 550;
 }
@@ -1092,6 +1092,40 @@ html {
 
 .skill-box.skill-added {
   border-style: dashed;
+}
+.skill-box.skill-removable {
+  align-items: stretch;
+  padding: 0;
+  overflow: hidden;
+}
+.skill-removable-label {
+  min-width: 0;
+  padding: 4px 7px;
+}
+.skill-removable-action {
+  display: inline-flex;
+  width: 24px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px dashed var(--skill-border);
+}
+.skill-removable-action:hover {
+  background: var(--skill-border);
+}
+.skill-removable-action:focus-visible,
+.skill-removable-label:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+@media (max-width: 639px), (pointer: coarse) {
+  .skill-removable-label {
+    padding: 6px 8px;
+  }
+  .skill-removable-action {
+    width: 36px;
+    min-height: 36px;
+  }
 }
 
 [data-slot="dropdown-menu-item"],

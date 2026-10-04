@@ -3,15 +3,18 @@
 import { useTranslations } from "gt-next";
 import { getSkill, skillName, sortSkillIds } from "@/domain/catalog";
 import { RuleHelp } from "./rule-help";
+import { X } from "lucide-react";
 
 export function SkillBox({
   id,
   added = false,
   captain = false,
+  onRemove,
 }: {
   id: string;
   added?: boolean;
   captain?: boolean;
+  onRemove?: () => void;
 }) {
   const t = useTranslations();
   const skill = getSkill(id);
@@ -23,16 +26,32 @@ export function SkillBox({
   ]
     .filter(Boolean)
     .join(" · ");
-  return (
+  const className = `skill-box skill-${category}${added || captain ? " skill-added" : ""}`;
+  const help = (
     <RuleHelp
       title={captain ? t("proCaptain") : skillName(id)}
       description={t(`skillDescriptions.${id.split(":")[0]}`)}
       meta={meta}
       skillPreview
-      className={`skill-box skill-${category}${added || captain ? " skill-added" : ""}`}
+      className={onRemove ? "skill-removable-label" : className}
     >
       {captain ? t("proCaptain") : skillName(id)}
     </RuleHelp>
+  );
+  return onRemove ? (
+    <span className={`${className} skill-removable`}>
+      {help}
+      <button
+        type="button"
+        className="skill-removable-action"
+        aria-label={`${t("removeSkill")} · ${skillName(id)}`}
+        onClick={onRemove}
+      >
+        <X aria-hidden="true" className="size-3" />
+      </button>
+    </span>
+  ) : (
+    help
   );
 }
 

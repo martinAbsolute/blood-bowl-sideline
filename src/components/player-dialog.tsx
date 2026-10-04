@@ -3,27 +3,32 @@
 import { useRef, useState } from "react";
 import { useTranslations } from "gt-next";
 import { Check, Plus, ShieldCheck, Trash2, X } from "lucide-react";
-import { getRoster, getRuleset, skillName, stars } from "@/domain/catalog";
+import {
+  getRoster,
+  getRuleset,
+  sortSkillIds,
+  starPairs,
+  stars,
+} from "@/domain/catalog";
 import { playerSkillCost } from "@/domain/rules";
 import type { Team } from "@/domain/types";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "./dialog";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
 import { PlayerIcon, StarPlayerIcon } from "./player-icon";
+import { PlayerName } from "./player-name";
 import { PlayerSkillPicker } from "./player-skill-picker";
 import { SkillBox, SkillList } from "./skill-box";
 import { positionLabel } from "./position-name";
 
-const gold = (value: number) => `${(value / 1000).toLocaleString("en")}k GP`;
+const gold = (value: number) => (value / 1000).toLocaleString("en") + "k GP";
 
-/** One player workspace, with the same immediate edits as the roster. */
+/** Name and skill edits are staged until Save; removal is a separate action. */
 export function PlayerDialog({
   team,
   selected,
@@ -40,97 +45,161 @@ export function PlayerDialog({
   const t = useTranslations();
   const titleRef = useRef<HTMLHeadingElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
-  const [confirmRemoval, setConfirmRemoval] = useState(false);
+  const [confirmation, setConfirmation] = useState<"remove" | "discard" | null>(
+    null,
+  );
   const [mobileSection, setMobileSection] = useState("profile");
   const roster = getRoster(team.rosterId)!;
   const rules = getRuleset(team.rulesetId);
-  const player = team.players.find((item) => item.id === selected);
+  const playerIndex = team.players.findIndex((item) => item.id === selected);
+  const player = team.players[playerIndex];
   const position = roster.players.find(
     (item) => item.id === player?.positionId,
   );
   const star = team.stars.includes(selected)
     ? stars.find((item) => item.id === selected)
     : undefined;
+  const [draft, setDraft] = useState(() => ({
+    name: player?.name ?? "",
+    skills: player?.skills ?? [],
+  }));
   const profile = position ?? star;
   if (!profile) return null;
 
+  const editable = !!player && !readOnly;
   const captain = team.captainId === selected;
-  const title =
-    star?.name || (position && positionLabel(position.position)) || "";
-  const skillCost =
-    player && position ? playerSkillCost(team, position, player.skills) : 0;
+  const type = position
+    ? positionLabel(position.position)
+    : star?.playerType || t("starPlayers");
+  const title = star?.name || draft.name.trim() || type;
+  const dirty =
+    editable &&
+    (draft.name.trim() !== player.name.trim() ||
+      JSON.stringify(sortSkillIds(draft.skills)) !==
+        JSON.stringify(sortSkillIds(player.skills)));
+  const draftTeam = player
+    ? {
+        ...team,
+        players: team.players.map((item) =>
+          item.id === selected
+            ? { ...item, ...draft, name: draft.name.trim() }
+            : item,
+        ),
+      }
+    : team;
+  const skillCost = position
+    ? playerSkillCost(draftTeam, position, draft.skills)
+    : 0;
   const max = Math.min(
     6,
     rules.teamOverrides?.[roster.id]?.maxSkillsPerPlayer ??
       (rules.id === "eurobowl-2026" ? 2 : rules.maxAdvancementsPerPlayer),
   );
-  const editable = !!player && !readOnly;
   const formatSkills = (value: number) =>
-    rules.skillCurrency ? `${value} ${t(rules.skillCurrency)}` : gold(value);
-  function editPlayer(update: Partial<Team["players"][number]>) {
-    onChange({
+    rules.skillCurrency ? value + " " + t(rules.skillCurrency) : gold(value);
+  const removedStars = star
+    ? (starPairs.find((pair) => pair.includes(star.id)) ?? [star.id]).filter(
+        (id) => team.stars.includes(id),
+      )
+    : [];
+  const savedName = player?.name.trim();
+  const savedSkills = player?.skills ?? [];
+  const savedCustomisation = !!savedName || savedSkills.length > 0 || captain;
+
+  function requestClose() {
+    if (dirty) setConfirmation("discard");
+    else onClose();
+  }
+  function save() {
+    if (!editable || !dirty) return;
+    onChange(draftTeam);
+    onClose();
+  }
+  function remove() {
+    if (readOnly) return;
+    const next = {
       ...team,
-      players: team.players.map((item) =>
-        item.id === selected ? { ...item, ...update } : item,
-      ),
-    });
+      players: team.players.filter((item) => item.id !== selected),
+      stars: team.stars.filter((id) => !removedStars.includes(id)),
+    };
+    if (next.captainId === selected) delete next.captainId;
+    onChange(next);
+    onClose();
   }
 
   return (
     <Dialog
       open
       onOpenChange={(open) => {
-        if (!open) onClose();
+        if (!open) requestClose();
       }}
     >
       <DialogContent
-        className={`player-dialog ${editable ? "player-dialog-editable" : "player-dialog-view"}`}
+        className={
+          "player-dialog " +
+          (editable ? "player-dialog-editable" : "player-dialog-view")
+        }
         initialFocus={titleRef}
         showCloseButton={false}
       >
         <DialogHeader className="player-dialog-header">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-lg border bg-card">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-lg border bg-card sm:size-12">
               {position ? (
                 <PlayerIcon
                   positionId={position.id}
-                  variant={team.players.findIndex(
-                    (item) => item.id === selected,
-                  )}
-                  className="size-12"
+                  variant={playerIndex}
+                  className="size-12 sm:size-10"
                 />
               ) : (
-                star && <StarPlayerIcon starId={star.id} className="size-12" />
+                star && (
+                  <StarPlayerIcon
+                    starId={star.id}
+                    className="size-12 sm:size-10"
+                  />
+                )
               )}
             </div>
             <div className="min-w-0 flex-1">
               <DialogDescription className="mb-1 text-xs">
-                {player?.name.trim() ? title : t("managePlayer")} ·{" "}
+                {type} ·{" "}
                 {star
                   ? t("starPlayers")
-                  : `#${String(team.players.findIndex((item) => item.id === selected) + 1).padStart(2, "0")}`}
+                  : "#" + String(playerIndex + 1).padStart(2, "0")}
               </DialogDescription>
               <DialogTitle
                 ref={titleRef}
                 tabIndex={-1}
-                className="line-clamp-2 wrap-anywhere text-xl font-semibold leading-tight outline-none sm:text-2xl"
-                title={player?.name.trim() || title}
+                className="min-w-0 text-xl font-semibold leading-tight outline-none sm:text-2xl"
               >
-                {player?.name.trim() || title}
+                {editable ? (
+                  <>
+                    <span className="sr-only">{title}</span>
+                    <PlayerName
+                      value={draft.name}
+                      placeholder={t("playerModal.namePlaceholder")}
+                      label={t("playerName")}
+                      onChange={(name) =>
+                        setDraft((current) => ({ ...current, name }))
+                      }
+                    />
+                  </>
+                ) : (
+                  <span className="line-clamp-2 wrap-anywhere" title={title}>
+                    {title}
+                  </span>
+                )}
               </DialogTitle>
             </div>
-            <DialogClose
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-11 shrink-0 self-start"
-                />
-              }
-              aria-label={t("close")}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-11 shrink-0 self-start sm:size-8"
+              aria-label={t("playerModal.close")}
+              onClick={requestClose}
             >
-              <X className="size-5" />
-            </DialogClose>
+              <X className="size-4" />
+            </Button>
           </div>
         </DialogHeader>
 
@@ -155,11 +224,12 @@ export function PlayerDialog({
               <Plus className="size-4" />
               {t("playerModal.browseSkills")}
               <span className="font-mono text-xs">
-                {player?.skills.length}/{max}
+                {draft.skills.length}/{max}
               </span>
             </button>
           </div>
         )}
+
         <div className="player-dialog-body" data-section={mobileSection}>
           <section
             className="player-dialog-profile"
@@ -204,144 +274,204 @@ export function PlayerDialog({
                 </div>
               )}
             </dl>
-            {player && (
-              <label className="block text-xs font-medium">
-                {t("playerName")}
-                <Input
-                  className="mt-2 h-11 bg-card"
-                  value={player.name}
-                  maxLength={80}
-                  placeholder={title}
-                  readOnly={readOnly}
-                  onChange={(event) => editPlayer({ name: event.target.value })}
-                />
-              </label>
-            )}
-            <div className="space-y-2">
-              <h3 className="text-xs font-semibold">{t("builtInSkills")}</h3>
-              <SkillList ids={profile.skills} />
-            </div>
-            {captain && (
-              <div className="space-y-2 rounded-lg border bg-card p-3">
-                <p className="flex items-center gap-1.5 text-xs font-semibold text-primary">
-                  <ShieldCheck className="size-4" />
-                  {t("teamCaptain")}
-                </p>
-                <SkillList ids={[]} captain />
-              </div>
-            )}
-            {player && (
-              <div className="space-y-2 border-t pt-4">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-xs font-semibold">{t("addedSkills")}</h3>
-                  <span
-                    className="font-mono text-xs text-muted-foreground"
-                    role="status"
-                  >
-                    {player.skills.length} / {max}
+            <div className="space-y-3 border-t pt-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-xs font-semibold">{t("skills")}</h3>
+                {player && (
+                  <span className="text-xs text-muted-foreground" role="status">
+                    {t("playerModal.addedCount", {
+                      count: draft.skills.length,
+                      max,
+                    })}
                   </span>
-                </div>
-                {player.skills.length ? (
-                  <ul className="space-y-1">
-                    {player.skills.map((id) => (
-                      <li
-                        key={id}
-                        className="flex min-h-11 items-center justify-between gap-2"
-                      >
-                        <SkillBox id={id} added />
-                        {editable && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-11 shrink-0 text-muted-foreground hover:text-destructive"
-                            aria-label={`${t("removeSkill")} · ${skillName(id)}`}
-                            onClick={() =>
-                              editPlayer({
-                                skills: player.skills.filter(
-                                  (value) => value !== id,
-                                ),
-                              })
-                            }
-                          >
-                            <X className="size-4" />
-                          </Button>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-xs leading-relaxed text-muted-foreground">
-                    {t(editable ? "playerModal.noAddedSkills" : "noSkills")}
-                  </p>
                 )}
               </div>
-            )}
+              <div className="flex flex-wrap gap-1.5">
+                {sortSkillIds(profile.skills).map((id) => (
+                  <SkillBox key={id} id={id} />
+                ))}
+                {player &&
+                  sortSkillIds(draft.skills).map((id) => (
+                    <SkillBox
+                      key={"added-" + id}
+                      id={id}
+                      added
+                      onRemove={
+                        editable
+                          ? () =>
+                              setDraft((current) => ({
+                                ...current,
+                                skills: current.skills.filter(
+                                  (value) => value !== id,
+                                ),
+                              }))
+                          : undefined
+                      }
+                    />
+                  ))}
+                {captain && <SkillBox id="pro" captain />}
+                {!profile.skills.length && !draft.skills.length && !captain && (
+                  <span className="text-xs text-muted-foreground">
+                    {t("noSkills")}
+                  </span>
+                )}
+              </div>
+              {player && draft.skills.length > 0 && (
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  {t("playerModal.skillsHint")}
+                </p>
+              )}
+              {captain && (
+                <p className="flex items-center gap-1.5 text-xs font-medium text-primary">
+                  <ShieldCheck className="size-3.5" />
+                  {t("teamCaptain")}
+                </p>
+              )}
+            </div>
           </section>
-          {editable && player && position && (
+          {editable && position && (
             <PlayerSkillPicker
-              team={team}
-              playerId={player.id}
+              team={draftTeam}
+              playerId={selected}
               position={position}
-              selected={player.skills}
+              selected={draft.skills}
               max={max}
               captain={captain}
-              onChange={(skills) => editPlayer({ skills })}
+              onChange={(skills) =>
+                setDraft((current) => ({ ...current, skills }))
+              }
             />
           )}
         </div>
 
-        <div className="player-dialog-footer">
-          {editable && (
+        <div className="player-dialog-footer flex-wrap">
+          {dirty && (
+            <p className="w-full text-xs text-muted-foreground" role="status">
+              {t("playerModal.unsaved")}
+            </p>
+          )}
+          {!readOnly && (
             <Button
               variant="ghost"
-              className="h-11 text-destructive hover:bg-destructive/10 hover:text-destructive"
-              onClick={() => setConfirmRemoval(true)}
+              className="h-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:h-8"
+              aria-label={t("removePlayer")}
+              onClick={() => {
+                if (savedCustomisation || dirty || removedStars.length > 1)
+                  setConfirmation("remove");
+                else remove();
+              }}
             >
               <Trash2 className="size-4" />
-              {t("removePlayer")}
+              <span className="sm:hidden">{t("remove")}</span>
+              <span className="hidden sm:inline">{t("removePlayer")}</span>
             </Button>
           )}
-          <Button className="ml-auto h-11 min-w-24" onClick={onClose}>
-            {editable && <Check className="size-4" />}
-            {t(editable ? "playerModal.done" : "close")}
-          </Button>
+          <div className="ml-auto flex gap-2">
+            <Button
+              variant={editable ? "outline" : "default"}
+              className="h-11 sm:h-8"
+              onClick={onClose}
+            >
+              {t(editable ? "cancel" : "playerModal.close")}
+            </Button>
+            {editable && (
+              <Button
+                className="h-11 min-w-20 sm:h-8"
+                disabled={!dirty}
+                onClick={save}
+              >
+                <Check className="size-4" />
+                {t("playerModal.save")}
+              </Button>
+            )}
+          </div>
         </div>
 
-        <Dialog open={confirmRemoval} onOpenChange={setConfirmRemoval}>
+        <Dialog
+          open={confirmation !== null}
+          onOpenChange={(open) => {
+            if (!open) setConfirmation(null);
+          }}
+        >
           <DialogContent initialFocus={cancelRef}>
             <DialogHeader>
-              <DialogTitle>{t("removePlayer")}</DialogTitle>
+              <DialogTitle>
+                {t(
+                  confirmation === "discard"
+                    ? "playerModal.discardTitle"
+                    : "removePlayer",
+                )}
+              </DialogTitle>
               <DialogDescription>
-                {t("removePlayerConfirmation", {
-                  player: player?.name.trim() || title,
-                })}
+                {confirmation === "discard"
+                  ? t("playerModal.discardHint")
+                  : t("playerModal.removeQuestion", {
+                      player: savedName || star?.name || type,
+                    })}
               </DialogDescription>
             </DialogHeader>
+            {confirmation === "remove" && (
+              <div className="space-y-3 text-sm">
+                {savedCustomisation && (
+                  <div className="space-y-2 rounded-lg border bg-secondary/40 p-3">
+                    <p className="text-xs text-muted-foreground">
+                      {t("playerModal.savedDetailsLost")}
+                    </p>
+                    {savedName && (
+                      <p>
+                        {t("playerName")}:{" "}
+                        <strong className="wrap-anywhere">{savedName}</strong>
+                      </p>
+                    )}
+                    {savedSkills.length > 0 && (
+                      <div>
+                        <p className="mb-1.5 text-xs">{t("addedSkills")}</p>
+                        <SkillList ids={savedSkills} added />
+                      </div>
+                    )}
+                    {captain && (
+                      <p className="flex items-center gap-1.5">
+                        <ShieldCheck className="size-4" />
+                        {t("teamCaptain")}
+                      </p>
+                    )}
+                  </div>
+                )}
+                {removedStars.length > 1 && (
+                  <p>
+                    {t("playerModal.removePair", {
+                      players: removedStars
+                        .map((id) => stars.find((item) => item.id === id)!.name)
+                        .join(" & "),
+                    })}
+                  </p>
+                )}
+                {dirty && <p>{t("playerModal.removeUnsaved")}</p>}
+              </div>
+            )}
             <div className="flex justify-end gap-2">
               <Button
                 ref={cancelRef}
                 variant="outline"
-                className="h-11"
-                onClick={() => setConfirmRemoval(false)}
+                className="h-11 sm:h-8"
+                onClick={() => setConfirmation(null)}
               >
-                {t("cancel")}
+                {t(
+                  confirmation === "discard"
+                    ? "playerModal.keepEditing"
+                    : "cancel",
+                )}
               </Button>
               <Button
                 variant="destructive"
-                className="h-11"
-                onClick={() => {
-                  const next = {
-                    ...team,
-                    players: team.players.filter(
-                      (item) => item.id !== selected,
-                    ),
-                  };
-                  if (next.captainId === selected) delete next.captainId;
-                  onChange(next);
-                  onClose();
-                }}
+                className="h-11 sm:h-8"
+                onClick={confirmation === "discard" ? onClose : remove}
               >
-                {t("removePlayer")}
+                {t(
+                  confirmation === "discard"
+                    ? "playerModal.discard"
+                    : "removePlayer",
+                )}
               </Button>
             </div>
           </DialogContent>
