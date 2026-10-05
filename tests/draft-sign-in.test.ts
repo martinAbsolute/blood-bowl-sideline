@@ -4,6 +4,7 @@ import { act, createElement, StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { randomUUID } from "node:crypto";
 import { ConvexError } from "convex/values";
+import { getFunctionName, type FunctionReference } from "convex/server";
 import { newTeam } from "../src/domain/catalog";
 import {
   readDrafts,
@@ -47,7 +48,8 @@ vi.mock("convex/react", () => ({
   useConvexConnectionState: () => ({ isWebSocketConnected: mocks.connected }),
   useMutation: () =>
     Object.assign(mocks.save, { withOptimisticUpdate: () => mocks.save }),
-  useQuery: () => mocks.query(),
+  useQuery: (query: FunctionReference<"query">) =>
+    getFunctionName(query) === "leagues:listTeamCareers" ? [] : mocks.query(),
   useAction: () => mocks.isTelegramConfigured,
 }));
 vi.mock("@convex-dev/auth/react", () => ({

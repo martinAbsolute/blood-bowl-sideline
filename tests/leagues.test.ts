@@ -354,6 +354,89 @@ async function setup(count = 2) {
   const match = detail.matches.find((m) => m.status === "scheduled")!;
   return { t, ids, coaches, admin, leagueId, entries, teams, match };
 }
+
+describe("league team renames", () => {
+  it("publishes a commissioner's rename to the team page, library and league career together", async () => {
+    const s = await setup();
+    const team = s.teams[1];
+    const name = "Commissioner Corrected Humans";
+    const before = await s.t.query(api.teams.getByUuid, { uuid: team.uuid });
+    await s.t.run(async (ctx) => {
+      const entry = await ctx.db.get("leagueTeams", s.entries[1]);
+      await ctx.db.patch("leagueTeams", entry!._id, {
+        team: {
+          ...entry!.team,
+          staff: { ...entry!.team.staff, dedicatedFans: 3 },
+        },
+      });
+    });
+
+    await s.coaches[0].mutation(api.leagues.renameTeam, {
+      entryId: s.entries[1],
+      name: `  ${name}  `,
+      expectedRevision: 1,
+    });
+
+    const saved = await s.t.query(api.teams.getByUuid, { uuid: team.uuid });
+    expect(saved).toMatchObject({
+      team: { ...team, name },
+      revision: before!.revision + 1,
+      canEdit: false,
+      leagueLocked: true,
+    });
+    expect(saved!.updatedAt).toBeGreaterThanOrEqual(before!.updatedAt);
+    const library = await s.coaches[1].query(api.teams.listMine, {
+      archived: false,
+      paginationOpts: { numItems: 30, cursor: null },
+    });
+    expect(library.page[0]?.team.name).toBe(name);
+    const career = await s.coaches[1].query(api.leagues.getCareer, {
+      entryId: s.entries[1],
+    });
+    expect(career.entry.team.name).toBe(name);
+    expect(career.entry.revision).toBe(2);
+    expect(career.history[0]).toMatchObject({ action: "team-renamed" });
+    const source = await s.t.run((ctx) =>
+      ctx.db.get("teams", career.entry.teamId),
+    );
+    expect(source!.ownerId).toBe(s.ids.coaches[1]);
+    expect(source!.searchText).toContain(name);
+    expect(source!.searchText).not.toContain(team.name);
+    // Renaming identity must preserve the distinct builder and career rosters.
+    expect(saved!.team.staff.dedicatedFans).toBe(team.staff.dedicatedFans);
+    expect(career.entry.team.staff.dedicatedFans).toBe(3);
+  });
+
+  it("leaves both names intact when authorization, revision or name checks reject a rename", async () => {
+    const s = await setup();
+    const entryId = s.entries[0];
+    const before = await s.t.query(api.teams.getByUuid, {
+      uuid: s.teams[0].uuid,
+    });
+    for (const [actor, name, expectedRevision, error] of [
+      [s.coaches[1], "Unauthorized", 1, "FORBIDDEN"],
+      [s.coaches[0], "Stale", 0, "CONFLICT"],
+      [s.coaches[0], s.teams[1].name, 1, "DUPLICATE_TEAM_NAME"],
+    ] as const) {
+      await expect(
+        actor.mutation(api.leagues.renameTeam, {
+          entryId,
+          name,
+          expectedRevision,
+        }),
+      ).rejects.toThrow(error);
+      expect(
+        await s.t.query(api.teams.getByUuid, { uuid: s.teams[0].uuid }),
+      ).toEqual(before);
+      const career = await s.coaches[0].query(api.leagues.getCareer, {
+        entryId,
+      });
+      expect(career.entry.team.name).toBe(s.teams[0].name);
+      expect(career.entry.revision).toBe(1);
+    }
+  });
+});
+
 type PlayEvent = FunctionArgs<typeof api.leagues.savePlayEvent>["event"];
 function play(
   playerId: Id<"leaguePlayers">,

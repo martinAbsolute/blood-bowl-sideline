@@ -12,7 +12,7 @@ import { teamLeagueState } from "./teamLeagueState";
 import { playEventValidator } from "./leagueValidators";
 import { projectMatchEvents } from "../src/domain/match-events";
 import { isPreGameComplete } from "../src/domain/match-pregame";
-import { getRoster } from "../src/domain/catalog";
+import { getRoster, getRuleset } from "../src/domain/catalog";
 import { RULES_VERSION } from "../src/domain/types";
 import {
   advancementChoices,
@@ -2030,6 +2030,20 @@ export const renameTeam = mutation({
     await ctx.db.patch("leagueTeams", entryId, {
       team: { ...entry.team, name: clean },
       revision: entry.revision + 1,
+    });
+    // The builder page and library subscribe to the source team. Keep its
+    // identity in sync without replacing its roster with the career snapshot.
+    const source = await ctx.db.get("teams", entry.teamId);
+    if (!source) throw new ConvexError("NOT_FOUND");
+    await ctx.db.patch("teams", source._id, {
+      team: { ...source.team, name: clean },
+      revision: source.revision + 1,
+      updatedAt: Date.now(),
+      searchText: [
+        clean,
+        getRoster(source.team.rosterId)!.name,
+        getRuleset(source.team.rulesetId).name,
+      ].join(" "),
     });
     await auditEvent(
       ctx,

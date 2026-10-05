@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { act, createElement, type ReactNode } from "react";
+import { act, createElement, useState, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { randomUUID } from "node:crypto";
@@ -64,14 +64,17 @@ vi.mock("../src/components/team-editor", () => ({
     initial: Team;
     readOnly: boolean;
     leagueNotice: ReactNode;
-  }) =>
-    createElement(
+  }) => {
+    // Match the real editor: the initial team is captured in component state.
+    const [team] = useState(initial);
+    return createElement(
       "div",
       null,
       createElement("a", { href: "/teams" }, "My teams"),
       leagueNotice,
-      createElement("button", { disabled: readOnly }, initial.name),
-    ),
+      createElement("button", { disabled: readOnly }, team.name),
+    );
+  },
 }));
 let root: Root;
 let container: HTMLDivElement;
@@ -116,6 +119,39 @@ it("waits for the server lock and never lets a local recovery draft unlock or re
   expect(container.textContent).toContain("leagueUi.builderLockedOwnerHint");
   expect(container.querySelectorAll("aside")).toHaveLength(1);
   expect(container.querySelector("a")?.textContent).toBe("My teams");
+});
+
+it("updates an already open locked team page when a commissioner renames its saved team", async () => {
+  const team = newTeam(randomUUID());
+  team.name = "Old Humans";
+  state.draft = { ...team, name: "Stale local name" };
+  state.live = {
+    team,
+    revision: 8,
+    canEdit: false,
+    leagueLocked: true,
+    leagueExperienced: true,
+  };
+  await act(async () =>
+    root.render(createElement(TeamPage, { uuid: team.uuid })),
+  );
+  expect(container.querySelector("button")?.textContent).toBe(team.name);
+
+  state.live = {
+    ...state.live,
+    team: { ...team, name: "Commissioner Corrected Humans" },
+    revision: 9,
+  };
+  await act(async () =>
+    root.render(createElement(TeamPage, { uuid: team.uuid })),
+  );
+  expect(container.querySelector("button")?.textContent).toBe(
+    state.live.team.name,
+  );
+  expect(container.textContent).not.toContain(state.draft.name);
+  expect(container.querySelector<HTMLButtonElement>("button")?.disabled).toBe(
+    true,
+  );
 });
 
 it("shows shared viewers where to find the current roster without telling them to manage the team", async () => {
