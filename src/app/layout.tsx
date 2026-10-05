@@ -15,6 +15,7 @@ import { Providers } from "@/components/providers";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteShell } from "@/components/site-shell";
 import { ShellLoading } from "@/components/loading-layouts";
+import { InitialLoading } from "@/components/initial-loading";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -75,7 +76,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${display.variable}`}>
       <body className="bg-background font-sans text-foreground antialiased">
-        <Suspense fallback={<ShellLoading />}>
+        <Suspense
+          fallback={
+            <ShellLoading>
+              <InitialLoading />
+            </ShellLoading>
+          }
+        >
           <GTProvider>
             <Providers>
               <SiteShell footer={<SiteFooter />}>{children}</SiteShell>

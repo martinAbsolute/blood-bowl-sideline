@@ -4,19 +4,13 @@ import { LeagueNumber } from "./league-number";
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useTranslations } from "gt-next";
-import {
-  ArrowLeft,
-  Download,
-  History,
-  LoaderCircle,
-  Search,
-  Trophy,
-} from "lucide-react";
+import { ArrowLeft, Download, History, Search, Trophy } from "lucide-react";
 import { ConvexError } from "convex/values";
 import { LoginButton } from "./site-shell";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { LeagueHelp } from "./league-help";
+import { InitialLoading } from "./initial-loading";
 
 export function useLeagueAction() {
   const t = useTranslations();
@@ -123,25 +117,17 @@ export function LeagueGate({
   loading: boolean;
 }) {
   const t = useTranslations();
+  if (loading) return <InitialLoading label={t("loading")} />;
   return (
     <div className="page-width py-12">
       <div className="mx-auto max-w-lg rounded-lg border bg-card p-6 text-center">
-        {loading ? (
-          <p role="status" className="flex justify-center gap-2">
-            <LoaderCircle className="size-5 animate-spin" />
-            {t("loading")}
-          </p>
-        ) : (
-          <>
-            <Trophy
-              aria-hidden="true"
-              className="mx-auto mb-3 size-7 text-primary"
-            />
-            <h1 className="mb-2 text-lg font-semibold">{t("leagues")}</h1>
-            <p className="mb-5">{t("leagueUi.signIn")}</p>
-            {!authenticated && <LoginButton />}
-          </>
-        )}
+        <Trophy
+          aria-hidden="true"
+          className="mx-auto mb-3 size-7 text-primary"
+        />
+        <h1 className="mb-2 text-lg font-semibold">{t("leagues")}</h1>
+        <p className="mb-5">{t("leagueUi.signIn")}</p>
+        {!authenticated && <LoginButton />}
       </div>
     </div>
   );

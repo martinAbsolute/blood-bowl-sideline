@@ -18,10 +18,13 @@ import { ArrowLeft, Copy, Printer, ChevronDown, Ellipsis } from "lucide-react";
 import { BookOpen, Flag, Shield, Trophy } from "lucide-react";
 import { EditorSelect } from "./editor-select";
 import { Card } from "./ui/card";
+import type { ReactNode } from "react";
+import { LeagueCardsLoading, UsersLoading } from "./list-loading";
 
 const ignoreChange = () => {};
 
-export type LoadingVariant = "library" | "editor" | "catalog";
+export type LoadingVariant =
+  "library" | "editor" | "catalog" | "leagues" | "league" | "users";
 
 export function LibraryCardsLoading({
   label,
@@ -383,16 +386,125 @@ export function LoadingLayout({
         </div>
       </div>
     );
-  // Locale and route are not known at the root boundary.
+  if (variant === "league")
+    return (
+      <div
+        className="page-width space-y-4 py-5 sm:py-6"
+        role="status"
+        data-loading-layout={variant}
+      >
+        <span className="sr-only">{label}</span>
+        <div aria-hidden="true" className="flex min-h-10 items-center">
+          <ArrowLeft className="mr-2 size-4 text-muted-foreground" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+        <div
+          aria-hidden="true"
+          className="overflow-hidden rounded-xl border bg-card"
+        >
+          <div className="space-y-3 p-5 sm:p-6">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-9 w-72 max-w-full" />
+            <Skeleton className="h-5 w-56 max-w-full" />
+          </div>
+          <div className="flex gap-5 border-t bg-secondary/25 px-5 py-3">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-28" />
+          </div>
+        </div>
+        <div
+          aria-hidden="true"
+          className="flex gap-3 overflow-hidden rounded-xl border p-2"
+        >
+          {[0, 1, 2].map((index) => (
+            <Skeleton key={index} className="h-10 w-28 shrink-0" />
+          ))}
+        </div>
+        <div
+          aria-hidden="true"
+          className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]"
+        >
+          <div className="space-y-4 rounded-xl border bg-card p-5">
+            <Skeleton className="h-6 w-40" />
+            {[0, 1, 2, 3].map((index) => (
+              <Skeleton key={index} className="h-12 w-full" />
+            ))}
+          </div>
+          <div className="space-y-4 rounded-xl border bg-card p-5">
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-16 w-full" />
+          </div>
+        </div>
+      </div>
+    );
+  // The locale is still resolving here, so translated headings are placeholders.
+  // Once providers resolve, the page keeps its real headings and static controls.
   return (
-    <div className="page-width py-8 sm:py-10" role="status">
-      <p className="text-sm text-muted-foreground">{label}</p>
+    <div className="page-width py-8 sm:py-10" data-loading-layout={variant}>
+      <div
+        aria-hidden="true"
+        className={
+          variant === "leagues"
+            ? "mb-6 space-y-3 rounded-xl border bg-card p-5 sm:p-6"
+            : "mb-7 space-y-2"
+        }
+      >
+        <Skeleton className="h-[30px] w-40 sm:h-[37.5px]" />
+        {variant !== "catalog" && <Skeleton className="h-5 w-80 max-w-full" />}
+      </div>
+      {variant === "catalog" ? (
+        <div className="catalog-layout" role="status">
+          <span className="sr-only">{label}</span>
+          <aside aria-hidden="true" className="catalog-index">
+            <Skeleton className="h-9 w-full" />
+            <div className="mt-3 flex gap-1 overflow-hidden lg:flex-col">
+              {Array.from({ length: 8 }, (_, index) => (
+                <Skeleton key={index} className="h-7 w-28 shrink-0" />
+              ))}
+            </div>
+          </aside>
+          <div aria-hidden="true" className="min-w-0 space-y-5">
+            {[0, 1, 2].map((index) => (
+              <div
+                key={index}
+                className="overflow-hidden rounded-lg border bg-card"
+              >
+                <div className="flex h-[49px] items-center justify-between gap-4 bg-secondary/40 px-3">
+                  <Skeleton className="h-6 w-36" />
+                  <Skeleton className="h-7 w-24" />
+                </div>
+                <div className="hidden md:block">
+                  <TableLoading rows={4} title={false} framed={false} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : variant === "users" ? (
+        <UsersLoading label={label} />
+      ) : (
+        <>
+          <div
+            aria-hidden="true"
+            className="mb-7 grid grid-cols-2 gap-3 lg:grid-cols-[minmax(200px,1fr)_180px_210px]"
+          >
+            <Skeleton className="col-span-2 h-10 lg:col-span-1" />
+            <Skeleton className="h-10" />
+            <Skeleton className="h-10" />
+          </div>
+          {variant === "leagues" ? (
+            <LeagueCardsLoading label={label} />
+          ) : (
+            <LibraryCardsLoading label={label} />
+          )}
+        </>
+      )}
     </div>
   );
 }
 
 /** The initial locale/provider boundary preserves the same shell geometry. */
-export function ShellLoading() {
+export function ShellLoading({ children }: { children?: ReactNode }) {
   return (
     <ShellFrame
       footer={<SiteFooter />}
@@ -443,7 +555,7 @@ export function ShellLoading() {
         </>
       }
     >
-      <LoadingLayout label="Loading…" />
+      {children ?? <LoadingLayout label="Loading…" />}
     </ShellFrame>
   );
 }
