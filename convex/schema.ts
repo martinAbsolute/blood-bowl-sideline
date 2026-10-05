@@ -100,7 +100,6 @@ export default defineSchema({
     ),
   }).index("by_leagueId", ["leagueId"]),
   leagueMatches: defineTable({
-    eventReporting: v.optional(v.boolean()),
     leagueId: v.id("leagues"),
     roundId: v.id("leagueRounds"),
     homeEntryId: v.id("leagueTeams"),
@@ -125,8 +124,6 @@ export default defineSchema({
     weather: v.optional(v.union(v.number(), v.null())),
     homeDedicatedFans: v.optional(v.number()),
     awayDedicatedFans: v.optional(v.number()),
-    venue: v.string(),
-    evidenceUrl: v.string(),
     confirmedBy: v.array(v.id("users")),
     startedAt: v.union(v.number(), v.null()),
     completedAt: v.union(v.number(), v.null()),

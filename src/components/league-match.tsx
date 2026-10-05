@@ -21,30 +21,13 @@ import {
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { getRoster } from "@/domain/catalog";
-import { calculateWinnings, casualtyOutcome } from "@/domain/league-rules";
-import {
-  leaguePlayerLabel,
-  snapshotPlayerNumber,
-} from "@/lib/league-player-label";
+import { calculateWinnings } from "@/domain/league-rules";
 import { useBeforeUnload } from "@/lib/use-before-unload";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { LeagueNumber } from "./league-number";
 import { Switch } from "./ui/switch";
 import { RosterIcon } from "./player-icon";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "./dialog";
 import { Textarea } from "./ui/textarea";
 import { LeagueField, LeagueSelect } from "./league-field";
-import { PlayerIcon } from "./player-icon";
-import { SkillList } from "./skill-box";
-import { LeagueHelp } from "./league-help";
-import { positionLabel } from "./position-name";
 import { CommissionerRuling } from "./league-commissioner";
 import {
   DiceInput,
@@ -57,59 +40,12 @@ import {
 } from "./league-ui";
 
 type MatchData = FunctionReturnType<typeof api.leagues.getMatch>;
-type ReportPlayer = MatchData["players"][number];
 type DetailsPatch = Omit<
   FunctionArgs<typeof api.leagues.updateMatchDetails>,
   "matchId" | "expectedRevision"
 >;
-type PlayerPatch = Omit<
-  FunctionArgs<typeof api.leagues.patchMatchPlayer>,
-  "matchId" | "playerId"
->;
 type Step = "pre-game" | "game" | "post-game";
 const steps: Step[] = ["pre-game", "game", "post-game"];
-const fields = [
-  "td",
-  "cas",
-  "sppCas",
-  "com",
-  "int",
-  "mvp",
-  "fou",
-  "sof",
-  "superbThrows",
-  "safeLandings",
-  "inj",
-  "dth",
-] as const;
-
-function patchedPlayer(player: ReportPlayer, patch: PlayerPatch): ReportPlayer {
-  const next = {
-    ...player,
-    ...patch,
-    stats: { ...player.stats, ...patch.stats },
-  };
-  if (patch.statusAfter !== undefined)
-    next.stats.dth = patch.statusAfter === "dead" ? 1 : 0;
-  if (
-    next.casualtyRoll !== null &&
-    (patch.casualtyRoll !== undefined || patch.lastingRoll !== undefined)
-  ) {
-    try {
-      const result = casualtyOutcome(next.casualtyRoll, next.lastingRoll ?? 1);
-      next.statusAfter = result.dead
-        ? "dead"
-        : result.missNextGame
-          ? "missing-next-game"
-          : "active";
-      next.stats.inj = Math.max(1, next.stats.inj);
-      next.stats.dth = result.dead ? 1 : 0;
-    } catch {
-      /* Invalid input is reported by the mutation. */
-    }
-  }
-  return next;
-}
 
 export function LeagueMatch({
   leagueId,
@@ -153,33 +89,10 @@ export function LeagueMatch({
       },
     );
   });
-  const updatePlayer = useMutation(
-    api.leagues.patchMatchPlayer,
-  ).withOptimisticUpdate((store, args) => {
-    const current = store.getQuery(api.leagues.getMatch, {
-      matchId: args.matchId,
-    });
-    if (!current) return;
-    store.setQuery(
-      api.leagues.getMatch,
-      { matchId: args.matchId },
-      {
-        ...current,
-        match: { ...current.match, confirmedBy: [] },
-        players: current.players.map((player) =>
-          player.playerId === args.playerId
-            ? patchedPlayer(player, args)
-            : player,
-        ),
-      },
-    );
-  });
   const action = useLeagueAction();
   const [step, setStep] = useState<Step>("game");
-  const [selectedSide, setSide] = useState<"home" | "away" | null>(null);
   const [correction, setCorrection] = useState<MatchData | null>(null);
   const [reason, setReason] = useState("");
-  const [playerSearch, setPlayerSearch] = useState("");
   const pendingCount = useRef(0);
   const [pending, setPending] = useState(0);
   const failedEdits = useRef(
@@ -220,21 +133,6 @@ export function LeagueMatch({
     else
       void edit(`details:${Object.keys(patch).join(",")}`, () =>
         updateDetails({ matchId: id, ...patch }),
-      );
-  }
-  function changePlayer(player: ReportPlayer, patch: PlayerPatch) {
-    if (correction)
-      setCorrection({
-        ...correction,
-        players: correction.players.map((row) =>
-          row._id === player._id ? patchedPlayer(row, patch) : row,
-        ),
-      });
-    else
-      void edit(
-        `player:${player._id}:${Object.keys(patch.stats ?? patch).join(",")}`,
-        () =>
-          updatePlayer({ matchId: id, playerId: player.playerId, ...patch }),
       );
   }
   async function changeEvent(
@@ -312,8 +210,6 @@ export function LeagueMatch({
 
   const view = correction ?? data;
   const { match, league, home, away } = view;
-  const teamSide =
-    selectedSide ?? (away?.coachId === data.viewerId ? "away" : "home");
   const base = `/leagues/manage/${leagueId}`;
   const locked = data.match.status === "completed";
   const editable = (data.canEdit && !locked) || !!correction;
@@ -369,11 +265,6 @@ export function LeagueMatch({
       label: t("leagueUx.reportCheckInjuries"),
       step: "game" as Step,
     },
-    {
-      ready: !match.evidenceUrl || /^https:\/\//i.test(match.evidenceUrl),
-      label: t("leagueUx.reportCheckEvidence"),
-      step: "post-game" as Step,
-    },
   ];
   const ready = checks.every((check) => check.ready);
   return (
@@ -384,15 +275,15 @@ export function LeagueMatch({
           <h1 className="page-heading">{t("leagueUi.matchReport")}</h1>
           <LeagueStatus status={match.status} />
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">
-          {t(
-            match.administrativeResult
-              ? "leagueUi.administrativeHint"
-              : locked
-                ? "leagueUi.lockedHint"
-                : "leagueUi.sharedHint",
-          )}
-        </p>
+        {(match.administrativeResult || locked) && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            {t(
+              match.administrativeResult
+                ? "leagueUi.administrativeHint"
+                : "leagueUi.lockedHint",
+            )}
+          </p>
+        )}
       </header>
       <LeagueError message={action.error || syncError} />
       {syncError && (
@@ -466,11 +357,7 @@ export function LeagueMatch({
             action={
               <Button
                 disabled={action.busy}
-                onClick={() =>
-                  void action.run(() =>
-                    start({ matchId: id, eventReporting: true }),
-                  )
-                }
+                onClick={() => void action.run(() => start({ matchId: id }))}
               >
                 {t("leagueUi.start")}
               </Button>
@@ -529,12 +416,42 @@ export function LeagueMatch({
               )}
             </p>
             <div id="report-pre-game" hidden={step !== "pre-game"}>
-              <LeagueSection title={t("leagueUx.reportPreGame")}>
+              <section
+                className="py-4"
+                aria-label={t("leagueUx.reportPreGame")}
+              >
                 <fieldset
                   disabled={!editable || action.busy}
-                  className="grid gap-4 sm:grid-cols-2"
+                  className="space-y-6"
                 >
-                  <LeagueField>
+                  <div className="grid gap-6 sm:grid-cols-2 sm:gap-10">
+                    {(["home", "away"] as const).map((side) => (
+                      <div key={side} className="min-w-0 space-y-4">
+                        <h2 className="border-b pb-3 text-base font-semibold">
+                          {side === "home" ? home.team.name : away?.team.name}
+                        </h2>
+                        <div className="flex items-baseline justify-between gap-3">
+                          <span className="text-sm text-muted-foreground">
+                            {t("leagueUx.reportDedicatedFans")}
+                          </span>
+                          <strong className="font-mono text-3xl tabular-nums">
+                            {match[`${side}DedicatedFans`] ??
+                              match[`${side}Snapshot`]?.staff.dedicatedFans ??
+                              "—"}
+                          </strong>
+                        </div>
+                        <DiceInput
+                          label={t("leagueUi.fanAttendanceRoll")}
+                          sides={3}
+                          value={match[`${side}FanRoll`]}
+                          onChange={(value) =>
+                            changeDetails({ [`${side}FanRoll`]: value })
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <LeagueField className="border-t pt-5 sm:max-w-sm">
                     {t("leagueUx.reportWeather")}
                     <LeagueSelect
                       value={match.weather ?? ""}
@@ -556,214 +473,37 @@ export function LeagueMatch({
                       ))}
                     </LeagueSelect>
                   </LeagueField>
-                  <LeagueField>
-                    {t("leagueUi.venue")}
-                    <Input
-                      maxLength={160}
-                      value={match.venue}
-                      onChange={(event) =>
-                        changeDetails({ venue: event.target.value })
-                      }
-                    />
-                  </LeagueField>
-                  {(["home", "away"] as const).map((side) => (
-                    <div key={side} className="space-y-3 rounded-lg border p-4">
-                      <h3 className="font-semibold">
-                        {side === "home" ? home.team.name : away?.team.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {t("leagueUx.reportDedicatedFans")}:{" "}
-                        {match[`${side}DedicatedFans`] ??
-                          match[`${side}Snapshot`]?.staff.dedicatedFans ??
-                          "—"}
-                      </p>
-                      <DiceInput
-                        label={t("leagueUi.fanAttendanceRoll")}
-                        sides={3}
-                        value={match[`${side}FanRoll`]}
-                        onChange={(value) =>
-                          changeDetails({ [`${side}FanRoll`]: value })
-                        }
-                      />
-                    </div>
-                  ))}
                 </fieldset>
-              </LeagueSection>
+              </section>
             </div>
             <div
               id="report-game"
               hidden={step !== "game"}
               className="space-y-4"
             >
-              {match.eventReporting ? (
-                <LeagueEvents
-                  data={view}
-                  editable={editable && !action.busy}
-                  onSave={changeEvent}
-                  onDraftChange={setEventDraft}
-                  error={action.error}
-                  busy={action.busy}
-                />
-              ) : (
-                <>
-                  <p className="rounded-md border bg-secondary/20 px-3 py-2 text-xs text-muted-foreground">
-                    {t("matchEvents.legacy")}
-                  </p>
-                  <fieldset
-                    disabled={!editable || action.busy}
-                    className="grid grid-cols-2 gap-4 rounded-xl border bg-card p-4 sm:p-5"
-                  >
-                    <LeagueNumber
-                      label={
-                        home.team.name + " · " + t("leagueUx.reportTouchdowns")
-                      }
-                      value={match.scoreHome}
-                      max={30}
-                      onChange={(scoreHome) => changeDetails({ scoreHome })}
-                    />
-                    <LeagueNumber
-                      label={
-                        (away?.team.name ?? "") +
-                        " · " +
-                        t("leagueUx.reportTouchdowns")
-                      }
-                      value={match.scoreAway}
-                      max={30}
-                      onChange={(scoreAway) => changeDetails({ scoreAway })}
-                    />
-                  </fieldset>
-                  <div className="grid grid-cols-2 gap-2 rounded-xl bg-secondary/60 p-1.5">
-                    {[home, away].map(
-                      (entry, index) =>
-                        entry && (
-                          <Button
-                            key={entry._id}
-                            variant={
-                              teamSide === (index ? "away" : "home")
-                                ? "default"
-                                : "outline"
-                            }
-                            className="h-auto min-h-12 min-w-0 whitespace-normal break-words"
-                            aria-pressed={
-                              teamSide === (index ? "away" : "home")
-                            }
-                            onClick={() => setSide(index ? "away" : "home")}
-                          >
-                            {entry.team.name}
-                          </Button>
-                        ),
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {t("leagueUx.reportPlayersHint")}
-                  </p>
-                  <Input
-                    aria-label={t("leagueUx.matchSearch")}
-                    placeholder={t("leagueUx.matchSearch")}
-                    value={playerSearch}
-                    onChange={(event) => setPlayerSearch(event.target.value)}
-                    className="h-11 sm:max-w-md"
-                  />
-                  {[home, away].map(
-                    (entry, sideIndex) =>
-                      entry && (
-                        <div
-                          key={entry._id}
-                          hidden={teamSide !== (sideIndex ? "away" : "home")}
-                        >
-                          <LeagueSection title={entry.team.name}>
-                            <div className="mb-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
-                              <span>
-                                {t("leagueUx.reportTouchdowns")}:{" "}
-                                <strong>
-                                  {view.players
-                                    .filter((p) => p.entryId === entry._id)
-                                    .reduce(
-                                      (sum, p) => sum + p.stats.td,
-                                      0,
-                                    )}{" "}
-                                  /{" "}
-                                  {sideIndex
-                                    ? match.scoreAway
-                                    : match.scoreHome}
-                                </strong>
-                              </span>
-                              <span>
-                                {t("leagueUi.stats.mvp")}:{" "}
-                                <strong>
-                                  {view.players
-                                    .filter((p) => p.entryId === entry._id)
-                                    .reduce(
-                                      (sum, p) => sum + p.stats.mvp,
-                                      0,
-                                    )}{" "}
-                                  / 1
-                                </strong>
-                              </span>
-                            </div>
-                            <div className="rounded-lg border">
-                              <div className="grid grid-cols-[minmax(0,1fr)_repeat(3,2rem)_1rem] items-center gap-1 border-b bg-secondary/30 px-3 py-2 text-xs text-muted-foreground sm:grid-cols-[minmax(0,1fr)_repeat(6,3.25rem)_1.5rem]">
-                                <span>{t("player")}</span>
-                                {fields.slice(0, 6).map((field) => (
-                                  <span
-                                    key={field}
-                                    className={`text-center ${["td", "cas", "mvp"].includes(field) ? "" : "hidden sm:block"}`}
-                                  >
-                                    <LeagueHelp stat={field} />
-                                  </span>
-                                ))}
-                                <span />
-                              </div>
-                              {view.players
-                                .filter((p) => p.entryId === entry._id)
-                                .map((player, index) => (
-                                  <MatchPlayerRow
-                                    key={player._id}
-                                    player={player}
-                                    displayName={leaguePlayerLabel(
-                                      player.name,
-                                      positionLabel(
-                                        player.snapshot.positionName,
-                                      ),
-                                      snapshotPlayerNumber(
-                                        player.sourcePlayerId,
-                                        entry._id === home._id
-                                          ? match.homeSnapshot?.players
-                                          : match.awaySnapshot?.players,
-                                        index + 1,
-                                      ),
-                                    )}
-                                    editable={editable && !action.busy}
-                                    search={playerSearch}
-                                    onChange={(patch) =>
-                                      changePlayer(player, patch)
-                                    }
-                                  />
-                                ))}
-                            </div>
-                          </LeagueSection>
-                        </div>
-                      ),
-                  )}
-                </>
-              )}
+              <LeagueEvents
+                data={view}
+                editable={editable && !action.busy}
+                onSave={changeEvent}
+                onDraftChange={setEventDraft}
+                error={action.error}
+                busy={action.busy}
+              />
             </div>
             <div
               id="report-post-game"
               hidden={step !== "post-game"}
               className="space-y-4"
             >
-              {match.eventReporting && (
-                <LeagueEvents
-                  data={view}
-                  editable={editable && !action.busy}
-                  onSave={changeEvent}
-                  onDraftChange={setEventDraft}
-                  error={action.error}
-                  busy={action.busy}
-                  review
-                />
-              )}
+              <LeagueEvents
+                data={view}
+                editable={editable && !action.busy}
+                onSave={changeEvent}
+                onDraftChange={setEventDraft}
+                error={action.error}
+                busy={action.busy}
+                review
+              />
               <PostGame
                 data={view}
                 editable={editable && !action.busy}
@@ -830,43 +570,16 @@ export function LeagueMatch({
                                 matchId: id,
                                 expectedRevision: correction.match.revision,
                                 reason: reason.trim(),
-                                scoreHome: match.scoreHome,
-                                scoreAway: match.scoreAway,
                                 weather: match.weather ?? null,
-                                venue: match.venue,
-                                evidenceUrl: match.evidenceUrl,
                                 homeFanRoll: match.homeFanRoll,
                                 awayFanRoll: match.awayFanRoll,
                                 homeFansRoll: match.homeFansRoll,
                                 awayFansRoll: match.awayFansRoll,
                                 homeStalled: match.homeStalled,
                                 awayStalled: match.awayStalled,
-                                playEvents: match.eventReporting
-                                  ? view.playEvents.map((row) => row.event)
-                                  : undefined,
-                                playerChanges: match.eventReporting
-                                  ? undefined
-                                  : view.players
-                                      .filter(
-                                        (player) =>
-                                          player.participated &&
-                                          JSON.stringify(player) !==
-                                            JSON.stringify(
-                                              data.players.find(
-                                                (row) =>
-                                                  row.playerId ===
-                                                  player.playerId,
-                                              ),
-                                            ),
-                                      )
-                                      .map((player) => ({
-                                        playerId: player.playerId,
-                                        stats: player.stats,
-                                        statusAfter: player.statusAfter,
-                                        injuryNotes: player.injuryNotes,
-                                        casualtyRoll: player.casualtyRoll,
-                                        lastingRoll: player.lastingRoll,
-                                      })),
+                                playEvents: view.playEvents.map(
+                                  (row) => row.event,
+                                ),
                               }),
                             )
                             .then((saved) => {
@@ -927,9 +640,10 @@ export function LeagueMatch({
                 )}
               </LeagueSection>
             </div>
-            <div className="flex items-center justify-between gap-3 border-t pt-4">
+            <div className="grid grid-cols-2 items-stretch gap-3 border-t pt-4 sm:flex sm:justify-between">
               <Button
-                variant="ghost"
+                variant="outline"
+                className="min-h-12 min-w-0 whitespace-normal px-4 sm:min-w-32 sm:px-5"
                 disabled={step === "pre-game"}
                 onClick={() => setStep(steps[steps.indexOf(step) - 1])}
               >
@@ -938,7 +652,8 @@ export function LeagueMatch({
               </Button>
               {step !== "post-game" && (
                 <Button
-                  variant="outline"
+                  variant="default"
+                  className="min-h-12 min-w-0 whitespace-normal px-4 sm:min-w-32 sm:px-5"
                   onClick={() => setStep(steps[steps.indexOf(step) + 1])}
                 >
                   {t(
@@ -1004,7 +719,7 @@ export function LeagueMatch({
                   onClick={() => {
                     setCorrection(structuredClone(data));
                     setReason("");
-                    setStep(data.match.eventReporting ? "game" : "pre-game");
+                    setStep("game");
                   }}
                 >
                   <ShieldCheck className="size-4" />
@@ -1055,25 +770,16 @@ function PostGame({
               ? null
               : calculateWinnings(attendance, score, match[`${side}Stalled`]);
           return (
-            <div key={side} className="space-y-4 rounded-lg border p-4">
+            <div key={side} className="min-w-0 space-y-4 sm:px-2">
               <h3 className="break-words font-semibold">
                 {side === "home" ? data.home.team.name : data.away?.team.name}
               </h3>
-              {match.eventReporting ? (
-                <p className="flex items-center justify-between text-xs text-muted-foreground">
-                  {t("leagueUx.reportTouchdowns")}
-                  <strong className="font-mono text-base text-foreground">
-                    {score}
-                  </strong>
-                </p>
-              ) : (
-                <LeagueNumber
-                  label={t("leagueUx.reportTouchdowns")}
-                  value={score}
-                  max={30}
-                  onChange={(value) => onChange({ [scoreKey]: value })}
-                />
-              )}
+              <p className="flex items-center justify-between text-sm text-muted-foreground">
+                {t("leagueUx.reportTouchdowns")}
+                <strong className="font-mono text-base text-foreground">
+                  {score}
+                </strong>
+              </p>
               <label className="flex min-h-11 items-center justify-between gap-3 rounded-lg bg-secondary/30 px-3 text-sm">
                 {t("leagueUi.stalled")}
                 <Switch
@@ -1101,230 +807,7 @@ function PostGame({
             </div>
           );
         })}
-        <LeagueField className="sm:col-span-2">
-          {t("leagueUi.evidence")}
-          <Input
-            type="url"
-            maxLength={1000}
-            placeholder="https://"
-            value={match.evidenceUrl}
-            onChange={(event) => onChange({ evidenceUrl: event.target.value })}
-          />
-        </LeagueField>
       </fieldset>
-      <p className="mt-3 text-xs text-muted-foreground">
-        {t("leagueUi.winningsHint")}
-      </p>
     </LeagueSection>
-  );
-}
-
-function MatchPlayerRow({
-  player,
-  displayName,
-  editable,
-  onChange,
-  search,
-}: {
-  player: ReportPlayer;
-  displayName: string;
-  editable: boolean;
-  onChange: (patch: PlayerPatch) => void;
-  search: string;
-}) {
-  const t = useTranslations();
-  const [open, setOpen] = useState(false);
-  const canEdit = editable && player.participated;
-  return (
-    <div
-      hidden={
-        !`${displayName} ${positionLabel(player.snapshot.positionName)}`
-          .toLocaleLowerCase()
-          .includes(search.trim().toLocaleLowerCase())
-      }
-      className="border-b bg-card last:border-b-0"
-    >
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label={displayName}
-        aria-haspopup="dialog"
-        className="grid min-h-16 w-full cursor-pointer grid-cols-[minmax(0,1fr)_repeat(3,2rem)_1rem] items-center gap-1 px-3 py-3 text-left hover:bg-secondary/30 focus-visible:outline-2 focus-visible:outline-ring sm:grid-cols-[minmax(0,1fr)_repeat(6,3.25rem)_1.5rem]"
-      >
-        <span className="flex min-w-0 items-center gap-2">
-          <PlayerIcon
-            positionId={player.positionId}
-            className="size-8 shrink-0"
-          />
-          <span className="min-w-0">
-            <span className="block break-words text-sm font-semibold">
-              {displayName}
-            </span>
-            <span className="block text-xs text-muted-foreground">
-              {positionLabel(player.snapshot.positionName)}
-            </span>
-            {(!player.participated || player.statusAfter !== "active") && (
-              <span className="text-[11px] text-destructive">
-                {t(
-                  "leagueUi.status." +
-                    (player.participated
-                      ? player.statusAfter
-                      : player.snapshot.status),
-                )}
-              </span>
-            )}
-          </span>
-        </span>
-        {fields.slice(0, 6).map((field) => (
-          <span
-            key={field}
-            className={`text-center font-mono text-xs ${["td", "cas", "mvp"].includes(field) ? "" : "hidden sm:block"}`}
-          >
-            <span className="sr-only">{t("leagueUi.stats." + field)} </span>
-            {player.stats[field] || "—"}
-          </span>
-        ))}
-        <ArrowRight className="size-4 text-muted-foreground" />
-      </button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[90dvh] overflow-y-auto p-4 sm:max-w-2xl sm:p-6">
-          <DialogHeader className="pr-7">
-            <DialogTitle className="flex items-center gap-3">
-              <PlayerIcon
-                positionId={player.positionId}
-                className="size-10 shrink-0"
-              />
-              <span className="break-words">{displayName}</span>
-            </DialogTitle>
-            <DialogDescription>
-              {positionLabel(player.snapshot.positionName)} ·{" "}
-              {t("leagueUx.reportLive")}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <details className="rounded-lg bg-secondary/20 p-3">
-              <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
-                {t("leagueUx.reportPlayerProfile")}
-              </summary>
-              <div className="my-3 flex flex-wrap gap-4 font-mono text-sm">
-                {Object.entries(player.snapshot.profile).map(([key, value]) => (
-                  <span key={key}>
-                    {key.toUpperCase()} {value}
-                  </span>
-                ))}
-              </div>
-              <SkillList
-                ids={[...player.snapshot.baseSkills, ...player.skills]}
-              />
-            </details>
-            <p className="text-xs text-muted-foreground">
-              {t("leagueUx.reportStatsHint")}
-            </p>
-            <fieldset
-              disabled={!canEdit}
-              className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 lg:grid-cols-3"
-            >
-              {fields.slice(0, 6).map((field) =>
-                field === "mvp" ? (
-                  <label
-                    key={field}
-                    className="flex min-h-20 items-center justify-between gap-3 rounded-lg border bg-card px-3 text-sm font-medium"
-                  >
-                    {t("leagueUx.reportStatLabels.mvp")}
-                    <Switch
-                      disabled={!canEdit}
-                      checked={player.stats.mvp > 0}
-                      onCheckedChange={(checked) =>
-                        onChange({ stats: { mvp: checked ? 1 : 0 } })
-                      }
-                    />
-                  </label>
-                ) : (
-                  <LeagueNumber
-                    key={field}
-                    label={t("leagueUx.reportStatLabels." + field)}
-                    value={player.stats[field]}
-                    max={99}
-                    disabled={!canEdit}
-                    onChange={(value) =>
-                      onChange({ stats: { [field]: value } })
-                    }
-                  />
-                ),
-              )}
-            </fieldset>
-            <details
-              className="rounded-lg border"
-              open={
-                player.casualtyRoll !== null ||
-                player.statusAfter !== "active" ||
-                undefined
-              }
-            >
-              <summary className="cursor-pointer px-4 py-3 text-sm font-medium">
-                {t("leagueUx.reportInjuries")}
-              </summary>
-              <div className="border-t p-4">
-                <fieldset
-                  disabled={!canEdit}
-                  className="grid gap-3 sm:grid-cols-2"
-                >
-                  <DiceInput
-                    label={t("leagueUi.casualtyRoll")}
-                    sides={99}
-                    value={player.casualtyRoll}
-                    onChange={(value) =>
-                      onChange({ casualtyRoll: value, lastingRoll: null })
-                    }
-                  />
-                  {player.casualtyRoll !== null &&
-                    player.casualtyRoll >= 13 &&
-                    player.casualtyRoll <= 14 && (
-                      <DiceInput
-                        label={t("leagueUi.lastingRoll")}
-                        sides={6}
-                        value={player.lastingRoll}
-                        onChange={(value) => onChange({ lastingRoll: value })}
-                      />
-                    )}
-                  <LeagueField>
-                    {t("leagueUi.playerStatus")}
-                    <LeagueSelect
-                      value={player.statusAfter}
-                      disabled={player.casualtyRoll !== null}
-                      onChange={(event) =>
-                        onChange({
-                          statusAfter: event.target
-                            .value as ReportPlayer["statusAfter"],
-                        })
-                      }
-                    >
-                      {["active", "missing-next-game", "dead"].map((status) => (
-                        <option key={status} value={status}>
-                          {t("leagueUi.status." + status)}
-                        </option>
-                      ))}
-                    </LeagueSelect>
-                  </LeagueField>
-                  <LeagueField>
-                    {t("leagueUi.injuryNotes")}
-                    <Input
-                      value={player.injuryNotes}
-                      maxLength={500}
-                      onChange={(event) =>
-                        onChange({ injuryNotes: event.target.value })
-                      }
-                    />
-                  </LeagueField>
-                </fieldset>
-                <p className="mt-3 text-xs text-muted-foreground">
-                  {t("leagueUi.casualtyHint")}
-                </p>
-              </div>
-            </details>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
   );
 }

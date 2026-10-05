@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslations } from "gt-next";
 import type { FunctionReturnType } from "convex/server";
 import {
+  ChevronRight,
   Plus,
   Pencil,
   Trash2,
@@ -40,8 +41,16 @@ import {
 } from "./dialog";
 import { LeagueField, LeagueSelect } from "./league-field";
 import { PlayerIcon } from "./player-icon";
-import { TableSkills } from "./skill-box";
+import { TableSkills, SkillList } from "./skill-box";
 import { positionLabel } from "./position-name";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "./ui/table";
 
 type Data = FunctionReturnType<typeof api.leagues.getMatch>;
 type Save = (
@@ -73,11 +82,13 @@ export function LeagueEvents({
     data.away?.coachId === data.viewerId ? data.away._id : data.home._id,
   );
   const [search, setSearch] = useState("");
+  const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [editing, setEditing] = useState<{
     event: MatchEvent;
     version: number;
   } | null>(null);
-  const ledger = data.playEvents ?? [];
+  const selected = data.players.find((row) => row.playerId === selectedPlayer);
+  const ledger = data.playEvents;
   const events = sortMatchEvents(ledger.map((row) => row.event));
   const label = (id: string) => {
     const row = data.players.find((player) => player.playerId === id);
@@ -403,109 +414,168 @@ export function LeagueEvents({
               onChange={(event) => setSearch(event.target.value)}
             />
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead className="bg-secondary/30 text-muted-foreground">
-                <tr>
-                  <th className="px-3 py-2 text-left">{t("player")}</th>
-                  {["MA", "ST", "AG", "PA", "AV"].map((stat) => (
-                    <th
-                      className="hidden px-2 py-2 text-center md:table-cell"
-                      key={stat}
-                    >
-                      {stat}
-                    </th>
-                  ))}
-                  <th className="hidden px-3 text-left lg:table-cell">
-                    {t("skills")}
-                  </th>
-                  <th className="px-2">TD</th>
-                  <th className="px-2">SPP</th>
-                  <th className="px-3 text-right">{t("matchEvents.events")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.players
-                  .filter(
-                    (row) =>
-                      row.entryId === side &&
-                      `${label(row.playerId)} ${row.snapshot.positionName}`
-                        .toLocaleLowerCase()
-                        .includes(search.toLocaleLowerCase()),
-                  )
-                  .map((row) => (
-                    <tr
-                      key={row._id}
-                      className="border-t hover:bg-secondary/20"
-                    >
-                      <td className="px-3 py-2">
-                        <div className="flex items-center gap-2">
-                          <PlayerIcon
-                            positionId={row.positionId}
-                            className="size-8 shrink-0"
-                          />
-                          <div>
-                            <p className="font-semibold">
-                              {label(row.playerId)}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground">
-                              {positionLabel(row.snapshot.positionName)}
-                            </p>
-                            {(!row.participated ||
-                              row.statusAfter !== "active") && (
-                              <span className="text-[10px] text-destructive">
-                                {t(
-                                  `leagueUi.status.${row.participated ? row.statusAfter : row.snapshot.status}`,
-                                )}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      {(["ma", "st", "ag", "pa", "av"] as const).map((stat) => (
-                        <td
-                          key={stat}
-                          className="hidden px-2 text-center font-mono md:table-cell"
-                        >
-                          {row.snapshot.profile[stat]}
-                        </td>
-                      ))}
-                      <td className="hidden max-w-64 px-3 lg:table-cell">
-                        <TableSkills
-                          ids={row.snapshot.baseSkills}
-                          additionalIds={row.skills.filter(
-                            (id) => !row.snapshot.baseSkills.includes(id),
-                          )}
-                          label={t("skills")}
+          <Table
+            aria-label={t("players")}
+            className="player-table min-w-[740px] table-auto md:table-fixed"
+          >
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-10 pl-3">#</TableHead>
+                <TableHead className="w-48">{t("player")}</TableHead>
+                {["MA", "ST", "AG", "PA", "AV"].map((stat) => (
+                  <TableHead
+                    key={stat}
+                    className="w-8 text-center font-mono text-xs"
+                  >
+                    {stat}
+                  </TableHead>
+                ))}
+                <TableHead>{t("skills")}</TableHead>
+                <TableHead className="w-10 text-center font-mono text-xs">
+                  TD
+                </TableHead>
+                <TableHead className="w-12 text-center font-mono text-xs">
+                  SPP
+                </TableHead>
+                <TableHead className="w-10">
+                  <span className="sr-only">{t("managePlayer")}</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.players
+                .filter((row) => row.entryId === side)
+                .map((row, index) => ({ row, index }))
+                .filter(({ row }) =>
+                  `${label(row.playerId)} ${positionLabel(row.snapshot.positionName)}`
+                    .toLocaleLowerCase()
+                    .includes(search.trim().toLocaleLowerCase()),
+                )
+                .map(({ row, index }) => (
+                  <TableRow
+                    key={row._id}
+                    tabIndex={0}
+                    aria-label={`${t("managePlayer")} · ${label(row.playerId)}`}
+                    className="group cursor-pointer focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-[-2px]"
+                    onClick={(event) => {
+                      if (!(event.target as HTMLElement).closest("button, a"))
+                        setSelectedPlayer(row.playerId);
+                    }}
+                    onKeyDown={(event) => {
+                      if (
+                        event.target === event.currentTarget &&
+                        ["Enter", " "].includes(event.key)
+                      ) {
+                        event.preventDefault();
+                        setSelectedPlayer(row.playerId);
+                      }
+                    }}
+                  >
+                    <TableCell className="pl-5 font-mono text-xs text-muted-foreground">
+                      {String(
+                        snapshotPlayerNumber(
+                          row.sourcePlayerId,
+                          row.entryId === data.home._id
+                            ? data.match.homeSnapshot?.players
+                            : data.match.awaySnapshot?.players,
+                          index + 1,
+                        ),
+                      ).padStart(2, "0")}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <PlayerIcon
+                          positionId={row.positionId}
+                          variant={index}
+                          className="size-8 shrink-0"
                         />
-                      </td>
-                      <td className="px-2 text-center font-mono">
-                        {row.stats.td || "—"}
-                      </td>
-                      <td className="px-2 text-center font-mono font-semibold text-primary">
-                        {spp(row.playerId) || "—"}
-                      </td>
-                      <td className="px-3 text-right">
-                        {editable && row.participated ? (
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="size-8"
-                            aria-label={`${t("matchEvents.add")} · ${label(row.playerId)}`}
-                            onClick={() => open(newMatchEvent(row.playerId))}
+                        <div className="min-w-0">
+                          <button
+                            type="button"
+                            aria-haspopup="dialog"
+                            className="text-left text-sm font-semibold text-primary hover:underline"
+                            onClick={() => setSelectedPlayer(row.playerId)}
                           >
-                            <Plus className="size-4" />
-                          </Button>
-                        ) : (
-                          "—"
+                            {row.name.trim() ||
+                              positionLabel(row.snapshot.positionName)}
+                          </button>
+                          <p className="mt-0.5 text-xs text-muted-foreground">
+                            {positionLabel(row.snapshot.positionName)}
+                          </p>
+                          {(!row.participated ||
+                            row.statusAfter !== "active") && (
+                            <span className="text-xs text-destructive">
+                              {t(
+                                `leagueUi.status.${row.participated ? row.statusAfter : row.snapshot.status}`,
+                              )}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    {(["ma", "st", "ag", "pa", "av"] as const).map((stat) => (
+                      <TableCell
+                        key={stat}
+                        className="text-center font-mono text-xs"
+                      >
+                        {row.snapshot.profile[stat]}
+                      </TableCell>
+                    ))}
+                    <TableCell>
+                      <TableSkills
+                        ids={row.snapshot.baseSkills}
+                        additionalIds={row.skills.filter(
+                          (id) => !row.snapshot.baseSkills.includes(id),
                         )}
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
+                        label={t("skills")}
+                      />
+                    </TableCell>
+                    <TableCell className="text-center font-mono text-xs">
+                      {row.stats.td || "—"}
+                    </TableCell>
+                    <TableCell className="text-center font-mono text-xs font-semibold text-primary">
+                      {spp(row.playerId) || "—"}
+                    </TableCell>
+                    <TableCell className="pr-3">
+                      <ChevronRight
+                        aria-hidden="true"
+                        className="size-4 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              {!data.players.some(
+                (row) =>
+                  row.entryId === side &&
+                  `${label(row.playerId)} ${positionLabel(row.snapshot.positionName)}`
+                    .toLocaleLowerCase()
+                    .includes(search.trim().toLocaleLowerCase()),
+              ) && (
+                <TableRow>
+                  <TableCell
+                    colSpan={11}
+                    className="py-8 text-center text-sm text-muted-foreground"
+                  >
+                    {t("noResults")}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </>
+      )}
+      {selected && (
+        <MatchPlayerDialog
+          player={selected}
+          label={label(selected.playerId)}
+          earned={spp(selected.playerId)}
+          editable={editable}
+          onClose={() => setSelectedPlayer(null)}
+          onAdd={() => {
+            setSelectedPlayer(null);
+            open(newMatchEvent(selected.playerId));
+          }}
+        />
       )}
       <Dialog
         open={!!editing}
@@ -527,6 +597,169 @@ export function LeagueEvents({
         )}
       </Dialog>
     </section>
+  );
+}
+
+function MatchPlayerDialog({
+  player,
+  label,
+  earned,
+  editable,
+  onClose,
+  onAdd,
+}: {
+  player: Data["players"][number];
+  label: string;
+  earned: number;
+  editable: boolean;
+  onClose: () => void;
+  onAdd: () => void;
+}) {
+  const t = useTranslations();
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const addedSkills = player.skills.filter(
+    (id) => !player.snapshot.baseSkills.includes(id),
+  );
+  return (
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <DialogContent
+        className="player-dialog player-dialog-view"
+        initialFocus={titleRef}
+        showCloseButton={false}
+      >
+        <DialogHeader className="player-dialog-header">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-lg border bg-card sm:size-12">
+              <PlayerIcon
+                positionId={player.positionId}
+                className="size-12 sm:size-10"
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <DialogDescription className="mb-1 text-xs">
+                {positionLabel(player.snapshot.positionName)}
+              </DialogDescription>
+              <DialogTitle
+                ref={titleRef}
+                tabIndex={-1}
+                className="min-w-0 text-xl font-semibold leading-tight outline-none sm:text-2xl"
+              >
+                <span className="line-clamp-2 wrap-anywhere">{label}</span>
+              </DialogTitle>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-11 shrink-0 self-start sm:size-8"
+              aria-label={t("playerModal.close")}
+              onClick={onClose}
+            >
+              <X className="size-4" />
+            </Button>
+          </div>
+        </DialogHeader>
+        <div className="player-dialog-body">
+          <section
+            className="player-dialog-profile"
+            aria-label={t("leagueUx.reportPlayerProfile")}
+          >
+            <dl className="grid grid-cols-5 divide-x overflow-hidden rounded-lg border bg-card text-center">
+              {(["ma", "st", "ag", "pa", "av"] as const).map((stat) => (
+                <div key={stat} className="py-2.5">
+                  <dt className="font-mono text-[10px] text-muted-foreground">
+                    {stat.toUpperCase()}
+                  </dt>
+                  <dd className="mt-1 font-mono text-base font-semibold">
+                    {player.snapshot.profile[stat]}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <dl className="space-y-2 text-xs">
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted-foreground">{t("cost")}</dt>
+                <dd className="font-mono font-medium">
+                  {(player.snapshot.baseCost + player.snapshot.valueIncrease) /
+                    1000}
+                  k GP
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted-foreground">
+                  {t("leagueUi.playerStatus")}
+                </dt>
+                <dd>
+                  {t(
+                    `leagueUi.status.${player.participated ? player.statusAfter : player.snapshot.status}`,
+                  )}
+                </dd>
+              </div>
+            </dl>
+            <div className="space-y-3 border-t pt-4">
+              <h3 className="text-xs font-semibold">{t("skills")}</h3>
+              <div className="flex flex-wrap gap-1.5">
+                {player.snapshot.baseSkills.length > 0 && (
+                  <SkillList ids={player.snapshot.baseSkills} />
+                )}
+                {addedSkills.length > 0 && (
+                  <SkillList ids={addedSkills} added />
+                )}
+                {!player.snapshot.baseSkills.length && !addedSkills.length && (
+                  <span className="text-xs text-muted-foreground">
+                    {t("noSkills")}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="space-y-3 border-t pt-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-semibold">
+                  {t("leagueUx.reportGame")}
+                </h3>
+                <span className="font-mono text-sm font-semibold text-primary">
+                  +{earned} SPP
+                </span>
+              </div>
+              <dl className="grid grid-cols-3 gap-3 text-center">
+                {(["td", "sppCas", "com", "int", "mvp", "inj"] as const).map(
+                  (stat) => (
+                    <div key={stat}>
+                      <dt className="text-[10px] text-muted-foreground">
+                        {t(`leagueUi.stats.${stat}`)}
+                      </dt>
+                      <dd className="mt-1 font-mono text-base font-semibold">
+                        {player.stats[stat]}
+                      </dd>
+                    </div>
+                  ),
+                )}
+              </dl>
+              {player.injuryNotes && (
+                <p className="text-xs text-muted-foreground">
+                  {player.injuryNotes}
+                </p>
+              )}
+            </div>
+          </section>
+        </div>
+        <div className="player-dialog-footer justify-end">
+          <Button variant="outline" className="h-11 sm:h-8" onClick={onClose}>
+            {t("playerModal.close")}
+          </Button>
+          {editable && player.participated && (
+            <Button className="h-11 sm:h-8" onClick={onAdd}>
+              <Plus className="size-4" />
+              {t("matchEvents.add")}
+            </Button>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

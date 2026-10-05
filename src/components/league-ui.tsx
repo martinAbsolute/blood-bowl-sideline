@@ -8,6 +8,7 @@ import { ArrowLeft, Download, History, Search, Trophy } from "lucide-react";
 import { ConvexError } from "convex/values";
 import { LoginButton } from "./site-shell";
 import { Button } from "./ui/button";
+import { ButtonGroup } from "./ui/button-group";
 import { Input } from "./ui/input";
 import { LeagueHelp } from "./league-help";
 import { InitialLoading } from "./initial-loading";
@@ -41,7 +42,6 @@ export function useLeagueAction() {
         "EVENT_CASUALTY_REQUIRED",
         "EVENT_APOTHECARY_REQUIRED",
         "EVENT_DUPLICATE_INJURY",
-        "EVENT_REPORT_REQUIRED",
         "UNAUTHENTICATED",
         "CONFLICT",
         "FORBIDDEN",
@@ -53,7 +53,6 @@ export function useLeagueAction() {
         "INELIGIBLE_PLAYER",
         "ONE_MVP_PER_TEAM_REQUIRED",
         "TOUCHDOWN_TOTAL_MISMATCH",
-        "INVALID_EVIDENCE_URL",
         "REPORT_LOCKED",
         "REPORT_NOT_STARTED",
         "MATCH_IN_PROGRESS",
@@ -364,13 +363,13 @@ export function DiceInput({
       <legend className="mb-2 text-xs font-medium text-muted-foreground">
         {label}
       </legend>
-      <div className="grid grid-cols-3 gap-1.5">
+      <ButtonGroup aria-label={label} className="w-full">
         {Array.from({ length: sides }, (_, index) => index + 1).map((roll) => (
           <Button
             key={roll}
             type="button"
             variant={roll === value ? "default" : "outline"}
-            className="h-11 min-w-0 font-mono text-base"
+            className="h-11 min-w-0 flex-1 font-mono text-base"
             aria-label={`${label}: ${roll}`}
             aria-pressed={roll === value}
             onClick={() => onChange(roll === value ? null : roll)}
@@ -378,7 +377,7 @@ export function DiceInput({
             {roll}
           </Button>
         ))}
-      </div>
+      </ButtonGroup>
     </fieldset>
   );
 }

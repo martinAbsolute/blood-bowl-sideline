@@ -22,13 +22,13 @@ For casualties, record the original modified D16, any lasting-injury D6, the Apo
 
 Half and turn are optional. Timed events sort into play order; untimed events retain their entry order; MVPs appear last. Corrections can change timing, participants, injury resolution or event kind, or remove an event entirely. The roster tab shows the captured match profiles, skills and derived TD/SPP alongside player availability.
 
-## Persistence and compatibility
+## Persistence
 
 `leaguePlayEvents` contains one bounded event per document, its client-generated id, edit version and last editor. Appends from different coaches merge transactionally. Updating/removing an event compares its version. Retrying the same operation is idempotent; deleted records retain a tombstone. Limit: 256 active events, 512 total including tombstones per match.
 
 `projectMatchEvents` derives player contributions, score and final injury inputs. Event reports reject direct player-counter and score writes. Existing SPP rates captured with the roster remain authoritative, including Brawlin' Brutes. Official report revisions retain the complete before/after event ledger. Commissioner correction reuses the existing career, treasury and standings replay, including spent-SPP and later-availability safeguards.
 
-The optional `eventReporting` flag makes the schema additive. The new UI opts in when starting a fixture. Previously started reports and older clients retain their totals and correction flow: missing player relationships are never invented. Legacy CAS contributions retain their original calculation so reversing an old result cannot corrupt standings. Event-based reports count only SPP-eligible casualties for league CAS, as required by League Play.
+All match reports use the event timeline. Scores and player statistics are derived from events; there is no totals editor or compatibility mode. Standings count only SPP-eligible casualties. Disposable data must be reset before deploying incompatible schema changes.
 
 Rules were checked against the project's [BB2025 League Play reference](https://bloodbowlbase.ru/bb2025/core_rules/league_play/), [injury and Apothecary rules](https://bloodbowlbase.ru/bb2025/core_rules/the_game_of_blood_bowl/#apothecaries), and [official May 2026 FAQ](https://assets.warhammer-community.com/eng_20-05_blood_bowl_faq_errata-gytvlserev-ngihd3chox.pdf). See [rules provenance](league-rules-sources.md) for the existing career rules.
 

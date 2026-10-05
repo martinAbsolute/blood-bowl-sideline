@@ -16,7 +16,6 @@ import { LeagueMatch } from "../src/components/league-match";
 const state = vi.hoisted(() => ({
   status: "in-progress",
   revision: 1,
-  eventReporting: false,
   viewerId: "coach",
   calls: [] as { name: string; args: Record<string, unknown> }[],
 }));
@@ -52,15 +51,12 @@ vi.mock("convex/react", () => ({
       canCommission: true,
       canConfirm: true,
       match: {
-        eventReporting: state.eventReporting,
         _id: "match",
         status: state.status,
         revision: state.revision,
         scoreHome: 0,
         scoreAway: 0,
         confirmedBy: [],
-        venue: "",
-        evidenceUrl: "",
         homeFanRoll: null,
         awayFanRoll: null,
         homeFansRoll: null,
@@ -99,7 +95,10 @@ vi.mock("../src/components/player-icon", () => ({
   PlayerIcon: () => null,
   RosterIcon: () => null,
 }));
-vi.mock("../src/components/skill-box", () => ({ SkillList: () => null }));
+vi.mock("../src/components/skill-box", () => ({
+  SkillList: () => null,
+  TableSkills: () => null,
+}));
 vi.mock("../src/components/league-help", () => ({ LeagueHelp: () => null }));
 vi.mock("../src/components/dialog", () => ({
   Dialog: ({
@@ -183,7 +182,6 @@ afterEach(() => {
   state.viewerId = "coach";
   state.status = "in-progress";
   state.revision = 1;
-  state.eventReporting = false;
   state.calls = [];
 });
 
@@ -229,7 +227,6 @@ async function click(element: HTMLElement) {
 }
 
 it("records an event instead of editing counters and shows the review timeline", async () => {
-  state.eventReporting = true;
   const view = await setup();
   try {
     expect(view.container.textContent).not.toContain(
@@ -269,7 +266,6 @@ it("records an event instead of editing counters and shows the review timeline",
   }
 });
 it("keeps a new commissioner event local until the correction is applied", async () => {
-  state.eventReporting = true;
   state.status = "completed";
   const view = await setup();
   try {
@@ -299,6 +295,7 @@ it("opens an away coach's own players first and lets them inspect the opponent",
   state.viewerId = "opponent";
   const view = await setup();
   try {
+    await click(button(view.container, "matchEvents.roster"));
     expect(
       button(view.container, "Away Team").getAttribute("aria-pressed"),
     ).toBe("true");
@@ -315,65 +312,40 @@ it("opens an away coach's own players first and lets them inspect the opponent",
   }
 });
 
-it("syncs fields immediately and lets coaches switch steps, teams and rows during edits", async () => {
+it("opens builder-style player profiles and adds events from a player", async () => {
   const view = await setup();
   try {
-    const venue = view.container.querySelector<HTMLInputElement>(
-      "#report-pre-game input",
-    )!;
-    await input(venue, "Table 3 ");
-    expect(state.calls[0]).toEqual({
-      name: "leagues:updateMatchDetails",
-      args: { matchId: "match", venue: "Table 3 " },
-    });
-    const rows = view.container.querySelectorAll<HTMLButtonElement>(
-      '#report-game button[aria-haspopup="dialog"]',
+    await click(button(view.container, "matchEvents.roster"));
+    await click(button(view.container, "first"));
+    const dialog = document.querySelector<HTMLElement>('[role="dialog"]')!;
+    expect(dialog.textContent).toContain("leagueUx.reportGame");
+    expect(dialog.querySelector("input")).toBeNull();
+    await click(button(dialog, "matchEvents.add"));
+    expect(document.querySelector("form")).not.toBeNull();
+    expect(state.calls).toHaveLength(0);
+  } finally {
+    await view.close();
+  }
+});
+
+it("removes totals, venue and evidence editors from all steps", async () => {
+  const view = await setup();
+  try {
+    expect(view.container.textContent).not.toMatch(
+      /sharedHint|legacy|winningsHint|leagueUi.evidence|leagueUi.venue/,
     );
-    await click(rows[0]);
-    await input(
-      document.querySelector<HTMLInputElement>(
-        '[role="dialog"] input[role="spinbutton"]',
-      )!,
-      "1",
-    );
-    expect(state.calls[1]).toEqual({
-      name: "leagues:patchMatchPlayer",
-      args: { matchId: "match", playerId: "first", stats: { td: 1 } },
-    });
-    expect(button(view.container, "Away Team").disabled).toBe(false);
-    expect(button(view.container, "leagueUx.reportNextPostGame").disabled).toBe(
-      false,
-    );
-    await click(
-      document.querySelector<HTMLElement>(
-        '[role="dialog"] [data-slot="dialog-close"]',
-      )!,
-    );
-    await click(rows[1]);
-    expect(document.querySelector('[role="dialog"]')?.textContent).toContain(
-      "second",
-    );
-    await click(
-      document.querySelector<HTMLElement>(
-        '[role="dialog"] [data-slot="dialog-close"]',
-      )!,
-    );
-    state.revision = 2;
-    await view.render();
-    expect(rows[0].textContent).not.toContain("leagueUi.staleDraft");
-    expect(view.container.textContent).not.toContain("leagueUi.savePlayer");
-    expect(view.container.textContent).not.toContain("leagueUi.saveDetails");
-    await click(button(view.container, "leagueUx.reportNextPostGame"));
-    await input(
-      view.container.querySelector<HTMLInputElement>(
-        '#report-post-game input[role="spinbutton"]',
-      )!,
-      "2",
-    );
-    expect(state.calls[2]).toEqual({
-      name: "leagues:updateMatchDetails",
-      args: { matchId: "match", scoreHome: 2 },
-    });
+    expect(view.container.querySelector("#report-pre-game input")).toBeNull();
+    expect(
+      view.container.querySelector('#report-post-game input[type="url"]'),
+    ).toBeNull();
+    expect(
+      button(view.container, "leagueUx.reportNextPostGame").getAttribute(
+        "variant",
+      ),
+    ).toBe("default");
+    expect(
+      button(view.container, "leagueUx.reportPrevious").getAttribute("variant"),
+    ).toBe("outline");
   } finally {
     await view.close();
   }
@@ -384,12 +356,6 @@ it("stages a completed report correction, can cancel it and protects against a n
   const view = await setup();
   try {
     await click(button(view.container, "leagueUi.correctReport"));
-    const score = view.container.querySelector<HTMLInputElement>(
-      '#report-post-game input[role="spinbutton"]',
-    )!;
-    await input(score, "3");
-    expect(score.value).toBe("3");
-    expect(state.calls).toHaveLength(0);
     await click(
       view.container.querySelector<HTMLButtonElement>(
         '[aria-controls="report-post-game"]',
