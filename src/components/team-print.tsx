@@ -27,13 +27,13 @@ export function printStyles(orientation: PrintOrientation) {
     * { box-sizing: border-box; }
     body { margin: 0; color: #000; background: #fff; font: 10pt Arial, sans-serif; }
     h1 { font: bold 20pt Georgia, serif; margin: 0 0 3mm; overflow-wrap: anywhere; }
-    h2 { font-size: 11pt; margin: 0 0 3mm; }
-    h3 { font-size: 9pt; margin: 0 0 2mm; border-bottom: 1px solid; padding-bottom: 1mm; }
+    h3 { font-size: 9pt; margin: 0 0 2mm; border-bottom: 1px solid; padding-bottom: 1mm; break-after: avoid; }
     p { margin: 0; }
+    .overview { ${orientation === "landscape" ? "display: grid; grid-template-columns: 45mm minmax(0, 1fr); gap: 4mm; align-items: start;" : "display: block;"} }
     .identity { margin-bottom: 4mm; }
     .identity p { margin-top: 1mm; }
-    .summary { display: grid; align-items: start; grid-template-columns: repeat(${orientation === "portrait" ? 2 : 4}, minmax(0,1fr)); gap: 3mm; margin-bottom: 4mm; }
-    .summary section { border: 1px solid; padding: 2mm; break-inside: avoid; }
+    .summary { display: flex; align-items: flex-start; gap: 3mm; margin: 3mm 0 4mm; }
+    .summary section { flex: 1; min-width: 0; border: 1px solid; padding: 2mm; break-inside: avoid; }
     dl { margin: 0; }
     dl div { display: flex; justify-content: space-between; gap: 2mm; margin-bottom: 1mm; }
     dt, dd { margin: 0; }
@@ -47,13 +47,11 @@ export function printStyles(orientation: PrintOrientation) {
     .cost { width: 16mm; text-align: right; }
     tr { break-inside: avoid; }
     thead { display: table-header-group; }
-    .added { text-decoration: underline dashed; text-underline-offset: 2px; }
-    .captain { text-decoration: underline dotted; text-underline-offset: 2px; }
-    .legend { margin-top: 3mm; font-size: 9pt; white-space: pre-wrap; overflow-wrap: anywhere; }
-    .reference { break-before: page; }
-    .reference h2 { border-bottom: 1px solid; padding-bottom: 2mm; }
+    .added { font-weight: bold; }
+    .reference { margin-top: 4mm; }
     .rules { columns: ${orientation === "portrait" ? 2 : 3}; column-gap: 5mm; font-size: 9pt; line-height: 1.3; }
-    .rule { margin-bottom: 3mm; }
+    .rule { margin-bottom: 3mm; break-inside: avoid; page-break-inside: avoid; }
+    .team-rules { margin-top: 4mm; font-size: 9pt; line-height: 1.3; }
     .rule p { white-space: pre-wrap; overflow-wrap: anywhere; }
     .rule strong { display: block; break-after: avoid; margin-bottom: 1mm; }
   `;
@@ -120,10 +118,6 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
       name: skillName(id),
       text: t(`skillDescriptions.${id.split(":")[0]}`),
     })),
-    ...specialRules.map((name) => ({
-      name,
-      text: t(`teamSpecialRules.${specialRuleKey(name)}`),
-    })),
     ...selectedInducements.map((item) => ({
       name: item.name,
       text: t(`inducementDescriptions.${item.id}`),
@@ -135,72 +129,69 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
   return (
     <>
       <section className="roster-sheet">
-        <header className="identity">
-          <h1>{team.name || t("untitled")}</h1>
-          <p>
-            {roster.name} · {ruleset.name} · {t("tier")} {totals.tier}
-          </p>
-        </header>
-        <div className="summary">
-          <section>
-            <h3>{t("staff")}</h3>
-            <dl>
-              {Object.entries(team.staff).map(([key, count]) => (
-                <div key={key}>
-                  <dt>{t(key)}</dt>
-                  <dd>{count}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-          <section>
-            <h3>{t("inducements")}</h3>
-            <dl>
-              {selectedInducements.map((item) => (
-                <div key={item.id}>
-                  <dt>
-                    {team.inducements[item.id]} × {item.name}
-                  </dt>
-                  <dd>
-                    {gold(
-                      inducementInfo(team, item).cost *
-                        team.inducements[item.id],
-                    )}
-                  </dd>
-                </div>
-              ))}
-              {!selectedInducements.length && <p>—</p>}
-            </dl>
-          </section>
-          <section>
-            <h3>{t("specialRules")}</h3>
-            {specialRules.map((name) => (
-              <p key={name}>{name}</p>
-            ))}
-          </section>
-          <section>
-            <h3>{t("summary")}</h3>
-            <dl>
-              {[
-                [t("players"), gold(totals.players + totals.starGold)],
-                [t("staff"), gold(totals.staff)],
-                [t("inducements"), gold(totals.inducements)],
-                [
-                  t("skills"),
-                  ruleset.skillCurrency
-                    ? `${totals.skills} ${ruleset.skillCurrency.toUpperCase()}`
-                    : gold(totals.skills),
-                ],
-                [t("teamValue"), `${gold(totals.teamGold)} GP`],
-                [t("remaining"), `${gold(totals.remaining)} GP`],
-              ].map(([label, value]) => (
-                <div key={label}>
-                  <dt>{label}</dt>
-                  <dd>{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
+        <div className="overview">
+          <header className="identity">
+            <h1>{team.name || t("untitled")}</h1>
+            <p>
+              {roster.name} · {ruleset.name} · {t("tier")} {totals.tier}
+            </p>
+          </header>
+          <div className="summary">
+            <section>
+              <h3>{t("staff")}</h3>
+              <dl>
+                {Object.entries(team.staff).map(([key, count]) => (
+                  <div key={key}>
+                    <dt>{t(key)}</dt>
+                    <dd>{count}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+            {selectedInducements.length > 0 && (
+              <section>
+                <h3>{t("inducements")}</h3>
+                <dl>
+                  {selectedInducements.map((item) => (
+                    <div key={item.id}>
+                      <dt>
+                        {team.inducements[item.id]} × {item.name}
+                      </dt>
+                      <dd>
+                        {gold(
+                          inducementInfo(team, item).cost *
+                            team.inducements[item.id],
+                        )}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            )}
+            <section>
+              <h3>{t("summary")}</h3>
+              <dl>
+                {[
+                  [t("players"), gold(totals.players + totals.starGold)],
+                  [t("staff"), gold(totals.staff)],
+                  [t("inducements"), gold(totals.inducements)],
+                  [
+                    t("skills"),
+                    ruleset.skillCurrency
+                      ? `${totals.skills} ${ruleset.skillCurrency.toUpperCase()}`
+                      : gold(totals.skills),
+                  ],
+                  [t("teamValue"), `${gold(totals.teamGold)} GP`],
+                  [t("remaining"), `${gold(totals.remaining)} GP`],
+                ].map(([label, value]) => (
+                  <div key={label}>
+                    <dt>{label}</dt>
+                    <dd>{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          </div>
         </div>
         <table>
           <thead>
@@ -275,14 +266,18 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
             ))}
           </tbody>
         </table>
-        <p className="legend">
-          {t("builtInSkills")} ·{" "}
-          <span className="added">{t("addedSkills")}</span> ·{" "}
-          <span className="captain">{t("proCaptain")}</span>
-        </p>
+        {specialRules.length > 0 && (
+          <section className="team-rules">
+            {specialRules.map((name) => (
+              <article className="rule" key={name}>
+                <strong>{name}</strong>
+                <p>{t(`teamSpecialRules.${specialRuleKey(name)}`)}</p>
+              </article>
+            ))}
+          </section>
+        )}
       </section>
       <section className="reference">
-        <h2>{t("printRules")}</h2>
         <div className="rules">
           {appendix.map((rule) => (
             <article className="rule" key={rule.name}>

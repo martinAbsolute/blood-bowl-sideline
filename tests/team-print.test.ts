@@ -125,12 +125,42 @@ describe.each([
   });
 });
 
-it("uses A4 in the chosen orientation and starts the rule appendix on a new page", () => {
+it("omits empty panels and the skill legend, and puts team rules below the roster", () => {
+  const t = translator(en);
+  const amazon = renderToStaticMarkup(
+    createElement(TeamPrint, { team: newTeam(randomUUID(), "amazon"), t }),
+  );
+  expect(amazon).not.toContain(`<h3>${t("inducements")}</h3>`);
+  expect(amazon).not.toContain(`<h3>${t("specialRules")}</h3>`);
+  expect(amazon).not.toContain(t("printRules"));
+  expect(amazon).not.toContain('class="team-rules"');
+  expect(amazon).not.toContain(t("builtInSkills"));
+  expect(amazon).not.toContain(t("addedSkills"));
+  expect(amazon).not.toContain(t("proCaptain"));
+
+  const team = newTeam(randomUUID(), "orc");
+  team.inducements["blitzers-best-kegs"] = 1;
+  const orc = renderToStaticMarkup(createElement(TeamPrint, { team, t }));
+  expect(orc).toContain(`<h3>${t("inducements")}</h3>`);
+  expect(orc).toContain("1 ×");
+  expect(orc).not.toContain(`<h3>${t("specialRules")}</h3>`);
+  expect(orc).not.toContain(t("printRules"));
+  expect(orc.indexOf('class="team-rules"')).toBeGreaterThan(
+    orc.indexOf("</table>"),
+  );
+  expect(orc).toContain(en.teamSpecialRules.captain);
+  expect(orc.split(en.teamSpecialRules.captain)).toHaveLength(2);
+});
+
+it("uses A4 in both orientations, flows rules after the roster, and keeps definitions together", () => {
   expect(printStyles("portrait")).toContain("size: A4 portrait");
   expect(printStyles("landscape")).toContain("size: A4 landscape");
-  expect(printStyles("portrait")).toContain(
-    ".reference { break-before: page; }",
-  );
+  for (const orientation of ["portrait", "landscape"] as const) {
+    expect(printStyles(orientation)).not.toContain("break-before: page");
+    expect(printStyles(orientation)).toContain(
+      ".rule { margin-bottom: 3mm; break-inside: avoid; page-break-inside: avoid; }",
+    );
+  }
   expect(printStyles("landscape")).toContain(
     "font-size: 9pt; line-height: 1.3;",
   );
