@@ -198,7 +198,6 @@
     "reportGame": "Match events",
     "reportPostGame": "Review & finances",
     "reportWeather": "Weather",
-    "reportWeatherUnknown": "Not recorded",
     "reportWeather2": "Sweltering heat",
     "reportWeather3": "Very sunny",
     "reportWeather4": "Perfect conditions",
@@ -214,7 +213,17 @@
     "reportHistory": "Recorded report history",
     "reportEventRecorded": "Recorded",
     "reportEventCorrected": "Corrected",
-    "reportEventReplayed": "Replayed"
+    "reportEventReplayed": "Replayed",
+    "reportWeatherRoll": "Each coach rolls a D6; add the results.",
+    "reportWeatherSelect": "Select the combined 2D6 result to record the weather.",
+    "reportWeatherRules": "Season 3 weather rules",
+    "reportWeatherEffect2": "At the end of each drive, one coach rolls a D3. Each coach randomly selects that many of their players on the pitch. Move those players to Reserves; they must miss the next drive.",
+    "reportWeatherEffect3": "Apply −1 to every Passing Ability test.",
+    "reportWeatherEffect4": "No additional effects.",
+    "reportWeatherEffect11": "Apply −1 when picking up or catching the ball, or intercepting a Pass action.",
+    "reportWeatherEffect12": "Apply an additional −1 to every Rush roll. Only Quick Passes and Short Passes may be attempted.",
+    "reportPreGameRequired": "Weather and both attendance rolls recorded",
+    "reportPreGameHint": "Select both teams’ fan rolls and the weather to unlock match events for both coaches."
   },
   "app": "Blood Bowl Sideline",
   "appVersion": "Version {version}",
@@ -1005,7 +1014,8 @@
       "EVENT_TEAM_MISMATCH": "Choose players from the appropriate teams for this event.",
       "EVENT_CASUALTY_REQUIRED": "Enter the original casualty roll.",
       "EVENT_APOTHECARY_REQUIRED": "Enter the Apothecary's casualty roll.",
-      "EVENT_DUPLICATE_INJURY": "This player already has an unrecovered casualty. Edit that event first."
+      "EVENT_DUPLICATE_INJURY": "This player already has an unrecovered casualty. Edit that event first.",
+      "PRE_GAME_INCOMPLETE": "Select both teams’ fan rolls and the weather to unlock match events for both coaches."
     },
     "correctTreasury": "Commissioner treasury correction",
     "hiringClosedHint": "Regular recruitment closes after the first dismissal. Hire new players before dismissing any in this postgame sequence.",

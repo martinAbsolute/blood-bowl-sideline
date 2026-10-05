@@ -17,6 +17,9 @@ const state = vi.hoisted(() => ({
   status: "in-progress",
   revision: 1,
   viewerId: "coach",
+  weather: 4 as number | null,
+  homeFanRoll: 1 as number | null,
+  awayFanRoll: 1 as number | null,
   calls: [] as { name: string; args: Record<string, unknown> }[],
 }));
 vi.mock("convex/react", () => ({
@@ -57,8 +60,9 @@ vi.mock("convex/react", () => ({
         scoreHome: 0,
         scoreAway: 0,
         confirmedBy: [],
-        homeFanRoll: null,
-        awayFanRoll: null,
+        weather: state.weather,
+        homeFanRoll: state.homeFanRoll,
+        awayFanRoll: state.awayFanRoll,
         homeFansRoll: null,
         awayFansRoll: null,
         homeStalled: false,
@@ -183,6 +187,9 @@ afterEach(() => {
   state.status = "in-progress";
   state.revision = 1;
   state.calls = [];
+  state.weather = 4;
+  state.homeFanRoll = 1;
+  state.awayFanRoll = 1;
 });
 
 async function setup() {
@@ -334,14 +341,16 @@ it("removes totals, venue and evidence editors from all steps", async () => {
     expect(view.container.textContent).not.toMatch(
       /sharedHint|legacy|winningsHint|leagueUi.evidence|leagueUi.venue/,
     );
-    expect(view.container.querySelector("#report-pre-game input")).toBeNull();
+    expect(
+      view.container.querySelector(
+        '#report-pre-game input:not([type="radio"])',
+      ),
+    ).toBeNull();
     expect(
       view.container.querySelector('#report-post-game input[type="url"]'),
     ).toBeNull();
     expect(
-      button(view.container, "leagueUx.reportNextPostGame").getAttribute(
-        "variant",
-      ),
+      button(view.container, "leagueUx.reportNextGame").getAttribute("variant"),
     ).toBe("default");
     expect(
       button(view.container, "leagueUx.reportPrevious").getAttribute("variant"),
@@ -393,6 +402,43 @@ it("disables a completed report until a commissioner explicitly begins a correct
       view.container.querySelector<HTMLFieldSetElement>(
         "#report-pre-game fieldset",
       )!.disabled,
+    ).toBe(false);
+  } finally {
+    await view.close();
+  }
+});
+
+it("keeps match events locked until both attendance rolls and weather arrive, and relocks on remote clearing", async () => {
+  state.weather = null;
+  state.awayFanRoll = null;
+  const view = await setup();
+  try {
+    const next = () => button(view.container, "leagueUx.reportNextGame");
+    const tab = () =>
+      view.container.querySelector<HTMLButtonElement>(
+        '[aria-controls="report-game"]',
+      )!;
+    expect(next().disabled).toBe(true);
+    expect(tab().disabled).toBe(true);
+    state.awayFanRoll = 3;
+    await view.render();
+    expect(tab().disabled).toBe(true);
+    state.weather = 10;
+    await view.render();
+    expect(next().disabled).toBe(false);
+    expect(tab().disabled).toBe(false);
+    await click(tab());
+    expect(
+      view.container.querySelector<HTMLElement>("#report-game")!.hidden,
+    ).toBe(false);
+    state.homeFanRoll = null;
+    await view.render();
+    expect(tab().disabled).toBe(true);
+    expect(
+      view.container.querySelector<HTMLElement>("#report-game")!.hidden,
+    ).toBe(true);
+    expect(
+      view.container.querySelector<HTMLElement>("#report-pre-game")!.hidden,
     ).toBe(false);
   } finally {
     await view.close();

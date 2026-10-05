@@ -11,6 +11,7 @@ import { currentUser, requireUser } from "./roles";
 import { teamLeagueState } from "./teamLeagueState";
 import { playEventValidator } from "./leagueValidators";
 import { projectMatchEvents } from "../src/domain/match-events";
+import { isPreGameComplete } from "../src/domain/match-pregame";
 import { getRoster } from "../src/domain/catalog";
 import { RULES_VERSION } from "../src/domain/types";
 import {
@@ -198,6 +199,7 @@ export const savePlayEvent = mutation({
     { matchId, event, expectedVersion, deleted = false },
   ) => {
     const { user, match } = await editableMatch(ctx, matchId);
+    if (!isPreGameComplete(match)) throw new ConvexError("PRE_GAME_INCOMPLETE");
     integer(expectedVersion, 0, Number.MAX_SAFE_INTEGER);
     const ledger = await playEvents(ctx, matchId);
     const previous = ledger.find((row) => row.event.id === event.id);
@@ -1172,6 +1174,7 @@ function validateReport(
   match: Doc<"leagueMatches">,
   rows: Doc<"leagueMatchPlayers">[],
 ) {
+  if (!isPreGameComplete(match)) throw new ConvexError("PRE_GAME_INCOMPLETE");
   const home = rows.filter((r) => r.entryId === match.homeEntryId),
     away = rows.filter((r) => r.entryId === match.awayEntryId);
   for (const row of rows) {

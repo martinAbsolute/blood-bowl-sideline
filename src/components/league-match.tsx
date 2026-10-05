@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 import { LeagueEvents } from "./league-events";
+import { MatchWeather } from "./match-weather";
+import { isPreGameComplete } from "@/domain/match-pregame";
 import { projectMatchEvents, type MatchEvent } from "@/domain/match-events";
 import Link from "next/link";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
@@ -16,6 +18,7 @@ import {
   Circle,
   LoaderCircle,
   LockKeyhole,
+  Plus,
   ShieldCheck,
 } from "lucide-react";
 import { api } from "../../convex/_generated/api";
@@ -27,7 +30,7 @@ import { Button } from "./ui/button";
 import { Switch } from "./ui/switch";
 import { RosterIcon } from "./player-icon";
 import { Textarea } from "./ui/textarea";
-import { LeagueField, LeagueSelect } from "./league-field";
+import { LeagueField } from "./league-field";
 import { CommissionerRuling } from "./league-commissioner";
 import {
   DiceInput,
@@ -90,7 +93,7 @@ export function LeagueMatch({
     );
   });
   const action = useLeagueAction();
-  const [step, setStep] = useState<Step>("game");
+  const [requestedStep, setStep] = useState<Step>("pre-game");
   const [correction, setCorrection] = useState<MatchData | null>(null);
   const [reason, setReason] = useState("");
   const pendingCount = useRef(0);
@@ -210,6 +213,9 @@ export function LeagueMatch({
 
   const view = correction ?? data;
   const { match, league, home, away } = view;
+  const preGameComplete = isPreGameComplete(match);
+  const step = preGameComplete ? requestedStep : "pre-game";
+  const canProceed = preGameComplete && !pending && !syncError;
   const base = `/leagues/manage/${leagueId}`;
   const locked = data.match.status === "completed";
   const editable = (data.canEdit && !locked) || !!correction;
@@ -218,6 +224,11 @@ export function LeagueMatch({
   const dice = (value: number | null | undefined, sides: number) =>
     value != null && Number.isInteger(value) && value >= 1 && value <= sides;
   const checks = [
+    {
+      ready: preGameComplete,
+      label: t("leagueUx.reportPreGameRequired"),
+      step: "pre-game" as Step,
+    },
     {
       ready:
         dice(match.homeFanRoll, 3) &&
@@ -382,8 +393,9 @@ export function LeagueMatch({
                   type="button"
                   aria-current={step === value ? "step" : undefined}
                   aria-controls={`report-${value}`}
+                  disabled={value !== "pre-game" && !canProceed}
                   onClick={() => setStep(value)}
-                  className={`flex min-h-10 items-center justify-center gap-1 rounded-lg px-2 text-xs font-medium focus-visible:outline-2 focus-visible:outline-primary sm:gap-2 sm:text-sm ${step === value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
+                  className={`flex min-h-10 items-center justify-center gap-1 rounded-lg px-2 text-xs font-medium focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-45 sm:gap-2 sm:text-sm ${step === value ? "bg-primary text-primary-foreground" : "text-muted-foreground enabled:hover:bg-secondary enabled:hover:text-foreground"}`}
                 >
                   <span className="hidden size-6 shrink-0 items-center justify-center rounded-full border border-current/30 text-xs sm:flex">
                     {index + 1}
@@ -433,49 +445,45 @@ export function LeagueMatch({
                         <h2 className="border-b pb-4 text-base font-semibold">
                           {side === "home" ? home.team.name : away?.team.name}
                         </h2>
-                        <div className="flex items-center gap-3">
-                          <strong className="font-mono text-4xl leading-none text-primary tabular-nums">
+                        <div className="grid grid-cols-[auto_auto_minmax(0,1fr)] items-end gap-x-3 gap-y-3 sm:gap-x-4">
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {t("leagueUx.reportDedicatedFans")}
+                          </span>
+                          <span className="col-start-3 text-xs font-medium text-muted-foreground">
+                            {t("leagueUi.fanAttendanceRoll")}
+                          </span>
+                          <strong className="flex h-11 items-center justify-center font-mono text-4xl leading-none text-primary tabular-nums">
                             {match[`${side}DedicatedFans`] ??
                               match[`${side}Snapshot`]?.staff.dedicatedFans ??
                               "—"}
                           </strong>
-                          <span className="text-sm font-medium">
-                            {t("leagueUx.reportDedicatedFans")}
-                          </span>
+                          <Plus
+                            aria-hidden="true"
+                            className="mb-3 size-5 text-muted-foreground"
+                          />
+                          <DiceInput
+                            label={t("leagueUi.fanAttendanceRoll")}
+                            hideLabel
+                            sides={3}
+                            value={match[`${side}FanRoll`]}
+                            onChange={(value) =>
+                              changeDetails({ [`${side}FanRoll`]: value })
+                            }
+                          />
                         </div>
-                        <DiceInput
-                          label={t("leagueUi.fanAttendanceRoll")}
-                          sides={3}
-                          value={match[`${side}FanRoll`]}
-                          onChange={(value) =>
-                            changeDetails({ [`${side}FanRoll`]: value })
-                          }
-                        />
                       </div>
                     ))}
                   </div>
-                  <LeagueField className="rounded-lg border bg-card p-4 sm:grid sm:grid-cols-[1fr_minmax(12rem,20rem)] sm:items-center sm:px-5">
-                    {t("leagueUx.reportWeather")}
-                    <LeagueSelect
-                      value={match.weather ?? ""}
-                      onChange={(event) =>
-                        changeDetails({
-                          weather: event.target.value
-                            ? Number(event.target.value)
-                            : null,
-                        })
-                      }
-                    >
-                      <option value="">
-                        {t("leagueUx.reportWeatherUnknown")}
-                      </option>
-                      {[2, 3, 4, 11, 12].map((roll) => (
-                        <option key={roll} value={roll}>
-                          {t(`leagueUx.reportWeather${roll}`)}
-                        </option>
-                      ))}
-                    </LeagueSelect>
-                  </LeagueField>
+                  <MatchWeather
+                    value={match.weather}
+                    onChange={(weather) => changeDetails({ weather })}
+                  />
+                  {!preGameComplete && (
+                    <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <LockKeyhole className="size-4 shrink-0" />
+                      {t("leagueUx.reportPreGameHint")}
+                    </p>
+                  )}
                 </fieldset>
               </section>
             </div>
@@ -486,7 +494,7 @@ export function LeagueMatch({
             >
               <LeagueEvents
                 data={view}
-                editable={editable && !action.busy}
+                editable={editable && !action.busy && canProceed}
                 onSave={changeEvent}
                 onDraftChange={setEventDraft}
                 error={action.error}
@@ -500,7 +508,7 @@ export function LeagueMatch({
             >
               <LeagueEvents
                 data={view}
-                editable={editable && !action.busy}
+                editable={editable && !action.busy && canProceed}
                 onSave={changeEvent}
                 onDraftChange={setEventDraft}
                 error={action.error}
@@ -656,6 +664,7 @@ export function LeagueMatch({
               {step !== "post-game" && (
                 <Button
                   variant="default"
+                  disabled={!canProceed}
                   className="min-h-12 min-w-0 whitespace-normal px-4 sm:min-w-32 sm:px-5"
                   onClick={() => setStep(steps[steps.indexOf(step) + 1])}
                 >

@@ -55,6 +55,7 @@ export function useLeagueAction() {
         "TOUCHDOWN_TOTAL_MISMATCH",
         "REPORT_LOCKED",
         "REPORT_NOT_STARTED",
+        "PRE_GAME_INCOMPLETE",
         "MATCH_IN_PROGRESS",
         "PREVIOUS_ROUND_INCOMPLETE",
         "REGISTRATION_CLOSED",
@@ -329,11 +330,13 @@ export function DiceInput({
   sides,
   value,
   onChange,
+  hideLabel = false,
 }: {
   label: string;
   sides: number;
   value?: number | null;
   onChange: (value: number | null) => void;
+  hideLabel?: boolean;
 }) {
   const t = useTranslations();
   if (sides > 6)
@@ -360,7 +363,13 @@ export function DiceInput({
     );
   return (
     <fieldset className="min-w-0 space-y-2">
-      <legend className="mb-2 text-xs font-medium text-muted-foreground">
+      <legend
+        className={
+          hideLabel
+            ? "sr-only"
+            : "mb-2 text-xs font-medium text-muted-foreground"
+        }
+      >
         {label}
       </legend>
       <ButtonGroup aria-label={label} className="w-full">

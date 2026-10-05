@@ -13,7 +13,7 @@ import type { FunctionArgs } from "convex/server";
 const modules = import.meta.glob("../convex/**/*.ts");
 
 describe("shared event reports", () => {
-  async function eventReport() {
+  async function eventReport(preGameReady = true) {
     const s = await setup();
     await s.coaches[0].mutation(api.leagues.startMatch, {
       matchId: s.match._id,
@@ -23,6 +23,13 @@ describe("shared event reports", () => {
     });
     const home = s.coaches[s.entries.indexOf(view.home._id)];
     const away = s.coaches[s.entries.indexOf(view.away!._id)];
+    if (preGameReady)
+      await home.mutation(api.leagues.updateMatchDetails, {
+        matchId: s.match._id,
+        weather: 4,
+        homeFanRoll: 1,
+        awayFanRoll: 1,
+      });
     const a = view.players.find((row) => row.entryId === view.home._id)!;
     const b = view.players.find((row) => row.entryId === view.away!._id)!;
     function event(
@@ -67,6 +74,44 @@ describe("shared event reports", () => {
     }
     return { ...s, home, away, a, b, event, save, ready };
   }
+  it("unlocks events for both coaches only after all shared pre-game selections, and relocks when cleared", async () => {
+    const s = await eventReport(false);
+    const attempt = (actor: typeof s.home) =>
+      actor.mutation(api.leagues.savePlayEvent, {
+        matchId: s.match._id,
+        event: s.event(),
+        expectedVersion: 0,
+      });
+    for (const actor of [s.home, s.away])
+      await expect(attempt(actor)).rejects.toThrow("PRE_GAME_INCOMPLETE");
+    await s.home.mutation(api.leagues.updateMatchDetails, {
+      matchId: s.match._id,
+      homeFanRoll: 2,
+      awayFanRoll: 3,
+    });
+    await expect(attempt(s.away)).rejects.toThrow("PRE_GAME_INCOMPLETE");
+    await s.away.mutation(api.leagues.updateMatchDetails, {
+      matchId: s.match._id,
+      weather: 10,
+    });
+    await attempt(s.home);
+    await attempt(s.away);
+    await s.away.mutation(api.leagues.updateMatchDetails, {
+      matchId: s.match._id,
+      awayFanRoll: null,
+    });
+    await expect(attempt(s.home)).rejects.toThrow("PRE_GAME_INCOMPLETE");
+    const view = await s.home.query(api.leagues.getMatch, {
+      matchId: s.match._id,
+    });
+    expect(view.playEvents).toHaveLength(2);
+    await expect(
+      s.home.mutation(api.leagues.confirmMatch, {
+        matchId: s.match._id,
+        expectedRevision: view.match.revision,
+      }),
+    ).rejects.toThrow("PRE_GAME_INCOMPLETE");
+  });
   it("merges simultaneous coach appends, deduplicates retries and rejects stale edits", async () => {
     const s = await eventReport();
     const one = s.event(),
@@ -355,6 +400,12 @@ async function readyReport(
   const home = s.coaches[homeIndex],
     away = s.coaches[awayIndex];
   await home.mutation(api.leagues.startMatch, { matchId });
+  await home.mutation(api.leagues.updateMatchDetails, {
+    matchId,
+    weather: 4,
+    homeFanRoll: 1,
+    awayFanRoll: 1,
+  });
   let view = await s.t.query(api.leagues.getMatch, { matchId });
   const scorer = view.players.find(
     (p) => p.entryId === view.home._id && p.participated,
@@ -778,6 +829,12 @@ describe("one shared revision and atomic match finalization", () => {
     const s = await setup();
     await s.coaches[0].mutation(api.leagues.startMatch, {
       matchId: s.match._id,
+    });
+    await s.coaches[0].mutation(api.leagues.updateMatchDetails, {
+      matchId: s.match._id,
+      weather: 4,
+      homeFanRoll: 1,
+      awayFanRoll: 1,
     });
     const report = await s.t.query(api.leagues.getMatch, {
       matchId: s.match._id,

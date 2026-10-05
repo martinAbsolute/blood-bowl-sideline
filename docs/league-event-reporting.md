@@ -2,6 +2,10 @@
 
 New reports started through the league UI use a shared event ledger. The timeline is also shown in Review & finances, alongside each team's earned SPP and MVP. Both coaches must confirm the same report revision. Any change clears both confirmations. Commissioners can edit the live report or stage a correction to a completed report, review its timeline, and apply it with a reason.
 
+## Pre-game
+
+Record each team's D3 attendance roll alongside its captured Dedicated Fans value, then select the combined 2D6 weather result. The [Season 3 weather table](https://bb-rules-g2p.pages.dev/en/rules/two-halves) uses 2, 3, 4–10, 11 and 12; the selected condition shows its effects. Both coaches share these selections. Match events and review unlock only after both fan rolls and weather are saved, and clearing an attendance roll locks them again. Event writes and report confirmation/correction enforce the same readiness rule on the server.
+
 ## What to record
 
 | Event           | Participants                                                                           | League effect                                                    |
