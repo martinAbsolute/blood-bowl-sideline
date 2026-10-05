@@ -1,6 +1,7 @@
 {
   "playerModal": {
     "namePlaceholder": "Name this player",
+    "randomizeName": "Generate a player name",
     "close": "Close",
     "save": "Save",
     "addedCount": "{count}/{max} added",

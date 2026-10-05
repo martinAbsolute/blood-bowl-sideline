@@ -181,6 +181,9 @@ importers:
       '@convex-dev/presence':
         specifier: ^0.4.0
         version: 0.4.0(convex@1.46.0(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@scaleway/random-name':
+        specifier: 6.0.2
+        version: 6.0.2
       '@shikijs/transformers':
         specifier: ^4.4.3
         version: 4.4.3
@@ -1437,6 +1440,10 @@ packages:
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
+
+  '@scaleway/random-name@6.0.2':
+    resolution: {integrity: sha512-fhR2aCzxoZlOZcCM42srbALdpdqMy79LwOK5mVf4sGG1uknn095mr5PQ/0/zwfk/FX2KycZwbKJzr4zP6CG3Zg==}
+    engines: {node: '>=24.x'}
 
   '@sec-ant/readable-stream@0.4.1':
     resolution: {integrity: sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg==}
@@ -6070,6 +6077,8 @@ snapshots:
   '@rolldown/pluginutils@1.0.1': {}
 
   '@rtsao/scc@1.1.0': {}
+
+  '@scaleway/random-name@6.0.2': {}
 
   '@sec-ant/readable-stream@0.4.1': {}
 

@@ -1,6 +1,7 @@
 {
   "playerModal": {
     "namePlaceholder": "Назвіть гравця",
+    "randomizeName": "Згенерувати ім’я гравця",
     "close": "Закрити",
     "save": "Зберегти",
     "addedCount": "Додано {count}/{max}",

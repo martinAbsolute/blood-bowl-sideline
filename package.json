@@ -31,6 +31,7 @@
     "@base-ui/react": "^1.8.0",
     "@convex-dev/auth": "^0.0.95",
     "@convex-dev/presence": "^0.4.0",
+    "@scaleway/random-name": "6.0.2",
     "@shikijs/transformers": "^4.4.3",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",

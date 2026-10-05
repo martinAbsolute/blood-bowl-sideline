@@ -11,8 +11,12 @@ import {
 } from "../src/domain/catalog";
 import type { Team } from "../src/domain/types";
 import { PlayerDialog } from "../src/components/player-dialog";
+import { generatePlayerName } from "../src/lib/player-name-generator";
 
 vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
+vi.mock("../src/lib/player-name-generator", () => ({
+  generatePlayerName: vi.fn(),
+}));
 vi.mock("../src/components/player-icon", () => ({
   PlayerIcon: () => null,
   StarPlayerIcon: () => null,
@@ -61,6 +65,7 @@ beforeEach(() => {
   readOnly = false;
   onClose.mockClear();
   onChange.mockClear();
+  vi.mocked(generatePlayerName).mockReset().mockReturnValue("Brave Bell");
 });
 afterEach(async () => {
   await act(async () => root.unmount());
@@ -133,6 +138,48 @@ it("keeps added skills removable after filtering and recognises reverted edits",
   expect(button("addSkill · Wrestle")).toBeUndefined();
   await click("removeSkill · Block");
   expect(button("playerModal.save").disabled).toBe(true);
+  expect(onChange).not.toHaveBeenCalled();
+});
+
+it("generates and rerolls draft names, applies only the final name on Save", async () => {
+  team.players[0].name = "Original name";
+  vi.mocked(generatePlayerName)
+    .mockReturnValueOnce("Brave Bell")
+    .mockReturnValueOnce("Happy Hopper");
+  await render();
+  const input = document.querySelector<HTMLInputElement>(
+    'input[aria-label="playerName"]',
+  )!;
+  await click("playerModal.randomizeName");
+  expect(input.value).toBe("Brave Bell");
+  await click("playerModal.randomizeName");
+  expect(input.value).toBe("Happy Hopper");
+  expect(team.players[0].name).toBe("Original name");
+  expect(onChange).not.toHaveBeenCalled();
+  await click("playerModal.save");
+  expect(team.players[0].name).toBe("Happy Hopper");
+  expect(onChange).toHaveBeenCalledOnce();
+});
+
+it("keeps generated names editable and discards them on Cancel", async () => {
+  await render();
+  await click("playerModal.randomizeName");
+  await rename("Edited generated name");
+  await click("cancel");
+  expect(team.players[0].name).toBe("");
+  expect(onChange).not.toHaveBeenCalled();
+});
+
+it("keeps the empty editor compact when focus moves to the generator", async () => {
+  await render();
+  const input = document.querySelector<HTMLInputElement>(
+    'input[aria-label="playerName"]',
+  )!;
+  await act(async () => input.focus());
+  await act(async () => button("playerModal.randomizeName").focus());
+  expect(input.placeholder).toBe("");
+  await click("playerModal.randomizeName");
+  expect(input.value).toBe("Brave Bell");
   expect(onChange).not.toHaveBeenCalled();
 });
 
@@ -323,6 +370,7 @@ it("shows read-only players and stars without editing or removal controls", asyn
   team.players[0].skills = ["block"];
   await render();
   expect(document.querySelector('input[aria-label="playerName"]')).toBeNull();
+  expect(button("playerModal.randomizeName")).toBeUndefined();
   expect(document.querySelector(".player-skill-browser")).toBeNull();
   expect(button("removePlayer")).toBeUndefined();
   expect(button("removeSkill · Block")).toBeUndefined();
