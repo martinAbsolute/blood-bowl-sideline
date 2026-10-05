@@ -2204,6 +2204,7 @@ export const listTeamCareers = query({
       leagueName: v.string(),
       teamName: v.string(),
       coachName: v.string(),
+      isOwner: v.boolean(),
       status: schema.tables.leagues.validator.fields.status,
     }),
   ),
@@ -2213,6 +2214,7 @@ export const listTeamCareers = query({
       .withIndex("by_uuid", (q) => q.eq("uuid", teamUuid))
       .unique();
     if (!team) return [];
+    const viewer = await currentUser(ctx);
     const entries = await ctx.db
       .query("leagueTeams")
       .withIndex("by_teamId", (q) => q.eq("teamId", team._id))
@@ -2226,6 +2228,7 @@ export const listTeamCareers = query({
         leagueName: league.name,
         teamName: entry.team.name,
         coachName: entry.coachName,
+        isOwner: viewer?._id === team.ownerId,
         status: league.status,
       });
     }

@@ -675,7 +675,6 @@
   "leagueSaveFailed": "Could not save league changes",
   "leagueSingleRoundRobin": "Single round robin",
   "leagueOfficialRosters": "Official league rosters",
-  "leagueBuilderSeparate": "League progression is recorded in your official roster. The builder is locked while this team participates.",
   "leagueStatus": {
     "registration": "Registration",
     "active": "In progress",
@@ -700,7 +699,9 @@
     "teamLocked": "League locked",
     "experiencedTeam": "Experienced",
     "builderLockedHint": "This team is locked while participating in a league. Manage its roster and progression in the official league career.",
-    "experiencedTeamHint": "This team has already been enrolled in a league and is experienced. It cannot enter another rookie league.",
+    "builderLockedOwnerHint": "This team's builder is locked during league participation. Manage its current roster and progression through the league link below.",
+    "builderLockedViewerHint": "This is the team's original roster from before league play. Follow the league link below to view its current roster and progression.",
+    "experiencedTeamHint": "This team has league experience and cannot enter another rookie league. Builder edits are for planning; league progression stays in the official roster.",
     "ineligibleTeam": "Ineligible",
     "selectedTeam": "Selected",
     "teamSelectionHint": "Choose a saved team. Greyed-out teams cannot enter a rookie league; their cards explain what needs to change.",

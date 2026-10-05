@@ -1,11 +1,12 @@
 // @vitest-environment happy-dom
-import { act, createElement } from "react";
+import { act, createElement, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { randomUUID } from "node:crypto";
 import { newTeam } from "../src/domain/catalog";
 import type { Team } from "../src/domain/types";
 import { TeamPage } from "../src/components/team-page";
+import { getFunctionName, type FunctionReference } from "convex/server";
 
 const state = vi.hoisted(() => ({
   live: undefined as
@@ -18,11 +19,22 @@ const state = vi.hoisted(() => ({
         leagueExperienced: boolean;
       },
   draft: null as Team | null,
+  isOwner: true,
 }));
 vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
 vi.mock("convex/react", () => ({
   useConvexAuth: () => ({ isAuthenticated: true }),
-  useQuery: () => state.live,
+  useQuery: (query: FunctionReference<"query">) =>
+    getFunctionName(query) === "leagues:listTeamCareers"
+      ? [
+          {
+            entryId: "entry",
+            leagueId: "league",
+            leagueName: "Giga League",
+            isOwner: state.isOwner,
+          },
+        ]
+      : state.live,
 }));
 vi.mock("../src/lib/drafts", () => ({
   draftAccount: () => "coach",
@@ -36,15 +48,30 @@ vi.mock("../src/components/draft-sync-provider", () => ({
 vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
-vi.mock("../src/components/team-league-links", () => ({
-  TeamLeagueLinks: () => null,
+vi.mock("next/link", () => ({
+  default: ({ children, ...props }: { children: ReactNode; href: string }) =>
+    createElement("a", props, children),
 }));
 vi.mock("../src/components/workspace-loading", () => ({
   WorkspaceLoading: () => createElement("p", null, "Loading"),
 }));
 vi.mock("../src/components/team-editor", () => ({
-  TeamEditor: ({ initial, readOnly }: { initial: Team; readOnly: boolean }) =>
-    createElement("button", { disabled: readOnly }, initial.name),
+  TeamEditor: ({
+    initial,
+    readOnly,
+    leagueNotice,
+  }: {
+    initial: Team;
+    readOnly: boolean;
+    leagueNotice: ReactNode;
+  }) =>
+    createElement(
+      "div",
+      null,
+      createElement("a", { href: "/teams" }, "My teams"),
+      leagueNotice,
+      createElement("button", { disabled: readOnly }, initial.name),
+    ),
 }));
 let root: Root;
 let container: HTMLDivElement;
@@ -55,6 +82,7 @@ beforeEach(() => {
   root = createRoot(container);
   state.live = undefined;
   state.draft = null;
+  state.isOwner = true;
 });
 afterEach(async () => {
   await act(async () => root.unmount());
@@ -85,7 +113,35 @@ it("waits for the server lock and never lets a local recovery draft unlock or re
   );
   expect(container.textContent).toContain(team.name);
   expect(container.textContent).not.toContain(state.draft.name);
-  expect(container.textContent).toContain("leagueUi.builderLockedHint");
+  expect(container.textContent).toContain("leagueUi.builderLockedOwnerHint");
+  expect(container.querySelectorAll("aside")).toHaveLength(1);
+  expect(container.querySelector("a")?.textContent).toBe("My teams");
+});
+
+it("shows shared viewers where to find the current roster without telling them to manage the team", async () => {
+  const team = newTeam(randomUUID());
+  state.isOwner = false;
+  state.live = {
+    team,
+    revision: 8,
+    canEdit: false,
+    leagueLocked: true,
+    leagueExperienced: true,
+  };
+  await act(async () =>
+    root.render(createElement(TeamPage, { uuid: team.uuid })),
+  );
+  expect(container.textContent).toContain("leagueUi.builderLockedViewerHint");
+  expect(container.textContent).not.toContain(
+    "leagueUi.builderLockedOwnerHint",
+  );
+  expect(container.querySelectorAll("aside")).toHaveLength(1);
+  expect(container.querySelector("aside a")?.getAttribute("href")).toBe(
+    "/leagues/manage/league/teams/entry",
+  );
+  expect(container.querySelector<HTMLButtonElement>("button")?.disabled).toBe(
+    true,
+  );
 });
 
 it("permits planning after participation ends while showing that the team remains experienced", async () => {

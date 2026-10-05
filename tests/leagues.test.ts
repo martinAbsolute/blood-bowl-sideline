@@ -447,6 +447,16 @@ describe("league registration and fixtures", () => {
   it("locks builders for participants, including admins, and forbids a second rookie enrollment", async () => {
     const s = await setup();
     const team = s.teams[0];
+    for (const [actor, isOwner] of [
+      [s.coaches[0], true],
+      [s.coaches[1], false],
+      [s.admin, false],
+      [s.t, false],
+    ] as const) {
+      expect(
+        await actor.query(api.leagues.listTeamCareers, { teamUuid: team.uuid }),
+      ).toMatchObject([{ isOwner }]);
+    }
     expect(
       await s.coaches[0].query(api.teams.getByUuid, { uuid: team.uuid }),
     ).toMatchObject({

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "gt-next";
 import { useConvexAuth } from "convex/react";
@@ -87,6 +87,7 @@ export function TeamEditor({
   server,
   recovered,
   leagueContext,
+  leagueNotice,
 }: {
   initial: Team;
   revision?: number;
@@ -94,6 +95,7 @@ export function TeamEditor({
   server?: (SavedTeam & { leagueExperienced?: boolean }) | null;
   recovered?: boolean;
   leagueContext?: FunctionReturnType<typeof api.leagues.get>;
+  leagueNotice?: ReactNode;
 }) {
   const t = useTranslations(),
     router = useRouter(),
@@ -220,13 +222,16 @@ export function TeamEditor({
     <div className="page-width team-builder py-3">
       <TeamHeader
         back={
-          <Link
-            href="/teams"
-            className="no-print inline-flex min-h-8 items-center gap-1.5 rounded-sm text-sm text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
-          >
-            <ArrowLeft className="size-3.5" />
-            {t("myTeams")}
-          </Link>
+          <>
+            <Link
+              href="/teams"
+              className="no-print inline-flex min-h-8 items-center gap-1.5 rounded-sm text-sm text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+            >
+              <ArrowLeft className="size-3.5" />
+              {t("myTeams")}
+            </Link>
+            {leagueNotice}
+          </>
         }
         status={
           !readOnly && (
