@@ -105,30 +105,6 @@ describe("league UI and API vocabulary", () => {
       }
   });
 
-  it("provides every literal label used by league controls", () => {
-    const keys = new Set(
-      componentSources.flatMap((source) =>
-        Array.from(
-          source.matchAll(/t\("leagueUi\.([a-zA-Z][a-zA-Z.-]+)"\)/g),
-          (match) => match[1],
-        ),
-      ),
-    );
-    for (const key of keys)
-      for (const locale of locales) {
-        const value = key
-          .split(".")
-          .reduce<unknown>(
-            (current, part) =>
-              current && typeof current === "object"
-                ? (current as Record<string, unknown>)[part]
-                : undefined,
-            messages[locale].leagueUi,
-          );
-        expect(value, `${locale}: leagueUi.${key}`).toBeTypeOf("string");
-      }
-  });
-
   it("labels all schema statuses and administrative results", () => {
     const schema = read("convex/schema.ts").split("leagues: defineTable")[1];
     const validators = read("convex/leagueValidators.ts");

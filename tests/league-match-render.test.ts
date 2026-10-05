@@ -92,8 +92,43 @@ vi.mock("convex/react", () => ({
   },
 }));
 vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
-vi.mock("../src/components/player-icon", () => ({ PlayerIcon: () => null }));
+vi.mock("../src/components/player-icon", () => ({
+  PlayerIcon: () => null,
+  RosterIcon: () => null,
+}));
 vi.mock("../src/components/skill-box", () => ({ SkillList: () => null }));
+vi.mock("../src/components/league-help", () => ({ LeagueHelp: () => null }));
+vi.mock("../src/components/dialog", () => ({
+  Dialog: ({
+    open,
+    onOpenChange,
+    children,
+  }: {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    children: ReactNode;
+  }) =>
+    open
+      ? createElement(
+          "div",
+          { role: "dialog" },
+          children,
+          createElement(
+            "button",
+            { "data-slot": "dialog-close", onClick: () => onOpenChange(false) },
+            "close",
+          ),
+        )
+      : null,
+  DialogContent: ({ children }: { children: ReactNode }) =>
+    createElement("div", null, children),
+  DialogHeader: ({ children }: { children: ReactNode }) =>
+    createElement("div", null, children),
+  DialogTitle: ({ children }: { children: ReactNode }) =>
+    createElement("h2", null, children),
+  DialogDescription: ({ children }: { children: ReactNode }) =>
+    createElement("p", null, children),
+}));
 vi.mock("../src/components/league-commissioner", () => ({
   CommissionerRuling: () => null,
 }));
@@ -193,7 +228,6 @@ it("opens an away coach's own players first and lets them inspect the opponent",
   state.viewerId = "opponent";
   const view = await setup();
   try {
-    await click(button(view.container, "leagueUx.reportNextGame"));
     expect(
       button(view.container, "Away Team").getAttribute("aria-pressed"),
     ).toBe("true");
@@ -221,13 +255,14 @@ it("syncs fields immediately and lets coaches switch steps, teams and rows durin
       name: "leagues:updateMatchDetails",
       args: { matchId: "match", venue: "Table 3 " },
     });
-    await click(button(view.container, "leagueUx.reportNextGame"));
-    const rows = view.container.querySelectorAll<HTMLDetailsElement>(
-      "#report-game details.group\\/player",
+    const rows = view.container.querySelectorAll<HTMLButtonElement>(
+      '#report-game button[aria-haspopup="dialog"]',
     );
-    await click(rows[0].querySelector("summary")!);
+    await click(rows[0]);
     await input(
-      rows[0].querySelector<HTMLInputElement>('input[type="number"]')!,
+      document.querySelector<HTMLInputElement>(
+        '[role="dialog"] input[role="spinbutton"]',
+      )!,
       "1",
     );
     expect(state.calls[1]).toEqual({
@@ -238,9 +273,20 @@ it("syncs fields immediately and lets coaches switch steps, teams and rows durin
     expect(button(view.container, "leagueUx.reportNextPostGame").disabled).toBe(
       false,
     );
-    const event = new MouseEvent("click", { bubbles: true, cancelable: true });
-    rows[1].querySelector("summary")!.dispatchEvent(event);
-    expect(event.defaultPrevented).toBe(false);
+    await click(
+      document.querySelector<HTMLElement>(
+        '[role="dialog"] [data-slot="dialog-close"]',
+      )!,
+    );
+    await click(rows[1]);
+    expect(document.querySelector('[role="dialog"]')?.textContent).toContain(
+      "second",
+    );
+    await click(
+      document.querySelector<HTMLElement>(
+        '[role="dialog"] [data-slot="dialog-close"]',
+      )!,
+    );
     state.revision = 2;
     await view.render();
     expect(rows[0].textContent).not.toContain("leagueUi.staleDraft");
@@ -249,7 +295,7 @@ it("syncs fields immediately and lets coaches switch steps, teams and rows durin
     await click(button(view.container, "leagueUx.reportNextPostGame"));
     await input(
       view.container.querySelector<HTMLInputElement>(
-        '#report-post-game input[type="number"]',
+        '#report-post-game input[role="spinbutton"]',
       )!,
       "2",
     );
@@ -268,7 +314,7 @@ it("stages a completed report correction, can cancel it and protects against a n
   try {
     await click(button(view.container, "leagueUi.correctReport"));
     const score = view.container.querySelector<HTMLInputElement>(
-      '#report-post-game input[type="number"]',
+      '#report-post-game input[role="spinbutton"]',
     )!;
     await input(score, "3");
     expect(score.value).toBe("3");
@@ -289,7 +335,7 @@ it("stages a completed report correction, can cancel it and protects against a n
       true,
     );
     await click(button(view.container, "cancel"));
-    expect(score.value).toBe("0");
+    expect(view.container.textContent).not.toContain("leagueUi.saveCorrection");
     expect(state.calls).toHaveLength(0);
   } finally {
     await view.close();

@@ -18,6 +18,10 @@ import {
   Plus,
   ShieldCheck,
   TrendingUp,
+  Users,
+  Settings2,
+  History,
+  ChartNoAxesColumn,
 } from "lucide-react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
@@ -32,6 +36,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { LeagueField, LeagueSelect } from "./league-field";
 import { LeagueTeamPicker } from "./league-team-picker";
+import { LeagueNavigation } from "./league-navigation";
 import { PlayerIcon, RosterIcon } from "./player-icon";
 import { SkillList, TableSkills } from "./skill-box";
 import { LeagueHelp } from "./league-help";
@@ -282,6 +287,7 @@ export function LeagueCareer({
   >("roster");
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [showFormer, setShowFormer] = useState(false);
+  const [playerSearch, setPlayerSearch] = useState("");
   if (auth.isLoading || !auth.isAuthenticated || data === undefined)
     return (
       <LeagueGate
@@ -320,9 +326,17 @@ export function LeagueCareer({
   const selectedPosition = positions.find(
     (position) => position.id === positionId,
   );
+  const visiblePlayers = players.filter(
+    (player) =>
+      (showFormer ||
+        (player.status !== "dead" && player.status !== "retired")) &&
+      playerLabel(player)
+        .toLocaleLowerCase()
+        .includes(playerSearch.trim().toLocaleLowerCase()),
+  );
   return (
     <div className="page-width space-y-4 py-5 sm:py-6">
-      <header className="rounded-lg border bg-card p-4">
+      <header className="rounded-xl border bg-card p-5 sm:p-6">
         <LeagueBack href={`/leagues/manage/${leagueId}`}>
           {league.name}
         </LeagueBack>
@@ -378,38 +392,48 @@ export function LeagueCareer({
           </div>
         </section>
       )}
-      <nav
-        className="flex gap-1 overflow-x-auto border-b"
-        aria-label={t("leagueUx.careerNavigation")}
-      >
-        {(
-          [
-            "roster",
-            ...(data.canManage ? (["management"] as const) : []),
-            ...(data.canCommission ? (["commissioner"] as const) : []),
-            "stats",
-            "history",
-          ] as const
-        ).map((value) => (
-          <button
-            key={value}
-            type="button"
-            aria-pressed={tab === value}
-            onClick={() => setTab(value)}
-            className={`min-h-11 shrink-0 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${tab === value ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
-          >
-            {t(`leagueUx.careerTab.${value}`)}
-            {value === "roster" && (
-              <span className="ml-2 rounded-md bg-secondary px-1.5 py-0.5 text-xs text-muted-foreground">
-                {active.length}
-              </span>
-            )}
-            {value === "management" && entry.postGamePending && (
-              <span className="ml-2 inline-block size-1.5 rounded-full bg-primary" />
-            )}
-          </button>
-        ))}
-      </nav>
+      <LeagueNavigation<typeof tab>
+        label={t("leagueUx.careerNavigation")}
+        value={tab}
+        onChange={setTab}
+        items={[
+          {
+            value: "roster",
+            label: t("leagueUx.careerTab.roster"),
+            icon: Users,
+            badge: active.length,
+          },
+          ...(data.canManage
+            ? [
+                {
+                  value: "management" as const,
+                  label: t("leagueUx.careerTab.management"),
+                  icon: Settings2,
+                  badge: entry.postGamePending ? 1 : 0,
+                },
+              ]
+            : []),
+          {
+            value: "stats",
+            label: t("leagueUx.careerTab.stats"),
+            icon: ChartNoAxesColumn,
+          },
+          {
+            value: "history",
+            label: t("leagueUx.careerTab.history"),
+            icon: History,
+          },
+          ...(data.canCommission
+            ? [
+                {
+                  value: "commissioner" as const,
+                  label: t("leagueUx.careerTab.commissioner"),
+                  icon: ShieldCheck,
+                },
+              ]
+            : []),
+        ]}
+      />
       <div hidden={tab !== "roster"}>
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {[
@@ -517,6 +541,9 @@ export function LeagueCareer({
         )}
         {data.canManage && entry.postGamePending && (
           <LeagueSection title={t("leagueUi.staff")}>
+            <p className="mb-4 text-sm text-muted-foreground">
+              {t("leagueUx.careerStaffHint")}
+            </p>
             <div className="grid gap-3 sm:grid-cols-2">
               {(
                 [
@@ -541,11 +568,17 @@ export function LeagueCareer({
                         : 0
                       : 6;
                 return (
-                  <div key={key} className="rounded-lg border p-3">
-                    <p className="text-sm font-medium">
-                      {t(key)} · {entry.team.staff[key]}
-                    </p>
-                    <div className="mt-3 flex gap-2">
+                  <div
+                    key={key}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-secondary/10 p-3"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold">{t(key)}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {cost / 1000}k GP · {entry.team.staff[key]} / {max}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
                       <Button
                         className="h-10"
                         variant="outline"
@@ -598,6 +631,13 @@ export function LeagueCareer({
       </div>
       <div hidden={tab !== "roster"}>
         <LeagueSection title={t("leagueUx.careerRoster")}>
+          <Input
+            aria-label={t("leagueUx.rosterSearch")}
+            placeholder={t("leagueUx.rosterSearch")}
+            value={playerSearch}
+            onChange={(event) => setPlayerSearch(event.target.value)}
+            className="mb-4 h-11 sm:max-w-sm"
+          />
           {players.some(
             (player) => player.status === "dead" || player.status === "retired",
           ) && (
@@ -614,7 +654,52 @@ export function LeagueCareer({
               )}
             </Button>
           )}
-          <div className="overflow-x-auto rounded-lg border">
+          <div className="space-y-2 lg:hidden">
+            {visiblePlayers.map((player) => {
+              const position = positions.find(
+                (item) => item.id === player.positionId,
+              );
+              const available = player.sppEarned - player.sppSpent;
+              return (
+                <button
+                  key={player._id}
+                  type="button"
+                  onClick={() => setSelectedPlayerId(player._id)}
+                  className="flex w-full min-w-0 items-center gap-3 rounded-lg border bg-card p-3 text-left hover:border-primary/40 hover:bg-secondary/30 focus-visible:outline-2 focus-visible:outline-ring"
+                >
+                  <PlayerIcon
+                    positionId={player.positionId}
+                    className="size-10 shrink-0"
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="block break-words text-sm font-semibold">
+                      {playerLabel(player)}
+                    </span>
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                      {positionLabel(position?.position ?? player.positionId)} ·{" "}
+                      {((position?.cost ?? 0) + player.valueIncrease) / 1000}k
+                      GP
+                    </span>
+                    {player.status !== "active" && (
+                      <span className="mt-1 block">
+                        <LeagueStatus status={player.status} />
+                      </span>
+                    )}
+                  </span>
+                  <span className="shrink-0 text-center">
+                    <span className="block font-mono text-lg font-semibold text-primary">
+                      {available}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">
+                      SPP
+                    </span>
+                  </span>
+                  <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+                </button>
+              );
+            })}
+          </div>
+          <div className="hidden overflow-x-auto rounded-lg border lg:block">
             <table className="w-full min-w-[760px] border-collapse text-xs">
               <caption className="sr-only">
                 {t("leagueUx.careerRoster")}
@@ -650,144 +735,136 @@ export function LeagueCareer({
                 </tr>
               </thead>
               <tbody>
-                {players
-                  .filter(
-                    (player) =>
-                      showFormer ||
-                      (player.status !== "dead" && player.status !== "retired"),
-                  )
-                  .map((player) => {
-                    const position = positions.find(
-                      (position) => position.id === player.positionId,
-                    );
-                    const available = player.sppEarned - player.sppSpent;
-                    const ready = player.availableAdvancements.some(
-                      (option) => option.cost <= available,
-                    );
-                    const selected = selectedPlayerId === player._id;
-                    const toggle = () =>
-                      setSelectedPlayerId(selected ? null : player._id);
-                    return (
-                      <Fragment key={player._id}>
-                        <tr
-                          className={`group cursor-pointer border-b last:border-b-0 hover:bg-secondary/30 focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-[-2px] ${selected ? "bg-secondary/30" : ""}`}
-                          tabIndex={0}
-                          aria-label={`${t("managePlayer")} · ${playerLabel(player)}`}
-                          aria-expanded={selected}
-                          aria-controls={`career-player-${player._id}`}
-                          onClick={(event) => {
-                            if (
-                              !(event.target as HTMLElement).closest(
-                                "button, a",
-                              )
-                            )
-                              toggle();
-                          }}
-                          onKeyDown={(event) => {
-                            if (
-                              event.target === event.currentTarget &&
-                              ["Enter", " "].includes(event.key)
-                            ) {
-                              event.preventDefault();
-                              toggle();
-                            }
-                          }}
+                {visiblePlayers.map((player) => {
+                  const position = positions.find(
+                    (position) => position.id === player.positionId,
+                  );
+                  const available = player.sppEarned - player.sppSpent;
+                  const ready = player.availableAdvancements.some(
+                    (option) => option.cost <= available,
+                  );
+                  const selected = selectedPlayerId === player._id;
+                  const toggle = () =>
+                    setSelectedPlayerId(selected ? null : player._id);
+                  return (
+                    <Fragment key={player._id}>
+                      <tr
+                        className={`group cursor-pointer border-b last:border-b-0 hover:bg-secondary/30 focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-[-2px] ${selected ? "bg-secondary/30" : ""}`}
+                        tabIndex={0}
+                        aria-label={`${t("managePlayer")} · ${playerLabel(player)}`}
+                        aria-expanded={selected}
+                        aria-controls={`career-player-${player._id}`}
+                        onClick={(event) => {
+                          if (
+                            !(event.target as HTMLElement).closest("button, a")
+                          )
+                            toggle();
+                        }}
+                        onKeyDown={(event) => {
+                          if (
+                            event.target === event.currentTarget &&
+                            ["Enter", " "].includes(event.key)
+                          ) {
+                            event.preventDefault();
+                            toggle();
+                          }
+                        }}
+                      >
+                        <td className="px-2 py-2 text-center font-mono text-muted-foreground">
+                          {String(playerNumbers.get(player._id)).padStart(
+                            2,
+                            "0",
+                          )}
+                        </td>
+                        <th
+                          scope="row"
+                          className="px-2 py-2 text-left font-normal"
                         >
-                          <td className="px-2 py-2 text-center font-mono text-muted-foreground">
-                            {String(playerNumbers.get(player._id)).padStart(
-                              2,
-                              "0",
-                            )}
-                          </td>
-                          <th
-                            scope="row"
-                            className="px-2 py-2 text-left font-normal"
-                          >
-                            <div className="flex items-center gap-2">
-                              <PlayerIcon
-                                positionId={player.positionId}
-                                className="size-8 shrink-0"
-                              />
-                              <div className="min-w-0">
-                                <button
-                                  type="button"
-                                  onClick={toggle}
-                                  aria-expanded={selected}
-                                  aria-controls={`career-player-${player._id}`}
-                                  className="text-left text-sm font-semibold text-primary hover:underline"
-                                >
-                                  {player.name ||
-                                    positionLabel(
-                                      position?.position ?? player.positionId,
-                                    )}
-                                </button>
-                                {player.name && (
-                                  <p className="mt-0.5 text-xs text-muted-foreground">
-                                    {positionLabel(
-                                      position?.position ?? player.positionId,
-                                    )}
-                                  </p>
+                          <div className="flex items-center gap-2">
+                            <PlayerIcon
+                              positionId={player.positionId}
+                              className="size-8 shrink-0"
+                            />
+                            <div className="min-w-0">
+                              <button
+                                type="button"
+                                onClick={toggle}
+                                aria-expanded={selected}
+                                aria-controls={`career-player-${player._id}`}
+                                className="text-left text-sm font-semibold text-primary hover:underline"
+                              >
+                                {player.name ||
+                                  positionLabel(
+                                    position?.position ?? player.positionId,
+                                  )}
+                              </button>
+                              {player.name && (
+                                <p className="mt-0.5 text-xs text-muted-foreground">
+                                  {positionLabel(
+                                    position?.position ?? player.positionId,
+                                  )}
+                                </p>
+                              )}
+                              <div className="flex flex-wrap gap-1">
+                                {player.status !== "active" && (
+                                  <LeagueStatus status={player.status} />
                                 )}
-                                <div className="flex flex-wrap gap-1">
-                                  {player.status !== "active" && (
-                                    <LeagueStatus status={player.status} />
-                                  )}
-                                  {player.temporary && (
-                                    <span className="text-[10px] text-muted-foreground">
-                                      {t("leagueUx.careerJourneyman")}
-                                    </span>
-                                  )}
-                                  {ready && entry.postGamePending && (
-                                    <span className="flex items-center gap-1 text-[10px] text-primary">
-                                      <TrendingUp className="size-3" />
-                                      {t("leagueUx.careerReadyToAdvance")}
-                                    </span>
-                                  )}
-                                </div>
+                                {player.temporary && (
+                                  <span className="text-[10px] text-muted-foreground">
+                                    {t("leagueUx.careerJourneyman")}
+                                  </span>
+                                )}
+                                {ready && entry.postGamePending && (
+                                  <span className="flex items-center gap-1 text-[10px] text-primary">
+                                    <TrendingUp className="size-3" />
+                                    {t("leagueUx.careerReadyToAdvance")}
+                                  </span>
+                                )}
                               </div>
                             </div>
-                          </th>
-                          {(["ma", "st", "ag", "pa", "av"] as const).map(
-                            (stat) => (
-                              <td
-                                key={stat}
-                                className="px-1 py-2 text-center font-mono"
-                              >
-                                {player.effectiveStats[stat]}
-                              </td>
-                            ),
-                          )}
-                          <td className="px-2 py-1">
-                            <TableSkills
-                              ids={position?.skills ?? []}
-                              additionalIds={player.skills.filter(
-                                (id) => !position?.skills.includes(id),
-                              )}
-                              captain={
-                                entry.team.captainId === player.sourcePlayerId
-                              }
-                              label={t("skills")}
-                            />
-                          </td>
-                          <td
-                            className={`px-2 py-2 text-center font-mono ${ready ? "font-semibold text-primary" : ""}`}
-                          >
-                            {available}
-                          </td>
-                          <td className="px-2 py-2 text-right font-mono">
-                            {((position?.cost ?? 0) + player.valueIncrease) /
-                              1000}
-                            k
-                          </td>
-                          <td className="px-2">
-                            <ChevronDown
-                              className={`size-3.5 text-muted-foreground ${selected ? "rotate-180" : ""}`}
-                            />
-                          </td>
-                        </tr>
-                      </Fragment>
-                    );
-                  })}
+                          </div>
+                        </th>
+                        {(["ma", "st", "ag", "pa", "av"] as const).map(
+                          (stat) => (
+                            <td
+                              key={stat}
+                              className="px-1 py-2 text-center font-mono"
+                            >
+                              {player.effectiveStats[stat]}
+                            </td>
+                          ),
+                        )}
+                        <td className="px-2 py-1">
+                          <TableSkills
+                            ids={position?.skills ?? []}
+                            additionalIds={player.skills.filter(
+                              (id) => !position?.skills.includes(id),
+                            )}
+                            captain={
+                              entry.team.captainId === player.sourcePlayerId
+                            }
+                            label={t("skills")}
+                          />
+                        </td>
+                        <td
+                          className={`px-2 py-2 text-center font-mono ${ready ? "font-semibold text-primary" : ""}`}
+                        >
+                          {available}
+                        </td>
+                        <td className="px-2 py-2 text-right font-mono">
+                          {((position?.cost ?? 0) + player.valueIncrease) /
+                            1000}
+                          k
+                        </td>
+                        <td className="px-2">
+                          <ChevronDown
+                            className={`size-3.5 text-muted-foreground ${selected ? "rotate-180" : ""}`}
+                          />
+                        </td>
+                      </tr>
+                    </Fragment>
+                  );
+                })}
               </tbody>
             </table>
             {players.length === 0 && (
@@ -796,6 +873,15 @@ export function LeagueCareer({
               </p>
             )}
           </div>
+          {!visiblePlayers.length && (
+            <p className="py-6 text-center text-sm text-muted-foreground">
+              {t(
+                playerSearch
+                  ? "leagueUx.noSearchResults"
+                  : "leagueUx.careerEmptyRoster",
+              )}
+            </p>
+          )}
           {players.map((player) => (
             <LeaguePlayerDialog
               key={player._id}

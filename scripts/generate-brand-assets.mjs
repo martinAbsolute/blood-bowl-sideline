@@ -95,7 +95,6 @@ const og = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" vi
   ${positionedLine(top, y)}
   ${positionedLine(bottom, y + top.height + gap)}
 </svg>\n`;
-await writeFile(new URL("public/brand/og-image.svg", root), og);
 await writeFile(
   new URL("src/app/opengraph-image.png", root),
   await sharp(Buffer.from(og)).png().toBuffer(),

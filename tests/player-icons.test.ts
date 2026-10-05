@@ -164,8 +164,8 @@ describe("FUMBBL canonical sprite library", () => {
       ...asset.frames.map((frame) => publicPath(frame.src)),
     ]);
     expected.push(
-      "public/assets/fumbbl/manifest.json",
-      "public/assets/fumbbl/README.md",
+      path.join("public", "assets", "fumbbl", "manifest.json"),
+      path.join("public", "assets", "fumbbl", "README.md"),
     );
     expect(filesIn("public/assets/fumbbl").sort()).toEqual(expected.sort());
     expect(new Set(expected).size).toBe(expected.length);

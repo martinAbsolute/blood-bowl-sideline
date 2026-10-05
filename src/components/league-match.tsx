@@ -27,6 +27,16 @@ import {
 import { useBeforeUnload } from "@/lib/use-before-unload";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import { LeagueNumber } from "./league-number";
+import { Switch } from "./ui/switch";
+import { RosterIcon } from "./player-icon";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "./dialog";
 import { Textarea } from "./ui/textarea";
 import { LeagueField, LeagueSelect } from "./league-field";
 import { PlayerIcon } from "./player-icon";
@@ -161,10 +171,11 @@ export function LeagueMatch({
     );
   });
   const action = useLeagueAction();
-  const [step, setStep] = useState<Step>("pre-game");
+  const [step, setStep] = useState<Step>("game");
   const [selectedSide, setSide] = useState<"home" | "away" | null>(null);
   const [correction, setCorrection] = useState<MatchData | null>(null);
   const [reason, setReason] = useState("");
+  const [playerSearch, setPlayerSearch] = useState("");
   const pendingCount = useRef(0);
   const [pending, setPending] = useState(0);
   const failedEdits = useRef(
@@ -333,7 +344,7 @@ export function LeagueMatch({
           {t("leagueUx.reportRetry")}
         </Button>
       )}
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-lg border bg-card p-4 sm:gap-6 sm:p-5">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 rounded-xl border bg-card p-4 sm:gap-6 sm:p-6">
         {[home, away].map(
           (entry, index) =>
             entry && (
@@ -341,6 +352,10 @@ export function LeagueMatch({
                 key={entry._id}
                 className={`min-w-0 ${index ? "col-start-3 text-right" : ""}`}
               >
+                <RosterIcon
+                  rosterId={entry.team.rosterId}
+                  className={`mb-3 size-10 ${index ? "ml-auto" : ""}`}
+                />
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   {t(index ? "leagueUi.away" : "leagueUi.home")}
                 </p>
@@ -406,7 +421,7 @@ export function LeagueMatch({
           <>
             <nav
               aria-label={t("leagueUi.matchReport")}
-              className="grid grid-cols-3 border-b"
+              className="grid grid-cols-3 gap-1 rounded-xl border bg-card p-1"
             >
               {steps.map((value, index) => (
                 <button
@@ -415,7 +430,7 @@ export function LeagueMatch({
                   aria-current={step === value ? "step" : undefined}
                   aria-controls={`report-${value}`}
                   onClick={() => setStep(value)}
-                  className={`-mb-px flex min-h-14 items-center justify-center gap-2 border-b-2 px-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-primary ${step === value ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                  className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-lg px-2 text-xs font-medium focus-visible:outline-2 focus-visible:outline-primary sm:flex-row sm:gap-2 sm:text-sm ${step === value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
                 >
                   <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-current/30 text-xs">
                     {index + 1}
@@ -513,7 +528,30 @@ export function LeagueMatch({
               hidden={step !== "game"}
               className="space-y-4"
             >
-              <div className="flex flex-wrap gap-2">
+              <fieldset
+                disabled={!editable || action.busy}
+                className="grid grid-cols-2 gap-4 rounded-xl border bg-card p-4 sm:p-5"
+              >
+                <LeagueNumber
+                  label={
+                    home.team.name + " · " + t("leagueUx.reportTouchdowns")
+                  }
+                  value={match.scoreHome}
+                  max={30}
+                  onChange={(scoreHome) => changeDetails({ scoreHome })}
+                />
+                <LeagueNumber
+                  label={
+                    (away?.team.name ?? "") +
+                    " · " +
+                    t("leagueUx.reportTouchdowns")
+                  }
+                  value={match.scoreAway}
+                  max={30}
+                  onChange={(scoreAway) => changeDetails({ scoreAway })}
+                />
+              </fieldset>
+              <div className="grid grid-cols-2 gap-2 rounded-xl bg-secondary/60 p-1.5">
                 {[home, away].map(
                   (entry, index) =>
                     entry && (
@@ -524,7 +562,7 @@ export function LeagueMatch({
                             ? "default"
                             : "outline"
                         }
-                        className="h-auto min-h-11 whitespace-normal"
+                        className="h-auto min-h-12 min-w-0 whitespace-normal break-words"
                         aria-pressed={teamSide === (index ? "away" : "home")}
                         onClick={() => setSide(index ? "away" : "home")}
                       >
@@ -536,6 +574,13 @@ export function LeagueMatch({
               <p className="text-sm text-muted-foreground">
                 {t("leagueUx.reportPlayersHint")}
               </p>
+              <Input
+                aria-label={t("leagueUx.matchSearch")}
+                placeholder={t("leagueUx.matchSearch")}
+                value={playerSearch}
+                onChange={(event) => setPlayerSearch(event.target.value)}
+                className="h-11 sm:max-w-md"
+              />
               {[home, away].map(
                 (entry, sideIndex) =>
                   entry && (
@@ -595,6 +640,7 @@ export function LeagueMatch({
                                   ),
                                 )}
                                 editable={editable && !action.busy}
+                                search={playerSearch}
                                 onChange={(patch) =>
                                   changePlayer(player, patch)
                                 }
@@ -895,30 +941,21 @@ function PostGame({
               <h3 className="break-words font-semibold">
                 {side === "home" ? data.home.team.name : data.away?.team.name}
               </h3>
-              <LeagueField>
-                {t("leagueUx.reportTouchdowns")}
-                <Input
-                  type="number"
-                  min={0}
-                  max={30}
-                  step={1}
-                  className="h-14 text-center text-2xl font-semibold tabular-nums"
-                  value={score}
-                  onChange={(event) =>
-                    onChange({ [scoreKey]: Number(event.target.value) })
-                  }
-                />
-              </LeagueField>
-              <label className="flex min-h-10 items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  className="size-4 accent-primary"
-                  checked={match[`${side}Stalled`]}
-                  onChange={(event) =>
-                    onChange({ [`${side}Stalled`]: event.target.checked })
-                  }
-                />
+              <LeagueNumber
+                label={t("leagueUx.reportTouchdowns")}
+                value={score}
+                max={30}
+                onChange={(value) => onChange({ [scoreKey]: value })}
+              />
+              <label className="flex min-h-11 items-center justify-between gap-3 rounded-lg bg-secondary/30 px-3 text-sm">
                 {t("leagueUi.stalled")}
+                <Switch
+                  disabled={!editable}
+                  checked={match[`${side}Stalled`]}
+                  onCheckedChange={(checked) =>
+                    onChange({ [`${side}Stalled`]: checked })
+                  }
+                />
               </label>
               {match.scoreHome !== match.scoreAway && (
                 <DiceInput
@@ -960,24 +997,42 @@ function MatchPlayerRow({
   displayName,
   editable,
   onChange,
+  search,
 }: {
   player: ReportPlayer;
   displayName: string;
   editable: boolean;
   onChange: (patch: PlayerPatch) => void;
+  search: string;
 }) {
   const t = useTranslations();
+  const [open, setOpen] = useState(false);
   const canEdit = editable && player.participated;
   return (
-    <details className="group/player border-b bg-card last:border-b-0">
-      <summary className="grid min-h-12 cursor-pointer list-none grid-cols-[minmax(0,1fr)_repeat(3,2rem)_1rem] items-center gap-1 px-3 py-2 hover:bg-secondary/30 sm:grid-cols-[minmax(0,1fr)_repeat(6,3.25rem)_1.5rem] [&::-webkit-details-marker]:hidden">
+    <div
+      hidden={
+        !`${displayName} ${positionLabel(player.snapshot.positionName)}`
+          .toLocaleLowerCase()
+          .includes(search.trim().toLocaleLowerCase())
+      }
+      className="border-b bg-card last:border-b-0"
+    >
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label={displayName}
+        aria-haspopup="dialog"
+        className="grid min-h-16 w-full cursor-pointer grid-cols-[minmax(0,1fr)_repeat(3,2rem)_1rem] items-center gap-1 px-3 py-3 text-left hover:bg-secondary/30 focus-visible:outline-2 focus-visible:outline-ring sm:grid-cols-[minmax(0,1fr)_repeat(6,3.25rem)_1.5rem]"
+      >
         <span className="flex min-w-0 items-center gap-2">
           <PlayerIcon
             positionId={player.positionId}
             className="size-8 shrink-0"
           />
           <span className="min-w-0">
-            <span className="block text-sm font-semibold">{displayName}</span>
+            <span className="block break-words text-sm font-semibold">
+              {displayName}
+            </span>
             <span className="block text-xs text-muted-foreground">
               {positionLabel(player.snapshot.positionName)}
             </span>
@@ -1002,142 +1057,169 @@ function MatchPlayerRow({
             {player.stats[field] || "—"}
           </span>
         ))}
-        <ChevronDown className="size-4 text-muted-foreground group-open/player:rotate-180" />
-      </summary>
-      <div className="space-y-4 border-t bg-secondary/10 p-3 sm:p-4">
-        <details className="rounded-lg bg-secondary/20 p-3">
-          <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
-            {t("leagueUx.reportPlayerProfile")}
-          </summary>
-          <div className="my-3 flex flex-wrap gap-4 font-mono text-sm">
-            {Object.entries(player.snapshot.profile).map(([key, value]) => (
-              <span key={key}>
-                {key.toUpperCase()} {value}
-              </span>
-            ))}
-          </div>
-          <SkillList ids={[...player.snapshot.baseSkills, ...player.skills]} />
-        </details>
-        <p className="text-xs text-muted-foreground">
-          {t("leagueUx.reportStatsHint")}
-        </p>
-        <fieldset
-          disabled={!canEdit}
-          className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"
-        >
-          {fields.slice(0, 6).map((field) => (
-            <LeagueField key={field}>
-              <span title={t("leagueUi.statDescriptions." + field)}>
-                {t("leagueUx.reportStatLabels." + field)}
-              </span>
-              <Input
-                className="h-10 tabular-nums"
-                type="number"
-                min={0}
-                max={field === "mvp" ? 1 : 99}
-                step={1}
-                value={player.stats[field]}
-                onChange={(event) =>
-                  onChange({ stats: { [field]: Number(event.target.value) } })
-                }
+        <ArrowRight className="size-4 text-muted-foreground" />
+      </button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto p-4 sm:max-w-2xl sm:p-6">
+          <DialogHeader className="pr-7">
+            <DialogTitle className="flex items-center gap-3">
+              <PlayerIcon
+                positionId={player.positionId}
+                className="size-10 shrink-0"
               />
-            </LeagueField>
-          ))}
-        </fieldset>
-        <details className="rounded-lg border">
-          <summary className="cursor-pointer px-4 py-3 text-sm font-medium">
-            {t("leagueUx.reportMoreStats")}
-          </summary>
-          <fieldset
-            disabled={!canEdit}
-            className="grid grid-cols-2 gap-3 border-t p-4 sm:grid-cols-3"
-          >
-            {fields.slice(6).map((field) => (
-              <LeagueField key={field}>
-                {t("leagueUx.reportStatLabels." + field)}
-                <Input
-                  className="h-10 tabular-nums"
-                  type="number"
-                  min={0}
-                  max={field === "dth" ? 1 : 99}
-                  step={1}
-                  disabled={field === "dth"}
-                  value={player.stats[field]}
-                  onChange={(event) =>
-                    onChange({ stats: { [field]: Number(event.target.value) } })
-                  }
-                />
-              </LeagueField>
-            ))}
-          </fieldset>
-        </details>
-        <details
-          className="rounded-lg border"
-          open={
-            player.casualtyRoll !== null ||
-            player.statusAfter !== "active" ||
-            undefined
-          }
-        >
-          <summary className="cursor-pointer px-4 py-3 text-sm font-medium">
-            {t("leagueUx.reportInjuries")}
-          </summary>
-          <div className="border-t p-4">
-            <fieldset disabled={!canEdit} className="grid gap-3 sm:grid-cols-2">
-              <DiceInput
-                label={t("leagueUi.casualtyRoll")}
-                sides={99}
-                value={player.casualtyRoll}
-                onChange={(value) =>
-                  onChange({ casualtyRoll: value, lastingRoll: null })
-                }
+              <span className="break-words">{displayName}</span>
+            </DialogTitle>
+            <DialogDescription>
+              {positionLabel(player.snapshot.positionName)} ·{" "}
+              {t("leagueUx.reportLive")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <details className="rounded-lg bg-secondary/20 p-3">
+              <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
+                {t("leagueUx.reportPlayerProfile")}
+              </summary>
+              <div className="my-3 flex flex-wrap gap-4 font-mono text-sm">
+                {Object.entries(player.snapshot.profile).map(([key, value]) => (
+                  <span key={key}>
+                    {key.toUpperCase()} {value}
+                  </span>
+                ))}
+              </div>
+              <SkillList
+                ids={[...player.snapshot.baseSkills, ...player.skills]}
               />
-              {player.casualtyRoll !== null &&
-                player.casualtyRoll >= 13 &&
-                player.casualtyRoll <= 14 && (
-                  <DiceInput
-                    label={t("leagueUi.lastingRoll")}
-                    sides={6}
-                    value={player.lastingRoll}
-                    onChange={(value) => onChange({ lastingRoll: value })}
-                  />
-                )}
-              <LeagueField>
-                {t("leagueUi.playerStatus")}
-                <LeagueSelect
-                  value={player.statusAfter}
-                  disabled={player.casualtyRoll !== null}
-                  onChange={(event) =>
-                    onChange({
-                      statusAfter: event.target
-                        .value as ReportPlayer["statusAfter"],
-                    })
-                  }
-                >
-                  {["active", "missing-next-game", "dead"].map((status) => (
-                    <option key={status} value={status}>
-                      {t("leagueUi.status." + status)}
-                    </option>
-                  ))}
-                </LeagueSelect>
-              </LeagueField>
-              <LeagueField>
-                {t("leagueUi.injuryNotes")}
-                <Input
-                  value={player.injuryNotes}
-                  maxLength={500}
-                  onChange={(event) =>
-                    onChange({ injuryNotes: event.target.value })
-                  }
-                />
-              </LeagueField>
-            </fieldset>
-            <p className="mt-3 text-xs text-muted-foreground">
-              {t("leagueUi.casualtyHint")}
+            </details>
+            <p className="text-xs text-muted-foreground">
+              {t("leagueUx.reportStatsHint")}
             </p>
+            <fieldset
+              disabled={!canEdit}
+              className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 lg:grid-cols-3"
+            >
+              {fields.slice(0, 6).map((field) =>
+                field === "mvp" ? (
+                  <label
+                    key={field}
+                    className="flex min-h-20 items-center justify-between gap-3 rounded-lg border bg-card px-3 text-sm font-medium"
+                  >
+                    {t("leagueUx.reportStatLabels.mvp")}
+                    <Switch
+                      disabled={!canEdit}
+                      checked={player.stats.mvp > 0}
+                      onCheckedChange={(checked) =>
+                        onChange({ stats: { mvp: checked ? 1 : 0 } })
+                      }
+                    />
+                  </label>
+                ) : (
+                  <LeagueNumber
+                    key={field}
+                    label={t("leagueUx.reportStatLabels." + field)}
+                    value={player.stats[field]}
+                    max={99}
+                    disabled={!canEdit}
+                    onChange={(value) =>
+                      onChange({ stats: { [field]: value } })
+                    }
+                  />
+                ),
+              )}
+            </fieldset>
+            <details className="rounded-lg border">
+              <summary className="cursor-pointer px-4 py-3 text-sm font-medium">
+                {t("leagueUx.reportMoreStats")}
+              </summary>
+              <fieldset
+                disabled={!canEdit}
+                className="grid grid-cols-1 gap-3 border-t p-4 min-[380px]:grid-cols-2 lg:grid-cols-3"
+              >
+                {fields.slice(6).map((field) => (
+                  <LeagueNumber
+                    key={field}
+                    label={t("leagueUx.reportStatLabels." + field)}
+                    value={player.stats[field]}
+                    max={field === "dth" ? 1 : 99}
+                    disabled={!canEdit || field === "dth"}
+                    onChange={(value) =>
+                      onChange({ stats: { [field]: value } })
+                    }
+                  />
+                ))}
+              </fieldset>
+            </details>
+            <details
+              className="rounded-lg border"
+              open={
+                player.casualtyRoll !== null ||
+                player.statusAfter !== "active" ||
+                undefined
+              }
+            >
+              <summary className="cursor-pointer px-4 py-3 text-sm font-medium">
+                {t("leagueUx.reportInjuries")}
+              </summary>
+              <div className="border-t p-4">
+                <fieldset
+                  disabled={!canEdit}
+                  className="grid gap-3 sm:grid-cols-2"
+                >
+                  <DiceInput
+                    label={t("leagueUi.casualtyRoll")}
+                    sides={99}
+                    value={player.casualtyRoll}
+                    onChange={(value) =>
+                      onChange({ casualtyRoll: value, lastingRoll: null })
+                    }
+                  />
+                  {player.casualtyRoll !== null &&
+                    player.casualtyRoll >= 13 &&
+                    player.casualtyRoll <= 14 && (
+                      <DiceInput
+                        label={t("leagueUi.lastingRoll")}
+                        sides={6}
+                        value={player.lastingRoll}
+                        onChange={(value) => onChange({ lastingRoll: value })}
+                      />
+                    )}
+                  <LeagueField>
+                    {t("leagueUi.playerStatus")}
+                    <LeagueSelect
+                      value={player.statusAfter}
+                      disabled={player.casualtyRoll !== null}
+                      onChange={(event) =>
+                        onChange({
+                          statusAfter: event.target
+                            .value as ReportPlayer["statusAfter"],
+                        })
+                      }
+                    >
+                      {["active", "missing-next-game", "dead"].map((status) => (
+                        <option key={status} value={status}>
+                          {t("leagueUi.status." + status)}
+                        </option>
+                      ))}
+                    </LeagueSelect>
+                  </LeagueField>
+                  <LeagueField>
+                    {t("leagueUi.injuryNotes")}
+                    <Input
+                      value={player.injuryNotes}
+                      maxLength={500}
+                      onChange={(event) =>
+                        onChange({ injuryNotes: event.target.value })
+                      }
+                    />
+                  </LeagueField>
+                </fieldset>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  {t("leagueUi.casualtyHint")}
+                </p>
+              </div>
+            </details>
           </div>
-        </details>
-      </div>
-    </details>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

@@ -4,7 +4,7 @@
 
 A home for building and sharing teams, managing player advancements, tracking games, and running leagues and tournaments. Made with love for the Ukrainian Blood Bowl community, with an English and Ukrainian interface.
 
-**[Open Blood Bowl Sideline](https://blood-bowl-sideline.vercel.app/)** · [Contributing](CONTRIBUTING.md) · [License](LICENSE) · [Attribution](NOTICE.md)
+**[Open Blood Bowl Sideline](https://www.sideline.com.ua/)** · [Contributing](CONTRIBUTING.md) · [License](LICENSE) · [Attribution](NOTICE.md)
 
 ![Blood Bowl Sideline](src/app/opengraph-image.png)
 
@@ -84,7 +84,7 @@ Both the browser and backend compute costs and validate teams from the same cata
 
 ## Deployment
 
-The live application is [blood-bowl-sideline.vercel.app](https://blood-bowl-sideline.vercel.app/). The linked Vercel project deploys GitHub `main`; its production build deploys Convex functions and builds the frontend together. [vercel.json](vercel.json) defines the command:
+The live application is [www.sideline.com.ua](https://www.sideline.com.ua/). The linked Vercel project deploys GitHub `main`; its production build deploys Convex functions and builds the frontend together. [vercel.json](vercel.json) defines the command:
 
 ```sh
 pnpm exec convex deploy --cmd 'pnpm run build'
@@ -95,6 +95,8 @@ For your own deployment, import your fork into Vercel and connect your own Conve
 Keep Vercel's **Automatically expose System Environment Variables** enabled. Metadata and sitemap URLs use `VERCEL_PROJECT_PRODUCTION_URL`, with `http://localhost:3000` for local development. Convex supplies `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL` to the build, so neither needs to be defined manually on Vercel. The auth proxy uses that HTTP endpoint directly. Telegram readiness comes from Convex credentials rather than a frontend flag.
 
 Configure authentication secrets in Convex as described above. Convex Auth requires `SITE_URL` for redirects and `CUSTOM_AUTH_SITE_URL` for the frontend OAuth proxy; configure both to the hosted application's public origin in the corresponding Convex deployment. Register that origin's `/api/auth/callback/telegram` with Telegram. These settings remain in Convex because Vercel's system variables are not available inside Convex functions. The optional bot webhook also needs `TELEGRAM_BOT_TOKEN` and `TELEGRAM_WEBHOOK_SECRET` in Convex.
+
+The production origin is `https://www.sideline.com.ua`: set both Convex auth origins to this value, and register `https://www.sideline.com.ua/api/auth/callback/telegram` in Telegram's Allowed URLs. Vercel redirects `sideline.com.ua` and the previous Vercel domain to `www.sideline.com.ua`.
 
 Preview builds deploy an isolated Convex preview backend for the Git branch. Set required auth signing keys and optional Telegram credentials in Convex preview environment defaults; never expose the production deploy key to Preview. Preview metadata and robots prevent indexing. The sitemap includes public reference pages and the builder entry, while UUID team pages carry `noindex`.
 

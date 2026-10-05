@@ -1,6 +1,6 @@
 "use client";
 
-import { LeagueField } from "./league-field";
+import { LeagueNumber } from "./league-number";
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useTranslations } from "gt-next";
@@ -191,9 +191,9 @@ export function LeagueSection({
   action?: ReactNode;
 }) {
   return (
-    <section className="min-w-0 rounded-lg border bg-card p-3 sm:p-4">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b pb-3">
-        <h2 className="text-sm font-semibold">{title}</h2>
+    <section className="min-w-0 rounded-xl border bg-card p-4 sm:p-5">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold tracking-tight">{title}</h2>
         {action}
       </div>
       {children}
@@ -343,23 +343,50 @@ export function DiceInput({
   value?: number | null;
   onChange: (value: number | null) => void;
 }) {
+  const t = useTranslations();
+  if (sides > 6)
+    return (
+      <div className="space-y-1">
+        <LeagueNumber
+          label={label}
+          min={1}
+          max={sides}
+          value={value ?? null}
+          onChange={onChange}
+        />
+        {value != null && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onChange(null)}
+          >
+            {t("leagueUx.clearRoll")}
+          </Button>
+        )}
+      </div>
+    );
   return (
-    <LeagueField>
-      {label}
-      <Input
-        type="number"
-        min={1}
-        max={sides}
-        step={1}
-        className="mt-1 h-10"
-        value={value ?? ""}
-        onChange={(event) =>
-          onChange(
-            event.target.value === "" ? null : Number(event.target.value),
-          )
-        }
-      />
-    </LeagueField>
+    <fieldset className="min-w-0 space-y-2">
+      <legend className="mb-2 text-xs font-medium text-muted-foreground">
+        {label}
+      </legend>
+      <div className="grid grid-cols-3 gap-1.5">
+        {Array.from({ length: sides }, (_, index) => index + 1).map((roll) => (
+          <Button
+            key={roll}
+            type="button"
+            variant={roll === value ? "default" : "outline"}
+            className="h-11 min-w-0 font-mono text-base"
+            aria-label={`${label}: ${roll}`}
+            aria-pressed={roll === value}
+            onClick={() => onChange(roll === value ? null : roll)}
+          >
+            {roll}
+          </Button>
+        ))}
+      </div>
+    </fieldset>
   );
 }
 

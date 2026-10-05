@@ -36,6 +36,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { LeagueField, LeagueSelect } from "./league-field";
 import { LeagueTeamPicker } from "./league-team-picker";
+import { LeagueNavigation } from "./league-navigation";
 import { RosterIcon } from "./player-icon";
 import { CommissionerWithdrawal } from "./league-commissioner";
 import {
@@ -205,7 +206,14 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
     { value: "players", label: t("leagueUi.playerStats"), icon: ClipboardList },
     { value: "history", label: t("leagueUi.history"), icon: History },
     ...(data.canCommission
-      ? [{ value: "manage", label: t("leagueUx.manage"), icon: Settings2 }]
+      ? [
+          {
+            value: "manage",
+            label: t("leagueUx.manage"),
+            icon: Settings2,
+            badge: waitingReports.length + pendingPostgame.length,
+          },
+        ]
       : []),
   ];
   const playerNumbers = leaguePlayerNumbers(
@@ -217,17 +225,23 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
   return (
     <div className="page-width space-y-4 py-5 sm:py-6">
       <LeagueBack />
-      <header className="overflow-hidden rounded-lg border bg-card">
-        <div className="flex flex-wrap items-start justify-between gap-4 p-4">
-          <div>
+      <header className="overflow-hidden rounded-xl border bg-card">
+        <div className="flex flex-wrap items-start justify-between gap-4 p-5 sm:p-6">
+          <div className="min-w-0 flex-1 basis-64">
             <p className="mb-2 flex items-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
               <Trophy className="size-4 text-primary" /> {t("leagueUi.season")}{" "}
               · BB2025
             </p>
-            <h1 className="page-heading break-words">{league.name}</h1>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="page-heading break-words">{league.name}</h1>
+              <LeagueStatus status={league.status} />
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {league.commissionerName} ·{" "}
+              {t("leagueUx.roundDuration", { days: league.roundDays })}
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <LeagueStatus status={league.status} />
             <Button
               variant="outline"
               className="h-10"
@@ -260,7 +274,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
             {t("leagueUx.copyHint")}
           </p>
         )}
-        <div className="flex flex-wrap gap-x-5 gap-y-2 border-t bg-secondary/25 px-4 py-2.5 text-xs text-muted-foreground">
+        <div className="flex flex-wrap gap-x-5 gap-y-3 border-t bg-secondary/25 px-5 py-3 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-2">
             <Users className="size-4" />
             {activeEntries.length} {t("leagueUi.coaches")}
@@ -284,28 +298,17 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
         </div>
       </header>
       <LeagueError message={action.error} />
-      <nav
-        aria-label={t("leagueUi.leagueViews")}
-        className="flex gap-1 overflow-x-auto border-b"
-      >
-        {tabs.map(({ value, label, icon: Icon }) => (
-          <button
-            type="button"
-            key={value}
-            aria-current={tab === value ? "page" : undefined}
-            onClick={() => setTab(value)}
-            className={`inline-flex min-h-12 shrink-0 items-center gap-2 border-b-2 px-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-ring sm:px-4 ${tab === value ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:bg-secondary/40 hover:text-foreground"}`}
-          >
-            <Icon className="size-4" />
-            {label}
-          </button>
-        ))}
-      </nav>
+      <LeagueNavigation
+        label={t("leagueUi.leagueViews")}
+        value={tab}
+        onChange={setTab}
+        items={tabs}
+      />
       {tab === "overview" && (
         <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
           <div className="min-w-0 space-y-4">
             {mine ? (
-              <div className="rounded-lg border border-primary/20 bg-primary/[0.04] p-4">
+              <div className="rounded-xl border border-primary/25 bg-primary/[0.04] p-5 sm:p-6">
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   {t("leagueUx.yourTeam")}
                 </p>
@@ -424,7 +427,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
               }
             >
               {league.status === "registration" ? (
-                <div className="divide-y">
+                <div className="grid gap-3 xl:grid-cols-2">
                   {activeEntries.map((entry) => (
                     <Link
                       key={entry._id}
@@ -581,7 +584,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
         data.canCommission &&
         league.status === "registration" && (
           <LeagueSection
-            title={t("leagueUi.launchPhase")}
+            title={t("leagueUx.setupChecklist")}
             action={
               <Button
                 disabled={
@@ -595,9 +598,40 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
               </Button>
             }
           >
-            <p className="text-sm text-muted-foreground">
-              {t("leagueUi.launchHint")}
-            </p>
+            <ol className="grid gap-3 md:grid-cols-3">
+              {[
+                {
+                  label: t("leagueUx.setupInvite"),
+                  done: copied || activeEntries.length >= 2,
+                  detail: t("leagueUx.inviteCoaches"),
+                },
+                {
+                  label: t("leagueUx.setupTeams"),
+                  done: activeEntries.length >= 2,
+                  detail: `${activeEntries.length} / 2 ${t("leagueUi.coaches")}`,
+                },
+                {
+                  label: t("leagueUx.setupLaunch"),
+                  done: false,
+                  detail: t("leagueUi.launchHint"),
+                },
+              ].map((item, index) => (
+                <li
+                  key={item.label}
+                  className="rounded-lg border bg-secondary/20 p-4"
+                >
+                  <span
+                    className={`mb-3 flex size-8 items-center justify-center rounded-full text-sm ${item.done ? "bg-primary text-primary-foreground" : "border bg-card text-muted-foreground"}`}
+                  >
+                    {item.done ? <Check className="size-4" /> : index + 1}
+                  </span>
+                  <p className="text-sm font-semibold">{item.label}</p>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                    {item.detail}
+                  </p>
+                </li>
+              ))}
+            </ol>
           </LeagueSection>
         )}
       {tab === "fixtures" && (
@@ -629,7 +663,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                 title={`${t("leagueUi.round")} ${visibleRound.number}`}
                 action={<LeagueStatus status={visibleRound.status} />}
               >
-                <div className="divide-y">
+                <div className="grid gap-3 xl:grid-cols-2">
                   {roundMatches.map((match) => {
                     const home = entryById.get(match.homeEntryId);
                     const away = match.awayEntryId
@@ -641,7 +675,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                     return (
                       <article
                         key={match._id}
-                        className={`py-3 first:pt-1 last:pb-1 ${isMine ? "rounded-xl bg-primary/[0.03] px-3" : ""}`}
+                        className={`rounded-xl border p-4 ${isMine ? "border-primary/25 bg-primary/[0.03]" : "bg-card"}`}
                       >
                         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                           <LeagueStatus status={match.status} />

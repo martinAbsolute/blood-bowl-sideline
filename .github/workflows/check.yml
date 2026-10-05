@@ -23,4 +23,4 @@ jobs:
         env:
           NEXT_PUBLIC_CONVEX_URL: https://expert-grasshopper-80.convex.cloud
           NEXT_PUBLIC_CONVEX_SITE_URL: https://expert-grasshopper-80.convex.site
-          NEXT_PUBLIC_SITE_URL: https://blood-bowl-sideline.vercel.app
+          NEXT_PUBLIC_SITE_URL: https://www.sideline.com.ua

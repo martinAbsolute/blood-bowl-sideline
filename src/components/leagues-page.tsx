@@ -18,6 +18,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { LeagueField, LeagueSelect } from "./league-field";
 import { LeagueCardsLoading } from "./list-loading";
+import { LeagueNumber } from "./league-number";
 import { LoginButton } from "./site-shell";
 import { LeagueError, LeagueStatus, useLeagueAction } from "./league-ui";
 import {
@@ -26,7 +27,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
+} from "./dialog";
 
 export function LeaguesPage() {
   const t = useTranslations();
@@ -49,6 +50,7 @@ export function LeaguesPage() {
         .includes(search.trim().toLocaleLowerCase()),
   );
   const [creating, setCreating] = useState(false);
+  const [createStep, setCreateStep] = useState<"setup" | "review">("setup");
   const [name, setName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [roundDays, setRoundDays] = useState(14);
@@ -60,6 +62,10 @@ export function LeaguesPage() {
   );
   async function createLeague(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (createStep === "setup") {
+      setCreateStep("review");
+      return;
+    }
     await action.run(async () => {
       const leagueId = await create({
         name: name.trim(),
@@ -71,11 +77,15 @@ export function LeaguesPage() {
   }
   return (
     <div className="page-width py-8 sm:py-10">
-      <header className="mb-5 flex flex-wrap items-start justify-between gap-5">
-        <div>
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-5 rounded-xl border bg-card p-5 sm:p-6">
+        <div className="min-w-0 max-w-2xl">
+          <p className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <Trophy className="size-4 text-primary" />
+            {t("leagueUx.leagueHub")}
+          </p>
           <h1 className="page-heading">{t("leagues")}</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            {t("leagueUx.directoryIntro")}
+            {t("leagueUx.hubIntro")}
           </p>
         </div>
         {isAuthenticated ? (
@@ -90,11 +100,14 @@ export function LeaguesPage() {
       <Dialog
         open={creating && isAuthenticated}
         onOpenChange={(open) => {
-          if (!busy) setCreating(open);
+          if (!busy) {
+            setCreating(open);
+            if (!open) setCreateStep("setup");
+          }
         }}
       >
         <DialogContent
-          className="max-h-[90svh] overflow-y-auto p-6 sm:max-w-lg"
+          className="max-h-[90svh] overflow-y-auto p-5 sm:max-w-xl sm:p-6"
           showCloseButton={!busy}
         >
           <DialogHeader>
@@ -106,10 +119,22 @@ export function LeaguesPage() {
             </DialogTitle>
             <DialogDescription>{t("leagueUx.createIntro")}</DialogDescription>
           </DialogHeader>
+          <div className="grid grid-cols-2 gap-2 rounded-lg bg-secondary/50 p-1">
+            {["setup", "review"].map((step, index) => (
+              <div
+                key={step}
+                aria-current={createStep === step ? "step" : undefined}
+                className={`rounded-md px-3 py-2 text-sm ${createStep === step ? "bg-card font-semibold shadow-sm" : "text-muted-foreground"}`}
+              >
+                {index + 1}.{" "}
+                {t(`leagueUx.create${step === "setup" ? "Setup" : "Review"}`)}
+              </div>
+            ))}
+          </div>
           <form onSubmit={createLeague} className="space-y-5">
             <LeagueError message={action.error} />
-            <div className="grid gap-4 sm:grid-cols-3">
-              <LeagueField className="sm:col-span-3">
+            <div hidden={createStep !== "setup"} className="space-y-5">
+              <LeagueField>
                 <span>{t("leagueName")}</span>
                 <Input
                   required
@@ -121,7 +146,7 @@ export function LeaguesPage() {
                   className="h-11"
                 />
               </LeagueField>
-              <LeagueField className="sm:col-span-2">
+              <LeagueField>
                 <span>{t("leagueUx.plannedStart")}</span>
                 <Input
                   type="datetime-local"
@@ -131,34 +156,86 @@ export function LeaguesPage() {
                   aria-describedby="league-schedule-hint"
                 />
               </LeagueField>
-              <LeagueField>
-                <span>{t("leagueRoundDays")}</span>
-                <Input
-                  type="number"
+              <div className="space-y-2">
+                <LeagueNumber
+                  label={t("leagueRoundDays")}
                   min={1}
                   max={60}
-                  required
                   value={roundDays}
-                  onChange={(event) => setRoundDays(Number(event.target.value))}
-                  className="h-11"
-                  aria-describedby="league-schedule-hint"
+                  onChange={setRoundDays}
                 />
-              </LeagueField>
+                <div className="grid grid-cols-3 gap-2">
+                  {[7, 14, 21].map((days) => (
+                    <Button
+                      key={days}
+                      type="button"
+                      variant={roundDays === days ? "secondary" : "outline"}
+                      className="h-10"
+                      aria-pressed={roundDays === days}
+                      onClick={() => setRoundDays(days)}
+                    >
+                      {t("leagueUx.days", { days })}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <p
+                id="league-schedule-hint"
+                className="text-xs leading-relaxed text-muted-foreground"
+              >
+                {t("leagueUx.scheduleHint")}
+              </p>
             </div>
-            <p
-              id="league-schedule-hint"
-              className="text-xs leading-relaxed text-muted-foreground"
-            >
-              {t("leagueUx.scheduleHint")}
-            </p>
+            {createStep === "review" && (
+              <div className="space-y-4">
+                <div className="rounded-xl border bg-secondary/20 p-5">
+                  <h3 className="break-words text-xl font-semibold">
+                    {name.trim()}
+                  </h3>
+                  <dl className="mt-4 space-y-3 text-sm">
+                    <div className="flex flex-wrap justify-between gap-2">
+                      <dt className="text-muted-foreground">
+                        {t("leagueUx.plannedStart")}
+                      </dt>
+                      <dd>
+                        {startDate
+                          ? new Date(startDate).toLocaleString(
+                              locale === "uk" ? "uk-UA" : "en-GB",
+                            )
+                          : t("leagueUx.startWhenReady")}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between gap-2">
+                      <dt className="text-muted-foreground">
+                        {t("leagueRoundDays")}
+                      </dt>
+                      <dd>{roundDays}</dd>
+                    </div>
+                    <div className="flex justify-between gap-2">
+                      <dt className="text-muted-foreground">
+                        {t("leagueUx.format")}
+                      </dt>
+                      <dd>BB2025 · {t("leagueUx.roundRobin")}</dd>
+                    </div>
+                  </dl>
+                </div>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {t("leagueUx.createNextHint")}
+                </p>
+              </div>
+            )}
             <div className="flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end">
               <Button
                 type="button"
                 variant="outline"
                 disabled={busy}
-                onClick={() => setCreating(false)}
+                onClick={() =>
+                  createStep === "review"
+                    ? setCreateStep("setup")
+                    : setCreating(false)
+                }
               >
-                {t("cancel")}
+                {t(createStep === "review" ? "leagueUx.backToSetup" : "cancel")}
               </Button>
               <Button type="submit" disabled={busy || !name.trim()}>
                 {busy ? (
@@ -166,7 +243,11 @@ export function LeaguesPage() {
                 ) : (
                   <Plus className="size-4" />
                 )}
-                {t("leagueCreate")}
+                {t(
+                  createStep === "setup"
+                    ? "leagueUx.createReview"
+                    : "leagueCreate",
+                )}
               </Button>
             </div>
           </form>
@@ -228,26 +309,22 @@ export function LeaguesPage() {
             ) : null}
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg border bg-card">
-            <div className="hidden grid-cols-[minmax(0,1fr)_10rem_9rem_1rem] gap-4 border-b bg-secondary/30 px-4 py-2 text-xs text-muted-foreground lg:grid">
-              <span>{t("leagueName")}</span>
-              <span>{t("leagueUx.plannedStart")}</span>
-              <span>{t("leagueUx.seasonStatus")}</span>
-              <span />
-            </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {visible.map((league) => (
               <Link
                 key={league._id}
                 href={`/leagues/manage/${league._id}`}
-                className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b px-4 py-3 last:border-0 hover:bg-secondary/30 focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-[-2px] lg:grid-cols-[minmax(0,1fr)_10rem_9rem_1rem] lg:gap-4"
+                className="group flex min-w-0 flex-col items-start gap-4 rounded-xl border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-secondary/20 focus-visible:outline-2 focus-visible:outline-ring"
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <Trophy
-                    className="size-5 shrink-0 text-primary"
-                    aria-hidden="true"
-                  />
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-secondary">
+                    <Trophy
+                      className="size-5 text-primary"
+                      aria-hidden="true"
+                    />
+                  </span>
                   <div className="min-w-0">
-                    <h3 className="break-words text-sm font-semibold">
+                    <h3 className="break-words text-base font-semibold">
                       {league.name}
                     </h3>
                     <p className="mt-1 text-xs text-muted-foreground">
@@ -256,19 +333,19 @@ export function LeaguesPage() {
                     </p>
                   </div>
                 </div>
-                <span className="hidden text-xs text-muted-foreground lg:block">
-                  {dateFormat.format(league.startAt)}
-                </span>
-                <span>
+                <div className="mt-auto flex w-full flex-wrap items-center justify-between gap-2 border-t pt-4">
                   <LeagueStatus status={league.status} />
-                </span>
-                <ArrowRight
-                  className="hidden size-4 text-muted-foreground group-hover:text-primary lg:block"
-                  aria-hidden="true"
-                />
-                <span className="col-span-2 flex items-center gap-2 text-xs text-muted-foreground lg:hidden">
-                  <CalendarDays className="size-3.5" />
-                  {dateFormat.format(league.startAt)}
+                  <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <CalendarDays className="size-3.5" />
+                    {dateFormat.format(league.startAt)}
+                  </span>
+                </div>
+                <span className="flex w-full items-center justify-between text-sm font-medium text-primary">
+                  {t("leagueUx.openLeague")}
+                  <ArrowRight
+                    className="size-4 transition-transform group-hover:translate-x-1"
+                    aria-hidden="true"
+                  />
                 </span>
               </Link>
             ))}
