@@ -74,10 +74,7 @@ it("recognizes production conflicts from structured error data despite a redacte
   mocks.save.mockRejectedValueOnce(error);
   await act(async () => root.render(editor()));
   await act(async () => vi.advanceTimersByTimeAsync(450));
-  expect(mocks.toast).toHaveBeenCalledWith({
-    type: "error",
-    title: "conflict",
-  });
+  expect(mocks.toast).not.toHaveBeenCalled();
   expect(readDrafts()).toHaveLength(1);
   expect(
     Array.from(container.querySelectorAll("button")).some(
@@ -333,10 +330,7 @@ it("preserves the draft and pending save on rejection without repeatedly retryin
     team,
     expectedRevision: 2,
   });
-  expect(mocks.toast).toHaveBeenCalledWith({
-    type: "error",
-    title: "conflict",
-  });
+  expect(mocks.toast).not.toHaveBeenCalled();
   expect(readDrafts()).toEqual([team]);
   expect(pendingDraftSave(team.uuid)).not.toBeNull();
   await act(async () => root.render(editor(team)));
@@ -414,7 +408,7 @@ it("a new device opens an empty builder without creating a phantom draft", async
 
 function action(label: string) {
   return Array.from(
-    container.querySelectorAll<HTMLButtonElement>("button"),
+    document.querySelectorAll<HTMLButtonElement>("button"),
   ).find((button) => button.textContent === label)!;
 }
 
@@ -598,7 +592,9 @@ it("recovers a stale tab without a reload loop and can save again after loading 
   await act(async () => vi.advanceTimersByTimeAsync(450));
   expect(mocks.save.mock.calls[0][0].expectedRevision).toBe(1);
   expect(readDraftRevision(team.uuid)).toBe(1);
-  expect(container.textContent).toContain("conflict");
+  expect(container.textContent).not.toContain("conflict");
+  await act(async () => action("saveStatusError").click());
+  expect(document.body.textContent).toContain("conflict");
   await act(async () => action("useSavedTeam").click());
   expect(readDrafts()).toEqual([]);
   expect(
@@ -649,7 +645,7 @@ it("shows a reconnecting state for a pending cloud save without claiming it is s
   mocks.connected = false;
   await act(async () => root.render(editor()));
   expect(container.querySelector('[role="status"]')?.textContent).toContain(
-    "saveWaitingConnection",
+    "saveReconnecting",
   );
   expect(unloadPrevented()).toBe(true);
 });
@@ -756,7 +752,8 @@ it("warns on failed cloud saves and removes the unload warning after a successfu
   expect(unloadPrevented()).toBe(true);
   await act(async () => vi.advanceTimersByTimeAsync(450));
   expect(unloadPrevented()).toBe(true);
-  const retry = Array.from(container.querySelectorAll("button")).find(
+  await act(async () => action("saveStatusError").click());
+  const retry = Array.from(document.querySelectorAll("button")).find(
     (b) => b.textContent === "retry",
   )!;
   await act(async () => retry.click());

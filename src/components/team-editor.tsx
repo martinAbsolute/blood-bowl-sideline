@@ -105,7 +105,7 @@ export function TeamEditor({
     server,
     recovered,
   );
-  const { team, revision, syncError, cloudInvalid, change } = autosave;
+  const { team, revision, change } = autosave;
   const [dialog, setDialog] = useState<"stars" | null>(null),
     [selected, setSelected] = useState<string | null>(null),
     [search, setSearch] = useState("");
@@ -758,18 +758,6 @@ export function TeamEditor({
 
           <TeamBudget team={team} floating={!readOnly} />
           <TeamReadiness team={team} />
-          {!readOnly && (syncError || cloudInvalid) && (
-            <p
-              role="alert"
-              className="text-xs leading-relaxed text-muted-foreground"
-            >
-              {t(
-                cloudInvalid
-                  ? "invalidTeamSave"
-                  : (syncError?.message ?? "saveFailed"),
-              )}
-            </p>
-          )}
         </aside>
       </div>
       <Dialog

@@ -210,10 +210,6 @@ export function useTeamAutosave(
                   ? "invalidTeamSave"
                   : "saveFailed";
         setSyncError({ team, conflict, message });
-        toast.add({
-          type: "error",
-          title: t(message),
-        });
       } finally {
         saveInFlight.current = false;
         setSaving(false);

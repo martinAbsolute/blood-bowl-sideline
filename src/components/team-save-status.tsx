@@ -1,14 +1,27 @@
 "use client";
 
 import { useTranslations } from "gt-next";
-import { Check, CloudCheck, CloudOff, LoaderCircle } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  CloudCheck,
+  CloudOff,
+  LoaderCircle,
+} from "lucide-react";
 import type { useTeamAutosave } from "@/lib/use-team-autosave";
 import { useConvexConnectionState } from "convex/react";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 type SaveState = ReturnType<typeof useTeamAutosave>;
 
-// Lucide paths leave different amounts of space below their strokes in the
-// 24-unit viewBox. At 14px, these optical offsets put the ink on the baseline.
+// Lucide paths leave different amounts of space below their strokes.
 const iconBaselineOffset = new Map([
   [CloudCheck, 1.5],
   [Check, 3],
@@ -37,65 +50,94 @@ export function TeamSaveStatus({
     discardChanges,
     hasServer,
   } = state;
-  const { label: saveStatus, Icon } =
-    isAuthenticated && !connection.isWebSocketConnected && (dirty || saving)
-      ? { label: "saveWaitingConnection", Icon: CloudOff }
-      : syncError || cloudInvalid
-        ? { label: "saveStatusError", Icon: CloudOff }
+  const reconnecting =
+    isAuthenticated && !connection.isWebSocketConnected && (dirty || saving);
+  const { label, Icon } = reconnecting
+    ? { label: "saveReconnecting", Icon: CloudOff }
+    : syncError || cloudInvalid
+      ? { label: "saveStatusError", Icon: CloudOff }
+      : localSave?.failed
+        ? { label: "saveStatusLocalError", Icon: CloudOff }
+        : cloudPending || localPending
+          ? { label: "saving", Icon: LoaderCircle }
+          : revision > 0 && !dirty
+            ? { label: "savedCloud", Icon: CloudCheck }
+            : { label: "savedInDrafts", Icon: Check };
+  const detail = syncError
+    ? syncError.message
+    : reconnecting
+      ? "saveWaitingConnection"
+      : cloudInvalid
+        ? "invalidTeamSave"
         : localSave?.failed
-          ? { label: "saveStatusLocalError", Icon: CloudOff }
-          : cloudPending || localPending
-            ? { label: "saving", Icon: LoaderCircle }
-            : revision > 0 && !dirty
-              ? { label: "savedCloud", Icon: CloudCheck }
-              : { label: "savedInDrafts", Icon: Check };
-  return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="no-print flex flex-wrap items-baseline gap-1.5 text-[11px] text-muted-foreground sm:text-xs"
-      title={
-        syncError
-          ? t(syncError.message)
-          : cloudInvalid
-            ? t("invalidTeamSave")
-            : localSave?.failed
-              ? t("storageError")
-              : isAuthenticated && !team.name.trim()
-                ? t("teamNameRequired")
-                : !isAuthenticated
-                  ? t("guestText")
-                  : undefined
-      }
-    >
+          ? "storageError"
+          : isAuthenticated && !team.name.trim()
+            ? "teamNameRequired"
+            : !isAuthenticated
+              ? "guestText"
+              : undefined;
+  const indicator = (
+    <>
       <Icon
         aria-hidden="true"
-        className={`size-3.5 shrink-0 ${saveStatus === "saving" ? "animate-spin" : ""}`}
+        className={`size-3.5 shrink-0 ${label === "saving" ? "animate-spin" : ""}`}
         style={{ translate: `0 ${iconBaselineOffset.get(Icon) ?? 0.5}px` }}
       />
-      <span>{t(saveStatus)}</span>
-      {syncError && (
-        <>
-          <span>{t(syncError.message)}</span>
-          <button
-            type="button"
-            className="min-h-11 px-2 underline underline-offset-4"
-            disabled={saving}
-            onClick={discardChanges}
+      <span>{t(label)}</span>
+    </>
+  );
+  return (
+    <div className="no-print shrink-0 text-[11px] text-muted-foreground sm:text-xs">
+      <span role="status" aria-live="polite" className="sr-only">
+        {t(label)}
+      </span>
+      {detail ? (
+        <Popover>
+          <PopoverTrigger className="inline-flex cursor-pointer items-baseline gap-1.5 whitespace-nowrap rounded-sm py-1 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+            {indicator}
+            <ChevronDown
+              aria-hidden="true"
+              className="size-3 self-center opacity-60"
+            />
+          </PopoverTrigger>
+          <PopoverContent
+            align="start"
+            sideOffset={8}
+            className="w-80 max-w-[calc(100vw-2rem)] gap-3 p-4"
           >
-            {t(hasServer ? "useSavedTeam" : "discardDraft")}
-          </button>
-        </>
-      )}
-      {syncError && !syncError.conflict && (
-        <button
-          type="button"
-          className="min-h-11 px-2 underline underline-offset-4"
-          disabled={saving || !team.name.trim()}
-          onClick={() => void saveTeam()}
-        >
-          {t("retry")}
-        </button>
+            <PopoverTitle className="text-sm">{t(label)}</PopoverTitle>
+            <PopoverDescription className="text-xs leading-relaxed">
+              {t(detail)}
+            </PopoverDescription>
+            {syncError && (
+              <div className="flex flex-col items-stretch gap-2">
+                {!syncError.conflict && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={saving || !team.name.trim()}
+                    onClick={() => void saveTeam()}
+                  >
+                    {t("retry")}
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-auto min-h-9 whitespace-normal py-2 text-xs"
+                  disabled={saving}
+                  onClick={discardChanges}
+                >
+                  {t(hasServer ? "useSavedTeam" : "discardDraft")}
+                </Button>
+              </div>
+            )}
+          </PopoverContent>
+        </Popover>
+      ) : (
+        <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap py-1">
+          {indicator}
+        </span>
       )}
     </div>
   );

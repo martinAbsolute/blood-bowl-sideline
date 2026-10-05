@@ -326,6 +326,7 @@
   "conflict": "Another tab saved changes to this team. Copy Team to keep your edits separately, or load the saved team to discard these edits.",
   "useSavedTeam": "Discard edits and load saved team",
   "discardDraft": "Discard recovery draft",
+  "saveReconnecting": "Reconnecting",
   "saveWaitingConnection": "Not saved yet — reconnecting. Keep this tab open.",
   "saveArchived": "This team was archived. Copy Team to keep these edits, or discard the recovery draft and restore the team from your archived teams.",
   "saveAccessLost": "This account cannot save this team. Sign in to the owning account, or copy the team to keep your edits separately.",
