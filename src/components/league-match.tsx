@@ -417,28 +417,31 @@ export function LeagueMatch({
             </p>
             <div id="report-pre-game" hidden={step !== "pre-game"}>
               <section
-                className="py-4"
+                className="py-1"
                 aria-label={t("leagueUx.reportPreGame")}
               >
                 <fieldset
                   disabled={!editable || action.busy}
-                  className="space-y-6"
+                  className="space-y-4"
                 >
-                  <div className="grid gap-6 sm:grid-cols-2 sm:gap-10">
+                  <div className="grid gap-4 sm:grid-cols-2">
                     {(["home", "away"] as const).map((side) => (
-                      <div key={side} className="min-w-0 space-y-4">
-                        <h2 className="border-b pb-3 text-base font-semibold">
+                      <div
+                        key={side}
+                        className="min-w-0 space-y-5 rounded-lg border bg-card p-4 sm:p-5"
+                      >
+                        <h2 className="border-b pb-4 text-base font-semibold">
                           {side === "home" ? home.team.name : away?.team.name}
                         </h2>
-                        <div className="flex items-baseline justify-between gap-3">
-                          <span className="text-sm text-muted-foreground">
-                            {t("leagueUx.reportDedicatedFans")}
-                          </span>
-                          <strong className="font-mono text-3xl tabular-nums">
+                        <div className="flex items-center gap-3">
+                          <strong className="font-mono text-4xl leading-none text-primary tabular-nums">
                             {match[`${side}DedicatedFans`] ??
                               match[`${side}Snapshot`]?.staff.dedicatedFans ??
                               "—"}
                           </strong>
+                          <span className="text-sm font-medium">
+                            {t("leagueUx.reportDedicatedFans")}
+                          </span>
                         </div>
                         <DiceInput
                           label={t("leagueUi.fanAttendanceRoll")}
@@ -451,7 +454,7 @@ export function LeagueMatch({
                       </div>
                     ))}
                   </div>
-                  <LeagueField className="border-t pt-5 sm:max-w-sm">
+                  <LeagueField className="rounded-lg border bg-card p-4 sm:grid sm:grid-cols-[1fr_minmax(12rem,20rem)] sm:items-center sm:px-5">
                     {t("leagueUx.reportWeather")}
                     <LeagueSelect
                       value={match.weather ?? ""}
