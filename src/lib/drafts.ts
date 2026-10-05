@@ -70,6 +70,9 @@ export function readRevision(uuid: string) {
   }
 }
 export function storeRevision(uuid: string, revision: number) {
+  // An editor mounted before an upload completed may still hold an old value.
+  // Never let its next edit roll back the acknowledged server revision.
+  if (!Number.isSafeInteger(revision) || revision < readRevision(uuid)) return;
   try {
     localStorage.setItem(`bbsideline:revision:${uuid}`, String(revision));
   } catch {
@@ -106,6 +109,10 @@ export function acknowledgeDraft(team: Team, revision: number) {
   storeRevision(team.uuid, revision);
   const local = readDrafts().find((draft) => draft.uuid === team.uuid);
   // A response must never discard edits made while the request was in flight.
-  if (local && JSON.stringify(local) === JSON.stringify(team))
+  // Parsing restores schema field order; object insertion order is not an edit.
+  if (
+    local &&
+    JSON.stringify(local) === JSON.stringify(localDraftSchema.parse(team))
+  )
     removeDraft(team.uuid);
 }

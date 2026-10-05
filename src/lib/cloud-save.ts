@@ -18,10 +18,16 @@ export function saveCloudDraft(
   const previous = pending.get(team.uuid);
   if (previous?.snapshot === snapshot) return previous.promise;
   const promise = (async () => {
-    if (previous) await previous.promise.catch(() => {});
+    const acknowledged = previous
+      ? await previous.promise.catch(() => null)
+      : null;
     const result = await save({
       team,
-      expectedRevision: Math.max(expectedRevision, readRevision(team.uuid)),
+      expectedRevision: Math.max(
+        expectedRevision,
+        readRevision(team.uuid),
+        acknowledged?.revision ?? 0,
+      ),
     });
     acknowledgeDraft(team, result.revision);
     return result;

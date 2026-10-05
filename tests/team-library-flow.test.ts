@@ -9,6 +9,7 @@ import {
   storeDraft,
   draftAccount,
   readRevision,
+  storeRevision,
   normalizeStoredDrafts,
   DRAFTS_KEY,
 } from "../src/lib/drafts";
@@ -24,6 +25,9 @@ import { libraryMatches } from "../src/lib/team-library";
 import { TEAM_NAME_MAX_LENGTH } from "../src/domain/team-name";
 import { duplicateTeam } from "../src/lib/duplicate-team";
 import { teamSchema } from "../src/domain/types";
+import { convexTest } from "convex-test";
+import schema from "../convex/schema";
+import { api } from "../convex/_generated/api";
 
 const mocks = vi.hoisted(() => ({
   authenticated: false,
@@ -219,6 +223,88 @@ it("deduplicates overlapping library/editor uploads and serializes a different s
   await next;
   expect(mocks.save.mock.calls[1][0].expectedRevision).toBe(1);
   expect(readDrafts()).toEqual([]);
+});
+it("never lets an older editor roll back an acknowledged revision", () => {
+  const uuid = randomUUID();
+  storeRevision(uuid, 3);
+  storeRevision(uuid, 0);
+  storeRevision(uuid, 2);
+  expect(readRevision(uuid)).toBe(3);
+});
+
+it("serializes saves with the acknowledged revision even when revision storage fails", async () => {
+  const team = newTeam(randomUUID());
+  let complete!: (result: { revision: number }) => void;
+  mocks.save
+    .mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          complete = resolve;
+        }),
+    )
+    .mockResolvedValue({ revision: 2 });
+  const storage = vi.spyOn(localStorage, "setItem").mockImplementation(() => {
+    throw new Error("Storage blocked");
+  });
+  try {
+    const first = saveCloudDraft(team, 0, mocks.save);
+    const next = saveCloudDraft({ ...team, name: "Newer edit" }, 0, mocks.save);
+    complete({ revision: 1 });
+    await first;
+    await next;
+    expect(mocks.save.mock.calls[1][0].expectedRevision).toBe(1);
+  } finally {
+    storage.mockRestore();
+  }
+});
+
+it("acknowledges the same draft regardless of object property order", async () => {
+  const initial = newTeam(randomUUID(), "black-orc");
+  const { name, ...fields } = initial;
+  const team = { ...fields, name: `Renamed ${name}` };
+  storeDraft(team);
+  await saveCloudDraft(team, 0, mocks.save);
+  expect(readDrafts()).toEqual([]);
+});
+it("syncs a renamed guest Black Orc team through sign-in and subsequent edits against the real save handler", async () => {
+  const backend = convexTest(schema, import.meta.glob("../convex/**/*.ts"));
+  const userId = await backend.run((ctx) =>
+    ctx.db.insert("users", { name: "Coach" }),
+  );
+  const coach = backend.withIdentity({ subject: userId });
+  mocks.save.mockImplementation((args) => coach.mutation(api.teams.save, args));
+  const { name, ...fields } = newTeam(randomUUID(), "black-orc");
+  const team = { ...fields, name: `Renamed ${name}` };
+  storeDraft(team);
+  await act(async () => root.render(renderSync()));
+  await tick();
+  expect(mocks.save).not.toHaveBeenCalled();
+  mocks.authenticated = true;
+  mocks.account = userId;
+  await act(async () => root.render(renderSync()));
+  await tick();
+  await tick();
+  expect(mocks.save).toHaveBeenCalledTimes(1);
+  await act(async () => {
+    await mocks.save.mock.results[0].value;
+  });
+  expect(readDrafts()).toEqual([]);
+  expect(readRevision(team.uuid)).toBe(1);
+  // An editor that mounted before sign-in still holds revision zero.
+  storeRevision(team.uuid, 0);
+  const edited = { ...team, name: "Next Black Orc name" };
+  await act(async () => storeDraft(edited, userId));
+  await tick();
+  await tick();
+  expect(mocks.save).toHaveBeenCalledTimes(2);
+  await act(async () => {
+    await mocks.save.mock.results[1].value;
+  });
+  expect(mocks.save.mock.calls[1][0].expectedRevision).toBe(1);
+  expect(readDrafts()).toEqual([]);
+  expect(
+    await coach.query(api.teams.getByUuid, { uuid: team.uuid }),
+  ).toMatchObject({ team: edited, revision: 2 });
 });
 it("shows one card per team when a local recovery copy overlaps a cloud team", async () => {
   const team = newTeam(randomUUID());

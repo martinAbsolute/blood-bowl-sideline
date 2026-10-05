@@ -20,6 +20,35 @@ async function setup() {
   };
 }
 describe("Convex team ownership and sharing", () => {
+  it("acknowledges a repeated save after a lost response without another write, while rejecting different stale edits", async () => {
+    const { a, b } = await setup();
+    const team = {
+      ...newTeam(randomUUID(), "black-orc"),
+      name: "Renamed Black Orcs",
+    };
+    const request = { team, expectedRevision: 0 };
+    const saved = await a.mutation(api.teams.save, request);
+    expect(await a.mutation(api.teams.save, request)).toEqual(saved);
+    await expect(b.mutation(api.teams.save, request)).rejects.toThrow(
+      "FORBIDDEN",
+    );
+    await expect(
+      a.mutation(api.teams.save, {
+        ...request,
+        team: { ...team, name: "A different stale edit" },
+      }),
+    ).rejects.toThrow("CONFLICT");
+    const changed = await a.mutation(api.teams.save, {
+      team: { ...team, name: "Latest server name" },
+      expectedRevision: saved.revision,
+    });
+    await expect(a.mutation(api.teams.save, request)).rejects.toThrow(
+      "CONFLICT",
+    );
+    expect(
+      (await a.query(api.teams.getByUuid, { uuid: team.uuid }))?.revision,
+    ).toBe(changed.revision);
+  });
   it("enforces the team-name boundary for both creates and renames", async () => {
     const { a } = await setup();
     const team = {

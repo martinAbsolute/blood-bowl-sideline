@@ -3,6 +3,7 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { act, createElement, StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { randomUUID } from "node:crypto";
+import { ConvexError } from "convex/values";
 import { newTeam } from "../src/domain/catalog";
 import { readDrafts, readRevision } from "../src/lib/drafts";
 import {
@@ -57,6 +58,25 @@ vi.mock("@/components/ui/toast", () => ({
 }));
 
 let root: Root;
+it("recognizes production conflicts from structured error data despite a redacted message", async () => {
+  vi.useFakeTimers();
+  mocks.auth = { isAuthenticated: true, isLoading: false };
+  const error = new ConvexError("CONFLICT");
+  error.message = "[Request ID: test] Server Error";
+  mocks.save.mockRejectedValueOnce(error);
+  await act(async () => root.render(editor()));
+  await act(async () => vi.advanceTimersByTimeAsync(450));
+  expect(mocks.toast).toHaveBeenCalledWith({
+    type: "error",
+    title: "conflict",
+  });
+  expect(readDrafts()).toHaveLength(1);
+  expect(
+    Array.from(container.querySelectorAll("button")).some(
+      (b) => b.textContent === "retry",
+    ),
+  ).toBe(false);
+});
 function DraftSignInProvider({ children }: { children?: React.ReactNode }) {
   return createElement(
     DraftProvider,

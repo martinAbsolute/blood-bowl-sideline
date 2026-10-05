@@ -169,8 +169,25 @@ export const save = mutation({
       ? await teamLeagueState(ctx, existing)
       : { leagueLocked: false, leagueExperienced: false };
     if (leagueState.leagueLocked) throw new ConvexError("TEAM_IN_LEAGUE");
-    if ((existing?.revision ?? 0) !== args.expectedRevision)
+    if ((existing?.revision ?? 0) !== args.expectedRevision) {
+      // A lost response or a second uploader can repeat a committed snapshot.
+      // Acknowledge it without advancing the revision or overwriting changes.
+      if (
+        existing &&
+        !existing.archived &&
+        args.expectedRevision < existing.revision &&
+        JSON.stringify(teamSchema.parse(existing.team)) === JSON.stringify(team)
+      )
+        return {
+          team: existing.team,
+          revision: existing.revision,
+          updatedAt: existing.updatedAt,
+          legal: existing.legal,
+          canEdit: true,
+          ...leagueState,
+        };
       throw new ConvexError("CONFLICT");
+    }
     if (existing?.archived) throw new ConvexError("ARCHIVED");
     const revision = (existing?.revision ?? 0) + 1,
       updatedAt = Date.now(),

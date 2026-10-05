@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useConvexAuth } from "convex/react";
+import { ConvexError } from "convex/values";
 import { useTranslations } from "gt-next";
 import { teamSaveIssues } from "@/domain/rules";
 import type { Team } from "@/domain/types";
@@ -144,7 +145,8 @@ export function useTeamAutosave(
       } catch (error) {
         if (latestTeam.current.uuid !== team.uuid) return;
         const conflict =
-          error instanceof Error && error.message.includes("CONFLICT");
+          (error instanceof ConvexError && error.data === "CONFLICT") ||
+          (error instanceof Error && error.message.includes("CONFLICT"));
         setSyncError({ team, conflict });
         toast.add({
           type: "error",
