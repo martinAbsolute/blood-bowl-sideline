@@ -15,7 +15,7 @@ import {
   CalendarDays,
   Check,
   ClipboardList,
-  Copy,
+  Share2,
   Flag,
   History,
   LayoutDashboard,
@@ -26,6 +26,8 @@ import {
 } from "lucide-react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
+import { shareTeamLink } from "@/lib/share-team";
+import { DEFAULT_LEAGUE_TREASURY } from "@/domain/league-rules";
 import { getRoster } from "@/domain/catalog";
 import { canEnrollTeam } from "@/lib/league-team-eligibility";
 import {
@@ -143,7 +145,8 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
   const base = `/leagues/manage/${leagueId}`;
   const mine = entries.find((entry) => entry.coachId === data.viewerId);
   const selectedTeam = own.results.find(({ team }) => team.uuid === teamUuid);
-  const canJoin = selectedTeam && canEnrollTeam(selectedTeam);
+  const canJoin =
+    selectedTeam && canEnrollTeam(selectedTeam, league.startingTreasury);
   const entryById = new Map(entries.map((entry) => [entry._id, entry]));
   const currentRound =
     rounds.find((round) => round.status === "open") ??
@@ -214,10 +217,6 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
       <header className="overflow-hidden rounded-xl border bg-card">
         <div className="flex flex-wrap items-start justify-between gap-4 p-5 sm:p-6">
           <div className="min-w-0 flex-1 basis-64">
-            <p className="mb-2 flex items-center gap-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-              <Trophy className="size-4 text-primary" /> {t("leagueUi.season")}{" "}
-              · BB2025
-            </p>
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="page-heading break-words">{league.name}</h1>
               <LeagueStatus status={league.status} />
@@ -233,10 +232,10 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
               className="h-10"
               onClick={async () => {
                 try {
-                  await navigator.clipboard.writeText(
+                  const result = await shareTeamLink(
                     window.location.origin + base,
                   );
-                  setCopied(true);
+                  setCopied(result === "copied");
                   setCopyFailed(false);
                 } catch {
                   setCopyFailed(true);
@@ -246,9 +245,9 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
               {copied ? (
                 <Check className="size-4" />
               ) : (
-                <Copy className="size-4" />
+                <Share2 className="size-4" />
               )}
-              {t(copied ? "leagueUx.linkCopied" : "leagueUx.inviteCoaches")}
+              {t(copied ? "leagueUx.linkCopied" : "share")}
             </Button>
           </div>
         </div>
@@ -357,10 +356,12 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
             {data.canRegister && !mine && (
               <LeagueSection title={t("leagueUi.registerTeam")}>
                 <p className="mb-4 text-sm text-muted-foreground">
-                  {t("leagueUi.registrationHint")}
+                  {t("leagueUx.joinHint")}
                 </p>
                 <div className="flex flex-wrap items-end gap-3">
                   <LeagueTeamPicker
+                    leagueId={leagueId}
+                    startingTreasury={league.startingTreasury}
                     teams={own.results}
                     value={teamUuid}
                     onChange={setTeamUuid}
@@ -379,12 +380,6 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                   >
                     {t("leagueUi.join")}
                   </Button>
-                  <Link
-                    href="/rosters"
-                    className="inline-flex min-h-10 items-center text-sm text-primary hover:underline"
-                  >
-                    {t("createTeam")}
-                  </Link>
                 </div>
               </LeagueSection>
             )}
@@ -536,6 +531,18 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
               </LeagueSection>
             )}
             <LeagueSection title={t("leagueUx.leagueDetails")}>
+              <p className="mb-4 text-sm">
+                <span className="text-muted-foreground">
+                  {t("leagueUx.startingTreasury")}
+                </span>
+                <br />
+                <strong>
+                  {(
+                    league.startingTreasury ?? DEFAULT_LEAGUE_TREASURY
+                  ).toLocaleString("uk-UA")}{" "}
+                  {t("leagueUx.goldUnit")}
+                </strong>
+              </p>
               <dl className="space-y-3 text-xs">
                 <div className="flex justify-between gap-3">
                   <dt className="text-muted-foreground">

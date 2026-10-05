@@ -16,13 +16,15 @@ const rookieCodes = new Set([
 export function LeagueTeamIssues({
   team,
   leagueExperienced = false,
+  startingTreasury,
 }: {
   team: Team;
   leagueExperienced?: boolean;
+  startingTreasury?: number;
 }) {
   const t = useTranslations();
-  const issues = rookieLeagueIssues(team);
-  const validation = validateTeam(team);
+  const issues = rookieLeagueIssues(team, startingTreasury);
+  const validation = validateTeam(team, startingTreasury);
   return issues.length || leagueExperienced ? (
     <ul className="space-y-1 text-xs leading-relaxed text-muted-foreground">
       {leagueExperienced && <li>{t("leagueUi.experiencedTeamHint")}</li>}

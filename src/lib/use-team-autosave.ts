@@ -36,6 +36,7 @@ export function useTeamAutosave(
   save: Save,
   server?: SavedTeam | null,
   recovered = initialRevision === 0,
+  startingTreasury?: number,
 ) {
   const t = useTranslations();
   const { isAuthenticated, isLoading } = useConvexAuth();
@@ -60,7 +61,7 @@ export function useTeamAutosave(
   const returnedFromSignIn = useRef(pendingDraftSave(initial.uuid) !== null);
   const latestTeam = useRef(team);
   const saveInFlight = useRef(false);
-  const saveIssues = teamSaveIssues(team);
+  const saveIssues = teamSaveIssues(team, startingTreasury);
   const storageErrorText = t("storageError");
   const reserveEditor = draftSync.editing;
   // Convex subscriptions drive idle editors. Never rebase unsaved edits onto a
@@ -157,7 +158,7 @@ export function useTeamAutosave(
         toast.add({ type: "error", title: t("teamNameRequired") });
         return;
       }
-      if (teamSaveIssues(team).length) {
+      if (teamSaveIssues(team, startingTreasury).length) {
         toast.add({ type: "error", title: t("invalidTeamSave") });
         return;
       }
@@ -217,6 +218,7 @@ export function useTeamAutosave(
     },
     [
       revision,
+      startingTreasury,
       save,
       team,
       t,
@@ -279,7 +281,7 @@ export function useTeamAutosave(
       saving ||
       !dirty ||
       !team.name.trim() ||
-      teamSaveIssues(team).length > 0 ||
+      teamSaveIssues(team, startingTreasury).length > 0 ||
       syncError?.conflict ||
       syncError?.team === team
     )
@@ -292,6 +294,7 @@ export function useTeamAutosave(
     isAuthenticated,
     saving,
     dirty,
+    startingTreasury,
     team,
     syncError,
     saveTeam,

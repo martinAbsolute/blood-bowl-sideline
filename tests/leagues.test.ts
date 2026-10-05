@@ -1689,3 +1689,80 @@ describe("live report collaboration and immutable revisions", () => {
     ).toEqual(eventsBefore);
   });
 });
+
+describe("league starting treasury", () => {
+  it("enforces the selected allowance on registration and replacement, including legacy leagues", async () => {
+    const t = convexTest(schema, modules);
+    const userId = await t.run((ctx) =>
+      ctx.db.insert("users", { name: "Treasury coach" }),
+    );
+    const coach = t.withIdentity({ subject: userId });
+    const customId = await coach.mutation(api.leagues.create, {
+      name: "Custom treasury",
+      startAt: Date.now(),
+      startingTreasury: 1_200_000,
+    });
+    const defaultId = await coach.mutation(api.leagues.create, {
+      name: "Default treasury",
+      startAt: Date.now(),
+    });
+    expect(
+      (await coach.query(api.leagues.get, { leagueId: defaultId })).league
+        .startingTreasury,
+    ).toBe(1_000_000);
+    await t.run((ctx) =>
+      ctx.db.patch("leagues", defaultId, { startingTreasury: undefined }),
+    );
+    const team = rookie("Big budget rookies");
+    team.staff.rerolls = 8;
+    team.staff.apothecary = 1;
+    team.staff.assistantCoaches = 1;
+    await coach.mutation(api.teams.save, {
+      team,
+      expectedRevision: 0,
+      leagueId: customId,
+    });
+    const saved = await coach.query(api.teams.getByUuid, { uuid: team.uuid });
+    expect(saved?.draftLeagueId).toBe(customId);
+    await coach.mutation(api.teams.save, {
+      team: { ...team, name: "Reopened league draft" },
+      expectedRevision: 1,
+    });
+    await expect(
+      coach.mutation(api.leagues.register, {
+        leagueId: defaultId,
+        teamUuid: team.uuid,
+      }),
+    ).rejects.toThrow("INVALID_ROOKIE");
+    const entryId = await coach.mutation(api.leagues.register, {
+      leagueId: customId,
+      teamUuid: team.uuid,
+    });
+    const entry = await t.run((ctx) => ctx.db.get("leagueTeams", entryId));
+    expect(entry!.treasury).toBe(190_000);
+    const replacement = rookie("Replacement rookies");
+    replacement.staff.rerolls = 8;
+    replacement.staff.apothecary = 1;
+    replacement.staff.assistantCoaches = 2;
+    await coach.mutation(api.teams.save, {
+      team: replacement,
+      expectedRevision: 0,
+      leagueId: customId,
+    });
+    await coach.mutation(api.leagues.replaceEntryTeam, {
+      entryId,
+      teamUuid: replacement.uuid,
+      expectedRevision: 1,
+    });
+    expect(
+      (await t.run((ctx) => ctx.db.get("leagueTeams", entryId)))!.treasury,
+    ).toBe(180_000);
+    await expect(
+      coach.mutation(api.leagues.create, {
+        name: "Bad budget",
+        startAt: Date.now(),
+        startingTreasury: 1_000_001,
+      }),
+    ).rejects.toThrow("INVALID_TREASURY");
+  });
+});

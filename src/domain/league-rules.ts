@@ -170,8 +170,13 @@ export function advancementChoices(
 }
 
 /** A league rookie must not import exhibition skills or permanent match inducements. */
-export function rookieLeagueIssues(team: Team): string[] {
-  const issues = validateTeam(team).issues.map((issue) => issue.code);
+export const DEFAULT_LEAGUE_TREASURY = 1_000_000;
+
+export function rookieLeagueIssues(
+  team: Team,
+  treasury = DEFAULT_LEAGUE_TREASURY,
+): string[] {
+  const issues = validateTeam(team, treasury).issues.map((issue) => issue.code);
   if (team.rulesetId !== "bb2025-default") issues.push("leagueRuleset");
   if (team.players.some((player) => player.skills.length))
     issues.push("rookieSkills");
@@ -183,10 +188,13 @@ export function rookieLeagueIssues(team: Team): string[] {
   return [...new Set(issues)];
 }
 
-export function startingTreasury(team: Team): number {
-  if (rookieLeagueIssues(team).length)
+export function startingTreasury(
+  team: Team,
+  treasury = DEFAULT_LEAGUE_TREASURY,
+): number {
+  if (rookieLeagueIssues(team, treasury).length)
     throw new Error("A legal rookie roster is required");
-  return summarize(team).remaining;
+  return summarize(team, treasury).remaining;
 }
 
 export interface LeaguePlayerValueState {

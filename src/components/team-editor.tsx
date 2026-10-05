@@ -54,6 +54,9 @@ import { Checkbox } from "./ui/checkbox";
 import { PlayerDialog } from "./player-dialog";
 import { positionLabel } from "./position-name";
 import { TeamSupport } from "./team-support";
+import type { api } from "../../convex/_generated/api";
+import type { FunctionReturnType } from "convex/server";
+import { LeagueEnrollment } from "./league-enrollment";
 import { TeamBudget } from "./team-budget";
 import { shareTeamLink } from "@/lib/share-team";
 import { hasTeamProgress, resetTeamRoster } from "@/lib/builder";
@@ -83,17 +86,19 @@ export function TeamEditor({
   readOnly = false,
   server,
   recovered,
+  leagueContext,
 }: {
   initial: Team;
   revision?: number;
   readOnly?: boolean;
-  server?: SavedTeam | null;
+  server?: (SavedTeam & { leagueExperienced?: boolean }) | null;
   recovered?: boolean;
+  leagueContext?: FunctionReturnType<typeof api.leagues.get>;
 }) {
   const t = useTranslations(),
     router = useRouter(),
     { isAuthenticated, isLoading } = useConvexAuth(),
-    save = useTeamSave();
+    save = useTeamSave(leagueContext?.league._id);
   const draftSync = useDraftSync();
   const locale = useLocale();
   const [duplicating, setDuplicating] = useState(false);
@@ -104,6 +109,7 @@ export function TeamEditor({
     save,
     server,
     recovered,
+    leagueContext?.league.startingTreasury,
   );
   const { team, revision, change } = autosave;
   const [dialog, setDialog] = useState<"stars" | null>(null),
@@ -113,7 +119,7 @@ export function TeamEditor({
   const [switchingRoster, setSwitchingRoster] = useState(false);
   const roster = getRoster(team.rosterId)!,
     rules = getRuleset(team.rulesetId),
-    totals = summarize(team);
+    totals = summarize(team, leagueContext?.league.startingTreasury);
   const requiresCaptain = roster.specialRules.includes("Team Captain");
   async function switchRoster(rosterId: string) {
     if (switchingRoster) return;
@@ -350,6 +356,20 @@ export function TeamEditor({
           {readOnly && <Badge variant="outline">{t("viewOnly")}</Badge>}
         </div>
       </TeamHeader>
+      {!readOnly && leagueContext && (
+        <LeagueEnrollment
+          league={leagueContext.league}
+          canRegister={leagueContext.canRegister}
+          team={team}
+          pending={
+            autosave.cloudPending ||
+            autosave.dirty ||
+            autosave.saving ||
+            revision === 0
+          }
+          experienced={server?.leagueExperienced}
+        />
+      )}
       <div className="budget-grid">
         <div className="@container space-y-5">
           {!readOnly && (
@@ -756,8 +776,15 @@ export function TeamEditor({
             </section>
           )}
 
-          <TeamBudget team={team} floating={!readOnly} />
-          <TeamReadiness team={team} />
+          <TeamBudget
+            team={team}
+            floating={!readOnly}
+            startingTreasury={leagueContext?.league.startingTreasury}
+          />
+          <TeamReadiness
+            team={team}
+            startingTreasury={leagueContext?.league.startingTreasury}
+          />
         </aside>
       </div>
       <Dialog

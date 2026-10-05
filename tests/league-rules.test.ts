@@ -1,3 +1,4 @@
+import { summarize } from "../src/domain/rules";
 import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { getRoster, getSkill, newTeam } from "../src/domain/catalog";
@@ -347,4 +348,17 @@ describe("single round-robin fixtures", () => {
     expect(roundRobin(["a"])).toEqual([]);
     expect(roundRobin([])).toEqual([]);
   });
+});
+
+it("uses the league treasury for rookie eligibility and carries over unspent gold", () => {
+  const team = rookie();
+  team.staff.rerolls = 8;
+  team.staff.apothecary = 1;
+  team.staff.assistantCoaches = 1;
+  expect(rookieLeagueIssues(team)).toContain("budget");
+  expect(rookieLeagueIssues(team, 1_200_000)).toEqual([]);
+  expect(startingTreasury(team, 1_200_000)).toBe(
+    1_200_000 - summarize(team).teamGold,
+  );
+  expect(rookieLeagueIssues(team, 500_000)).toContain("budget");
 });

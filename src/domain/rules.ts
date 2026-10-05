@@ -24,9 +24,12 @@ export function tierFor(team: Team) {
     )?.[0] ?? 0,
   );
 }
-export function budgetFor(team: Team) {
+export function budgetFor(team: Team, startingTreasury?: number) {
   const rules = getRuleset(team.rulesetId);
-  return rules.tierBudgets[tierFor(team)] ?? rules.tierBudgets[0];
+  const budget = rules.tierBudgets[tierFor(team)] ?? rules.tierBudgets[0];
+  return startingTreasury !== undefined && team.rulesetId === "bb2025-default"
+    ? { ...budget, teamBudget: startingTreasury }
+    : budget;
 }
 export function skillAccess(position: Position, skillId: string) {
   const skill = getSkill(skillId);
@@ -145,10 +148,10 @@ export function inducementInfo(team: Team, inducement: Inducement) {
       (required[inducement.id] ?? true),
   };
 }
-export function summarize(team: Team) {
+export function summarize(team: Team, startingTreasury?: number) {
   const roster = getRoster(team.rosterId)!,
     rules = getRuleset(team.rulesetId),
-    budget = budgetFor(team);
+    budget = budgetFor(team, startingTreasury);
   const selectedStars = team.stars.flatMap(
     (id) => stars.find((s) => s.id === id) ?? [],
   );
@@ -213,7 +216,10 @@ export function summarize(team: Team) {
     playerCount: team.players.length + team.stars.length,
   };
 }
-export function validateTeam(input: unknown): {
+export function validateTeam(
+  input: unknown,
+  startingTreasury?: number,
+): {
   issues: Issue[];
   valid: boolean;
 } {
@@ -228,7 +234,7 @@ export function validateTeam(input: unknown): {
     rules = getRuleset(team.rulesetId);
   if (!roster)
     return { issues: [{ code: "unknownRoster", values: {} }], valid: false };
-  const totals = summarize(team),
+  const totals = summarize(team, startingTreasury),
     overrides = rules.teamOverrides?.[roster.id];
   if (
     ["chaos-chosen", "chaos-renegade"].includes(roster.id) &&
@@ -393,8 +399,8 @@ export function validateTeam(input: unknown): {
 
 // Unfinished recruitment is saveable. Every actual rule violation must be fixed
 // before publishing a cloud snapshot; local recovery drafts preserve edits.
-export function teamSaveIssues(team: Team): Issue[] {
-  return validateTeam(team).issues.filter(
+export function teamSaveIssues(team: Team, startingTreasury?: number): Issue[] {
+  return validateTeam(team, startingTreasury).issues.filter(
     ({ code }) =>
       code !== "minPlayers" && !(code === "captain" && !team.captainId),
   );

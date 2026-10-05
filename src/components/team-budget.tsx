@@ -22,12 +22,14 @@ import {
 export function TeamBudget({
   team,
   floating = true,
+  startingTreasury,
 }: {
   team: Team;
   floating?: boolean;
+  startingTreasury?: number;
 }) {
   const t = useTranslations();
-  const summary = budgetSummary(team);
+  const summary = budgetSummary(team, startingTreasury);
   // Keep the same allowance in the header throughout opening and closing.
   const drawerPool =
     summary.issues[0] ??
@@ -161,7 +163,10 @@ export function TeamBudget({
             >
               <BudgetBreakdown summary={summary} drawerPool={drawerPool} />
               <div className="px-3 pb-3">
-                <TeamReadiness team={team} />
+                <TeamReadiness
+                  team={team}
+                  startingTreasury={startingTreasury}
+                />
               </div>
             </div>
           </DrawerContent>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useCallback } from "react";
+import type { Id } from "../../convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import type { OptimisticLocalStore } from "convex/browser";
 import { api } from "../../convex/_generated/api";
@@ -22,8 +24,13 @@ export function optimisticallySaveTeam(
   }
 }
 
-export function useTeamSave() {
-  return useMutation(api.teams.save).withOptimisticUpdate(
+export function useTeamSave(leagueId?: string) {
+  const save = useMutation(api.teams.save).withOptimisticUpdate(
     optimisticallySaveTeam,
+  );
+  return useCallback(
+    (args: { team: Team; expectedRevision: number }) =>
+      save(leagueId ? { ...args, leagueId: leagueId as Id<"leagues"> } : args),
+    [save, leagueId],
   );
 }

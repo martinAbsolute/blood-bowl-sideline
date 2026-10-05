@@ -56,6 +56,7 @@ vi.mock("@convex-dev/auth/react", () => ({
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: mocks.replace, push: mocks.push }),
   usePathname: () => "/builder",
+  useSearchParams: () => new URLSearchParams(),
 }));
 vi.mock("next/link", () => ({
   default: ({ children, ...props }: { children: React.ReactNode }) =>

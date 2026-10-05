@@ -127,3 +127,32 @@ it("excludes the current career team from replacement and marks the chosen card"
       ?.getAttribute("aria-pressed"),
   ).toBe("true");
 });
+
+it("allows a roster above the standard allowance when this league funds it", async () => {
+  const team = rookie("Custom treasury humans");
+  team.staff.rerolls = 8;
+  team.staff.apothecary = 1;
+  team.staff.assistantCoaches = 1;
+  const change = vi.fn();
+  await act(async () =>
+    root.render(
+      createElement(LeagueTeamPicker, {
+        teams: [{ team }],
+        value: "",
+        onChange: change,
+        status: "Exhausted",
+        loadMore: vi.fn(),
+        startingTreasury: 1_200_000,
+      }),
+    ),
+  );
+  await act(async () =>
+    container.querySelector<HTMLButtonElement>("button")!.click(),
+  );
+  const button = document.querySelector<HTMLButtonElement>(
+    `button[aria-label="${team.name}"]`,
+  )!;
+  expect(button.disabled).toBe(false);
+  await act(async () => button.click());
+  expect(change).toHaveBeenCalledWith(team.uuid);
+});

@@ -127,7 +127,8 @@ it("puts team registration first for a newcomer without commissioner tasks", asy
       "leagueUi.registerTeam",
     );
     expect(container.textContent).not.toContain("leagueUx.commissionerDesk");
-    expect(container.querySelector('a[href="/rosters"]')).not.toBeNull();
+    expect(container.textContent).toContain("leagueUi.chooseTeam");
+    expect(container.querySelector('a[href="/rosters"]')).toBeNull();
   });
 });
 

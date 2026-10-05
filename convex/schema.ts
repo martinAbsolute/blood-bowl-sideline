@@ -40,6 +40,7 @@ export default defineSchema({
     rulesVersion: v.string(),
     startAt: v.number(),
     roundDays: v.number(),
+    startingTreasury: v.optional(v.number()),
     activeRound: v.union(v.number(), v.null()),
     updatedAt: v.number(),
   })
@@ -211,6 +212,7 @@ export default defineSchema({
     .index("by_entryId", ["entryId"])
     .index("by_matchId", ["matchId"]),
   teams: defineTable({
+    draftLeagueId: v.optional(v.id("leagues")),
     leagueExperienced: v.optional(v.boolean()),
     ownerId: v.id("users"),
     uuid: v.string(),

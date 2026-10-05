@@ -33,6 +33,9 @@ vi.mock("../src/lib/drafts", () => ({
 vi.mock("../src/components/draft-sync-provider", () => ({
   useDraftSync: () => ({ ready: true, account: "coach" }),
 }));
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(),
+}));
 vi.mock("../src/components/team-league-links", () => ({
   TeamLeagueLinks: () => null,
 }));

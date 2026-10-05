@@ -441,14 +441,7 @@ export function LoadingLayout({
   // Once providers resolve, the page keeps its real headings and static controls.
   return (
     <div className="page-width py-8 sm:py-10" data-loading-layout={variant}>
-      <div
-        aria-hidden="true"
-        className={
-          variant === "leagues"
-            ? "mb-6 space-y-3 rounded-xl border bg-card p-5 sm:p-6"
-            : "mb-7 space-y-2"
-        }
-      >
+      <div aria-hidden="true" className="mb-7 space-y-2">
         <Skeleton className="h-[30px] w-40 sm:h-[37.5px]" />
         {variant !== "catalog" && <Skeleton className="h-5 w-80 max-w-full" />}
       </div>

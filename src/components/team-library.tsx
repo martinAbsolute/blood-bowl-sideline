@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { LoginButton } from "./site-shell";
 import { toast } from "@/components/ui/toast";
+import { LibraryHeader } from "./library-header";
 import { TeamCard } from "./team-card";
 import { useDraftSync } from "./draft-sync-provider";
 import { libraryMatches } from "@/lib/team-library";
@@ -132,15 +133,13 @@ export function TeamLibrary() {
   }
   return (
     <div className="page-width py-8 sm:py-10">
-      <header className="mb-7 flex flex-wrap items-start justify-between gap-5">
-        <div>
-          <h1 className="page-heading">{t("myTeams")}</h1>
-          <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-            {t(isAuthenticated ? "libraryCloudHint" : "libraryGuestHint")}
-          </p>
-        </div>
-        <CreateTeamButton />
-      </header>
+      <LibraryHeader
+        title={t("myTeams")}
+        description={t(
+          isAuthenticated ? "libraryCloudHint" : "libraryGuestHint",
+        )}
+        action={<CreateTeamButton />}
+      />
       {!isLoading && !isAuthenticated && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-secondary/30 px-5 py-4">
           <div className="flex items-center gap-3">

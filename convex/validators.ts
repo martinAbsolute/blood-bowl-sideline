@@ -45,6 +45,7 @@ export const teamValidator = v.object({
   captainId: v.optional(v.string()),
 });
 export const publicTeam = v.object({
+  draftLeagueId: v.optional(v.id("leagues")),
   team: teamValidator,
   revision: v.number(),
   legal: v.boolean(),

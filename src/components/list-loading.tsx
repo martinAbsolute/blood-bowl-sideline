@@ -1,28 +1,30 @@
+import { Card } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
 
 export function LeagueCardsLoading({ label }: { label: string }) {
   return (
-    <div role="status" className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div role="status" className="grid gap-5">
       <span className="sr-only">{label}</span>
       {[0, 1, 2].map((index) => (
-        <div
+        <Card
           key={index}
           aria-hidden="true"
-          className={`flex min-w-0 flex-col gap-4 rounded-xl border bg-card p-5 ${index === 1 ? "hidden md:flex" : index === 2 ? "hidden xl:flex" : ""}`}
+          className="gap-5 rounded-2xl p-5 shadow-sm sm:p-6"
         >
-          <div className="flex items-center gap-3">
-            <Skeleton className="size-11 shrink-0 rounded-lg" />
-            <div className="min-w-0 flex-1">
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="mt-1 h-4 w-full" />
+          <div className="flex items-center gap-4">
+            <Skeleton className="size-14 shrink-0 rounded-2xl" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <Skeleton className="h-6 w-48 max-w-full" />
+              <Skeleton className="h-4 w-28" />
             </div>
-          </div>
-          <div className="flex items-center justify-between gap-2 border-t pt-4">
             <Skeleton className="h-6 w-24 rounded-full" />
-            <Skeleton className="h-4 w-20" />
           </div>
-          <Skeleton className="h-5 w-28" />
-        </div>
+          <div className="flex flex-wrap gap-6 border-t pt-4">
+            <Skeleton className="h-5 w-28" />
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-5 w-40" />
+          </div>
+        </Card>
       ))}
     </div>
   );

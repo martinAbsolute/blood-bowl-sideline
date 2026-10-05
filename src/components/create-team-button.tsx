@@ -16,11 +16,13 @@ import { saveCloudDraft } from "@/lib/cloud-save";
 export function CreateTeamButton({
   className,
   rosterId,
+  leagueId,
   size,
   iconClassName = "size-4",
 }: {
   className?: string;
   rosterId?: string;
+  leagueId?: string;
   size?: "default" | "sm";
   iconClassName?: string;
 }) {
@@ -28,7 +30,7 @@ export function CreateTeamButton({
   const router = useRouter();
   const sync = useDraftSync();
   const { isAuthenticated } = useConvexAuth();
-  const save = useTeamSave();
+  const save = useTeamSave(leagueId);
   const [creating, setCreating] = useState(false);
   if (rosterId)
     return (
@@ -44,7 +46,9 @@ export function CreateTeamButton({
           try {
             if (isAuthenticated) await saveCloudDraft(team, 0, save);
             else storeDraft(team, null, 0);
-            router.push(`/teams/${team.uuid}`);
+            router.push(
+              `/teams/${team.uuid}${leagueId ? `?league=${encodeURIComponent(leagueId)}` : ""}`,
+            );
           } catch {
             toast.add({
               type: "error",

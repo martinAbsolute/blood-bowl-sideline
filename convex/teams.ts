@@ -27,6 +27,7 @@ export const getByUuid = query({
     const leagueState = await teamLeagueState(ctx, doc);
     return {
       team: doc.team,
+      draftLeagueId: doc.draftLeagueId,
       revision: doc.revision,
       legal: doc.legal,
       updatedAt: doc.updatedAt,
@@ -127,6 +128,7 @@ export const listMine = query({
           const leagueState = await teamLeagueState(ctx, d);
           return {
             team: d.team,
+            draftLeagueId: d.draftLeagueId,
             revision: d.revision,
             legal: d.legal,
             updatedAt: d.updatedAt,
@@ -139,7 +141,11 @@ export const listMine = query({
   },
 });
 export const save = mutation({
-  args: { team: teamValidator, expectedRevision: v.number() },
+  args: {
+    team: teamValidator,
+    expectedRevision: v.number(),
+    leagueId: v.optional(v.id("leagues")),
+  },
   returns: publicTeam,
   handler: async (ctx, args) => {
     const viewer = await requireUser(ctx);
@@ -158,13 +164,21 @@ export const save = mutation({
       ...parsed.data,
       notes: "",
     };
-    if (teamSaveIssues(team).length) throw new ConvexError("INVALID_TEAM");
     const existing = await ctx.db
       .query("teams")
       .withIndex("by_uuid", (q) => q.eq("uuid", team.uuid))
       .unique();
     if (existing && existing.ownerId !== ownerId && viewer.role !== "admin")
       throw new ConvexError("FORBIDDEN");
+    // A draft keeps its league allowance across navigation and background saves.
+    // Resolve the allowance from the league; never accept a client-supplied budget.
+    const draftLeagueId = args.leagueId ?? existing?.draftLeagueId;
+    const draftLeague = draftLeagueId
+      ? await ctx.db.get("leagues", draftLeagueId)
+      : null;
+    if (draftLeagueId && !draftLeague) throw new ConvexError("INVALID_INPUT");
+    if (teamSaveIssues(team, draftLeague?.startingTreasury).length)
+      throw new ConvexError("INVALID_TEAM");
     const leagueState = existing
       ? await teamLeagueState(ctx, existing)
       : { leagueLocked: false, leagueExperienced: false };
@@ -181,6 +195,7 @@ export const save = mutation({
       )
         return {
           team: existing.team,
+          draftLeagueId: existing.draftLeagueId,
           revision: existing.revision,
           updatedAt: existing.updatedAt,
           legal: existing.legal,
@@ -191,7 +206,7 @@ export const save = mutation({
     }
     const revision = (existing?.revision ?? 0) + 1,
       updatedAt = Date.now(),
-      legal = validateTeam(team).valid;
+      legal = validateTeam(team, draftLeague?.startingTreasury).valid;
     const searchText = [
       team.name,
       getRoster(team.rosterId)!.name,
@@ -200,6 +215,7 @@ export const save = mutation({
     if (existing)
       await ctx.db.patch(existing._id, {
         team,
+        draftLeagueId,
         revision,
         updatedAt,
         legal,
@@ -210,13 +226,22 @@ export const save = mutation({
         ownerId,
         uuid: team.uuid,
         team,
+        draftLeagueId,
         revision,
         updatedAt,
         legal,
         archived: false,
         searchText,
       });
-    return { team, revision, updatedAt, legal, canEdit: true, ...leagueState };
+    return {
+      team,
+      draftLeagueId,
+      revision,
+      updatedAt,
+      legal,
+      canEdit: true,
+      ...leagueState,
+    };
   },
 });
 export const setArchived = mutation({

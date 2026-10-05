@@ -10,8 +10,8 @@ export type BudgetPool = {
   shared: boolean;
 };
 
-export function budgetSummary(team: Team) {
-  const totals = summarize(team);
+export function budgetSummary(team: Team, startingTreasury?: number) {
+  const totals = summarize(team, startingTreasury);
   const rules = getRuleset(team.rulesetId);
   const roster = getRoster(team.rosterId)!;
   const shared = rules.id === "eurobowl-2026";

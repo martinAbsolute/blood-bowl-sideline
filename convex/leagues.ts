@@ -27,6 +27,7 @@ import {
   leagueAdvancementCosts,
   leagueCurrentTeamValue,
   leagueTeamValue,
+  DEFAULT_LEAGUE_TREASURY,
   rookieLeagueIssues,
   roundRobin,
   startingTreasury,
@@ -349,11 +350,15 @@ export const create = mutation({
     name: v.string(),
     startAt: v.number(),
     roundDays: v.optional(v.number()),
+    startingTreasury: v.optional(v.number()),
   },
   returns: v.id("leagues"),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     integer(args.startAt, 0, Number.MAX_SAFE_INTEGER);
+    const startingTreasury = args.startingTreasury ?? DEFAULT_LEAGUE_TREASURY;
+    integer(startingTreasury, 100_000, 10_000_000);
+    if (startingTreasury % 5000) throw new ConvexError("INVALID_TREASURY");
     const roundDays = args.roundDays ?? 14;
     integer(roundDays, 1, 365);
     const id = await ctx.db.insert("leagues", {
@@ -364,6 +369,7 @@ export const create = mutation({
       rulesVersion: `${RULES_VERSION}/league-bb2025-faq-2026-05-v1`,
       startAt: args.startAt,
       roundDays,
+      startingTreasury,
       activeRound: null,
       updatedAt: Date.now(),
     });
@@ -371,6 +377,7 @@ export const create = mutation({
       name: args.name,
       startAt: args.startAt,
       roundDays,
+      startingTreasury,
     });
     return id;
   },
@@ -556,7 +563,7 @@ export const register = mutation({
       throw new ConvexError("FORBIDDEN");
     if ((await teamLeagueState(ctx, source)).leagueExperienced)
       throw new ConvexError("TEAM_EXPERIENCED");
-    const issues = rookieLeagueIssues(source.team);
+    const issues = rookieLeagueIssues(source.team, league.startingTreasury);
     if (issues.length)
       throw new ConvexError({ code: "INVALID_ROOKIE", issues });
     const team = {
@@ -574,7 +581,7 @@ export const register = mutation({
       team,
       sourceRevision: source.revision,
       revision: 1,
-      treasury: startingTreasury(source.team),
+      treasury: startingTreasury(source.team, league.startingTreasury),
       stats: zeroTeamStats(),
       firstPlayedAt: null,
       activeMatchId: null,
@@ -2234,7 +2241,7 @@ export const replaceEntryTeam = mutation({
   },
   returns: v.null(),
   handler: async (ctx, { entryId, teamUuid, expectedRevision }) => {
-    const { entry, user } = await editableCareer(
+    const { entry, user, league } = await editableCareer(
       ctx,
       entryId,
       expectedRevision,
@@ -2249,7 +2256,7 @@ export const replaceEntryTeam = mutation({
       throw new ConvexError("FORBIDDEN");
     if ((await teamLeagueState(ctx, source)).leagueExperienced)
       throw new ConvexError("TEAM_EXPERIENCED");
-    const issues = rookieLeagueIssues(source.team);
+    const issues = rookieLeagueIssues(source.team, league.startingTreasury);
     if (issues.length)
       throw new ConvexError({ code: "INVALID_ROOKIE", issues });
     const oldPlayers = await entryPlayers(ctx, entryId);
@@ -2289,7 +2296,7 @@ export const replaceEntryTeam = mutation({
       teamId: source._id,
       sourceRevision: source.revision,
       team,
-      treasury: startingTreasury(source.team),
+      treasury: startingTreasury(source.team, league.startingTreasury),
       revision: entry.revision + 1,
     });
     await auditEvent(

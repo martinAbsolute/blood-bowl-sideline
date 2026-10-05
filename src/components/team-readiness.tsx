@@ -4,12 +4,16 @@ import { ShieldCheck } from "lucide-react";
 import type { Team } from "@/domain/types";
 import { getRuleset } from "@/domain/catalog";
 import { validateTeam } from "@/domain/rules";
-import { rookieLeagueIssues } from "@/domain/league-rules";
-import { LeagueTeamIssues } from "./league-team-issues";
 import { ReadinessCard } from "./readiness-card";
-export function TeamReadiness({ team }: { team: Team }) {
+export function TeamReadiness({
+  team,
+  startingTreasury,
+}: {
+  team: Team;
+  startingTreasury?: number;
+}) {
   const t = useTranslations();
-  const validation = validateTeam(team);
+  const validation = validateTeam(team, startingTreasury);
   const rules = getRuleset(team.rulesetId);
   return (
     <ReadinessCard ready={validation.valid}>
@@ -37,16 +41,6 @@ export function TeamReadiness({ team }: { team: Team }) {
           ))}
         </ul>
       )}
-      {validation.valid &&
-        rules.id === "bb2025-default" &&
-        rookieLeagueIssues(team).length > 0 && (
-          <div className="mt-4 space-y-2 border-t pt-3">
-            <p className="text-xs font-medium">
-              {t("leagueUi.rookieEligibility")}
-            </p>
-            <LeagueTeamIssues team={team} />
-          </div>
-        )}
       {rules.id !== "bb2025-default" && (
         <p className="mt-4 border-t pt-3 text-[10px] leading-relaxed text-muted-foreground">
           {t("squadNotice")}

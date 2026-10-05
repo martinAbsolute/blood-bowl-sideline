@@ -61,7 +61,13 @@ import {
 type CareerData = NonNullable<FunctionReturnType<typeof api.leagues.getCareer>>;
 type CareerPlayer = CareerData["players"][number];
 
-function CareerReplacement({ entry }: { entry: CareerData["entry"] }) {
+function CareerReplacement({
+  entry,
+  startingTreasury,
+}: {
+  entry: CareerData["entry"];
+  startingTreasury?: number;
+}) {
   const t = useTranslations();
   const viewer = useQuery(api.users.viewer, {});
   const teams = usePaginatedQuery(
@@ -81,6 +87,7 @@ function CareerReplacement({ entry }: { entry: CareerData["entry"] }) {
       <LeagueError message={action.error} />
       <div className="flex flex-wrap gap-3">
         <LeagueTeamPicker
+          startingTreasury={startingTreasury}
           teams={teams.results}
           value={uuid}
           onChange={setUuid}
@@ -97,7 +104,7 @@ function CareerReplacement({ entry }: { entry: CareerData["entry"] }) {
               (row) =>
                 row.team.uuid === uuid &&
                 row.team.uuid !== entry.team.uuid &&
-                canEnrollTeam(row),
+                canEnrollTeam(row, startingTreasury),
             )
           }
           onClick={() =>
@@ -1105,7 +1112,10 @@ export function LeagueCareer({
             )}
 
             {data.canManage && !entry.firstPlayedAt && !entry.activeMatchId && (
-              <CareerReplacement entry={entry} />
+              <CareerReplacement
+                entry={entry}
+                startingTreasury={league.startingTreasury}
+              />
             )}
           </div>
         </details>

@@ -174,7 +174,7 @@ it("reports an exceeded treasury once and keeps the collapsed meter structure un
   expect(container.querySelector('[aria-label="budgetIssues"]')).toBeNull();
 });
 
-it("preserves the collapsed drawer as spending reaches the limit and rookie warnings appear", async () => {
+it("preserves the collapsed drawer at the limit without league-specific warnings", async () => {
   const team = newTeam(crypto.randomUUID());
   team.players = Array.from({ length: 11 }, (_, i) => ({
     id: crypto.randomUUID(),
@@ -209,7 +209,7 @@ it("preserves the collapsed drawer as spending reaches the limit and rookie warn
     );
     expect(
       popup.textContent?.includes("leagueUi.rookieIssues.rookieFans"),
-    ).toBe(dedicatedFans === 3);
+    ).toBe(false);
   }
 });
 
@@ -328,8 +328,10 @@ it("shows readiness in an empty default drawer and updates warnings as the team 
       }),
     ),
   );
-  expect(breakdown.textContent).toContain("leagueUi.rookieEligibility");
-  expect(breakdown.textContent).toContain("leagueUi.rookieIssues.rookieSkills");
+  expect(breakdown.textContent).not.toContain("leagueUi.rookieEligibility");
+  expect(breakdown.textContent).not.toContain(
+    "leagueUi.rookieIssues.rookieSkills",
+  );
   await act(async () =>
     root.render(
       createElement(TeamBudget, {
