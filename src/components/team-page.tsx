@@ -18,14 +18,14 @@ import { TeamLeagueLinks } from "./team-league-links";
 export function TeamPage({ uuid }: { uuid: string }) {
   const t = useTranslations();
   const sync = useDraftSync();
-  const { isAuthenticated } = useConvexAuth();
+  const { isAuthenticated, isLoading } = useConvexAuth();
   const raw = useSyncExternalStore(subscribeDrafts, draftSnapshot, () => "[]");
   const local = parseDrafts(raw).find((team) => {
     const account = draftAccount(team.uuid);
     return team.uuid === uuid && (!account || account === sync.account);
   });
   const live = useQuery(api.teams.getByUuid, sync.ready ? { uuid } : "skip");
-  if (!sync.ready || live === undefined)
+  if (isLoading || !sync.ready || live === undefined)
     return <WorkspaceLoading variant="editor" />;
   const editable = live ? isAuthenticated && live.canEdit : !!local;
   if (sync.ready && (local || live))
@@ -53,6 +53,8 @@ export function TeamPage({ uuid }: { uuid: string }) {
             live?.leagueLocked ? live.revision : local ? 0 : live!.revision
           }
           readOnly={!editable}
+          server={live}
+          recovered={!!local && !live?.leagueLocked}
         />
       </>
     );

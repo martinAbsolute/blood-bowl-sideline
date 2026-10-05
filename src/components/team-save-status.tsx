@@ -3,6 +3,7 @@
 import { useTranslations } from "gt-next";
 import { Check, CloudCheck, CloudOff, LoaderCircle } from "lucide-react";
 import type { useTeamAutosave } from "@/lib/use-team-autosave";
+import { useConvexConnectionState } from "convex/react";
 
 type SaveState = ReturnType<typeof useTeamAutosave>;
 
@@ -21,6 +22,7 @@ export function TeamSaveStatus({
   isAuthenticated: boolean;
 }) {
   const t = useTranslations();
+  const connection = useConvexConnectionState();
   const {
     team,
     revision,
@@ -32,17 +34,21 @@ export function TeamSaveStatus({
     localPending,
     cloudInvalid,
     saveTeam,
+    discardChanges,
+    hasServer,
   } = state;
   const { label: saveStatus, Icon } =
-    syncError || cloudInvalid
-      ? { label: "saveStatusError", Icon: CloudOff }
-      : localSave?.failed
-        ? { label: "saveStatusLocalError", Icon: CloudOff }
-        : cloudPending || localPending
-          ? { label: "saving", Icon: LoaderCircle }
-          : revision > 0 && !dirty
-            ? { label: "savedCloud", Icon: CloudCheck }
-            : { label: "savedInDrafts", Icon: Check };
+    isAuthenticated && !connection.isWebSocketConnected && (dirty || saving)
+      ? { label: "saveWaitingConnection", Icon: CloudOff }
+      : syncError || cloudInvalid
+        ? { label: "saveStatusError", Icon: CloudOff }
+        : localSave?.failed
+          ? { label: "saveStatusLocalError", Icon: CloudOff }
+          : cloudPending || localPending
+            ? { label: "saving", Icon: LoaderCircle }
+            : revision > 0 && !dirty
+              ? { label: "savedCloud", Icon: CloudCheck }
+              : { label: "savedInDrafts", Icon: Check };
   return (
     <div
       role="status"
@@ -50,7 +56,7 @@ export function TeamSaveStatus({
       className="no-print flex flex-wrap items-baseline gap-1.5 text-[11px] text-muted-foreground sm:text-xs"
       title={
         syncError
-          ? t(syncError.conflict ? "conflict" : "saveFailed")
+          ? t(syncError.message)
           : cloudInvalid
             ? t("invalidTeamSave")
             : localSave?.failed
@@ -68,6 +74,19 @@ export function TeamSaveStatus({
         style={{ translate: `0 ${iconBaselineOffset.get(Icon) ?? 0.5}px` }}
       />
       <span>{t(saveStatus)}</span>
+      {syncError && (
+        <>
+          <span>{t(syncError.message)}</span>
+          <button
+            type="button"
+            className="min-h-11 px-2 underline underline-offset-4"
+            disabled={saving}
+            onClick={discardChanges}
+          >
+            {t(hasServer ? "useSavedTeam" : "discardDraft")}
+          </button>
+        </>
+      )}
       {syncError && !syncError.conflict && (
         <button
           type="button"

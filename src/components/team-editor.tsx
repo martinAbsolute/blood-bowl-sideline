@@ -74,17 +74,21 @@ import {
 import { toast } from "@/components/ui/toast";
 import Link from "next/link";
 import { PlayerIcon, StarPlayerIcon } from "./player-icon";
-import { useTeamAutosave } from "@/lib/use-team-autosave";
+import { useTeamAutosave, type SavedTeam } from "@/lib/use-team-autosave";
 import { useTeamSave } from "@/lib/use-team-save";
 const gold = (n: number) => `${(n / 1000).toLocaleString("en")}k`;
 export function TeamEditor({
   initial,
   revision: initialRevision = 0,
   readOnly = false,
+  server,
+  recovered,
 }: {
   initial: Team;
   revision?: number;
   readOnly?: boolean;
+  server?: SavedTeam | null;
+  recovered?: boolean;
 }) {
   const t = useTranslations(),
     router = useRouter(),
@@ -93,31 +97,48 @@ export function TeamEditor({
   const draftSync = useDraftSync();
   const locale = useLocale();
   const [duplicating, setDuplicating] = useState(false);
-  const autosave = useTeamAutosave(initial, initialRevision, readOnly, save);
+  const autosave = useTeamAutosave(
+    initial,
+    initialRevision,
+    readOnly,
+    save,
+    server,
+    recovered,
+  );
   const { team, revision, syncError, cloudInvalid, change } = autosave;
   const [dialog, setDialog] = useState<"stars" | null>(null),
     [selected, setSelected] = useState<string | null>(null),
     [search, setSearch] = useState("");
   const [pendingRoster, setPendingRoster] = useState<string | null>(null);
+  const [switchingRoster, setSwitchingRoster] = useState(false);
   const roster = getRoster(team.rosterId)!,
     rules = getRuleset(team.rulesetId),
     totals = summarize(team);
   const requiresCaptain = roster.specialRules.includes("Team Captain");
-  function switchRoster(rosterId: string) {
+  async function switchRoster(rosterId: string) {
+    if (switchingRoster) return;
     const next = resetTeamRoster(
       team,
       rosterId,
       revision > 0 ? crypto.randomUUID() : team.uuid,
     );
-    // A saved team keeps its identity; switching starts a separate local draft.
+    // A saved team keeps its identity; switching creates a separate team.
     if (revision > 0) {
+      setSwitchingRoster(true);
       try {
-        storeDraft(next);
+        if (isAuthenticated) await saveCloudDraft(next, 0, save);
+        else storeDraft(next, draftSync.account, 0);
+        router.replace(`/teams/${next.uuid}`, { scroll: false });
+        setPendingRoster(null);
       } catch {
-        toast.add({ type: "error", title: t("storageError") });
-        return;
+        toast.add({
+          type: "error",
+          title: t(isAuthenticated ? "saveFailed" : "storageError"),
+        });
+      } finally {
+        setSwitchingRoster(false);
       }
-      router.replace(`/teams/${next.uuid}`, { scroll: false });
+      return;
     }
     change(next);
     setSelected(null);
@@ -140,19 +161,22 @@ export function TeamEditor({
     const duplicate = duplicateTeam(team, t("copySuffix"));
     const release = draftSync.editing(duplicate.uuid);
     try {
-      storeDraft(duplicate, draftSync.account);
-    } catch {
-      toast.add({ type: "error", title: t("storageError") });
-      release();
-      setDuplicating(false);
-      return;
-    }
-    try {
       if (isAuthenticated) await saveCloudDraft(duplicate, 0, save);
+      else storeDraft(duplicate, null, 0);
       router.push(`/teams/${duplicate.uuid}`);
     } catch {
-      toast.add({ type: "error", title: t("saveFailed") });
-      router.push(`/teams/${duplicate.uuid}`);
+      toast.add({
+        type: "error",
+        title: t(isAuthenticated ? "saveFailed" : "storageError"),
+      });
+      if (isAuthenticated) {
+        try {
+          storeDraft(duplicate, draftSync.account, 0);
+          router.push(`/teams/${duplicate.uuid}`);
+        } catch {
+          toast.add({ type: "error", title: t("storageError") });
+        }
+      }
     } finally {
       release();
       setDuplicating(false);
@@ -669,7 +693,7 @@ export function TeamEditor({
                       const id = e.target.value;
                       if (id === team.rosterId) return;
                       if (hasTeamProgress(team)) setPendingRoster(id);
-                      else switchRoster(id);
+                      else void switchRoster(id);
                     }}
                   >
                     {rosters.map((r) => (
@@ -742,9 +766,7 @@ export function TeamEditor({
               {t(
                 cloudInvalid
                   ? "invalidTeamSave"
-                  : syncError?.conflict
-                    ? "conflict"
-                    : "saveFailed",
+                  : (syncError?.message ?? "saveFailed"),
               )}
             </p>
           )}
@@ -771,8 +793,9 @@ export function TeamEditor({
             </Button>
             <Button
               variant="destructive"
+              disabled={switchingRoster}
               onClick={() => {
-                if (pendingRoster) switchRoster(pendingRoster);
+                if (pendingRoster) void switchRoster(pendingRoster);
               }}
             >
               {t("switchTeam")}

@@ -11,9 +11,11 @@ import {
   readRevision,
   storeRevision,
   normalizeStoredDrafts,
+  readDraftRevision,
   DRAFTS_KEY,
 } from "../src/lib/drafts";
 import { saveCloudDraft } from "../src/lib/cloud-save";
+import { DRAFT_EDITOR_RELEASED } from "../src/lib/draft-lock";
 import {
   DraftSyncProvider,
   useDraftSync,
@@ -172,7 +174,7 @@ it("never uploads another account's recovery work when signing in or switching a
   expect(mocks.save).toHaveBeenCalledTimes(2);
   expect(readDrafts()).toEqual([]);
 });
-it("preserves a newer edit while an upload is in flight and syncs it with the returned revision", async () => {
+it("does not rebase a recovery snapshot written by another tab during an upload", async () => {
   const team = newTeam(randomUUID());
   storeDraft(team);
   let complete!: (result: { revision: number }) => void;
@@ -195,7 +197,7 @@ it("preserves a newer edit while an upload is in flight and syncs it with the re
   await tick();
   expect(mocks.save.mock.calls[1][0]).toEqual({
     team: changed,
-    expectedRevision: 1,
+    expectedRevision: 0,
   });
   expect(readDrafts()).toEqual([]);
 });
@@ -290,10 +292,10 @@ it("syncs a renamed guest Black Orc team through sign-in and subsequent edits ag
   });
   expect(readDrafts()).toEqual([]);
   expect(readRevision(team.uuid)).toBe(1);
-  // An editor that mounted before sign-in still holds revision zero.
+  // The editor advances only from its own acknowledged save.
   storeRevision(team.uuid, 0);
   const edited = { ...team, name: "Next Black Orc name" };
-  await act(async () => storeDraft(edited, userId));
+  await act(async () => storeDraft(edited, userId, 1));
   await tick();
   await tick();
   expect(mocks.save).toHaveBeenCalledTimes(2);
@@ -595,5 +597,181 @@ it("removes obsolete fields from local draft data while retaining roster selecti
   );
   normalizeStoredDrafts();
   expect(readDrafts()).toEqual([team]);
-  expect(JSON.parse(localStorage.getItem(DRAFTS_KEY)!)).toEqual([team]);
+  expect(JSON.parse(localStorage.getItem(DRAFTS_KEY)!)).toEqual([
+    { ...team, baseRevision: 0, draftOwner: null },
+  ]);
+});
+
+it("binds recovery to its exact base and owner even when another tab acknowledges a newer revision", async () => {
+  const team = newTeam(randomUUID());
+  storeDraft(team, "account-a", 2);
+  storeRevision(team.uuid, 9);
+  normalizeStoredDrafts();
+  expect(readDraftRevision(team.uuid)).toBe(2);
+  expect(draftAccount(team.uuid)).toBe("account-a");
+  await saveCloudDraft(team, 2, mocks.save);
+  expect(mocks.save).toHaveBeenCalledWith({ team, expectedRevision: 2 });
+});
+
+it("updates a focused idle name field from the cloud without writing its old buffer back", async () => {
+  const change = vi.fn();
+  const render = (value: string) =>
+    createElement(TeamName, {
+      value,
+      onChange: change,
+      placeholder: "Untitled",
+      label: "Name",
+    });
+  await act(async () => root.render(render("Original")));
+  const name = container.querySelector("input")!;
+  await act(async () => name.focus());
+  await act(async () => root.render(render("Other tab")));
+  expect(name.value).toBe("Other tab");
+  await act(async () => name.blur());
+  expect(change).not.toHaveBeenCalled();
+});
+
+it("does not turn cloud success into failure when recovery cleanup is blocked", async () => {
+  const team = newTeam(randomUUID());
+  storeDraft(team, "account-a", 2);
+  const blocked = vi.spyOn(localStorage, "setItem").mockImplementation(() => {
+    throw new Error("blocked");
+  });
+  try {
+    await expect(saveCloudDraft(team, 2, mocks.save)).resolves.toEqual({
+      revision: 1,
+    });
+    expect(mocks.save).toHaveBeenCalledTimes(1);
+  } finally {
+    blocked.mockRestore();
+  }
+});
+
+it("lets a signed-in coach discard a failed recovery draft and reveal the cloud team", async () => {
+  const team = newTeam(randomUUID());
+  storeDraft({ ...team, name: "Failed recovery" }, "account-a", 1);
+  mocks.authenticated = true;
+  mocks.account = "account-a";
+  mocks.results = [{ team }];
+  mocks.save.mockRejectedValue(new Error("CONFLICT"));
+  await act(async () =>
+    root.render(
+      createElement(DraftSyncProvider, null, createElement(TeamLibrary)),
+    ),
+  );
+  await tick();
+  const discard = container.querySelector<HTMLButtonElement>(
+    'button[aria-label="discardDraft Failed recovery"]',
+  )!;
+  expect(discard).not.toBeNull();
+  await act(async () => discard.click());
+  expect(readDrafts()).toEqual([]);
+  expect(container.querySelectorAll("article")).toHaveLength(1);
+  expect(
+    container.querySelector('button[aria-label^="archive "]'),
+  ).not.toBeNull();
+  await tick();
+  expect(mocks.save).toHaveBeenCalledTimes(1);
+});
+
+it("creates signed-in teams directly in Convex even when local storage is blocked", async () => {
+  mocks.authenticated = true;
+  mocks.account = "account-a";
+  const blocked = vi.spyOn(localStorage, "setItem").mockImplementation(() => {
+    throw new Error("blocked");
+  });
+  try {
+    await act(async () =>
+      root.render(createElement(CreateTeamButton, { rosterId: "goblin" })),
+    );
+    await act(async () =>
+      container.querySelector<HTMLButtonElement>("button")!.click(),
+    );
+    expect(mocks.save).toHaveBeenCalledTimes(1);
+    expect(mocks.push).toHaveBeenCalledWith(
+      `/teams/${mocks.save.mock.calls[0][0].team.uuid}`,
+    );
+  } finally {
+    blocked.mockRestore();
+  }
+});
+
+it("parks background uploads while another tab is editing, then resumes on release", async () => {
+  const team = newTeam(randomUUID());
+  storeDraft(team, "account-a", 1);
+  mocks.authenticated = true;
+  mocks.account = "account-a";
+  let editorOpen = true;
+  const request = vi.fn(async (_name, _options, callback) =>
+    callback(editorOpen ? null : { mode: "exclusive" }),
+  );
+  vi.stubGlobal("navigator", { locks: { request } });
+  await act(async () => root.render(renderSync()));
+  await tick();
+  await act(async () => vi.advanceTimersByTimeAsync(1500));
+  expect(mocks.save).not.toHaveBeenCalled();
+  expect(request).toHaveBeenCalledTimes(1);
+  editorOpen = false;
+  await act(async () =>
+    window.dispatchEvent(
+      new StorageEvent("storage", { key: DRAFT_EDITOR_RELEASED }),
+    ),
+  );
+  await tick();
+  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({
+    team,
+    expectedRevision: 1,
+  });
+  expect(readDrafts()).toEqual([]);
+});
+
+it("does not loop background cloud saves when acknowledged recovery cleanup fails", async () => {
+  const team = newTeam(randomUUID());
+  storeDraft(team, "account-a", 0);
+  mocks.authenticated = true;
+  mocks.account = "account-a";
+  let complete!: (result: { revision: number }) => void;
+  mocks.save.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        complete = resolve;
+      }),
+  );
+  await act(async () => root.render(renderSync()));
+  await tick();
+  const blocked = vi.spyOn(localStorage, "setItem").mockImplementation(() => {
+    throw new Error("blocked");
+  });
+  try {
+    await act(async () => complete({ revision: 1 }));
+    await act(async () => vi.advanceTimersByTimeAsync(5000));
+    expect(mocks.save).toHaveBeenCalledTimes(1);
+    const unload = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(unload);
+    expect(unload.defaultPrevented).toBe(false);
+  } finally {
+    blocked.mockRestore();
+  }
+});
+
+it("rejects a stale tab against Convex even after shared storage learns a newer revision", async () => {
+  const backend = convexTest(schema, import.meta.glob("../convex/**/*.ts"));
+  const userId = await backend.run((ctx) =>
+    ctx.db.insert("users", { name: "Coach" }),
+  );
+  const coach = backend.withIdentity({ subject: userId });
+  const team = newTeam(randomUUID());
+  const save = (args: { team: typeof team; expectedRevision: number }) =>
+    coach.mutation(api.teams.save, args);
+  await saveCloudDraft(team, 0, save);
+  const latest = { ...team, name: "Saved in tab A" };
+  await saveCloudDraft(latest, 1, save);
+  expect(readRevision(team.uuid)).toBe(2);
+  const stale = { ...team, name: "Stale tab B" };
+  storeDraft(stale, userId, 1);
+  await expect(saveCloudDraft(stale, 1, save)).rejects.toThrow("CONFLICT");
+  expect(
+    (await coach.query(api.teams.getByUuid, { uuid: team.uuid }))?.team.name,
+  ).toBe(latest.name);
+  expect(readDrafts()).toEqual([stale]);
 });

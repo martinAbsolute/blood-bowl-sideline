@@ -5,7 +5,13 @@ import { createRoot, type Root } from "react-dom/client";
 import { randomUUID } from "node:crypto";
 import { ConvexError } from "convex/values";
 import { newTeam } from "../src/domain/catalog";
-import { readDrafts, readRevision } from "../src/lib/drafts";
+import {
+  readDrafts,
+  readRevision,
+  readDraftRevision,
+  storeDraft,
+  storeRevision,
+} from "../src/lib/drafts";
 import {
   PENDING_SAVE,
   prepareDraftSignIn,
@@ -21,6 +27,7 @@ import { TeamPage } from "../src/components/team-page";
 
 const mocks = vi.hoisted(() => ({
   auth: { isAuthenticated: false, isLoading: false },
+  connected: true,
   save: vi.fn(),
   signIn: vi.fn(),
   isTelegramConfigured: vi.fn(),
@@ -37,6 +44,7 @@ vi.mock("gt-next", () => ({
 }));
 vi.mock("convex/react", () => ({
   useConvexAuth: () => mocks.auth,
+  useConvexConnectionState: () => ({ isWebSocketConnected: mocks.connected }),
   useMutation: () =>
     Object.assign(mocks.save, { withOptimisticUpdate: () => mocks.save }),
   useQuery: () => mocks.query(),
@@ -99,6 +107,7 @@ beforeEach(() => {
   localStorage.clear();
   sessionStorage.clear();
   mocks.auth = { isAuthenticated: false, isLoading: false };
+  mocks.connected = true;
   mocks.save.mockReset().mockResolvedValue({ revision: 1 });
   mocks.signIn.mockReset().mockResolvedValue({
     redirect: new URL("https://oauth.telegram.org/auth"),
@@ -525,6 +534,150 @@ function unloadPrevented() {
   window.dispatchEvent(event);
   return event.defaultPrevented;
 }
+
+it("adopts another tab's cloud changes when idle, then edits from that exact revision", async () => {
+  vi.useFakeTimers();
+  mocks.auth = { isAuthenticated: true, isLoading: false };
+  const team = newTeam(randomUUID(), "amazon");
+  const live = { team, revision: 1, canEdit: true, legal: false, updatedAt: 1 };
+  const page = () =>
+    createElement(
+      DraftSignInProvider,
+      null,
+      createElement(TeamPage, { uuid: team.uuid }),
+    );
+  mocks.query.mockReturnValue(live);
+  await act(async () => root.render(page()));
+  const name = container.querySelector<HTMLInputElement>(
+    'input[aria-label="teamName"]',
+  )!;
+  mocks.query.mockReturnValue({
+    ...live,
+    revision: 2,
+    team: { ...team, name: "Other tab" },
+  });
+  await act(async () => root.render(page()));
+  expect(name.value).toBe("Other tab");
+  expect(mocks.save).not.toHaveBeenCalled();
+  await act(async () =>
+    container
+      .querySelector<HTMLButtonElement>(
+        'button[aria-label="increaseQuantity"]',
+      )!
+      .click(),
+  );
+  await act(async () => vi.advanceTimersByTimeAsync(450));
+  expect(mocks.save.mock.calls[0][0].expectedRevision).toBe(2);
+  expect(mocks.save.mock.calls[0][0].team.name).toBe("Other tab");
+});
+
+it("recovers a stale tab without a reload loop and can save again after loading the cloud version", async () => {
+  vi.useFakeTimers();
+  mocks.auth = { isAuthenticated: true, isLoading: false };
+  const team = newTeam(randomUUID(), "amazon");
+  storeDraft({ ...team, name: "My stale edit" }, null, 1);
+  storeRevision(team.uuid, 8);
+  const live = {
+    team: { ...team, name: "Cloud version" },
+    revision: 8,
+    canEdit: true,
+    legal: false,
+    updatedAt: 1,
+  };
+  mocks.query.mockReturnValue(live);
+  mocks.save.mockRejectedValueOnce(new ConvexError("CONFLICT"));
+  await act(async () =>
+    root.render(
+      createElement(
+        DraftSignInProvider,
+        null,
+        createElement(TeamPage, { uuid: team.uuid }),
+      ),
+    ),
+  );
+  await act(async () => vi.advanceTimersByTimeAsync(450));
+  expect(mocks.save.mock.calls[0][0].expectedRevision).toBe(1);
+  expect(readDraftRevision(team.uuid)).toBe(1);
+  expect(container.textContent).toContain("conflict");
+  await act(async () => action("useSavedTeam").click());
+  expect(readDrafts()).toEqual([]);
+  expect(
+    container.querySelector<HTMLInputElement>('input[aria-label="teamName"]')!
+      .value,
+  ).toBe("Cloud version");
+  expect(unloadPrevented()).toBe(false);
+  await act(async () =>
+    container
+      .querySelector<HTMLButtonElement>(
+        'button[aria-label="increaseQuantity"]',
+      )!
+      .click(),
+  );
+  await act(async () => vi.advanceTimersByTimeAsync(450));
+  expect(mocks.save.mock.calls[1][0].expectedRevision).toBe(8);
+});
+
+it("keeps edits made during an in-flight save recoverable at the acknowledged base after unmount", async () => {
+  vi.useFakeTimers();
+  mocks.auth = { isAuthenticated: true, isLoading: false };
+  const team = newTeam(randomUUID(), "amazon");
+  let complete!: (result: { revision: number }) => void;
+  mocks.save.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        complete = resolve;
+      }),
+  );
+  await act(async () => root.render(editor(team)));
+  await act(async () => vi.advanceTimersByTimeAsync(450));
+  await act(async () =>
+    container
+      .querySelector<HTMLButtonElement>(
+        'button[aria-label="increaseQuantity"]',
+      )!
+      .click(),
+  );
+  await act(async () => root.unmount());
+  root = createRoot(container);
+  await act(async () => complete({ revision: 1 }));
+  expect(readDrafts()[0].players).toHaveLength(1);
+  expect(readDraftRevision(team.uuid)).toBe(1);
+});
+
+it("shows a reconnecting state for a pending cloud save without claiming it is saved", async () => {
+  mocks.auth = { isAuthenticated: true, isLoading: false };
+  mocks.connected = false;
+  await act(async () => root.render(editor()));
+  expect(container.querySelector('[role="status"]')?.textContent).toContain(
+    "saveWaitingConnection",
+  );
+  expect(unloadPrevented()).toBe(true);
+});
+
+it("waits for authentication to settle before mounting or uploading a guest draft", async () => {
+  vi.useFakeTimers();
+  const team = newTeam(randomUUID());
+  storeDraft(team);
+  mocks.query.mockReturnValue(null);
+  mocks.auth = { isAuthenticated: false, isLoading: true };
+  const page = () =>
+    createElement(
+      DraftSignInProvider,
+      null,
+      createElement(TeamPage, { uuid: team.uuid }),
+    );
+  await act(async () => root.render(page()));
+  expect(container.querySelector('input[aria-label="teamName"]')).toBeNull();
+  await act(async () => vi.advanceTimersByTimeAsync(1000));
+  expect(mocks.save).not.toHaveBeenCalled();
+  mocks.auth = { isAuthenticated: true, isLoading: false };
+  await act(async () => root.render(page()));
+  await act(async () => vi.advanceTimersByTimeAsync(450));
+  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({
+    team,
+    expectedRevision: 0,
+  });
+});
 
 it("keeps the UUID editor, typing focus mounted across recovery writes and acknowledgements", async () => {
   vi.useFakeTimers();

@@ -9,6 +9,9 @@ import { newTeam } from "@/domain/catalog";
 import { storeDraft } from "@/lib/drafts";
 import { useDraftSync } from "./draft-sync-provider";
 import { toast } from "./ui/toast";
+import { useConvexAuth } from "convex/react";
+import { useTeamSave } from "@/lib/use-team-save";
+import { saveCloudDraft } from "@/lib/cloud-save";
 
 export function CreateTeamButton({
   className,
@@ -24,6 +27,8 @@ export function CreateTeamButton({
   const t = useTranslations();
   const router = useRouter();
   const sync = useDraftSync();
+  const { isAuthenticated } = useConvexAuth();
+  const save = useTeamSave();
   const [creating, setCreating] = useState(false);
   if (rosterId)
     return (
@@ -31,16 +36,24 @@ export function CreateTeamButton({
         className={className}
         size={size}
         disabled={creating || !sync.ready}
-        onClick={() => {
+        onClick={async () => {
+          if (creating) return;
           const team = newTeam(crypto.randomUUID(), rosterId);
-          try {
-            storeDraft(team, sync.account);
-          } catch {
-            toast.add({ type: "error", title: t("storageError") });
-            return;
-          }
           setCreating(true);
-          router.push(`/teams/${team.uuid}`);
+          const release = sync.editing(team.uuid);
+          try {
+            if (isAuthenticated) await saveCloudDraft(team, 0, save);
+            else storeDraft(team, null, 0);
+            router.push(`/teams/${team.uuid}`);
+          } catch {
+            toast.add({
+              type: "error",
+              title: t(isAuthenticated ? "saveFailed" : "storageError"),
+            });
+          } finally {
+            release();
+            setCreating(false);
+          }
         }}
       >
         <Plus className={iconClassName} />

@@ -33,6 +33,7 @@ export function SharedTeam({
       initial={data.team}
       revision={data.revision}
       readOnly={!canEdit}
+      server={data}
     />
   );
 }

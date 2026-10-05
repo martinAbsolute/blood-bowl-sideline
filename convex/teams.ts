@@ -169,6 +169,7 @@ export const save = mutation({
       ? await teamLeagueState(ctx, existing)
       : { leagueLocked: false, leagueExperienced: false };
     if (leagueState.leagueLocked) throw new ConvexError("TEAM_IN_LEAGUE");
+    if (existing?.archived) throw new ConvexError("ARCHIVED");
     if ((existing?.revision ?? 0) !== args.expectedRevision) {
       // A lost response or a second uploader can repeat a committed snapshot.
       // Acknowledge it without advancing the revision or overwriting changes.
@@ -188,7 +189,6 @@ export const save = mutation({
         };
       throw new ConvexError("CONFLICT");
     }
-    if (existing?.archived) throw new ConvexError("ARCHIVED");
     const revision = (existing?.revision ?? 0) + 1,
       updatedAt = Date.now(),
       legal = validateTeam(team).valid;
@@ -235,6 +235,7 @@ export const setArchived = mutation({
       throw new ConvexError("FORBIDDEN");
     if (archived && (await teamLeagueState(ctx, doc)).leagueLocked)
       throw new ConvexError("TEAM_IN_LEAGUE");
+    if (doc.archived === archived) return null;
     await ctx.db.patch(doc._id, {
       archived,
       updatedAt: Date.now(),

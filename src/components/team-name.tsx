@@ -13,9 +13,19 @@ export function TeamName({
   label: string;
   onChange: (name: string) => void;
 }) {
-  const beforeFocus = useRef(value);
+  const [beforeFocus, setBeforeFocus] = useState(value);
   const cancelled = useRef(false);
   const [editing, setEditing] = useState<string | null>(null);
+  const [seenValue, setSeenValue] = useState(value);
+  if (seenValue !== value) {
+    setSeenValue(value);
+    // A cloud update can arrive while an idle input is focused. Its old buffer
+    // must not silently rename the team back on blur or Escape.
+    if (editing !== null && editing !== value) {
+      setEditing(value);
+      setBeforeFocus(value);
+    }
+  }
   const displayed = editing ?? value;
   return (
     <span className="relative grid w-max min-w-[1ch] max-w-full grid-cols-[minmax(0,1fr)]">
@@ -36,7 +46,7 @@ export function TeamName({
         spellCheck={false}
         style={{ font: "inherit" }}
         onFocus={(event) => {
-          beforeFocus.current = value;
+          setBeforeFocus(value);
           cancelled.current = false;
           setEditing(value);
           event.currentTarget.select();
@@ -49,7 +59,7 @@ export function TeamName({
         }}
         onBlur={() => {
           if (!cancelled.current) {
-            const next = editing?.trim() || beforeFocus.current;
+            const next = editing?.trim() || beforeFocus;
             if (next !== value) onChange(next);
           }
           setEditing(null);
@@ -63,7 +73,7 @@ export function TeamName({
           if (event.key === "Escape") {
             event.preventDefault();
             cancelled.current = true;
-            if (beforeFocus.current !== value) onChange(beforeFocus.current);
+            if (beforeFocus !== value) onChange(beforeFocus);
             event.currentTarget.blur();
           }
         }}

@@ -4,7 +4,7 @@ import { useTranslations } from "gt-next";
 import { useConvexAuth, useMutation, usePaginatedQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { rosters, rulesets } from "@/domain/catalog";
-import { type Team } from "@/domain/types";
+import { teamSchema, type Team } from "@/domain/types";
 import {
   draftAccount,
   draftSnapshot,
@@ -30,6 +30,8 @@ import { toast } from "@/components/ui/toast";
 import { TeamCard } from "./team-card";
 import { useDraftSync } from "./draft-sync-provider";
 import { libraryMatches } from "@/lib/team-library";
+import { finishDraftSignIn } from "@/lib/draft-sign-in";
+import { waitForTeamSave } from "@/lib/cloud-save";
 import { LibraryCardsLoading } from "./loading-layouts";
 
 const selectClass = "h-10 rounded-lg pl-3";
@@ -57,11 +59,21 @@ export function TeamLibrary() {
     { initialNumItems: 18 },
   );
   const raw = useSyncExternalStore(subscribeDrafts, draftSnapshot, () => "[]");
+  const leagueTeams = new Map(results.map((row) => [row.team.uuid, row]));
   const locals = parseDrafts(raw).filter((team) => {
     const owner = draftAccount(team.uuid);
-    return !owner || (isAuthenticated && owner === sync.account);
+    if (owner && (!isAuthenticated || owner !== sync.account)) return false;
+    const saved = leagueTeams.get(team.uuid);
+    const parsed = teamSchema.safeParse({ ...team, notes: "" });
+    // Storage cleanup can fail after a successful cloud save. The cloud card
+    // remains authoritative when that leftover snapshot is already saved.
+    return (
+      !saved ||
+      !parsed.success ||
+      JSON.stringify(parsed.data) !==
+        JSON.stringify(teamSchema.parse(saved.team))
+    );
   });
-  const leagueTeams = new Map(results.map((row) => [row.team.uuid, row]));
   const failedCount = locals.filter((team) =>
     sync.failed.has(team.uuid),
   ).length;
@@ -91,11 +103,30 @@ export function TeamLibrary() {
   const filtered = !!(search || rosterId || rulesetId);
   async function toggleArchive(team: Team) {
     setBusy(team.uuid);
+    const release = sync.editing(team.uuid);
     try {
+      await waitForTeamSave(team.uuid);
       await archive({ uuid: team.uuid, archived: !archived });
+      removeDraft(team.uuid);
+      finishDraftSignIn(team.uuid);
     } catch {
       toast.add({ type: "error", title: t("saveFailed") });
     } finally {
+      release();
+      setBusy(null);
+    }
+  }
+  async function discard(team: Team) {
+    setBusy(team.uuid);
+    const release = sync.editing(team.uuid);
+    try {
+      await waitForTeamSave(team.uuid);
+      removeDraft(team.uuid);
+      finishDraftSignIn(team.uuid);
+    } catch {
+      toast.add({ type: "error", title: t("storageError") });
+    } finally {
+      release();
       setBusy(null);
     }
   }
@@ -263,25 +294,15 @@ export function TeamLibrary() {
                 }
                 action={
                   local ? (
-                    !isAuthenticated && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label={`${t("remove")} ${team.name}`}
-                        onClick={() => {
-                          try {
-                            removeDraft(team.uuid);
-                          } catch {
-                            toast.add({
-                              type: "error",
-                              title: t("storageError"),
-                            });
-                          }
-                        }}
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    )
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={busy === team.uuid}
+                      aria-label={`${t(isAuthenticated ? "discardDraft" : "remove")} ${team.name}`}
+                      onClick={() => void discard(team)}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
                   ) : (
                     <Button
                       variant="ghost"

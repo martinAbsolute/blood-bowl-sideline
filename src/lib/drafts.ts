@@ -16,8 +16,27 @@ const localDraftSchema = teamSchema
 export const DRAFTS_KEY = "bbsideline:drafts:v1";
 const KEY = DRAFTS_KEY;
 const accountKey = (uuid: string) => `bbsideline:draft-account:${uuid}`;
+const storedDraftSchema = localDraftSchema.extend({
+  baseRevision: z.number().int().nonnegative().optional(),
+  draftOwner: z.string().nullable().optional(),
+});
+function storedDrafts() {
+  try {
+    const data: unknown = JSON.parse(draftSnapshot());
+    return Array.isArray(data)
+      ? data.flatMap((entry) => {
+          const parsed = storedDraftSchema.safeParse(entry);
+          return parsed.success ? [parsed.data] : [];
+        })
+      : [];
+  } catch {
+    return [];
+  }
+}
 export function draftAccount(uuid: string): string | null {
   try {
+    const entry = storedDrafts().find((draft) => draft.uuid === uuid);
+    if (entry?.draftOwner !== undefined) return entry.draftOwner;
     return localStorage.getItem(accountKey(uuid));
   } catch {
     return null;
@@ -56,10 +75,28 @@ export function parseDrafts(raw: string): Team[] {
 // hidden in local recovery data after they have been removed from teams.
 export function normalizeStoredDrafts() {
   const raw = draftSnapshot();
-  const normalized = JSON.stringify(parseDrafts(raw));
+  const normalized = JSON.stringify(
+    parseDrafts(raw).map((team) => ({
+      ...team,
+      baseRevision: readDraftRevision(team.uuid),
+      draftOwner: draftAccount(team.uuid),
+    })),
+  );
   if (raw !== normalized) {
     localStorage.setItem(KEY, normalized);
     window.dispatchEvent(new Event("bbs-drafts-changed"));
+  }
+}
+// The revision belongs to this snapshot, never to the browser's newest save.
+// Legacy recovery data has no trustworthy base: revision zero safely conflicts
+// with an existing team instead of silently overwriting it.
+export function readDraftRevision(uuid: string): number {
+  try {
+    return (
+      storedDrafts().find((entry) => entry.uuid === uuid)?.baseRevision ?? 0
+    );
+  } catch {
+    return 0;
   }
 }
 export function readRevision(uuid: string) {
@@ -86,23 +123,40 @@ export function readDrafts(): Team[] {
     return [];
   }
 }
-export function storeDraft(team: Team, account?: string | null) {
-  const all = readDrafts(),
+export function storeDraft(
+  team: Team,
+  account?: string | null,
+  revision = readDraftRevision(team.uuid),
+) {
+  const all = storedDrafts(),
     index = all.findIndex((t) => t.uuid === team.uuid);
-  if (index < 0) all.unshift(team);
-  else all[index] = team;
+  // Ownership and base revision commit atomically with the snapshot.
+  const snapshot = {
+    ...team,
+    baseRevision: revision,
+    draftOwner: account ?? draftAccount(team.uuid),
+  };
+  if (index < 0) all.unshift(snapshot);
+  else all[index] = snapshot;
   localStorage.setItem(KEY, JSON.stringify(all));
-  if (account) localStorage.setItem(accountKey(team.uuid), account);
-  localStorage.setItem(ACTIVE, team.uuid);
+  try {
+    localStorage.setItem(ACTIVE, team.uuid);
+  } catch {
+    /* The draft itself is already persisted. */
+  }
   window.dispatchEvent(new Event("bbs-drafts-changed"));
 }
 export function removeDraft(uuid: string) {
   localStorage.setItem(
     KEY,
-    JSON.stringify(readDrafts().filter((t) => t.uuid !== uuid)),
+    JSON.stringify(storedDrafts().filter((t) => t.uuid !== uuid)),
   );
-  if (localStorage.getItem(ACTIVE) === uuid) localStorage.removeItem(ACTIVE);
-  localStorage.removeItem(accountKey(uuid));
+  try {
+    if (localStorage.getItem(ACTIVE) === uuid) localStorage.removeItem(ACTIVE);
+    localStorage.removeItem(accountKey(uuid));
+  } catch {
+    /* Obsolete metadata cannot prevent discarding a recovery draft. */
+  }
   window.dispatchEvent(new Event("bbs-drafts-changed"));
 }
 export function acknowledgeDraft(team: Team, revision: number) {

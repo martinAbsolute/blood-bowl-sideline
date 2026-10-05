@@ -8,7 +8,8 @@ import { teamSaveIssues } from "@/domain/rules";
 import type { Team } from "@/domain/types";
 import {
   draftAccount,
-  readRevision,
+  readDraftRevision,
+  removeDraft,
   storeDraft,
   storeRevision,
 } from "@/lib/drafts";
@@ -24,6 +25,7 @@ import { useDraftSignIn } from "@/components/draft-sign-in-provider";
 import { useBeforeUnload } from "./use-before-unload";
 
 type Save = Parameters<typeof saveCloudDraft>[2];
+export type SavedTeam = { team: Team; revision: number };
 
 // The editor owns the optimistic snapshot; acknowledgements only advance its
 // revision. They must never replace edits made during an earlier request.
@@ -32,20 +34,23 @@ export function useTeamAutosave(
   initialRevision: number,
   readOnly: boolean,
   save: Save,
+  server?: SavedTeam | null,
+  recovered = initialRevision === 0,
 ) {
   const t = useTranslations();
   const { isAuthenticated, isLoading } = useConvexAuth();
   const draftSync = useDraftSync();
   const draftSignIn = useDraftSignIn();
   const [team, setTeam] = useState(initial),
-    [revision, setRevision] = useState(
-      () => initialRevision || readRevision(initial.uuid),
+    [revision, setRevision] = useState(() =>
+      recovered ? readDraftRevision(initial.uuid) : initialRevision,
     ),
     [saving, setSaving] = useState(false),
-    [dirty, setDirty] = useState(() => initialRevision === 0);
+    [dirty, setDirty] = useState(recovered);
   const [syncError, setSyncError] = useState<{
     team: Team;
     conflict: boolean;
+    message: string;
   } | null>(null);
   const [localSave, setLocalSave] = useState<{
     team: Team;
@@ -58,6 +63,22 @@ export function useTeamAutosave(
   const saveIssues = teamSaveIssues(team);
   const storageErrorText = t("storageError");
   const reserveEditor = draftSync.editing;
+  // Convex subscriptions drive idle editors. Never rebase unsaved edits onto a
+  // revision from another tab: the server will reject that stale write.
+  useEffect(() => {
+    if (!server || dirty || saving || server.revision <= revision) return;
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      latestTeam.current = server.team;
+      setTeam(server.team);
+      setRevision(server.revision);
+      setSyncError(null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [server, dirty, saving, revision]);
   useEffect(() => {
     if (!readOnly) return reserveEditor(team.uuid);
   }, [reserveEditor, team.uuid, readOnly]);
@@ -71,7 +92,7 @@ export function useTeamAutosave(
     ) {
       let failed = false;
       try {
-        storeDraft(team, draftSync.account);
+        storeDraft(team, draftSync.account, revision);
       } catch {
         failed = true;
         toast.add({ type: "error", title: storageErrorText });
@@ -104,7 +125,11 @@ export function useTeamAutosave(
   function change(next: Team) {
     // Persist before navigation can interrupt React's effect commit.
     try {
-      storeDraft(next, draftSync.account);
+      storeDraft(
+        next,
+        draftSync.account,
+        next.uuid === team.uuid ? revision : 0,
+      );
       if (next.uuid === team.uuid) storeRevision(next.uuid, revision);
       setLocalSave({ team: next, failed: false });
     } catch {
@@ -120,7 +145,14 @@ export function useTeamAutosave(
     async (
       expectedRevision = pendingDraftSave(team.uuid)?.revision ?? revision,
     ) => {
-      if (saveInFlight.current) return;
+      if (
+        saveInFlight.current ||
+        readOnly ||
+        !isAuthenticated ||
+        isLoading ||
+        !draftSync.ready
+      )
+        return;
       if (!team.name.trim()) {
         toast.add({ type: "error", title: t("teamNameRequired") });
         return;
@@ -139,26 +171,84 @@ export function useTeamAutosave(
         setRevision(result.revision);
         finishDraftSignIn(team.uuid);
         const hasNewerEdits = latestTeam.current !== team;
+        if (hasNewerEdits) {
+          try {
+            storeDraft(latestTeam.current, draftSync.account, result.revision);
+          } catch {
+            setLocalSave({ team: latestTeam.current, failed: true });
+          }
+        }
         setDirty(hasNewerEdits);
         if (!hasNewerEdits) setLocalSave({ team, failed: false });
         if (pending) toast.add({ type: "success", title: t("saved") });
       } catch (error) {
         if (latestTeam.current.uuid !== team.uuid) return;
-        const conflict =
-          (error instanceof ConvexError && error.data === "CONFLICT") ||
-          (error instanceof Error && error.message.includes("CONFLICT"));
-        setSyncError({ team, conflict });
+        // Another tab may have cleared the shared snapshot while its own save
+        // succeeded. Restore this tab's failed edits for explicit recovery.
+        try {
+          storeDraft(latestTeam.current, draftSync.account, expectedRevision);
+          setLocalSave({ team: latestTeam.current, failed: false });
+        } catch {
+          setLocalSave({ team: latestTeam.current, failed: true });
+        }
+        const code =
+          error instanceof ConvexError
+            ? error.data
+            : error instanceof Error
+              ? error.message
+              : "";
+        const conflict = typeof code === "string" && code.includes("CONFLICT");
+        const message = conflict
+          ? "conflict"
+          : code === "ARCHIVED"
+            ? "saveArchived"
+            : code === "FORBIDDEN" || code === "UNAUTHENTICATED"
+              ? "saveAccessLost"
+              : code === "TEAM_IN_LEAGUE"
+                ? "leagueUi.builderLockedHint"
+                : code === "INVALID_TEAM"
+                  ? "invalidTeamSave"
+                  : "saveFailed";
+        setSyncError({ team, conflict, message });
         toast.add({
           type: "error",
-          title: conflict ? t("conflict") : t("saveFailed"),
+          title: t(message),
         });
       } finally {
         saveInFlight.current = false;
         setSaving(false);
       }
     },
-    [revision, save, team, t],
+    [
+      revision,
+      save,
+      team,
+      t,
+      readOnly,
+      isAuthenticated,
+      isLoading,
+      draftSync.ready,
+      draftSync.account,
+    ],
   );
+  function discardChanges() {
+    if (saveInFlight.current) return;
+    try {
+      removeDraft(team.uuid);
+    } catch {
+      toast.add({ type: "error", title: storageErrorText });
+      return;
+    }
+    finishDraftSignIn(team.uuid);
+    if (server) {
+      latestTeam.current = server.team;
+      setTeam(server.team);
+      setRevision(server.revision);
+    }
+    setDirty(false);
+    setSyncError(null);
+    setLocalSave(null);
+  }
   useEffect(() => {
     if (
       !readOnly &&
@@ -235,5 +325,7 @@ export function useTeamAutosave(
     cloudInvalid,
     change,
     saveTeam,
+    discardChanges,
+    hasServer: !!server,
   };
 }

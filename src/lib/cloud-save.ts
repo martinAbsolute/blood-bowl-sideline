@@ -1,5 +1,5 @@
 import type { Team } from "@/domain/types";
-import { acknowledgeDraft, readRevision } from "./drafts";
+import { acknowledgeDraft } from "./drafts";
 
 type Result = { revision: number };
 type Save = (args: { team: Team; expectedRevision: number }) => Promise<Result>;
@@ -7,6 +7,10 @@ const pending = new Map<
   string,
   { snapshot: string; promise: Promise<Result> }
 >();
+
+export async function waitForTeamSave(uuid: string) {
+  await pending.get(uuid)?.promise.catch(() => null);
+}
 
 // The library uploader and editor share a queue, including across navigation.
 export function saveCloudDraft(
@@ -23,13 +27,15 @@ export function saveCloudDraft(
       : null;
     const result = await save({
       team,
-      expectedRevision: Math.max(
-        expectedRevision,
-        readRevision(team.uuid),
-        acknowledged?.revision ?? 0,
-      ),
+      expectedRevision: Math.max(expectedRevision, acknowledged?.revision ?? 0),
     });
-    acknowledgeDraft(team, result.revision);
+    // Cleanup is best effort. A quota/privacy error after the server commits
+    // must not turn a successful cloud save into a failed save/retry loop.
+    try {
+      acknowledgeDraft(team, result.revision);
+    } catch {
+      /* Cloud is saved. */
+    }
     return result;
   })();
   const entry = { snapshot, promise };

@@ -10,7 +10,7 @@ const pendingSchema = z.object({
 
 export function prepareDraftSignIn(team: Team, revision: number) {
   // Both writes must succeed before navigation; otherwise stay in the editor.
-  storeDraft(team);
+  storeDraft(team, undefined, revision);
   sessionStorage.setItem(
     PENDING_SAVE,
     JSON.stringify({ uuid: team.uuid, revision }),
@@ -30,7 +30,11 @@ export function pendingDraftSave(uuid: string) {
 }
 
 export function finishDraftSignIn(uuid: string) {
-  if (pendingDraftSave(uuid)) sessionStorage.removeItem(PENDING_SAVE);
+  try {
+    if (pendingDraftSave(uuid)) sessionStorage.removeItem(PENDING_SAVE);
+  } catch {
+    /* A cloud acknowledgement must survive blocked browser storage. */
+  }
 }
 
 export function signInReturnPath(

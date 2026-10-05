@@ -20,6 +20,30 @@ async function setup() {
   };
 }
 describe("Convex team ownership and sharing", () => {
+  it("keeps archiving idempotent across tabs and refuses pending edits until an explicit restore", async () => {
+    const { a } = await setup();
+    const team = newTeam(randomUUID());
+    await a.mutation(api.teams.save, { team, expectedRevision: 0 });
+    await a.mutation(api.teams.setArchived, {
+      uuid: team.uuid,
+      archived: true,
+    });
+    await a.mutation(api.teams.setArchived, {
+      uuid: team.uuid,
+      archived: true,
+    });
+    await expect(
+      a.mutation(api.teams.save, { team, expectedRevision: 1 }),
+    ).rejects.toThrow("ARCHIVED");
+    expect(await a.query(api.teams.getByUuid, { uuid: team.uuid })).toBeNull();
+    await a.mutation(api.teams.setArchived, {
+      uuid: team.uuid,
+      archived: false,
+    });
+    expect(
+      (await a.query(api.teams.getByUuid, { uuid: team.uuid }))?.revision,
+    ).toBe(3);
+  });
   it("acknowledges a repeated save after a lost response without another write, while rejecting different stale edits", async () => {
     const { a, b } = await setup();
     const team = {
