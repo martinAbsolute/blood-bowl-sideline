@@ -106,6 +106,50 @@ it("switches the rendered meters and currencies with the ruleset", async () => {
   }
 });
 
+it("shows legal EuroBowl Orc skills normally and warns when the shared reserve is exceeded", async () => {
+  const team = newTeam(crypto.randomUUID(), "orc");
+  team.rulesetId = "eurobowl-2026";
+  const players: [string, string[]][] = [
+    ["orc-5", []],
+    ["orc-4", ["block"]],
+    ["orc-4", ["block"]],
+    ["orc-3", ["tackle"]],
+    ["orc-3", ["guard"]],
+    ["orc-2", []],
+    ["orc-0", ["wrestle"]],
+    ...Array.from({ length: 4 }, (): [string, string[]] => ["orc-0", []]),
+    ["orc-1", []],
+  ];
+  team.players = players.map(([positionId, skills]) => ({
+    id: crypto.randomUUID(),
+    positionId,
+    skills,
+    name: "",
+  }));
+  team.captainId = team.players[1].id;
+  team.staff.rerolls = 3;
+  team.staff.apothecary = 1;
+  await act(async () =>
+    root.render(createElement(TeamBudget, { team, floating: false })),
+  );
+  const skills = container.querySelector('[data-budget-meter="skills"]')!;
+  const funds = container.querySelector('[data-budget-meter="funds"]')!;
+  expect(skills.textContent).toContain("130k / 120k");
+  expect(skills.querySelector('[title="budgetFromFunds"]')).not.toBeNull();
+  expect(funds.textContent).toContain("10k / 10k");
+  expect(container.querySelector('[class*="amber"]')).toBeNull();
+  expect(container.querySelector('[class*="destructive"]')).toBeNull();
+
+  // Spending the reserve on skills leaves none for an extra coach.
+  team.staff.assistantCoaches = 1;
+  await act(async () =>
+    root.render(createElement(TeamBudget, { team, floating: false })),
+  );
+  expect(funds.textContent).toContain("treasuryOver");
+  expect(funds.querySelector(".text-destructive")).not.toBeNull();
+  expect(funds.querySelector(".bg-destructive")).not.toBeNull();
+});
+
 it("expands the same drawer and progress bar, then hands off to the inline budget", async () => {
   await render();
   await reportBudgetPosition(1000);

@@ -25,11 +25,9 @@ function BudgetMeter({ pool }: { pool: BudgetPool }) {
   const t = useTranslations();
   const label = usePoolLabel()(pool);
   const excess = Math.max(0, pool.used - pool.limit);
-  const tone = excess
-    ? pool.shared
-      ? "text-amber-700"
-      : "text-destructive"
-    : "text-muted-foreground";
+  // Shared base pools draw on Flowing Funds; the reserve reports overspending.
+  const overBudget = excess > 0 && !pool.shared;
+  const tone = overBudget ? "text-destructive" : "text-muted-foreground";
   const status = t(
     excess
       ? pool.shared
@@ -76,7 +74,7 @@ function BudgetMeter({ pool }: { pool: BudgetPool }) {
         aria-valuetext={`${values} · ${status}`}
       >
         <span
-          className={`block h-full transition-[width] motion-reduce:transition-none ${excess ? (pool.shared ? "bg-amber-600" : "bg-destructive") : "bg-primary/70"}`}
+          className={`block h-full transition-[width] motion-reduce:transition-none ${overBudget ? "bg-destructive" : "bg-primary/70"}`}
           style={{ width: `${progress}%` }}
         />
       </span>
