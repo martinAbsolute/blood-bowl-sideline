@@ -13,6 +13,7 @@ import {
   reportStatusValidator,
   recordedReportValidator,
   teamStatsValidator,
+  playEventValidator,
 } from "./leagueValidators";
 
 export default defineSchema({
@@ -99,6 +100,7 @@ export default defineSchema({
     ),
   }).index("by_leagueId", ["leagueId"]),
   leagueMatches: defineTable({
+    eventReporting: v.optional(v.boolean()),
     leagueId: v.id("leagues"),
     roundId: v.id("leagueRounds"),
     homeEntryId: v.id("leagueTeams"),
@@ -173,6 +175,16 @@ export default defineSchema({
     .index("by_matchId", ["matchId"])
     .index("by_playerId", ["playerId"])
     .index("by_matchId_and_playerId", ["matchId", "playerId"]),
+  leaguePlayEvents: defineTable({
+    matchId: v.id("leagueMatches"),
+    event: playEventValidator,
+    version: v.number(),
+    deleted: v.boolean(),
+    actorId: v.id("users"),
+    actorName: v.string(),
+  })
+    .index("by_matchId", ["matchId"])
+    .index("by_matchId_and_event_id", ["matchId", "event.id"]),
   leagueMatchEvents: defineTable({
     leagueId: v.id("leagues"),
     matchId: v.id("leagueMatches"),

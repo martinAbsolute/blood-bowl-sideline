@@ -336,7 +336,7 @@ export function LeagueCareer({
   );
   return (
     <div className="page-width space-y-4 py-5 sm:py-6">
-      <header className="rounded-xl border bg-card p-5 sm:p-6">
+      <header className="rounded-lg border bg-card p-3 sm:p-4">
         <LeagueBack href={`/leagues/manage/${leagueId}`}>
           {league.name}
         </LeagueBack>
@@ -350,7 +350,7 @@ export function LeagueCareer({
             <p className="mt-2 text-sm text-muted-foreground">
               {entry.coachName} · {roster?.name}
             </p>
-            <div className="mt-4 flex flex-wrap gap-4 text-sm">
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
               <span className="inline-flex items-center gap-2">
                 <Coins className="size-4" />
                 {t("leagueUi.treasury")}:{" "}
@@ -435,20 +435,17 @@ export function LeagueCareer({
         ]}
       />
       <div hidden={tab !== "roster"}>
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        <div className="grid grid-cols-3 divide-x overflow-hidden rounded-lg border bg-card">
           {[
             [t("leagueUi.teamValue"), data.teamValue],
             [t("leagueUi.currentTeamValue"), data.currentTeamValue],
             [t("leagueUi.dedicatedFans"), entry.team.staff.dedicatedFans],
           ].map(([label, value]) => (
-            <div
-              key={String(label)}
-              className="min-w-0 rounded-lg border bg-card p-3 sm:p-4"
-            >
+            <div key={String(label)} className="min-w-0 px-3 py-2">
               <p className="text-[11px] leading-4 text-muted-foreground sm:text-xs">
                 {label}
               </p>
-              <p className="mt-1 font-mono text-base font-semibold sm:mt-2 sm:text-xl">
+              <p className="mt-1 font-mono text-base font-semibold">
                 {label === t("leagueUi.dedicatedFans")
                   ? value
                   : Number(value) / 1000 + "k GP"}
@@ -636,7 +633,7 @@ export function LeagueCareer({
             placeholder={t("leagueUx.rosterSearch")}
             value={playerSearch}
             onChange={(event) => setPlayerSearch(event.target.value)}
-            className="mb-4 h-11 sm:max-w-sm"
+            className="mb-3 h-9 sm:max-w-sm"
           />
           {players.some(
             (player) => player.status === "dead" || player.status === "retired",
@@ -654,7 +651,7 @@ export function LeagueCareer({
               )}
             </Button>
           )}
-          <div className="space-y-2 lg:hidden">
+          <div className="divide-y overflow-hidden rounded-lg border md:hidden">
             {visiblePlayers.map((player) => {
               const position = positions.find(
                 (item) => item.id === player.positionId,
@@ -665,11 +662,11 @@ export function LeagueCareer({
                   key={player._id}
                   type="button"
                   onClick={() => setSelectedPlayerId(player._id)}
-                  className="flex w-full min-w-0 items-center gap-3 rounded-lg border bg-card p-3 text-left hover:border-primary/40 hover:bg-secondary/30 focus-visible:outline-2 focus-visible:outline-ring"
+                  className="flex w-full min-w-0 items-center gap-2 bg-card px-3 py-2 text-left hover:bg-secondary/30 focus-visible:outline-2 focus-visible:outline-ring"
                 >
                   <PlayerIcon
                     positionId={player.positionId}
-                    className="size-10 shrink-0"
+                    className="size-8 shrink-0"
                   />
                   <span className="min-w-0 flex-1">
                     <span className="block break-words text-sm font-semibold">
@@ -687,7 +684,7 @@ export function LeagueCareer({
                     )}
                   </span>
                   <span className="shrink-0 text-center">
-                    <span className="block font-mono text-lg font-semibold text-primary">
+                    <span className="block font-mono text-sm font-semibold text-primary">
                       {available}
                     </span>
                     <span className="text-[10px] text-muted-foreground">
@@ -699,7 +696,7 @@ export function LeagueCareer({
               );
             })}
           </div>
-          <div className="hidden overflow-x-auto rounded-lg border lg:block">
+          <div className="hidden overflow-x-auto rounded-lg border md:block">
             <table className="w-full min-w-[760px] border-collapse text-xs">
               <caption className="sr-only">
                 {t("leagueUx.careerRoster")}

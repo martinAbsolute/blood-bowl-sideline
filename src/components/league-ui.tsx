@@ -35,6 +35,13 @@ export function useLeagueAction() {
             : "UNKNOWN";
       const known = [
         "UNKNOWN",
+        "EVENT_LIMIT",
+        "EVENT_TARGET_REQUIRED",
+        "EVENT_TEAM_MISMATCH",
+        "EVENT_CASUALTY_REQUIRED",
+        "EVENT_APOTHECARY_REQUIRED",
+        "EVENT_DUPLICATE_INJURY",
+        "EVENT_REPORT_REQUIRED",
         "UNAUTHENTICATED",
         "CONFLICT",
         "FORBIDDEN",
@@ -144,7 +151,7 @@ export function LeagueBack({
   return (
     <Link
       href={href}
-      className="mb-5 inline-flex min-h-10 items-center gap-2 text-sm text-muted-foreground hover:text-primary"
+      className="mb-3 inline-flex min-h-8 items-center gap-2 text-sm text-muted-foreground hover:text-primary"
     >
       <ArrowLeft className="size-4" />
       {children ?? t("leagues")}
@@ -177,8 +184,8 @@ export function LeagueSection({
   action?: ReactNode;
 }) {
   return (
-    <section className="min-w-0 rounded-xl border bg-card p-4 sm:p-5">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <section className="min-w-0 rounded-lg border bg-card p-3 sm:p-4">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-sm font-semibold tracking-tight">{title}</h2>
         {action}
       </div>
@@ -195,7 +202,7 @@ export function LeagueStatus({ status }: { status: string }) {
           status,
         )
       ? "border-amber-700/15 bg-amber-500/10 text-amber-900"
-      : ["withdrawn", "dead", "miss-next-game"].includes(status)
+      : ["withdrawn", "dead", "missing-next-game"].includes(status)
         ? "border-destructive/15 bg-destructive/5 text-destructive"
         : "border-border bg-secondary/50 text-muted-foreground";
   return (

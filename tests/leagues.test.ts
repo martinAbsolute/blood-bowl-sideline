@@ -8,8 +8,268 @@ import { getRoster, newTeam } from "../src/domain/catalog";
 import { emptyPlayerStats } from "../src/domain/league-rules";
 import { validateTeam } from "../src/domain/rules";
 import type { Id } from "../convex/_generated/dataModel";
+import { newMatchEvent } from "../src/domain/match-events";
+import type { FunctionArgs } from "convex/server";
 
 const modules = import.meta.glob("../convex/**/*.ts");
+
+describe("shared event reports", () => {
+  async function eventReport() {
+    const s = await setup();
+    await s.coaches[0].mutation(api.leagues.startMatch, {
+      matchId: s.match._id,
+      eventReporting: true,
+    });
+    const view = await s.t.query(api.leagues.getMatch, {
+      matchId: s.match._id,
+    });
+    const home = s.coaches[s.entries.indexOf(view.home._id)];
+    const away = s.coaches[s.entries.indexOf(view.away!._id)];
+    const a = view.players.find((row) => row.entryId === view.home._id)!;
+    const b = view.players.find((row) => row.entryId === view.away!._id)!;
+    function event(
+      patch: Partial<
+        FunctionArgs<typeof api.leagues.savePlayEvent>["event"]
+      > = {},
+    ) {
+      return {
+        ...newMatchEvent(a.playerId),
+        playerId: a.playerId,
+        targetId: null as Id<"leaguePlayers"> | null,
+        id: randomUUID(),
+        ...patch,
+      };
+    }
+    const save = (
+      e: ReturnType<typeof event>,
+      expectedVersion = 0,
+      deleted = false,
+    ) =>
+      home.mutation(api.leagues.savePlayEvent, {
+        matchId: s.match._id,
+        event: e,
+        expectedVersion,
+        deleted,
+      });
+    async function ready() {
+      await save(event({ kind: "mvp" }));
+      await away.mutation(api.leagues.savePlayEvent, {
+        matchId: s.match._id,
+        event: event({ kind: "mvp", playerId: b.playerId }),
+        expectedVersion: 0,
+      });
+      await home.mutation(api.leagues.updateMatchDetails, {
+        matchId: s.match._id,
+        homeFanRoll: 1,
+        awayFanRoll: 1,
+        homeFansRoll: 6,
+        awayFansRoll: 6,
+      });
+      return s.t.query(api.leagues.getMatch, { matchId: s.match._id });
+    }
+    return { ...s, home, away, a, b, event, save, ready };
+  }
+  it("merges simultaneous coach appends, deduplicates retries and rejects stale edits", async () => {
+    const s = await eventReport();
+    const one = s.event(),
+      two = s.event({ playerId: s.b.playerId });
+    await Promise.all([
+      s.save(one),
+      s.away.mutation(api.leagues.savePlayEvent, {
+        matchId: s.match._id,
+        event: two,
+        expectedVersion: 0,
+      }),
+    ]);
+    await s.save(one);
+    let view = await s.t.query(api.leagues.getMatch, { matchId: s.match._id });
+    expect(view.playEvents).toHaveLength(2);
+    expect(view.match).toMatchObject({ scoreHome: 1, scoreAway: 1 });
+    await s.save({ ...one, notes: "First edit" }, 1);
+    await expect(s.save({ ...one, notes: "Stale edit" }, 1)).rejects.toThrow(
+      "CONFLICT",
+    );
+    await s.save({ ...one, notes: "First edit" }, 2, true);
+    view = await s.t.query(api.leagues.getMatch, { matchId: s.match._id });
+    expect(view.match.scoreHome).toBe(0);
+    expect(view.playEvents).toHaveLength(1);
+  });
+  it("clears confirmation on events, prevents counter bypass and locks after both coaches agree", async () => {
+    const s = await eventReport();
+    let view = await s.ready();
+    await s.home.mutation(api.leagues.confirmMatch, {
+      matchId: s.match._id,
+      expectedRevision: view.match.revision,
+    });
+    const td = s.event();
+    await s.save(td);
+    view = await s.t.query(api.leagues.getMatch, { matchId: s.match._id });
+    expect(view.match.confirmedBy).toEqual([]);
+    await expect(
+      s.home.mutation(api.leagues.patchMatchPlayer, {
+        matchId: s.match._id,
+        playerId: s.a.playerId,
+        stats: { td: 9 },
+      }),
+    ).rejects.toThrow("EVENT_REPORT_REQUIRED");
+    await expect(
+      s.home.mutation(api.leagues.updateMatchDetails, {
+        matchId: s.match._id,
+        scoreHome: 9,
+      }),
+    ).rejects.toThrow("EVENT_REPORT_REQUIRED");
+    await s.home.mutation(api.leagues.confirmMatch, {
+      matchId: s.match._id,
+      expectedRevision: view.match.revision,
+    });
+    await s.away.mutation(api.leagues.confirmMatch, {
+      matchId: s.match._id,
+      expectedRevision: view.match.revision,
+    });
+    await expect(s.save(s.event())).rejects.toThrow("REPORT_LOCKED");
+    const career = await s.home.query(api.leagues.getCareer, {
+      entryId: s.a.entryId,
+    });
+    expect(
+      career.players.find((row) => row._id === s.a.playerId)?.sppEarned,
+    ).toBe(7);
+    const record = await s.t.run((ctx) =>
+      ctx.db
+        .query("leagueMatchEvents")
+        .withIndex("by_matchId", (q) => q.eq("matchId", s.match._id))
+        .first(),
+    );
+    expect(record?.after.playEvents).toHaveLength(3);
+  });
+  it("keeps SPP after recovery and atomically corrects the timeline and official career", async () => {
+    const s = await eventReport();
+    const injury = s.event({
+      kind: "casualty",
+      targetId: s.b.playerId,
+      casualtyRoll: 16,
+      apothecary: true,
+      apothecaryRoll: 3,
+    });
+    await s.save(injury);
+    const started = await s.t.query(api.leagues.getMatch, {
+      matchId: s.match._id,
+    });
+    const otherVictim = started.players.find(
+      (row) => row.entryId === s.b.entryId && row.playerId !== s.b.playerId,
+    )!;
+    await s.save(
+      s.event({
+        kind: "casualty",
+        cause: "foul",
+        targetId: otherVictim.playerId,
+        casualtyRoll: 3,
+      }),
+    );
+    const view = await s.ready();
+    await s.home.mutation(api.leagues.confirmMatch, {
+      matchId: s.match._id,
+      expectedRevision: view.match.revision,
+    });
+    await s.away.mutation(api.leagues.confirmMatch, {
+      matchId: s.match._id,
+      expectedRevision: view.match.revision,
+    });
+    expect(
+      (
+        await s.t.query(api.leagues.getCareer, { entryId: s.b.entryId })
+      ).players.find((row) => row._id === s.b.playerId)?.status,
+    ).toBe("active");
+    const events = view.playEvents.map((row) =>
+      row.event.id === injury.id
+        ? { ...row.event, apothecary: false, apothecaryRoll: null }
+        : row.event,
+    );
+    await s.coaches[0].mutation(api.leagues.correctMatch, {
+      matchId: s.match._id,
+      expectedRevision: view.match.revision,
+      scoreHome: 0,
+      scoreAway: 0,
+      reason: "Apothecary was not used",
+      playEvents: events,
+    });
+    const after = await s.t.query(api.leagues.getCareer, {
+      entryId: s.b.entryId,
+    });
+    expect(after.players.find((row) => row._id === s.b.playerId)?.status).toBe(
+      "dead",
+    );
+    const scorer = await s.t.query(api.leagues.getCareer, {
+      entryId: s.a.entryId,
+    });
+    expect(
+      scorer.players.find((row) => row._id === s.a.playerId)?.sppEarned,
+    ).toBe(6);
+    expect(scorer.entry.stats.casFor).toBe(1);
+    expect(
+      scorer.players.find((row) => row._id === s.a.playerId)?.stats,
+    ).toMatchObject({ cas: 2, sppCas: 1 });
+    const history = await s.t.run((ctx) =>
+      ctx.db
+        .query("leagueMatchEvents")
+        .withIndex("by_matchId", (q) => q.eq("matchId", s.match._id))
+        .collect(),
+    );
+    expect(
+      history.at(-1)?.before?.playEvents?.find((e) => e.id === injury.id)
+        ?.apothecary,
+    ).toBe(true);
+    expect(
+      history.at(-1)?.after.playEvents?.find((e) => e.id === injury.id)
+        ?.apothecary,
+    ).toBe(false);
+  });
+  it("rejects outsiders, foreign players and invalid injuries without partial writes", async () => {
+    const s = await eventReport();
+    const outsiderId = await s.t.run((ctx) =>
+      ctx.db.insert("users", { name: "Outsider" }),
+    );
+    const outsider = s.t.withIdentity({ subject: outsiderId });
+    await expect(
+      outsider.mutation(api.leagues.savePlayEvent, {
+        matchId: s.match._id,
+        event: s.event(),
+        expectedVersion: 0,
+      }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      s.t.mutation(api.leagues.savePlayEvent, {
+        matchId: s.match._id,
+        event: s.event(),
+        expectedVersion: 0,
+      }),
+    ).rejects.toThrow("UNAUTHENTICATED");
+    await expect(
+      s.save(
+        s.event({ kind: "casualty", targetId: s.b.playerId, casualtyRoll: 14 }),
+      ),
+    ).rejects.toThrow("INVALID_DICE");
+    const foreign = await s.t.run(async (ctx) => {
+      const row = await ctx.db.get("leaguePlayers", s.a.playerId);
+      const { _id, _creationTime, ...fields } = row!;
+      void _id;
+      void _creationTime;
+      return ctx.db.insert("leaguePlayers", fields);
+    });
+    await expect(s.save(s.event({ playerId: foreign }))).rejects.toThrow(
+      "INELIGIBLE_PLAYER",
+    );
+    const view = await s.t.query(api.leagues.getMatch, {
+      matchId: s.match._id,
+    });
+    expect(view.playEvents).toHaveLength(0);
+    expect(
+      view.players.every((row) =>
+        Object.values(row.stats).every((value) => value === 0),
+      ),
+    ).toBe(true);
+  });
+});
+
 function rookie(name = "Rookie") {
   const team = newTeam(randomUUID());
   team.name = name;

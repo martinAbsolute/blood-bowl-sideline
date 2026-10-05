@@ -62,25 +62,13 @@ const teamColumns = [
   "tdDiff",
   "cas",
   "casDiff",
-  "com",
-  "int",
-  "inj",
-  "dth",
-  "fou",
-  "sof",
-  "bhz",
-  "sbr",
-  "cu",
-  "winDrawPercent",
   "latest",
 ] as const;
 const playerColumns = [
   "sppEarned",
-  "sppSpent",
   "available",
   "mp",
   "td",
-  "cas",
   "sppCas",
   "com",
   "int",
@@ -89,8 +77,6 @@ const playerColumns = [
   "safeLandings",
   "inj",
   "dth",
-  "fou",
-  "sof",
 ] as const;
 
 export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
@@ -663,7 +649,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                 title={`${t("leagueUi.round")} ${visibleRound.number}`}
                 action={<LeagueStatus status={visibleRound.status} />}
               >
-                <div className="grid gap-3 xl:grid-cols-2">
+                <div className="divide-y overflow-hidden rounded-lg border">
                   {roundMatches.map((match) => {
                     const home = entryById.get(match.homeEntryId);
                     const away = match.awayEntryId
@@ -675,7 +661,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                     return (
                       <article
                         key={match._id}
-                        className={`rounded-xl border p-4 ${isMine ? "border-primary/25 bg-primary/[0.03]" : "bg-card"}`}
+                        className={`px-3 py-2.5 ${isMine ? "bg-primary/[0.03]" : "bg-card"}`}
                       >
                         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                           <LeagueStatus status={match.status} />
@@ -690,7 +676,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                             {home && (
                               <RosterIcon
                                 rosterId={home.team.rosterId}
-                                className="hidden size-11 sm:inline-flex"
+                                className="hidden size-8 sm:inline-flex"
                               />
                             )}
                             <div className="min-w-0">
@@ -702,7 +688,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                               </p>
                             </div>
                           </div>
-                          <span className="rounded-lg bg-secondary/60 px-3 py-2 text-center text-lg font-semibold tabular-nums sm:min-w-24 sm:text-2xl">
+                          <span className="rounded-md bg-secondary/60 px-3 py-1 text-center font-mono text-base font-semibold tabular-nums sm:min-w-20">
                             {match.administrativeResult
                               ? "—"
                               : match.status === "bye"
@@ -723,12 +709,12 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                             {away && (
                               <RosterIcon
                                 rosterId={away.team.rosterId}
-                                className="hidden size-11 sm:inline-flex"
+                                className="hidden size-8 sm:inline-flex"
                               />
                             )}
                           </div>
                         </div>
-                        <div className="mt-3 flex flex-wrap items-center justify-end gap-3">
+                        <div className="mt-1 flex flex-wrap items-center justify-end gap-3">
                           {match.administrativeResult && (
                             <span className="text-xs text-muted-foreground">
                               {t("leagueUi." + match.administrativeResult)}

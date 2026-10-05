@@ -1,5 +1,45 @@
 import { v } from "convex/values";
 
+export const playEventValidator = v.object({
+  id: v.string(),
+  kind: v.union(
+    v.literal("touchdown"),
+    v.literal("completion"),
+    v.literal("interception"),
+    v.literal("casualty"),
+    v.literal("knockout"),
+    v.literal("sent-off"),
+    v.literal("throw-team-mate"),
+    v.literal("mvp"),
+  ),
+  playerId: v.id("leaguePlayers"),
+  targetId: v.union(v.id("leaguePlayers"), v.null()),
+  half: v.union(v.number(), v.null()),
+  turn: v.union(v.number(), v.null()),
+  cause: v.union(
+    v.literal("block"),
+    v.literal("foul"),
+    v.literal("crowd"),
+    v.literal("dodge"),
+    v.literal("rush"),
+    v.literal("special"),
+    v.literal("other"),
+  ),
+  casualtyRoll: v.union(v.number(), v.null()),
+  lastingRoll: v.union(v.number(), v.null()),
+  apothecary: v.boolean(),
+  apothecaryRoll: v.union(v.number(), v.null()),
+  apothecaryLastingRoll: v.union(v.number(), v.null()),
+  keepOriginal: v.boolean(),
+  regeneration: v.union(
+    v.literal("not-used"),
+    v.literal("failed"),
+    v.literal("succeeded"),
+  ),
+  superb: v.boolean(),
+  notes: v.string(),
+});
+
 export const matchStatsValidator = v.object({
   td: v.number(),
   cas: v.number(),
@@ -104,6 +144,7 @@ export const playerChangeValidator = v.object({
 // Immutable official report revisions; rosters are captured once and remain on
 // the fixture. These events retain every input needed to reverse a contribution.
 export const recordedReportValidator = v.object({
+  playEvents: v.optional(v.array(playEventValidator)),
   scoreHome: v.number(),
   scoreAway: v.number(),
   venue: v.string(),

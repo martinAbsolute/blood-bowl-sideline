@@ -16,6 +16,7 @@ import { LeagueMatch } from "../src/components/league-match";
 const state = vi.hoisted(() => ({
   status: "in-progress",
   revision: 1,
+  eventReporting: false,
   viewerId: "coach",
   calls: [] as { name: string; args: Record<string, unknown> }[],
 }));
@@ -51,6 +52,7 @@ vi.mock("convex/react", () => ({
       canCommission: true,
       canConfirm: true,
       match: {
+        eventReporting: state.eventReporting,
         _id: "match",
         status: state.status,
         revision: state.revision,
@@ -66,6 +68,7 @@ vi.mock("convex/react", () => ({
         homeStalled: false,
         awayStalled: false,
       },
+      playEvents: [],
       players: ["first", "second"].map((name) => ({
         _id: name,
         playerId: name,
@@ -180,6 +183,7 @@ afterEach(() => {
   state.viewerId = "coach";
   state.status = "in-progress";
   state.revision = 1;
+  state.eventReporting = false;
   state.calls = [];
 });
 
@@ -223,6 +227,73 @@ async function input(
 async function click(element: HTMLElement) {
   await act(async () => element.click());
 }
+
+it("records an event instead of editing counters and shows the review timeline", async () => {
+  state.eventReporting = true;
+  const view = await setup();
+  try {
+    expect(view.container.textContent).not.toContain(
+      "leagueUx.reportMoreStats",
+    );
+    expect(
+      view.container.querySelector("#report-game input[role=spinbutton]"),
+    ).toBeNull();
+    expect(
+      view.container.querySelector("#report-post-game input[role=spinbutton]"),
+    ).toBeNull();
+    await click(button(view.container, "matchEvents.add"));
+    expect(document.querySelector('[role="dialog"]')?.textContent).toContain(
+      "matchEvents.editorHint",
+    );
+    await act(async () =>
+      document
+        .querySelector("form")!
+        .dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        ),
+    );
+    expect(state.calls).toHaveLength(1);
+    expect(state.calls[0]).toMatchObject({
+      name: "leagues:savePlayEvent",
+      args: {
+        matchId: "match",
+        expectedVersion: 0,
+        event: { kind: "touchdown", playerId: "first", targetId: null },
+      },
+    });
+    expect(
+      view.container.querySelector("#report-post-game")?.textContent,
+    ).toContain("matchEvents.review");
+  } finally {
+    await view.close();
+  }
+});
+it("keeps a new commissioner event local until the correction is applied", async () => {
+  state.eventReporting = true;
+  state.status = "completed";
+  const view = await setup();
+  try {
+    await click(button(view.container, "leagueUi.correctReport"));
+    await click(button(view.container, "matchEvents.add"));
+    await act(async () =>
+      document
+        .querySelector("form")!
+        .dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        ),
+    );
+    expect(state.calls).toHaveLength(0);
+    expect(view.container.textContent).toContain(
+      "matchEvents.sentences.touchdown",
+    );
+    await click(button(view.container, "cancel"));
+    expect(view.container.textContent).not.toContain(
+      "matchEvents.sentences.touchdown",
+    );
+  } finally {
+    await view.close();
+  }
+});
 
 it("opens an away coach's own players first and lets them inspect the opponent", async () => {
   state.viewerId = "opponent";

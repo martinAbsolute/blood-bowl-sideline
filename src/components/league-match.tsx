@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { LeagueEvents } from "./league-events";
+import { projectMatchEvents, type MatchEvent } from "@/domain/match-events";
 import Link from "next/link";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import type { FunctionArgs, FunctionReturnType } from "convex/server";
@@ -128,6 +130,8 @@ export function LeagueMatch({
     auth.isAuthenticated ? { matchId: id } : "skip",
   );
   const start = useMutation(api.leagues.startMatch);
+  const saveEvent = useMutation(api.leagues.savePlayEvent);
+  const [eventDraft, setEventDraft] = useState(false);
   const confirm = useMutation(api.leagues.confirmMatch);
   const correct = useMutation(api.leagues.correctMatch);
   const updateDetails = useMutation(
@@ -233,6 +237,64 @@ export function LeagueMatch({
           updatePlayer({ matchId: id, playerId: player.playerId, ...patch }),
       );
   }
+  async function changeEvent(
+    event: MatchEvent,
+    version: number,
+    deleted = false,
+  ) {
+    const payload = {
+      ...event,
+      playerId: event.playerId as Id<"leaguePlayers">,
+      targetId: event.targetId as Id<"leaguePlayers"> | null,
+    };
+    return action.run(async () => {
+      if (!correction) {
+        await saveEvent({
+          matchId: id,
+          event: payload,
+          expectedVersion: version,
+          deleted,
+        });
+        return;
+      }
+      const existing = correction.playEvents.find(
+        (row) => row.event.id === event.id,
+      );
+      const ledger = correction.playEvents.filter(
+        (row) => row.event.id !== event.id,
+      );
+      if (!deleted)
+        ledger.push(
+          existing
+            ? { ...existing, event: payload }
+            : {
+                _id: event.id as Id<"leaguePlayEvents">,
+                _creationTime: Date.now(),
+                matchId: id,
+                event: payload,
+                version: 1,
+                deleted: false,
+                actorId: correction.viewerId!,
+                actorName: t("leagueUi.correctReport"),
+              },
+        );
+      const projection = projectMatchEvents(
+        correction.players,
+        ledger.map((row) => row.event),
+        correction.home._id,
+      );
+      setCorrection({
+        ...correction,
+        playEvents: ledger,
+        players: projection.players,
+        match: {
+          ...correction.match,
+          scoreHome: projection.scoreHome,
+          scoreAway: projection.scoreAway,
+        },
+      });
+    });
+  }
   if (auth.isLoading || !auth.isAuthenticated || data === undefined)
     return (
       <LeagueGate
@@ -322,7 +384,7 @@ export function LeagueMatch({
           <h1 className="page-heading">{t("leagueUi.matchReport")}</h1>
           <LeagueStatus status={match.status} />
         </div>
-        <p className="mt-3 text-sm text-muted-foreground">
+        <p className="mt-2 text-xs text-muted-foreground">
           {t(
             match.administrativeResult
               ? "leagueUi.administrativeHint"
@@ -344,7 +406,7 @@ export function LeagueMatch({
           {t("leagueUx.reportRetry")}
         </Button>
       )}
-      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 rounded-xl border bg-card p-4 sm:gap-6 sm:p-6">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 rounded-lg border bg-card p-3 sm:gap-4 sm:p-4">
         {[home, away].map(
           (entry, index) =>
             entry && (
@@ -354,22 +416,22 @@ export function LeagueMatch({
               >
                 <RosterIcon
                   rosterId={entry.team.rosterId}
-                  className={`mb-3 size-10 ${index ? "ml-auto" : ""}`}
+                  className={`mb-1 size-6 ${index ? "ml-auto" : ""}`}
                 />
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                <p className="sr-only">
                   {t(index ? "leagueUi.away" : "leagueUi.home")}
                 </p>
                 <Link
                   href={`${base}/teams/${entry._id}`}
-                  className="mt-2 block break-words text-base font-semibold hover:text-primary sm:text-2xl"
+                  className="mt-1 block break-words text-sm font-semibold hover:text-primary sm:text-lg"
                 >
                   {entry.team.name}
                 </Link>
-                <p className="mt-2 text-xs text-muted-foreground">
+                <p className="mt-1 text-[11px] text-muted-foreground">
                   {entry.coachName} · {getRoster(entry.team.rosterId)?.name}
                 </p>
                 <p
-                  className={`mt-3 flex items-center gap-1.5 text-xs text-muted-foreground ${index ? "justify-end" : ""}`}
+                  className={`mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground ${index ? "justify-end" : ""}`}
                 >
                   {match.confirmedBy.includes(entry.coachId) ? (
                     <>
@@ -383,7 +445,7 @@ export function LeagueMatch({
               </div>
             ),
         )}
-        <div className="col-start-2 row-start-1 text-center font-mono text-3xl font-semibold tabular-nums sm:text-4xl">
+        <div className="col-start-2 row-start-1 text-center font-mono text-2xl font-semibold tabular-nums sm:text-4xl">
           {match.administrativeResult ? (
             <span className="text-sm">
               {t("leagueUi." + match.administrativeResult)}
@@ -404,7 +466,11 @@ export function LeagueMatch({
             action={
               <Button
                 disabled={action.busy}
-                onClick={() => void action.run(() => start({ matchId: id }))}
+                onClick={() =>
+                  void action.run(() =>
+                    start({ matchId: id, eventReporting: true }),
+                  )
+                }
               >
                 {t("leagueUi.start")}
               </Button>
@@ -430,9 +496,9 @@ export function LeagueMatch({
                   aria-current={step === value ? "step" : undefined}
                   aria-controls={`report-${value}`}
                   onClick={() => setStep(value)}
-                  className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-lg px-2 text-xs font-medium focus-visible:outline-2 focus-visible:outline-primary sm:flex-row sm:gap-2 sm:text-sm ${step === value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
+                  className={`flex min-h-10 items-center justify-center gap-1 rounded-lg px-2 text-xs font-medium focus-visible:outline-2 focus-visible:outline-primary sm:gap-2 sm:text-sm ${step === value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
                 >
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-current/30 text-xs">
+                  <span className="hidden size-6 shrink-0 items-center justify-center rounded-full border border-current/30 text-xs sm:flex">
                     {index + 1}
                   </span>
                   {t(
@@ -443,6 +509,7 @@ export function LeagueMatch({
             </nav>
             <p
               role="status"
+              hidden={!pending && !syncError && !correction}
               aria-live="polite"
               className="flex items-center gap-2 text-xs text-muted-foreground"
             >
@@ -528,128 +595,157 @@ export function LeagueMatch({
               hidden={step !== "game"}
               className="space-y-4"
             >
-              <fieldset
-                disabled={!editable || action.busy}
-                className="grid grid-cols-2 gap-4 rounded-xl border bg-card p-4 sm:p-5"
-              >
-                <LeagueNumber
-                  label={
-                    home.team.name + " · " + t("leagueUx.reportTouchdowns")
-                  }
-                  value={match.scoreHome}
-                  max={30}
-                  onChange={(scoreHome) => changeDetails({ scoreHome })}
+              {match.eventReporting ? (
+                <LeagueEvents
+                  data={view}
+                  editable={editable && !action.busy}
+                  onSave={changeEvent}
+                  onDraftChange={setEventDraft}
+                  error={action.error}
+                  busy={action.busy}
                 />
-                <LeagueNumber
-                  label={
-                    (away?.team.name ?? "") +
-                    " · " +
-                    t("leagueUx.reportTouchdowns")
-                  }
-                  value={match.scoreAway}
-                  max={30}
-                  onChange={(scoreAway) => changeDetails({ scoreAway })}
-                />
-              </fieldset>
-              <div className="grid grid-cols-2 gap-2 rounded-xl bg-secondary/60 p-1.5">
-                {[home, away].map(
-                  (entry, index) =>
-                    entry && (
-                      <Button
-                        key={entry._id}
-                        variant={
-                          teamSide === (index ? "away" : "home")
-                            ? "default"
-                            : "outline"
-                        }
-                        className="h-auto min-h-12 min-w-0 whitespace-normal break-words"
-                        aria-pressed={teamSide === (index ? "away" : "home")}
-                        onClick={() => setSide(index ? "away" : "home")}
-                      >
-                        {entry.team.name}
-                      </Button>
-                    ),
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {t("leagueUx.reportPlayersHint")}
-              </p>
-              <Input
-                aria-label={t("leagueUx.matchSearch")}
-                placeholder={t("leagueUx.matchSearch")}
-                value={playerSearch}
-                onChange={(event) => setPlayerSearch(event.target.value)}
-                className="h-11 sm:max-w-md"
-              />
-              {[home, away].map(
-                (entry, sideIndex) =>
-                  entry && (
-                    <div
-                      key={entry._id}
-                      hidden={teamSide !== (sideIndex ? "away" : "home")}
-                    >
-                      <LeagueSection title={entry.team.name}>
-                        <div className="mb-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
-                          <span>
-                            {t("leagueUx.reportTouchdowns")}:{" "}
-                            <strong>
-                              {view.players
-                                .filter((p) => p.entryId === entry._id)
-                                .reduce((sum, p) => sum + p.stats.td, 0)}{" "}
-                              / {sideIndex ? match.scoreAway : match.scoreHome}
-                            </strong>
-                          </span>
-                          <span>
-                            {t("leagueUi.stats.mvp")}:{" "}
-                            <strong>
-                              {view.players
-                                .filter((p) => p.entryId === entry._id)
-                                .reduce((sum, p) => sum + p.stats.mvp, 0)}{" "}
-                              / 1
-                            </strong>
-                          </span>
-                        </div>
-                        <div className="rounded-lg border">
-                          <div className="grid grid-cols-[minmax(0,1fr)_repeat(3,2rem)_1rem] items-center gap-1 border-b bg-secondary/30 px-3 py-2 text-xs text-muted-foreground sm:grid-cols-[minmax(0,1fr)_repeat(6,3.25rem)_1.5rem]">
-                            <span>{t("player")}</span>
-                            {fields.slice(0, 6).map((field) => (
-                              <span
-                                key={field}
-                                className={`text-center ${["td", "cas", "mvp"].includes(field) ? "" : "hidden sm:block"}`}
-                              >
-                                <LeagueHelp stat={field} />
+              ) : (
+                <>
+                  <p className="rounded-md border bg-secondary/20 px-3 py-2 text-xs text-muted-foreground">
+                    {t("matchEvents.legacy")}
+                  </p>
+                  <fieldset
+                    disabled={!editable || action.busy}
+                    className="grid grid-cols-2 gap-4 rounded-xl border bg-card p-4 sm:p-5"
+                  >
+                    <LeagueNumber
+                      label={
+                        home.team.name + " · " + t("leagueUx.reportTouchdowns")
+                      }
+                      value={match.scoreHome}
+                      max={30}
+                      onChange={(scoreHome) => changeDetails({ scoreHome })}
+                    />
+                    <LeagueNumber
+                      label={
+                        (away?.team.name ?? "") +
+                        " · " +
+                        t("leagueUx.reportTouchdowns")
+                      }
+                      value={match.scoreAway}
+                      max={30}
+                      onChange={(scoreAway) => changeDetails({ scoreAway })}
+                    />
+                  </fieldset>
+                  <div className="grid grid-cols-2 gap-2 rounded-xl bg-secondary/60 p-1.5">
+                    {[home, away].map(
+                      (entry, index) =>
+                        entry && (
+                          <Button
+                            key={entry._id}
+                            variant={
+                              teamSide === (index ? "away" : "home")
+                                ? "default"
+                                : "outline"
+                            }
+                            className="h-auto min-h-12 min-w-0 whitespace-normal break-words"
+                            aria-pressed={
+                              teamSide === (index ? "away" : "home")
+                            }
+                            onClick={() => setSide(index ? "away" : "home")}
+                          >
+                            {entry.team.name}
+                          </Button>
+                        ),
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {t("leagueUx.reportPlayersHint")}
+                  </p>
+                  <Input
+                    aria-label={t("leagueUx.matchSearch")}
+                    placeholder={t("leagueUx.matchSearch")}
+                    value={playerSearch}
+                    onChange={(event) => setPlayerSearch(event.target.value)}
+                    className="h-11 sm:max-w-md"
+                  />
+                  {[home, away].map(
+                    (entry, sideIndex) =>
+                      entry && (
+                        <div
+                          key={entry._id}
+                          hidden={teamSide !== (sideIndex ? "away" : "home")}
+                        >
+                          <LeagueSection title={entry.team.name}>
+                            <div className="mb-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
+                              <span>
+                                {t("leagueUx.reportTouchdowns")}:{" "}
+                                <strong>
+                                  {view.players
+                                    .filter((p) => p.entryId === entry._id)
+                                    .reduce(
+                                      (sum, p) => sum + p.stats.td,
+                                      0,
+                                    )}{" "}
+                                  /{" "}
+                                  {sideIndex
+                                    ? match.scoreAway
+                                    : match.scoreHome}
+                                </strong>
                               </span>
-                            ))}
-                            <span />
-                          </div>
-                          {view.players
-                            .filter((p) => p.entryId === entry._id)
-                            .map((player, index) => (
-                              <MatchPlayerRow
-                                key={player._id}
-                                player={player}
-                                displayName={leaguePlayerLabel(
-                                  player.name,
-                                  positionLabel(player.snapshot.positionName),
-                                  snapshotPlayerNumber(
-                                    player.sourcePlayerId,
-                                    entry._id === home._id
-                                      ? match.homeSnapshot?.players
-                                      : match.awaySnapshot?.players,
-                                    index + 1,
-                                  ),
-                                )}
-                                editable={editable && !action.busy}
-                                search={playerSearch}
-                                onChange={(patch) =>
-                                  changePlayer(player, patch)
-                                }
-                              />
-                            ))}
+                              <span>
+                                {t("leagueUi.stats.mvp")}:{" "}
+                                <strong>
+                                  {view.players
+                                    .filter((p) => p.entryId === entry._id)
+                                    .reduce(
+                                      (sum, p) => sum + p.stats.mvp,
+                                      0,
+                                    )}{" "}
+                                  / 1
+                                </strong>
+                              </span>
+                            </div>
+                            <div className="rounded-lg border">
+                              <div className="grid grid-cols-[minmax(0,1fr)_repeat(3,2rem)_1rem] items-center gap-1 border-b bg-secondary/30 px-3 py-2 text-xs text-muted-foreground sm:grid-cols-[minmax(0,1fr)_repeat(6,3.25rem)_1.5rem]">
+                                <span>{t("player")}</span>
+                                {fields.slice(0, 6).map((field) => (
+                                  <span
+                                    key={field}
+                                    className={`text-center ${["td", "cas", "mvp"].includes(field) ? "" : "hidden sm:block"}`}
+                                  >
+                                    <LeagueHelp stat={field} />
+                                  </span>
+                                ))}
+                                <span />
+                              </div>
+                              {view.players
+                                .filter((p) => p.entryId === entry._id)
+                                .map((player, index) => (
+                                  <MatchPlayerRow
+                                    key={player._id}
+                                    player={player}
+                                    displayName={leaguePlayerLabel(
+                                      player.name,
+                                      positionLabel(
+                                        player.snapshot.positionName,
+                                      ),
+                                      snapshotPlayerNumber(
+                                        player.sourcePlayerId,
+                                        entry._id === home._id
+                                          ? match.homeSnapshot?.players
+                                          : match.awaySnapshot?.players,
+                                        index + 1,
+                                      ),
+                                    )}
+                                    editable={editable && !action.busy}
+                                    search={playerSearch}
+                                    onChange={(patch) =>
+                                      changePlayer(player, patch)
+                                    }
+                                  />
+                                ))}
+                            </div>
+                          </LeagueSection>
                         </div>
-                      </LeagueSection>
-                    </div>
-                  ),
+                      ),
+                  )}
+                </>
               )}
             </div>
             <div
@@ -657,6 +753,17 @@ export function LeagueMatch({
               hidden={step !== "post-game"}
               className="space-y-4"
             >
+              {match.eventReporting && (
+                <LeagueEvents
+                  data={view}
+                  editable={editable && !action.busy}
+                  onSave={changeEvent}
+                  onDraftChange={setEventDraft}
+                  error={action.error}
+                  busy={action.busy}
+                  review
+                />
+              )}
               <PostGame
                 data={view}
                 editable={editable && !action.busy}
@@ -713,6 +820,7 @@ export function LeagueMatch({
                           action.busy ||
                           !ready ||
                           staleCorrection ||
+                          eventDraft ||
                           reason.trim().length < 3
                         }
                         onClick={() =>
@@ -733,26 +841,32 @@ export function LeagueMatch({
                                 awayFansRoll: match.awayFansRoll,
                                 homeStalled: match.homeStalled,
                                 awayStalled: match.awayStalled,
-                                playerChanges: view.players
-                                  .filter(
-                                    (player) =>
-                                      player.participated &&
-                                      JSON.stringify(player) !==
-                                        JSON.stringify(
-                                          data.players.find(
-                                            (row) =>
-                                              row.playerId === player.playerId,
-                                          ),
-                                        ),
-                                  )
-                                  .map((player) => ({
-                                    playerId: player.playerId,
-                                    stats: player.stats,
-                                    statusAfter: player.statusAfter,
-                                    injuryNotes: player.injuryNotes,
-                                    casualtyRoll: player.casualtyRoll,
-                                    lastingRoll: player.lastingRoll,
-                                  })),
+                                playEvents: match.eventReporting
+                                  ? view.playEvents.map((row) => row.event)
+                                  : undefined,
+                                playerChanges: match.eventReporting
+                                  ? undefined
+                                  : view.players
+                                      .filter(
+                                        (player) =>
+                                          player.participated &&
+                                          JSON.stringify(player) !==
+                                            JSON.stringify(
+                                              data.players.find(
+                                                (row) =>
+                                                  row.playerId ===
+                                                  player.playerId,
+                                              ),
+                                            ),
+                                      )
+                                      .map((player) => ({
+                                        playerId: player.playerId,
+                                        stats: player.stats,
+                                        statusAfter: player.statusAfter,
+                                        injuryNotes: player.injuryNotes,
+                                        casualtyRoll: player.casualtyRoll,
+                                        lastingRoll: player.lastingRoll,
+                                      })),
                               }),
                             )
                             .then((saved) => {
@@ -788,7 +902,11 @@ export function LeagueMatch({
                     {data.canConfirm && (
                       <Button
                         disabled={
-                          action.busy || pending > 0 || !!syncError || !ready
+                          action.busy ||
+                          eventDraft ||
+                          pending > 0 ||
+                          !!syncError ||
+                          !ready
                         }
                         onClick={() => {
                           if (pendingCount.current || failedEdits.current.size)
@@ -886,7 +1004,7 @@ export function LeagueMatch({
                   onClick={() => {
                     setCorrection(structuredClone(data));
                     setReason("");
-                    setStep("pre-game");
+                    setStep(data.match.eventReporting ? "game" : "pre-game");
                   }}
                 >
                   <ShieldCheck className="size-4" />
@@ -941,12 +1059,21 @@ function PostGame({
               <h3 className="break-words font-semibold">
                 {side === "home" ? data.home.team.name : data.away?.team.name}
               </h3>
-              <LeagueNumber
-                label={t("leagueUx.reportTouchdowns")}
-                value={score}
-                max={30}
-                onChange={(value) => onChange({ [scoreKey]: value })}
-              />
+              {match.eventReporting ? (
+                <p className="flex items-center justify-between text-xs text-muted-foreground">
+                  {t("leagueUx.reportTouchdowns")}
+                  <strong className="font-mono text-base text-foreground">
+                    {score}
+                  </strong>
+                </p>
+              ) : (
+                <LeagueNumber
+                  label={t("leagueUx.reportTouchdowns")}
+                  value={score}
+                  max={30}
+                  onChange={(value) => onChange({ [scoreKey]: value })}
+                />
+              )}
               <label className="flex min-h-11 items-center justify-between gap-3 rounded-lg bg-secondary/30 px-3 text-sm">
                 {t("leagueUi.stalled")}
                 <Switch
@@ -1126,28 +1253,6 @@ function MatchPlayerRow({
                 ),
               )}
             </fieldset>
-            <details className="rounded-lg border">
-              <summary className="cursor-pointer px-4 py-3 text-sm font-medium">
-                {t("leagueUx.reportMoreStats")}
-              </summary>
-              <fieldset
-                disabled={!canEdit}
-                className="grid grid-cols-1 gap-3 border-t p-4 min-[380px]:grid-cols-2 lg:grid-cols-3"
-              >
-                {fields.slice(6).map((field) => (
-                  <LeagueNumber
-                    key={field}
-                    label={t("leagueUx.reportStatLabels." + field)}
-                    value={player.stats[field]}
-                    max={field === "dth" ? 1 : 99}
-                    disabled={!canEdit || field === "dth"}
-                    onChange={(value) =>
-                      onChange({ stats: { [field]: value } })
-                    }
-                  />
-                ))}
-              </fieldset>
-            </details>
             <details
               className="rounded-lg border"
               open={
