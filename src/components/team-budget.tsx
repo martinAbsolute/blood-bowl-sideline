@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { useTranslations } from "gt-next";
 import type { Team } from "@/domain/types";
 import { budgetSummary } from "@/domain/budget";
@@ -123,6 +129,9 @@ export function TeamBudget({
           <DrawerContent
             className="mobile-budget-drawer budget-panel no-print"
             data-expanded={expanded}
+            style={
+              { "--budget-collapsed-height": collapsedPoint } as CSSProperties
+            }
             initialFocus={false}
             finalFocus={false}
             swipeHeader={

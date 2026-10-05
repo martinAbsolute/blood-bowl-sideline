@@ -457,6 +457,13 @@ html {
   border-bottom-right-radius: 0;
   box-shadow: 0 -4px 16px #193e320a;
 }
+/* Anchor the resting header to the viewport even when hidden warnings resize.
+   A measured pixel snap offset would animate after each content-height change. */
+.mobile-budget-drawer[data-expanded="false"] {
+  --translate-y: calc(
+    100% - var(--budget-collapsed-height) + var(--drawer-swipe-movement-y, 0px)
+  );
+}
 .budget-drawer-summary {
   touch-action: pan-x;
   user-select: none;

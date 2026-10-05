@@ -174,6 +174,45 @@ it("reports an exceeded treasury once and keeps the collapsed meter structure un
   expect(container.querySelector('[aria-label="budgetIssues"]')).toBeNull();
 });
 
+it("preserves the collapsed drawer as spending reaches the limit and rookie warnings appear", async () => {
+  const team = newTeam(crypto.randomUUID());
+  team.players = Array.from({ length: 11 }, (_, i) => ({
+    id: crypto.randomUUID(),
+    positionId: i === 10 ? "human-4" : "human-0",
+    name: "",
+    skills: [],
+  }));
+  team.captainId = team.players[0].id;
+  team.staff.rerolls = 8;
+  team.staff.dedicatedFans = 2;
+  await act(async () => root.render(createElement(TeamBudget, { team })));
+  await reportBudgetPosition(1000);
+  const popup = document.querySelector<HTMLElement>(".mobile-budget-drawer")!;
+  const header = popup.querySelector(".budget-drawer-summary")!;
+  const progress = header.querySelector('[role="progressbar"]');
+  expect(header.textContent).toContain("995k / 1,000k");
+  expect(popup.textContent).not.toContain("leagueUi.rookieIssues.rookieFans");
+  for (const dedicatedFans of [3, 2]) {
+    await act(async () =>
+      root.render(
+        createElement(TeamBudget, {
+          team: { ...team, staff: { ...team.staff, dedicatedFans } },
+        }),
+      ),
+    );
+    expect(document.querySelector(".mobile-budget-drawer")).toBe(popup);
+    expect(popup.dataset.expanded).toBe("false");
+    expect(popup.querySelector(".budget-drawer-summary")).toBe(header);
+    expect(header.querySelector('[role="progressbar"]')).toBe(progress);
+    expect(header.textContent).toContain(
+      dedicatedFans === 3 ? "1,000k / 1,000k" : "995k / 1,000k",
+    );
+    expect(
+      popup.textContent?.includes("leagueUi.rookieIssues.rookieFans"),
+    ).toBe(dedicatedFans === 3);
+  }
+});
+
 it("surfaces skill-only overspending in the closed drawer", async () => {
   const team = newTeam("budget-test");
   team.rulesetId = "bb2025-matched-play";
