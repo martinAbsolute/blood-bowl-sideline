@@ -12,13 +12,7 @@ import {
   starPairs,
   starChoices,
 } from "@/domain/catalog";
-import { rookieLeagueIssues } from "@/domain/league-rules";
-import {
-  playerSkillCost,
-  starEligible,
-  summarize,
-  validateTeam,
-} from "@/domain/rules";
+import { playerSkillCost, starEligible, summarize } from "@/domain/rules";
 import type { Team } from "@/domain/types";
 import { storeDraft } from "@/lib/drafts";
 import { saveCloudDraft } from "@/lib/cloud-save";
@@ -28,8 +22,7 @@ import { TeamName } from "./team-name";
 import { TeamSaveStatus } from "./team-save-status";
 import { TeamHeader } from "./team-header";
 import { EditorSelect } from "./editor-select";
-import { LeagueTeamIssues } from "./league-team-issues";
-import { ReadinessCard } from "./readiness-card";
+import { TeamReadiness } from "./team-readiness";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -75,7 +68,6 @@ import {
   Printer,
   RectangleVertical,
   RectangleHorizontal,
-  ShieldCheck,
   Star,
   X,
 } from "lucide-react";
@@ -109,8 +101,7 @@ export function TeamEditor({
   const [pendingRoster, setPendingRoster] = useState<string | null>(null);
   const roster = getRoster(team.rosterId)!,
     rules = getRuleset(team.rulesetId),
-    totals = summarize(team),
-    validation = validateTeam(team);
+    totals = summarize(team);
   const requiresCaptain = roster.specialRules.includes("Team Captain");
   function switchRoster(rosterId: string) {
     const next = resetTeamRoster(
@@ -742,47 +733,7 @@ export function TeamEditor({
           )}
 
           <TeamBudget team={team} floating={!readOnly} />
-          <ReadinessCard ready={validation.valid}>
-            <div className="flex items-center gap-2">
-              <ShieldCheck
-                className={`size-5 ${validation.valid ? "text-emerald-700" : "text-muted-foreground"}`}
-              />
-              <h2 className="font-semibold text-sm">
-                {validation.valid ? t("ready") : t("workInProgress")}
-              </h2>
-            </div>
-            {validation.valid ? (
-              <>
-                <p className="mt-3 text-xs leading-relaxed text-emerald-900">
-                  {t("legalText")}
-                </p>
-              </>
-            ) : (
-              <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
-                {validation.issues.map((issue, index) => (
-                  <li key={`${issue.code}-${index}`} className="flex gap-2">
-                    <span className="mt-1.5 size-1 shrink-0 rounded-full bg-orange-600" />
-                    <span>{t(`issues.${issue.code}`, issue.values)}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {validation.valid &&
-              rules.id === "bb2025-default" &&
-              rookieLeagueIssues(team).length > 0 && (
-                <div className="mt-4 space-y-2 border-t pt-3">
-                  <p className="text-xs font-medium">
-                    {t("leagueUi.rookieEligibility")}
-                  </p>
-                  <LeagueTeamIssues team={team} />
-                </div>
-              )}
-            {rules.id !== "bb2025-default" && (
-              <p className="mt-4 border-t pt-3 text-[10px] leading-relaxed text-muted-foreground">
-                {t("squadNotice")}
-              </p>
-            )}
-          </ReadinessCard>
+          <TeamReadiness team={team} />
           {!readOnly && (syncError || cloudInvalid) && (
             <p
               role="alert"

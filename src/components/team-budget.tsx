@@ -5,6 +5,7 @@ import { useTranslations } from "gt-next";
 import type { Team } from "@/domain/types";
 import { budgetSummary } from "@/domain/budget";
 import { BudgetBreakdown, BudgetOverview } from "./budget-details";
+import { TeamReadiness } from "./team-readiness";
 import {
   Drawer,
   DrawerContent,
@@ -150,6 +151,9 @@ export function TeamBudget({
               aria-hidden={!expanded}
             >
               <BudgetBreakdown summary={summary} drawerPool={drawerPool} />
+              <div className="px-3 pb-3">
+                <TeamReadiness team={team} />
+              </div>
             </div>
           </DrawerContent>
         </Drawer>

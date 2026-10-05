@@ -245,3 +245,58 @@ it("opens Flowing Funds help from the drawer header without nesting buttons or t
     ),
   ).toBe(true);
 });
+
+it("shows readiness in an empty default drawer and updates warnings as the team changes", async () => {
+  const team = newTeam(crypto.randomUUID());
+  await act(async () => root.render(createElement(TeamBudget, { team })));
+  await reportBudgetPosition(1000);
+  const popup = document.querySelector<HTMLElement>(".mobile-budget-drawer")!;
+  const breakdown = popup.querySelector(".budget-drawer-breakdown")!;
+  await act(async () =>
+    popup
+      .querySelector<HTMLButtonElement>(".budget-drawer-summary button")!
+      .click(),
+  );
+  expect(breakdown.hasAttribute("inert")).toBe(false);
+  expect(breakdown.textContent).toContain("workInProgress");
+  expect(breakdown.textContent).toContain("issues.minPlayers");
+  const ready = {
+    ...team,
+    players: Array.from({ length: 11 }, () => ({
+      id: crypto.randomUUID(),
+      positionId: "human-0",
+      name: "",
+      skills: [],
+    })),
+  };
+  ready.captainId = ready.players[0].id;
+  await act(async () =>
+    root.render(createElement(TeamBudget, { team: ready })),
+  );
+  expect(breakdown.textContent).toContain("legalText");
+  expect(breakdown.textContent).not.toContain("workInProgress");
+  expect(breakdown.textContent).not.toContain("issues.minPlayers");
+  await act(async () =>
+    root.render(
+      createElement(TeamBudget, {
+        team: {
+          ...ready,
+          players: ready.players.map((player, i) => ({
+            ...player,
+            skills: i === 0 ? ["block"] : [],
+          })),
+        },
+      }),
+    ),
+  );
+  expect(breakdown.textContent).toContain("leagueUi.rookieEligibility");
+  expect(breakdown.textContent).toContain("leagueUi.rookieIssues.rookieSkills");
+  await act(async () =>
+    root.render(
+      createElement(TeamBudget, {
+        team: { ...ready, rulesetId: "bb2025-matched-play" },
+      }),
+    ),
+  );
+  expect(breakdown.textContent).toContain("squadNotice");
+});

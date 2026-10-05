@@ -665,6 +665,9 @@ html {
 }
 /* The persistent, non-modal budget drawer stays below player and rule dialogs,
    including when its portal mounts after a viewport change. */
+[data-slot="drawer-overlay"]:has(
+  + [data-slot="drawer-viewport"] .mobile-budget-drawer
+),
 [data-slot="drawer-viewport"]:has(.mobile-budget-drawer) {
   z-index: 40;
 }
