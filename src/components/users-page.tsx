@@ -5,6 +5,7 @@ import { useConvexAuth, usePaginatedQuery, useQuery } from "convex/react";
 import { useLocale, useTranslations } from "gt-next";
 import { LoaderCircle, LockKeyhole, UsersRound } from "lucide-react";
 import { api } from "../../convex/_generated/api";
+import { UsersLoading } from "./list-loading";
 import { UserProfile } from "./user-profile";
 import { Button } from "./ui/button";
 import { sortUsers } from "@/lib/user-directory";
@@ -105,7 +106,9 @@ function UserDirectory() {
           <p className="text-sm text-muted-foreground">{t("noOtherUsers")}</p>
         </div>
       ) : null}
-      {status === "LoadingFirstPage" || status === "LoadingMore" ? (
+      {status === "LoadingFirstPage" ? (
+        <UsersLoading label={t("loading")} />
+      ) : status === "LoadingMore" ? (
         <LoadingUsers />
       ) : null}
       {status === "CanLoadMore" ? (

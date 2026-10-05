@@ -17,6 +17,7 @@ import { api } from "../../convex/_generated/api";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { LeagueField, LeagueSelect } from "./league-field";
+import { LeagueCardsLoading } from "./list-loading";
 import { LoginButton } from "./site-shell";
 import { LeagueError, LeagueStatus, useLeagueAction } from "./league-ui";
 import {
@@ -207,13 +208,7 @@ export function LeaguesPage() {
           </LeagueSelect>
         </div>
         {status === "LoadingFirstPage" ? (
-          <p
-            role="status"
-            className="flex min-h-64 items-center justify-center gap-2 text-sm text-muted-foreground"
-          >
-            <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
-            {t("loading")}
-          </p>
+          <LeagueCardsLoading label={t("loading")} />
         ) : results.length === 0 ? (
           <div className="rounded-2xl border bg-card px-6 py-16 text-center">
             <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-2xl bg-secondary">

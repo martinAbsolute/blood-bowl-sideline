@@ -1,5 +1,7 @@
 "use client";
 
+import { LibraryCardsLoading } from "./loading-layouts";
+
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "gt-next";
@@ -80,7 +82,11 @@ export function LeagueTeamPicker({
           className="h-10"
         />
         {status === "LoadingFirstPage" ? (
-          <p role="status">{t("loading")}</p>
+          <LibraryCardsLoading
+            label={t("loading")}
+            text={(key) => t(key)}
+            actionLabel={t("leagueUi.chooseTeam")}
+          />
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {visible.map((row) => {

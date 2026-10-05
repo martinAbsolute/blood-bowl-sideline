@@ -9,6 +9,8 @@ import {
   subscribeDrafts,
   draftAccount,
 } from "@/lib/drafts";
+import { TeamCatalog } from "./team-catalog";
+import { TeamLibrary } from "./team-library";
 import { useDraftSync } from "./draft-sync-provider";
 
 export function WorkspaceLoading({
@@ -30,5 +32,14 @@ export function WorkspaceLoading({
           );
         })
       : undefined;
-  return <LoadingLayout variant={variant} label={t("loading")} team={team} />;
+  if (variant === "catalog") return <TeamCatalog />;
+  if (variant === "library") return <TeamLibrary />;
+  return (
+    <LoadingLayout
+      variant={variant}
+      label={t("loading")}
+      team={team}
+      text={(key) => t(key)}
+    />
+  );
 }

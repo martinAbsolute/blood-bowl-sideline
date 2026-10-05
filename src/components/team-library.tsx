@@ -110,7 +110,7 @@ export function TeamLibrary() {
         </div>
         <CreateTeamButton />
       </header>
-      {!isAuthenticated && (
+      {!isLoading && !isAuthenticated && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-secondary/30 px-5 py-4">
           <div className="flex items-center gap-3">
             <CloudCheck className="size-5 shrink-0 text-muted-foreground" />
@@ -200,7 +200,11 @@ export function TeamLibrary() {
         (!sync.ready ||
           isLoading ||
           (isAuthenticated && status === "LoadingFirstPage")) ? (
-          <LibraryCardsLoading label={t("loading")} />
+          <LibraryCardsLoading
+            label={t("loading")}
+            text={(key) => t(key)}
+            actionLabel={t(archived ? "archived" : "openTeam")}
+          />
         ) : cards.length === 0 ? (
           <div className="flex min-h-[400px] flex-col items-center justify-center rounded-xl border border-dashed bg-card/50 px-6 py-16 text-center">
             <FileText className="mx-auto mb-4 size-7 text-muted-foreground" />

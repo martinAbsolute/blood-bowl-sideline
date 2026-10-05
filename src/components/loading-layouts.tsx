@@ -4,13 +4,34 @@ import { SiteFooter } from "./site-footer";
 import { ShellFrame } from "./shell-frame";
 import { AccountLoading } from "./account-loading";
 import { Languages, PanelLeftClose, PanelRightOpen } from "lucide-react";
-import { getRoster } from "@/domain/catalog";
+import { getRoster, getRuleset } from "@/domain/catalog";
+import { budgetSummary } from "@/domain/budget";
+import { BudgetOverview, BudgetBreakdown } from "./budget-details";
+import { TeamSupport } from "./team-support";
+import { TeamAffiliations } from "./team-affiliations";
+import { PlayerRecruitment } from "./player-recruitment";
 import type { Team } from "@/domain/types";
-import { needsPlayerRecruitment } from "@/lib/builder";
+import { TeamHeader } from "./team-header";
+import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
+import { ArrowLeft, Copy, Printer, ChevronDown, Ellipsis } from "lucide-react";
+import { BookOpen, Flag, Shield, Trophy } from "lucide-react";
+import { EditorSelect } from "./editor-select";
+import { Card } from "./ui/card";
+
+const ignoreChange = () => {};
 
 export type LoadingVariant = "library" | "editor" | "catalog";
 
-export function LibraryCardsLoading({ label }: { label: string }) {
+export function LibraryCardsLoading({
+  label,
+  text,
+  actionLabel,
+}: {
+  label: string;
+  text?: (key: string) => string;
+  actionLabel?: string;
+}) {
   return (
     <div
       role="status"
@@ -19,21 +40,21 @@ export function LibraryCardsLoading({ label }: { label: string }) {
     >
       <span className="sr-only">{label}</span>
       {[0, 1, 2].map((index) => (
-        <div
+        <Card
           key={index}
           aria-hidden="true"
-          className={`overflow-hidden rounded-2xl border bg-card ${index === 1 ? "hidden sm:block" : index === 2 ? "hidden xl:block" : ""}`}
+          className={`min-w-0 gap-0 rounded-2xl py-0 shadow-sm ${index === 1 ? "hidden sm:flex" : index === 2 ? "hidden xl:flex" : ""}`}
         >
           <div className="bg-primary/10 px-5 pb-5 pt-4">
             <div className="mb-4 flex h-6 justify-between">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-6 w-14 rounded-full" />
             </div>
-            <div className="flex h-20 items-center gap-4">
+            <div className="flex h-16 items-center gap-4">
               <Skeleton className="size-16 shrink-0 rounded-2xl" />
-              <div className="flex-1 space-y-3">
-                <Skeleton className="h-7 w-4/5" />
-                <Skeleton className="h-4 w-1/2" />
+              <div className="min-w-0 flex-1 space-y-1">
+                <Skeleton className="h-6 w-4/5" />
+                <Skeleton className="h-6 w-1/2" />
               </div>
             </div>
           </div>
@@ -41,13 +62,28 @@ export function LibraryCardsLoading({ label }: { label: string }) {
             <div className="h-8">
               <Skeleton className="h-4 w-3/4" />
             </div>
-            <Skeleton className="h-16 w-full rounded-lg" />
-            <Skeleton className="h-4 w-24" />
+            <dl className="grid grid-cols-3 divide-x rounded-lg border bg-secondary/25 py-3 text-center">
+              {["players", "teamValue", "remaining"].map((key) => (
+                <div key={key}>
+                  <dt className="text-[10px] text-muted-foreground">
+                    {text?.(key) ?? (
+                      <Skeleton className="mx-auto h-[15px] w-12" />
+                    )}
+                  </dt>
+                  <dd className="mt-1 flex h-6 items-center justify-center">
+                    <Skeleton className="h-4 w-10" />
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <div className="flex h-4 items-center text-xs font-semibold text-primary">
+              {actionLabel ?? <Skeleton className="h-4 w-24" />}
+            </div>
           </div>
           <div className="flex min-h-14 items-center border-t bg-secondary/15 px-5">
             <Skeleton className="h-4 w-28" />
           </div>
-        </div>
+        </Card>
       ))}
     </div>
   );
@@ -60,6 +96,8 @@ function TableLoading({
   footer = false,
   title = true,
   framed = true,
+  heading,
+  text,
 }: {
   rows: number;
   empty?: boolean;
@@ -67,6 +105,8 @@ function TableLoading({
   footer?: boolean;
   title?: boolean;
   framed?: boolean;
+  heading?: string;
+  text?: (key: string) => string;
 }) {
   return (
     <div
@@ -76,21 +116,26 @@ function TableLoading({
         <div
           className={`flex items-center justify-between border-b bg-secondary/40 px-4 ${compact ? "h-[44px]" : "h-[54px]"}`}
         >
-          <Skeleton className="h-5 w-36" />
+          <span className="text-base font-semibold">{heading}</span>
           <Skeleton className="h-3 w-10" />
         </div>
       )}
-      <div className="flex h-[34px] items-center gap-5 border-b px-4">
-        <Skeleton className="h-3 w-24" />
-        <Skeleton className="ml-auto h-3 w-1/3" />
-      </div>
+      {!empty && (
+        <div className="flex h-[34px] items-center gap-5 border-b px-4 text-[10px] font-medium text-muted-foreground">
+          <span className="w-40 shrink-0">{text?.("player")}</span>
+          <span className="hidden flex-1 sm:block">MA　 ST　 AG　 PA　 AV</span>
+          <span className="ml-auto">{text?.("cost")}</span>
+        </div>
+      )}
       {Array.from({ length: rows }, (_, index) => (
         <div
           key={index}
-          className={`flex items-center gap-3 border-b px-4 last:border-0 ${empty ? "h-[30px] justify-center" : "h-12"}`}
+          className={`flex items-center gap-3 border-b px-4 last:border-0 ${empty ? "min-h-[68px] justify-center py-6" : "h-12"}`}
         >
           {empty ? (
-            <Skeleton className="h-3 w-2/3" />
+            <p className="text-center text-xs leading-relaxed text-muted-foreground">
+              {text?.("emptyRosterHint")}
+            </p>
           ) : (
             <>
               <Skeleton className="size-8 shrink-0" />
@@ -114,116 +159,220 @@ export function LoadingLayout({
   variant = "library",
   label,
   team,
+  text,
 }: {
   variant?: LoadingVariant;
   label: string;
   team?: Team;
+  text?: (key: string) => string;
 }) {
+  const summary = team ? budgetSummary(team) : undefined;
   if (variant === "editor")
     return (
       <div
-        className="page-width team-builder py-5"
+        className="page-width team-builder py-3"
         role="status"
         aria-label={label}
       >
         <span className="sr-only">{label}</span>
-        <div aria-hidden="true">
-          <div className="mb-4 space-y-3">
-            <div className="flex min-h-8 items-center lg:pl-8">
-              <Skeleton className="h-4 w-20" />
-            </div>
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div className="flex max-w-full items-end gap-2">
-                <Skeleton className="h-10 w-60 max-w-full sm:h-12" />
-                <Skeleton className="mb-[9px] h-3 w-24" />
+        <div inert>
+          <TeamHeader
+            back={
+              <div className="inline-flex min-h-8 items-center gap-1.5 text-sm text-muted-foreground">
+                <ArrowLeft className="size-3.5" />
+                {text?.("myTeams")}
               </div>
-              <div className="mb-1 flex gap-2">
-                <Skeleton className="h-8 w-28" />
-                <Skeleton className="h-8 w-24" />
+            }
+            title={
+              <div className="page-heading team-heading min-w-0 truncate py-1">
+                {team?.name || (
+                  <Skeleton className="h-[1.2em] w-60 max-w-full" />
+                )}
               </div>
+            }
+            status={<Skeleton className="h-3 w-16" />}
+            actions={
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="hidden h-9 sm:inline-flex"
+                >
+                  <Copy className="size-4" />
+                  {text?.("duplicate")}
+                </Button>
+                <Button size="sm" className="h-11 flex-1 sm:h-9 sm:flex-none">
+                  <Printer className="size-4" />
+                  {text?.("print")}
+                  <ChevronDown className="size-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-11 flex-1 sm:hidden"
+                >
+                  <Ellipsis className="size-4" />
+                  {text?.("teamActions")}
+                </Button>
+              </>
+            }
+          >
+            <div className="flex min-h-6 flex-wrap gap-2">
+              {team ? (
+                <>
+                  <Badge
+                    variant="outline"
+                    className="h-auto min-h-6 max-w-full whitespace-normal text-left"
+                  >
+                    {getRoster(team.rosterId)?.name}
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className="h-auto min-h-6 max-w-full whitespace-normal text-left"
+                  >
+                    {getRuleset(team.rulesetId).name}
+                  </Badge>
+                </>
+              ) : (
+                <>
+                  <Skeleton className="h-6 w-20" />
+                  <Skeleton className="h-6 w-28" />
+                </>
+              )}
             </div>
-            <div className="flex h-6 gap-2">
-              <Skeleton className="h-6 w-20" />
-              <Skeleton className="h-6 w-28" />
-            </div>
-          </div>
+          </TeamHeader>
           <div className="budget-grid">
             <div className="@container space-y-5">
-              {team && needsPlayerRecruitment(team) ? (
-                <TableLoading rows={getRoster(team.rosterId)!.players.length} />
+              {team ? (
+                <PlayerRecruitment team={team} onChange={ignoreChange} />
               ) : (
-                <div className="flex h-14 items-center justify-between rounded-lg border bg-secondary px-4">
-                  <Skeleton className="h-5 w-36" />
-                  <Skeleton className="size-4" />
-                </div>
+                <TableLoading
+                  rows={4}
+                  heading={text?.("recruitPlayers")}
+                  text={text}
+                />
               )}
               <div>
                 <div className="mb-2 flex h-6 items-center justify-between px-1">
-                  <Skeleton className="h-5 w-24" />
+                  <h2 className="section-title">{text?.("players")}</h2>
                   <Skeleton className="h-3 w-10" />
                 </div>
                 <TableLoading
-                  rows={
-                    (team?.players.length ?? 0) + (team?.stars.length ?? 0) || 1
-                  }
-                  empty={!team?.players.length && !team?.stars.length}
+                  rows={team ? team.players.length + team.stars.length || 1 : 3}
+                  empty={!!team && !team.players.length && !team.stars.length}
                   title={false}
+                  text={text}
                 />
                 <div className="-mt-px flex h-12 justify-end rounded-b-lg border bg-card p-2">
-                  <Skeleton className="h-7 w-32" />
+                  <span className="flex h-7 items-center px-2 text-xs font-medium">
+                    {text?.("addStar")}
+                  </span>
                 </div>
               </div>
-              <div className="grid items-start gap-4 @min-[780px]:grid-cols-2">
-                {[5, 6].map((count) => (
-                  <section key={count}>
-                    <div className="mb-2 flex h-6 items-center justify-between px-1">
-                      <Skeleton className="h-5 w-36" />
-                      <Skeleton className="h-3 w-12" />
-                    </div>
-                    <div className="space-y-1.5">
-                      {Array.from({ length: count }, (_, index) => (
-                        <div
-                          key={index}
-                          className="flex h-14 items-center justify-between gap-2 rounded-lg border bg-card px-3"
-                        >
-                          <div className="flex-1 space-y-1.5">
-                            <Skeleton className="h-4 w-3/4" />
-                            <Skeleton className="h-3 w-2/3" />
+              {team ? (
+                <TeamSupport team={team} onChange={ignoreChange} />
+              ) : (
+                <div className="grid items-start gap-4 @min-[780px]:grid-cols-2">
+                  {[5, 6].map((count) => (
+                    <section key={count}>
+                      <div className="mb-2 flex h-6 items-center justify-between px-1">
+                        <h2 className="section-title">
+                          {text?.(count === 5 ? "staff" : "inducements")}
+                        </h2>
+                        <Skeleton className="h-3 w-12" />
+                      </div>
+                      <div className="space-y-1.5">
+                        {Array.from({ length: count }, (_, index) => (
+                          <div
+                            key={index}
+                            className="flex h-14 items-center justify-between gap-2 rounded-lg border bg-card px-3"
+                          >
+                            <div className="flex-1 space-y-1.5">
+                              <Skeleton className="h-4 w-3/4" />
+                              <Skeleton className="h-3 w-2/3" />
+                            </div>
+                            <Skeleton className="size-8" />
+                            <Skeleton className="h-4 w-5" />
+                            <Skeleton className="size-8" />
                           </div>
-                          <Skeleton className="size-8" />
-                          <Skeleton className="h-4 w-5" />
-                          <Skeleton className="size-8" />
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                ))}
-              </div>
+                        ))}
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              )}
             </div>
             <aside className="budget-side space-y-3">
               <section className="rounded-lg border bg-card p-3">
                 <div className="grid gap-3">
-                  {[0, 1, 2].map((index) => (
+                  {(team &&
+                  ["chaos-chosen", "chaos-renegade", "norse"].includes(
+                    team.rosterId,
+                  )
+                    ? [0, 1, 2]
+                    : [0, 1]
+                  ).map((index) => (
                     <div
                       key={index}
                       className={`space-y-1 ${index === 2 ? "max-[900px]:col-start-2" : ""}`}
                     >
-                      <Skeleton className="h-4 w-16" />
-                      <Skeleton className="h-9 w-full" />
+                      <div className="text-xs font-medium text-muted-foreground">
+                        {index < 2 ? (
+                          text?.(index === 0 ? "ruleset" : "roster")
+                        ) : (
+                          <Skeleton className="h-4 w-16" />
+                        )}
+                      </div>
+                      {team && index < 2 ? (
+                        <EditorSelect
+                          tabIndex={-1}
+                          aria-label={text?.(
+                            index === 0 ? "ruleset" : "roster",
+                          )}
+                        >
+                          <option>
+                            {index === 0
+                              ? getRuleset(team.rulesetId).name
+                              : getRoster(team.rosterId)?.name}
+                          </option>
+                        </EditorSelect>
+                      ) : (
+                        <Skeleton className="h-9 w-full" />
+                      )}
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 space-y-2 border-t pt-4">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
+                <div className="mt-4 border-t pt-4">
+                  {team ? (
+                    <TeamAffiliations
+                      roster={getRoster(team.rosterId)!}
+                      team={team}
+                    />
+                  ) : (
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-3/4" />
+                    </div>
+                  )}
                 </div>
               </section>
-              <section className="space-y-5 rounded-lg border bg-card p-4">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-8 w-32" />
-                <Skeleton className="h-2 w-full" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-10 w-full" />
+              <section className="rounded-lg border bg-card">
+                {summary ? (
+                  <>
+                    <BudgetOverview pool={summary.pools[0]} />
+                    <BudgetBreakdown summary={summary} />
+                  </>
+                ) : (
+                  <div className="p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-medium">
+                        {text?.("treasury")}
+                      </span>
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                    <Skeleton className="mt-1.5 h-1 w-full" />
+                  </div>
+                )}
               </section>
               <section className="space-y-3 rounded-lg border bg-card p-4">
                 <Skeleton className="h-6 w-40" />
@@ -234,76 +383,10 @@ export function LoadingLayout({
         </div>
       </div>
     );
-  if (variant === "catalog")
-    return (
-      <div
-        className="page-width py-8 sm:py-10"
-        role="status"
-        aria-label={label}
-      >
-        <span className="sr-only">{label}</span>
-        <div aria-hidden="true">
-          <div className="mb-5 flex h-[30px] items-center justify-between sm:h-[37.5px]">
-            <Skeleton className="h-8 w-36" />
-            <Skeleton className="h-4 w-20" />
-          </div>
-          <div className="catalog-layout">
-            <aside className="catalog-index">
-              <Skeleton className="h-9 w-full" />
-              <div className="mt-3 hidden space-y-2 lg:block">
-                {Array.from({ length: 12 }, (_, index) => (
-                  <Skeleton key={index} className="h-7 w-3/4" />
-                ))}
-              </div>
-              <Skeleton className="mt-3 h-7 w-full lg:hidden" />
-            </aside>
-            <div className="min-w-0 space-y-5">
-              {[0, 1, 2].map((index) => (
-                <div
-                  key={index}
-                  className="overflow-hidden rounded-lg border bg-card"
-                >
-                  <div className="flex h-[46px] items-center justify-between bg-secondary/40 px-3 md:h-[49px]">
-                    <Skeleton className="h-6 w-36" />
-                    <Skeleton className="h-7 w-32" />
-                  </div>
-                  <div className="hidden md:block">
-                    <TableLoading rows={4} title={false} framed={false} />
-                    <div className="space-y-3 border-t p-4">
-                      <Skeleton className="h-4 w-2/3" />
-                      <Skeleton className="h-4 w-1/2" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  // Locale and route are not known at the root boundary.
   return (
-    <div className="page-width py-8 sm:py-10">
-      <div aria-hidden="true">
-        <header className="mb-7 flex flex-wrap items-start justify-between gap-5">
-          <div className="max-w-full">
-            <Skeleton className="h-9 w-40" />
-            <Skeleton className="mt-2 h-5 w-80 max-w-full" />
-          </div>
-          <Skeleton className="h-8 w-32" />
-        </header>
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-secondary/30 px-5 py-4">
-          <Skeleton className="h-5 w-80 max-w-full" />
-          <Skeleton className="h-8 w-44" />
-        </div>
-        <div className="mb-7 grid grid-cols-2 gap-3 lg:grid-cols-[minmax(200px,1fr)_180px_210px]">
-          <Skeleton className="col-span-2 h-10 lg:col-span-1" />
-          <Skeleton className="h-10" />
-          <Skeleton className="h-10" />
-        </div>
-      </div>
-      <div className="min-h-[400px]">
-        <LibraryCardsLoading label={label} />
-      </div>
+    <div className="page-width py-8 sm:py-10" role="status">
+      <p className="text-sm text-muted-foreground">{label}</p>
     </div>
   );
 }
@@ -340,9 +423,9 @@ export function ShellLoading() {
             className="site-sidebar-content min-h-0 flex-1 space-y-1 overflow-y-auto"
             aria-hidden="true"
           >
-            {[0, 1, 2, 3].map((index) => (
+            {[Shield, BookOpen, Flag, Trophy].map((Icon, index) => (
               <div key={index} className="flex h-11 items-center gap-3 px-3">
-                <Skeleton className="size-4 shrink-0" />
+                <Icon className="size-4 shrink-0 text-muted-foreground" />
                 <Skeleton className="h-4 w-24" />
               </div>
             ))}
