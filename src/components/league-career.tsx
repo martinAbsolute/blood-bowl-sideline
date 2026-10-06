@@ -1,4 +1,5 @@
 "use client";
+import { useContentTitle } from "@/lib/use-content-title";
 
 import { Fragment, useState } from "react";
 import Link from "next/link";
@@ -274,6 +275,11 @@ export function LeagueCareer({
   const data = useQuery(
     api.leagues.getCareer,
     auth.isAuthenticated ? { entryId: id } : "skip",
+  );
+  useContentTitle(
+    data && String(data.league._id) === leagueId
+      ? `${data.entry.team.name} · ${data.league.name}`
+      : undefined,
   );
   const advance = useMutation(api.leagues.advancePlayer);
   const hire = useMutation(api.leagues.hirePlayer);

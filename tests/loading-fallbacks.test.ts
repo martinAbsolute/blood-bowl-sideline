@@ -13,6 +13,8 @@ describe("provider-free loading boundaries", () => {
     ["/rosters", "catalog"],
     ["/leagues", "leagues"],
     ["/leagues/manage/season", "league"],
+    ["/leagues/manage/season/matches/match", "league-match"],
+    ["/leagues/manage/season/teams/team", "league-career"],
     ["/users", "users"],
   ])(
     "renders skeletons before providers resolve at %s",

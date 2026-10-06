@@ -20,11 +20,19 @@ import { EditorSelect } from "./editor-select";
 import { Card } from "./ui/card";
 import type { ReactNode } from "react";
 import { LeagueCardsLoading, UsersLoading } from "./list-loading";
+import { LeagueContentLoading } from "./league-content-loading";
 
 const ignoreChange = () => {};
 
 export type LoadingVariant =
-  "library" | "editor" | "catalog" | "leagues" | "league" | "users";
+  | "library"
+  | "editor"
+  | "catalog"
+  | "leagues"
+  | "league"
+  | "league-match"
+  | "league-career"
+  | "users";
 
 export function LibraryCardsLoading({
   label,
@@ -170,6 +178,8 @@ export function LoadingLayout({
   text?: (key: string) => string;
 }) {
   const summary = team ? budgetSummary(team) : undefined;
+  if (variant === "league-match" || variant === "league-career")
+    return <LeagueContentLoading variant={variant} label={label} />;
   if (variant === "editor")
     return (
       <div
@@ -394,7 +404,7 @@ export function LoadingLayout({
         data-loading-layout={variant}
       >
         <span className="sr-only">{label}</span>
-        <div aria-hidden="true" className="flex min-h-10 items-center">
+        <div aria-hidden="true" className="mb-3 flex min-h-8 items-center">
           <ArrowLeft className="mr-2 size-4 text-muted-foreground" />
           <Skeleton className="h-4 w-24" />
         </div>
@@ -402,23 +412,28 @@ export function LoadingLayout({
           aria-hidden="true"
           className="overflow-hidden rounded-xl border bg-card"
         >
-          <div className="space-y-3 p-5 sm:p-6">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-9 w-72 max-w-full" />
-            <Skeleton className="h-5 w-56 max-w-full" />
+          <div className="flex flex-wrap items-start justify-between gap-4 p-5 sm:p-6">
+            <div className="min-w-0 flex-1 basis-64">
+              <div className="flex flex-wrap items-center gap-3">
+                <Skeleton className="h-[30px] w-72 max-w-full sm:h-[37.5px]" />
+                <Skeleton className="h-6 w-24" />
+              </div>
+              <Skeleton className="mt-2 h-5 w-56 max-w-full" />
+            </div>
+            <Skeleton className="h-10 w-24" />
           </div>
           <div className="flex gap-5 border-t bg-secondary/25 px-5 py-3">
             <Skeleton className="h-4 w-20" />
             <Skeleton className="h-4 w-28" />
           </div>
         </div>
-        <div
-          aria-hidden="true"
-          className="flex gap-3 overflow-hidden rounded-xl border p-2"
-        >
-          {[0, 1, 2].map((index) => (
-            <Skeleton key={index} className="h-10 w-28 shrink-0" />
-          ))}
+        <div aria-hidden="true">
+          <Skeleton className="h-12 w-full md:hidden" />
+          <div className="hidden flex-wrap gap-1 rounded-xl border bg-card p-1 md:flex">
+            {[0, 1, 2, 3].map((index) => (
+              <Skeleton key={index} className="h-11 w-28" />
+            ))}
+          </div>
         </div>
         <div
           aria-hidden="true"
@@ -441,9 +456,17 @@ export function LoadingLayout({
   // Once providers resolve, the page keeps its real headings and static controls.
   return (
     <div className="page-width py-8 sm:py-10" data-loading-layout={variant}>
-      <div aria-hidden="true" className="mb-7 space-y-2">
-        <Skeleton className="h-[30px] w-40 sm:h-[37.5px]" />
-        {variant !== "catalog" && <Skeleton className="h-5 w-80 max-w-full" />}
+      <div
+        aria-hidden="true"
+        className="mb-7 flex flex-wrap items-start justify-between gap-5"
+      >
+        <div className="space-y-2">
+          <Skeleton className="h-[30px] w-40 sm:h-[37.5px]" />
+          {variant !== "catalog" && (
+            <Skeleton className="h-5 w-80 max-w-full" />
+          )}
+        </div>
+        {variant === "leagues" && <Skeleton className="h-9 w-36" />}
       </div>
       {variant === "catalog" ? (
         <div className="catalog-layout" role="status">
@@ -479,11 +502,23 @@ export function LoadingLayout({
         <>
           <div
             aria-hidden="true"
-            className="mb-7 grid grid-cols-2 gap-3 lg:grid-cols-[minmax(200px,1fr)_180px_210px]"
+            className={
+              variant === "leagues"
+                ? "mb-7 flex flex-wrap items-center gap-3"
+                : "mb-7 grid grid-cols-2 gap-3 lg:grid-cols-[minmax(200px,1fr)_180px_210px]"
+            }
           >
-            <Skeleton className="col-span-2 h-10 lg:col-span-1" />
-            <Skeleton className="h-10" />
-            <Skeleton className="h-10" />
+            <Skeleton
+              className={
+                variant === "leagues"
+                  ? "h-10 min-w-48 flex-1"
+                  : "col-span-2 h-10 lg:col-span-1"
+              }
+            />
+            <Skeleton
+              className={variant === "leagues" ? "h-10 w-40" : "h-10"}
+            />
+            {variant !== "leagues" && <Skeleton className="h-10" />}
           </div>
           {variant === "leagues" ? (
             <LeagueCardsLoading label={label} />

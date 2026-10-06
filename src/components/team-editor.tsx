@@ -79,6 +79,7 @@ import Link from "next/link";
 import { PlayerIcon, StarPlayerIcon } from "./player-icon";
 import { useTeamAutosave, type SavedTeam } from "@/lib/use-team-autosave";
 import { useTeamSave } from "@/lib/use-team-save";
+import { useContentTitle } from "@/lib/use-content-title";
 const gold = (n: number) => `${(n / 1000).toLocaleString("en")}k`;
 export function TeamEditor({
   initial,
@@ -114,6 +115,7 @@ export function TeamEditor({
     leagueContext?.league.startingTreasury,
   );
   const { team, revision, change } = autosave;
+  useContentTitle(team.name.trim() || t("untitled"));
   const [dialog, setDialog] = useState<"stars" | null>(null),
     [selected, setSelected] = useState<string | null>(null),
     [search, setSearch] = useState("");

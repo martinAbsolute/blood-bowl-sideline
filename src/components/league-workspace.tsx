@@ -1,4 +1,5 @@
 "use client";
+import { useContentTitle } from "@/lib/use-content-title";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -91,6 +92,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
     api.leagues.get,
     isAuthenticated ? { leagueId: id } : "skip",
   );
+  useContentTitle(data?.league.name);
   const [teamUuid, setTeamUuid] = useState("");
   const requestedTab = searchParams.get("view") ?? "overview";
   const tab =

@@ -5,6 +5,10 @@ import { usePathname } from "next/navigation";
 import { LoadingLayout, type LoadingVariant } from "./loading-layouts";
 
 export function loadingVariantForPath(pathname: string): LoadingVariant {
+  if (/^\/leagues\/manage\/[^/]+\/matches\//.test(pathname))
+    return "league-match";
+  if (/^\/leagues\/manage\/[^/]+\/teams\//.test(pathname))
+    return "league-career";
   if (pathname.startsWith("/leagues/manage/")) return "league";
   if (pathname.startsWith("/leagues")) return "leagues";
   if (pathname === "/users") return "users";

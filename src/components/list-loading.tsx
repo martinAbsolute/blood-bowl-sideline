@@ -9,7 +9,7 @@ export function LeagueCardsLoading({ label }: { label: string }) {
         <Card
           key={index}
           aria-hidden="true"
-          className="gap-5 rounded-2xl p-5 shadow-sm sm:p-6"
+          className="grid gap-5 rounded-2xl p-5 shadow-sm sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-6"
         >
           <div className="flex items-center gap-4">
             <Skeleton className="size-14 shrink-0 rounded-2xl" />
@@ -17,9 +17,12 @@ export function LeagueCardsLoading({ label }: { label: string }) {
               <Skeleton className="h-6 w-48 max-w-full" />
               <Skeleton className="h-4 w-28" />
             </div>
-            <Skeleton className="h-6 w-24 rounded-full" />
           </div>
-          <div className="flex flex-wrap gap-6 border-t pt-4">
+          <div className="flex items-center justify-between gap-4">
+            <Skeleton className="h-6 w-24 rounded-full" />
+            <Skeleton className="size-4" />
+          </div>
+          <div className="flex flex-wrap gap-x-8 gap-y-3 border-t pt-4 sm:col-span-2">
             <Skeleton className="h-5 w-28" />
             <Skeleton className="h-5 w-32" />
             <Skeleton className="h-5 w-40" />

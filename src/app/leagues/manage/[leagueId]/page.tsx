@@ -1,7 +1,9 @@
 import { Suspense } from "react";
 import { LeagueGate } from "@/components/league-ui";
 import { LeagueWorkspace } from "@/components/league-workspace";
-import { pageMetadata } from "@/lib/site-metadata";
+import { contentMetadata } from "@/lib/content-metadata";
+import { api } from "../../../../../convex/_generated/api";
+import type { Id } from "../../../../../convex/_generated/dataModel";
 
 export async function generateMetadata({
   params,
@@ -9,10 +11,13 @@ export async function generateMetadata({
   params: Promise<{ leagueId: string }>;
 }) {
   const { leagueId } = await params;
-  return pageMetadata(
-    "League",
+  return contentMetadata(
+    api.leagues.get,
+    { leagueId: leagueId as Id<"leagues"> },
     `/leagues/manage/${leagueId}`,
+    "League",
     "League fixtures, standings and team development.",
+    (data) => data.league.name,
   );
 }
 

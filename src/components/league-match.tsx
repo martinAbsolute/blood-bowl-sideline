@@ -1,4 +1,5 @@
 "use client";
+import { useContentTitle } from "@/lib/use-content-title";
 
 import { useRef, useState } from "react";
 import { LeagueEvents } from "./league-events";
@@ -63,6 +64,11 @@ export function LeagueMatch({
   const data = useQuery(
     api.leagues.getMatch,
     auth.isAuthenticated ? { matchId: id } : "skip",
+  );
+  useContentTitle(
+    data && String(data.league._id) === leagueId
+      ? `${data.home.team.name} vs ${data.away?.team.name ?? t("leagueUi.bye")} · ${data.league.name}`
+      : undefined,
   );
   const history = useQuery(
     api.leagues.getMatchHistory,
