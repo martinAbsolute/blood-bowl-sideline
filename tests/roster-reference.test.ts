@@ -30,6 +30,22 @@ vi.mock("../src/components/position-name", () => ({
 }));
 
 describe("ruleset-aware roster references", () => {
+  it("keeps comparison facts visible without repeating shared rules", () => {
+    const html = renderToStaticMarkup(
+      createElement(RosterFacts, {
+        roster: getRoster("human")!,
+        rulesetId: "kyiv-seven-sins-sevens",
+        comparison: true,
+      }),
+    );
+    expect(html).not.toContain("650k GP");
+    expect(html).not.toContain("7–11");
+    expect(html).not.toContain("referenceSpecialists");
+    expect(html).toContain("tier:</span> 2");
+    expect(html).toContain("skillAllowance");
+    expect(html).toContain("100k GP");
+    expect(html).toContain("80k GP");
+  });
   it("shows the standard Sevens SP package separately from Kyiv", () => {
     const html = renderToStaticMarkup(
       createElement(RosterFacts, {

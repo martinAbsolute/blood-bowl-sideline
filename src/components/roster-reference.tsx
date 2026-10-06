@@ -13,6 +13,7 @@ import {
 } from "@/domain/rules";
 import { PlayerIcon } from "./player-icon";
 import { TeamAffiliations } from "./team-affiliations";
+import { sharedRosterBudget } from "@/lib/roster-ruleset";
 import {
   Table,
   TableBody,
@@ -108,9 +109,11 @@ export function RosterTable({
 export function RosterFacts({
   roster,
   rulesetId = "bb2025-default",
+  comparison = false,
 }: {
   roster: Roster;
   rulesetId?: RulesetId;
+  comparison?: boolean;
 }) {
   const t = useTranslations();
   const team = {
@@ -131,22 +134,27 @@ export function RosterFacts({
     <div className="space-y-1.5 border-t px-3 py-2.5 text-xs">
       <div className="flex flex-wrap gap-x-6 gap-y-1">
         <p>
-          <span className="font-medium">{t("rerolls")}:</span> 0–
-          {staff.rerolls.max} · {staff.rerolls.cost / 1000}k GP
+          <span className="font-medium">{t("rerolls")}:</span>{" "}
+          {!comparison && `0–${staff.rerolls.max} · `}
+          {staff.rerolls.cost / 1000}k GP
         </p>
         <p>
           <span className="font-medium">{t("apothecary")}:</span>{" "}
           {t(roster.apothecary ? "yes" : "no")}
           {roster.apothecary && ` · ${staff.apothecary.cost / 1000}k GP`}
         </p>
-        <p>
-          <span className="font-medium">{t("players")}:</span>{" "}
-          {rules.minPlayers}–{rules.maxPlayers}
-        </p>
-        <p>
-          <span className="font-medium">{t("treasury")}:</span>{" "}
-          {budget.teamBudget / 1000}k GP
-        </p>
+        {!comparison && (
+          <p>
+            <span className="font-medium">{t("players")}:</span>{" "}
+            {rules.minPlayers}–{rules.maxPlayers}
+          </p>
+        )}
+        {(!comparison || sharedRosterBudget(rulesetId) === undefined) && (
+          <p>
+            <span className="font-medium">{t("treasury")}:</span>{" "}
+            {budget.teamBudget / 1000}k GP
+          </p>
+        )}
         {tier > 0 && (
           <p>
             <span className="font-medium">{t("tier")}:</span> {tier}
@@ -165,7 +173,7 @@ export function RosterFacts({
               </>
             )}
           </p>
-        ) : (
+        ) : !comparison || budget.skillGold > 0 ? (
           <p>
             <span className="font-medium">
               {t(
@@ -181,8 +189,8 @@ export function RosterFacts({
               ? budget.skillGold
               : `${budget.skillGold / 1000}k GP`}
           </p>
-        )}
-        {isSevens(team) && (
+        ) : null}
+        {!comparison && isSevens(team) && (
           <p>
             <span className="font-medium">{t("referenceSpecialists")}:</span>{" "}
             0–4
