@@ -1,18 +1,29 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { PrefetchKind } from "next/dist/client/components/router-reducer/router-reducer-types";
 import { useConvex, useConvexAuth } from "convex/react";
 import { createNavigationPrewarmer } from "@/lib/navigation-prewarm";
 
 export function NavigationPrewarm() {
   const client = useConvex();
+  const router = useRouter();
   const { isAuthenticated, isLoading } = useConvexAuth();
-  const warm = useMemo(() => createNavigationPrewarmer(client), [client]);
   useEffect(() => {
+    const warm = createNavigationPrewarmer(client, (href, onInvalidate) => {
+      // The installed router defaults to the partial shell. FULL also resolves
+      // the destination's params/searchParams and loads its page code.
+      router.prefetch(href, { kind: PrefetchKind.FULL, onInvalidate });
+    });
     function onIntent(event: Event) {
       if (isLoading || !(event.target instanceof Element)) return;
       const link = event.target.closest<HTMLAnchorElement>("a[href]");
-      if (!link || link.hasAttribute("download") || link.target === "_blank")
+      if (
+        !link ||
+        link.hasAttribute("download") ||
+        (link.target && link.target !== "_self")
+      )
         return;
       const url = new URL(link.href, window.location.href);
       if (url.origin !== window.location.origin) return;
@@ -25,7 +36,8 @@ export function NavigationPrewarm() {
       document.removeEventListener("pointerover", onIntent);
       document.removeEventListener("focusin", onIntent);
       document.removeEventListener("touchstart", onIntent);
+      warm.dispose();
     };
-  }, [warm, isAuthenticated, isLoading]);
+  }, [client, router, isAuthenticated, isLoading]);
   return null;
 }
