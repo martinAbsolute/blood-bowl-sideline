@@ -348,6 +348,7 @@
   "savedHint": "Anyone with your UUID link can view this team. Only you can edit it.",
   "share": "Share",
   "copied": "Team link copied",
+  "shareSucceeded": "Link shared",
   "copyFailed": "Could not copy. Copy the URL from your browser address bar.",
   "print": "Print / PDF",
   "notes": "Coach’s notes",

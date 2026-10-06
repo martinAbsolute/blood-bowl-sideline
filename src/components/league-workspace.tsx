@@ -16,7 +16,6 @@ import {
   CalendarDays,
   Check,
   ClipboardList,
-  Share2,
   Flag,
   History,
   LayoutDashboard,
@@ -27,7 +26,7 @@ import {
 } from "lucide-react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
-import { shareTeamLink } from "@/lib/share-team";
+import { ShareButton } from "./share-button";
 import { DEFAULT_LEAGUE_TREASURY } from "@/domain/league-rules";
 import { getRoster } from "@/domain/catalog";
 import { canEnrollTeam } from "@/lib/league-team-eligibility";
@@ -113,7 +112,6 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
   const [selectedRound, setSelectedRound] = useState("");
   const [detailedStats, setDetailedStats] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [copyFailed, setCopyFailed] = useState(false);
   const own = usePaginatedQuery(
     api.teams.listMine,
     isAuthenticated ? { archived: false } : "skip",
@@ -229,38 +227,14 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <Button
+            <ShareButton
               variant="outline"
               className="h-10"
-              onClick={async () => {
-                try {
-                  const result = await shareTeamLink(
-                    window.location.origin + base,
-                  );
-                  setCopied(result === "copied");
-                  setCopyFailed(false);
-                } catch {
-                  setCopyFailed(true);
-                }
-              }}
-            >
-              {copied ? (
-                <Check className="size-4" />
-              ) : (
-                <Share2 className="size-4" />
-              )}
-              {t(copied ? "leagueUx.linkCopied" : "share")}
-            </Button>
+              path={base}
+              onShared={() => setCopied(true)}
+            />
           </div>
         </div>
-        {copyFailed && (
-          <p
-            role="status"
-            className="px-5 pb-4 text-sm text-muted-foreground sm:px-8"
-          >
-            {t("leagueUx.copyHint")}
-          </p>
-        )}
         <div className="flex flex-wrap gap-x-5 gap-y-3 border-t bg-secondary/25 px-5 py-3 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-2">
             <Users className="size-4" />

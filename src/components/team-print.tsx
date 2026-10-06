@@ -55,7 +55,8 @@ export function printStyles(orientation: PrintOrientation) {
     .cost { width: 16mm; text-align: right; }
     tr { break-inside: avoid; }
     thead { display: table-header-group; }
-    .added { font-weight: bold; }
+    .added, .captain { font-weight: 600; text-decoration-line: underline; text-underline-offset: 2pt; }
+    .captain { text-decoration-style: dashed; }
     .reference { break-before: page; page-break-before: always; }
     .rules { columns: ${orientation === "portrait" ? 2 : 3}; column-gap: 5mm; font-size: 9pt; line-height: 1.3; }
     .rule { margin-bottom: 3mm; break-inside: avoid; page-break-inside: avoid; }

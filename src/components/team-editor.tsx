@@ -58,14 +58,13 @@ import type { api } from "../../convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
 import { LeagueEnrollment } from "./league-enrollment";
 import { TeamBudget } from "./team-budget";
-import { shareTeamLink } from "@/lib/share-team";
+import { ShareButton } from "./share-button";
 import { hasTeamProgress, resetTeamRoster } from "@/lib/builder";
 import {
   ArrowLeft,
   ChevronRight,
   Copy,
   Ellipsis,
-  Share2,
   ChevronDown,
   Plus,
   Printer,
@@ -153,17 +152,6 @@ export function TeamEditor({
     change(next);
     setSelected(null);
     setPendingRoster(null);
-  }
-  async function share() {
-    try {
-      const result = await shareTeamLink(
-        `${window.location.origin}/teams/${team.uuid}`,
-      );
-      if (result === "copied")
-        toast.add({ type: "success", title: t("copied") });
-    } catch {
-      toast.add({ type: "error", title: t("copyFailed") });
-    }
   }
   async function copy() {
     if (duplicating) return;
@@ -256,15 +244,12 @@ export function TeamEditor({
               {t("duplicate")}
             </Button>
             {!readOnly && isAuthenticated && revision > 0 && (
-              <Button
+              <ShareButton
                 variant="outline"
                 size="sm"
-                className="hidden h-9 sm:inline-flex"
-                onClick={share}
-              >
-                <Share2 className="size-4" />
-                {t("share")}
-              </Button>
+                className="h-11 flex-1 sm:h-9 sm:flex-none"
+                path={`/teams/${team.uuid}`}
+              />
             )}
             <DropdownMenu>
               <DropdownMenuTrigger
@@ -318,12 +303,6 @@ export function TeamEditor({
                   <Copy className="size-4" />
                   {t("duplicate")}
                 </DropdownMenuItem>
-                {!readOnly && isAuthenticated && revision > 0 && (
-                  <DropdownMenuItem className="min-h-11" onClick={share}>
-                    <Share2 className="size-4" />
-                    {t("share")}
-                  </DropdownMenuItem>
-                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </>
