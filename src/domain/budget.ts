@@ -6,7 +6,7 @@ export type BudgetPool = {
   id: "team" | "skills" | "funds";
   used: number;
   limit: number;
-  unit: "GP" | "SP" | "SPP";
+  unit: "GP" | "SP" | "SPP" | "skills";
   shared: boolean;
 };
 
@@ -29,8 +29,9 @@ export function budgetSummary(team: Team, startingTreasury?: number) {
       id: "skills",
       used: totals.skills,
       limit: totals.budget.skillGold,
-      unit:
-        rules.skillCurrency === "spp"
+      unit: rules.sevens
+        ? "skills"
+        : rules.skillCurrency === "spp"
           ? "SPP"
           : rules.skillCurrency === "sp"
             ? "SP"

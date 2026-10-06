@@ -9,8 +9,14 @@ import { Input } from "./ui/input";
 import { RosterIcon } from "./player-icon";
 import { RosterFacts, RosterTable } from "./roster-reference";
 import { CreateTeamButton } from "./create-team-button";
+import type { RulesetId } from "@/domain/types";
+import { rosterReferenceHref } from "@/lib/roster-ruleset";
 
-export function RosterExplorer() {
+export function RosterExplorer({
+  rulesetId = "bb2025-default",
+}: {
+  rulesetId?: RulesetId;
+}) {
   const t = useTranslations();
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
@@ -108,7 +114,7 @@ export function RosterExplorer() {
                   </span>
                 </span>
                 <Link
-                  href={`/rosters/${r.id}`}
+                  href={rosterReferenceHref(r.id, rulesetId)}
                   className="hidden items-center gap-2 hover:underline md:flex"
                 >
                   <RosterIcon rosterId={r.id} className="size-8" />
@@ -121,7 +127,7 @@ export function RosterExplorer() {
                   variant="ghost"
                   className="h-11 gap-0.5 px-1.5 text-xs min-[360px]:gap-1 min-[360px]:px-2 min-[360px]:text-sm md:h-7 md:gap-1.5 md:px-3 md:text-sm"
                   nativeButton={false}
-                  render={<Link href={`/rosters/${r.id}`} />}
+                  render={<Link href={rosterReferenceHref(r.id, rulesetId)} />}
                 >
                   <span className="md:hidden">{t("teamDetailsShort")}</span>
                   <span className="hidden md:inline">{t("teamDetails")}</span>
@@ -130,6 +136,7 @@ export function RosterExplorer() {
                 <CreateTeamButton
                   size="sm"
                   rosterId={r.id}
+                  rulesetId={rulesetId}
                   className="h-11 gap-1 px-1.5 text-xs min-[360px]:px-2 min-[360px]:text-sm md:h-7 md:gap-1.5 md:px-3 md:text-sm"
                   iconClassName="hidden size-4 md:block"
                 />
@@ -147,8 +154,8 @@ export function RosterExplorer() {
               id={`roster-content-${r.id}`}
               className={`${expanded.has(r.id) ? "block" : "hidden"} md:block print:block`}
             >
-              <RosterTable roster={r} />
-              <RosterFacts roster={r} />
+              <RosterTable roster={r} rulesetId={rulesetId} />
+              <RosterFacts roster={r} rulesetId={rulesetId} />
             </div>
           </section>
         ))}

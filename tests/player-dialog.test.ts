@@ -360,12 +360,28 @@ it("shows the Sevens veteran ability and clears the designation on player remova
   await render();
   expect(
     document.querySelector(".player-dialog-profile")?.textContent,
-  ).toContain("sevensVeteranHelp");
+  ).toContain("sevensVeteran");
+  expect(
+    document.querySelector(".player-dialog-profile")?.textContent,
+  ).not.toContain("sevensVeteranHelp");
   await click("removePlayer");
   expect(confirmation().textContent).toContain("sevensVeteran");
   await click("removePlayer", confirmation());
   expect(team.players).toHaveLength(0);
   expect(team.veteranId).toBeUndefined();
+});
+
+it("shows no Sevens skill spend and gives a Tier 2 captain zero added-skill slots", async () => {
+  team.rulesetId = "kyiv-seven-sins-sevens";
+  team.captainId = selected;
+  await render();
+  expect(
+    document.querySelector(".player-dialog-profile")?.textContent,
+  ).not.toContain("playerModal.skillSpend");
+  expect(document.querySelector(".player-dialog")?.textContent).toContain(
+    "0/0",
+  );
+  expect(button("addSkill · Block")).toBeUndefined();
 });
 
 it("explains paired stars and removes the pair together", async () => {

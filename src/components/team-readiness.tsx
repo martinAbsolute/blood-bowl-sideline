@@ -41,9 +41,9 @@ export function TeamReadiness({
           ))}
         </ul>
       )}
-      {rules.id !== "bb2025-default" && (
+      {rules.id !== "bb2025-default" && !rules.sevens && (
         <p className="mt-4 border-t pt-3 text-[10px] leading-relaxed text-muted-foreground">
-          {t(rules.sevens ? "sevensPack" : "squadNotice")}
+          {t("squadNotice")}
         </p>
       )}
     </ReadinessCard>

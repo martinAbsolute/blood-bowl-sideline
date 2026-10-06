@@ -6,11 +6,19 @@ import { Check, LockKeyhole, Plus, Search, X } from "lucide-react";
 import {
   categories,
   getRuleset,
+  getRoster,
   skills,
   skillName,
   sortSkillIds,
 } from "@/domain/catalog";
-import { playerSkillCost, skillAccess, teamSaveIssues } from "@/domain/rules";
+import {
+  budgetFor,
+  isSevens,
+  playerSkillCost,
+  skillAccess,
+  teamSaveIssues,
+  tierFor,
+} from "@/domain/rules";
 import type { Position, Team } from "@/domain/types";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -44,6 +52,42 @@ export function PlayerSkillPicker({
   const searchRef = useRef<HTMLInputElement>(null);
   const deferredSearch = useDeferredValue(search).trim().toLowerCase();
   const rules = getRuleset(team.rulesetId);
+  const sevens = isSevens(team);
+  const tier = tierFor(team);
+  const allowance = budgetFor(team).skillGold;
+  const otherPlayers = team.players.filter((player) => player.id !== playerId);
+  const slotsRemaining = Math.max(
+    0,
+    allowance -
+      otherPlayers.reduce((sum, player) => sum + player.skills.length, 0) -
+      selected.length,
+  );
+  const secondaryMax =
+    rules.maxSecondaryByTier?.[tier] ?? rules.maxSecondaryPerTeam;
+  const secondaryUsed =
+    otherPlayers.reduce((sum, player) => {
+      const otherPosition = getRoster(team.rosterId)?.players.find(
+        (item) => item.id === player.positionId,
+      );
+      return (
+        sum +
+        player.skills.filter(
+          (id) =>
+            otherPosition && skillAccess(otherPosition, id) === "secondary",
+        ).length
+      );
+    }, 0) +
+    selected.filter((id) => skillAccess(position, id) === "secondary").length;
+  const secondaryRemaining = Math.max(0, secondaryMax - secondaryUsed);
+  const guidance =
+    sevens &&
+    (tier === 1
+      ? "playerModal.sevensTierOne"
+      : tier === 2 && captain
+        ? "playerModal.sevensCaptain"
+        : slotsRemaining === 0
+          ? "playerModal.sevensFull"
+          : undefined);
   const unit = rules.skillCurrency ? t(rules.skillCurrency) : "GP";
   const formatCost = (cost: number) =>
     rules.skillCurrency ? `${cost} ${unit}` : `${cost / 1000}k GP`;
@@ -63,13 +107,23 @@ export function PlayerSkillPicker({
         ),
     );
   }
-  const available = orderedSkills.filter(
+  const available = [
+    ...new Set([...orderedSkills, ...(sevens ? selected : [])]),
+  ].filter(
     (id) =>
-      skillAccess(position, id) &&
-      !position.skills.some((base) => base.split(":")[0] === id) &&
-      !(captain && id === "pro") &&
-      (category === "all" || skillsById.get(id)?.category === category) &&
-      skillName(id).toLowerCase().includes(deferredSearch),
+      (sevens && selected.includes(id)) ||
+      (skillAccess(position, id) &&
+        !position.skills.some((base) => base.split(":")[0] === id) &&
+        !(captain && id === "pro") &&
+        (!sevens ||
+          (!guidance &&
+            !full &&
+            id !== "leader" &&
+            (skillAccess(position, id) !== "secondary" ||
+              secondaryRemaining > 0) &&
+            !blocked([...selected, id]))) &&
+        (category === "all" || skillsById.get(id)?.category === category) &&
+        skillName(id).toLowerCase().includes(deferredSearch)),
   );
   const availableCategories = Object.entries(categories).filter(
     ([, code]) =>
@@ -83,76 +137,109 @@ export function PlayerSkillPicker({
       aria-label={t("playerModal.browseSkills")}
     >
       <div className="player-skill-toolbar">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <h3 className="text-sm font-semibold">
-            {t("playerModal.browseSkills")}
-          </h3>
-          <span className="font-mono text-xs text-muted-foreground">
-            {available.length}
-          </span>
-        </div>
-        <div className="relative">
-          <Search
-            aria-hidden="true"
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-          />
-          <Input
-            ref={searchRef}
-            className="h-11 bg-card pl-9 pr-11 sm:h-8 sm:pr-8"
-            maxLength={80}
-            value={search}
-            onChange={(event) => {
-              setSearch(event.target.value);
-              if (listRef.current) listRef.current.scrollTop = 0;
-            }}
-            placeholder={t("searchSkills")}
-            aria-label={t("searchSkills")}
-          />
-          {search && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-0 top-0 size-11 sm:size-8"
-              aria-label={t("playerModal.clearSearch")}
-              onClick={() => {
-                setSearch("");
-                searchRef.current?.focus();
-              }}
-            >
-              <X className="size-4" />
-            </Button>
-          )}
-        </div>
-        <div
-          className="mt-3 flex flex-wrap gap-1.5"
-          role="group"
-          aria-label={t("playerModal.filterCategory")}
-        >
-          {[["all", ""], ...availableCategories].map(([id]) => (
-            <button
-              key={id}
-              type="button"
-              aria-pressed={category === id}
-              className={`player-skill-filter ${id !== "all" ? `skill-${id}` : ""}`}
-              onClick={() => {
-                setCategory(id);
-                if (listRef.current) listRef.current.scrollTop = 0;
-              }}
-            >
-              {id !== "all" && (
-                <span className="player-skill-dot" aria-hidden="true" />
+        {sevens && (
+          <div
+            role="status"
+            className="mb-3 space-y-1 rounded-md bg-secondary/50 p-3 text-sm"
+          >
+            {!guidance && !full && (
+              <p>
+                {t("playerModal.sevensSlots", {
+                  remaining: slotsRemaining,
+                  total: allowance,
+                })}
+              </p>
+            )}
+            {!guidance && !full && secondaryMax > 0 && slotsRemaining > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {t("playerModal.sevensSecondary", {
+                  remaining: secondaryRemaining,
+                  total: secondaryMax,
+                })}
+              </p>
+            )}
+            {guidance && <p className="font-medium">{t(guidance)}</p>}
+            {!guidance && full && (
+              <p className="font-medium">
+                {t("skillLimitReached")} {t("playerModal.makeRoom")}
+              </p>
+            )}
+          </div>
+        )}
+        {(!sevens || (!guidance && !full)) && (
+          <>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h3 className="text-sm font-semibold">
+                {t("playerModal.browseSkills")}
+              </h3>
+              <span className="font-mono text-xs text-muted-foreground">
+                {available.length}
+              </span>
+            </div>
+            <div className="relative">
+              <Search
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+              />
+              <Input
+                ref={searchRef}
+                className="h-11 bg-card pl-9 pr-11 sm:h-8 sm:pr-8"
+                maxLength={80}
+                value={search}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  if (listRef.current) listRef.current.scrollTop = 0;
+                }}
+                placeholder={t("searchSkills")}
+                aria-label={t("searchSkills")}
+              />
+              {search && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 size-11 sm:size-8"
+                  aria-label={t("playerModal.clearSearch")}
+                  onClick={() => {
+                    setSearch("");
+                    searchRef.current?.focus();
+                  }}
+                >
+                  <X className="size-4" />
+                </Button>
               )}
-              {t(
-                id === "all"
-                  ? "playerModal.allSkills"
-                  : `skillCategories.${id}`,
-              )}
-            </button>
-          ))}
-        </div>
-        <p role="status" className="sr-only">
-          {full ? t("skillLimitReached") : ""}
-        </p>
+            </div>
+            <div
+              className="mt-3 flex flex-wrap gap-1.5"
+              role="group"
+              aria-label={t("playerModal.filterCategory")}
+            >
+              {[["all", ""], ...availableCategories].map(([id]) => (
+                <button
+                  key={id}
+                  type="button"
+                  aria-pressed={category === id}
+                  className={`player-skill-filter ${id !== "all" ? `skill-${id}` : ""}`}
+                  onClick={() => {
+                    setCategory(id);
+                    if (listRef.current) listRef.current.scrollTop = 0;
+                  }}
+                >
+                  {id !== "all" && (
+                    <span className="player-skill-dot" aria-hidden="true" />
+                  )}
+                  {t(
+                    id === "all"
+                      ? "playerModal.allSkills"
+                      : `skillCategories.${id}`,
+                  )}
+                </button>
+              ))}
+            </div>
+            <p role="status" className="sr-only">
+              {full ? t("skillLimitReached") : ""}
+            </p>
+          </>
+        )}
       </div>
       <ul
         ref={listRef}
@@ -161,7 +248,7 @@ export function PlayerSkillPicker({
         aria-busy={search.trim().toLowerCase() !== deferredSearch}
       >
         {available.map((id) => {
-          const skill = skillsById.get(id)!;
+          const skill = skillsById.get(id);
           const chosen = selected.includes(id);
           const next = sortSkillIds(
             chosen
@@ -200,14 +287,16 @@ export function PlayerSkillPicker({
               <div className="min-w-0 flex-1">
                 <SkillBox id={id} added={chosen} />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {t(skillAccess(position, id)!)}
-                  {skill.isElite ? ` · ${t("elite")}` : ""}
+                  {skillAccess(position, id) && t(skillAccess(position, id)!)}
+                  {skill?.isElite ? ` · ${t("elite")}` : ""}
                 </p>
               </div>
-              <span className="shrink-0 font-mono text-xs text-muted-foreground">
-                {chosen ? "−" : "+"}
-                {formatCost(Math.abs(delta))}
-              </span>
+              {!sevens && (
+                <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                  {chosen ? "−" : "+"}
+                  {formatCost(Math.abs(delta))}
+                </span>
+              )}
               {restriction ? (
                 <RuleHelp
                   title={skillName(id)}
@@ -258,7 +347,7 @@ export function PlayerSkillPicker({
             </li>
           );
         })}
-        {!available.length && (
+        {!available.length && !guidance && (
           <li className="flex flex-col items-center gap-4 px-4 py-8 text-center text-sm text-muted-foreground">
             <div className="space-y-2">
               <Search className="mx-auto size-5" aria-hidden="true" />

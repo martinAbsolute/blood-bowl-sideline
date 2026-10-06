@@ -12,16 +12,19 @@ import { toast } from "./ui/toast";
 import { useConvexAuth } from "convex/react";
 import { useTeamSave } from "@/lib/use-team-save";
 import { saveCloudDraft } from "@/lib/cloud-save";
+import type { RulesetId } from "@/domain/types";
 
 export function CreateTeamButton({
   className,
   rosterId,
+  rulesetId,
   leagueId,
   size,
   iconClassName = "size-4",
 }: {
   className?: string;
   rosterId?: string;
+  rulesetId?: RulesetId;
   leagueId?: string;
   size?: "default" | "sm";
   iconClassName?: string;
@@ -41,6 +44,7 @@ export function CreateTeamButton({
         onClick={async () => {
           if (creating) return;
           const team = newTeam(crypto.randomUUID(), rosterId);
+          if (rulesetId) team.rulesetId = rulesetId;
           setCreating(true);
           const release = sync.editing(team.uuid);
           try {

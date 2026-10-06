@@ -10,7 +10,12 @@ import {
   starPairs,
   stars,
 } from "@/domain/catalog";
-import { isSevens, playerMovement, playerSkillCost } from "@/domain/rules";
+import {
+  isSevens,
+  playerMovement,
+  playerSkillCost,
+  tierFor,
+} from "@/domain/rules";
 import type { Team } from "@/domain/types";
 import {
   Dialog,
@@ -25,6 +30,7 @@ import { PlayerName } from "./player-name";
 import { PlayerSkillPicker } from "./player-skill-picker";
 import { SkillBox, SkillList } from "./skill-box";
 import { positionLabel } from "./position-name";
+import { RuleInfo } from "./rule-help";
 
 const gold = (value: number) => (value / 1000).toLocaleString("en") + "k GP";
 
@@ -91,11 +97,15 @@ export function PlayerDialog({
   const skillCost = position
     ? playerSkillCost(draftTeam, position, draft.skills)
     : 0;
-  const max = Math.min(
-    6,
-    rules.teamOverrides?.[roster.id]?.maxSkillsPerPlayer ??
-      (rules.id === "eurobowl-2026" ? 2 : rules.maxAdvancementsPerPlayer),
-  );
+  const sevensSkillBlocked =
+    isSevens(team) && (tierFor(team) === 1 || (tierFor(team) === 2 && captain));
+  const max = sevensSkillBlocked
+    ? 0
+    : Math.min(
+        6,
+        rules.teamOverrides?.[roster.id]?.maxSkillsPerPlayer ??
+          (rules.id === "eurobowl-2026" ? 2 : rules.maxAdvancementsPerPlayer),
+      );
   const formatSkills = (value: number) =>
     rules.skillCurrency ? value + " " + t(rules.skillCurrency) : gold(value);
   const removedStars = star
@@ -271,7 +281,7 @@ export function PlayerDialog({
                   )}
                 </dd>
               </div>
-              {player && (
+              {player && !isSevens(team) && (
                 <div className="flex items-center justify-between gap-3">
                   <dt className="text-muted-foreground">
                     {t("playerModal.skillSpend")}
@@ -331,10 +341,14 @@ export function PlayerDialog({
                 </p>
               )}
               {veteran && (
-                <p className="text-xs text-muted-foreground">
-                  <strong>{t("sevensVeteran")}</strong> ·{" "}
-                  {t("sevensVeteranHelp")}
-                </p>
+                <div className="flex items-center gap-1 text-xs font-medium text-primary">
+                  {t("sevensVeteran")}
+                  <RuleInfo
+                    title={t("sevensVeteran")}
+                    description={t("sevensVeteranHelp")}
+                    label={t("explainRule", { name: t("sevensVeteran") })}
+                  />
+                </div>
               )}
             </div>
           </section>

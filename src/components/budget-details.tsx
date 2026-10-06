@@ -5,7 +5,7 @@ import { RuleInfo } from "./rule-help";
 
 const gold = (n: number) => `${(n / 1000).toLocaleString("en")}k`;
 const amount = (n: number, unit: BudgetPool["unit"]) =>
-  unit === "GP" ? gold(n) : `${n} ${unit}`;
+  unit === "GP" ? gold(n) : unit === "skills" ? String(n) : `${n} ${unit}`;
 
 function usePoolLabel() {
   const t = useTranslations();
@@ -14,11 +14,13 @@ function usePoolLabel() {
       ? t("treasury")
       : pool.id === "funds"
         ? t("flowingFunds")
-        : pool.unit === "GP"
-          ? t("skillGold")
-          : pool.unit === "SP"
-            ? t("skillPoints")
-            : t("spp");
+        : pool.unit === "skills"
+          ? t("addedSkills")
+          : pool.unit === "GP"
+            ? t("skillGold")
+            : pool.unit === "SP"
+              ? t("skillPoints")
+              : t("spp");
 }
 
 function BudgetMeter({ pool }: { pool: BudgetPool }) {

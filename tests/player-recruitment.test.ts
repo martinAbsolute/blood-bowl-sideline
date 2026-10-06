@@ -105,3 +105,60 @@ it("offers recruitment when World Cup stars do not satisfy the regular-player mi
   await render();
   expect(trigger().getAttribute("aria-expanded")).toBe("true");
 });
+
+it("blocks a fifth Sevens specialist while leaving Linemen available and reopens after removal", async () => {
+  team.rulesetId = "kyiv-seven-sins-sevens";
+  team.players = ["human-2", "human-2", "human-3", "human-3"].map(
+    (positionId, index) => ({
+      id: `specialist-${index}`,
+      positionId,
+      name: "",
+      skills: [],
+    }),
+  );
+  await render();
+  const rows = () => Array.from(container.querySelectorAll("tbody tr"));
+  const linemanRow = rows()[0];
+  const specialistRow = rows()[2];
+  expect(
+    specialistRow.querySelector('[title="sevensSpecialistsFull"]'),
+  ).not.toBeNull();
+  expect(
+    specialistRow.querySelector<HTMLButtonElement>(
+      '[aria-label="increaseQuantity"]',
+    )!.disabled,
+  ).toBe(true);
+  expect(
+    linemanRow.querySelector<HTMLButtonElement>(
+      '[aria-label="increaseQuantity"]',
+    )!.disabled,
+  ).toBe(false);
+  await act(async () =>
+    specialistRow
+      .querySelector<HTMLButtonElement>('[aria-label="decreaseQuantity"]')!
+      .click(),
+  );
+  expect(
+    rows()[2].querySelector<HTMLButtonElement>(
+      '[aria-label="increaseQuantity"]',
+    )!.disabled,
+  ).toBe(false);
+});
+
+it("caps Sevens recruitment at eleven and does not apply specialist limits to ordinary teams", async () => {
+  team.rulesetId = "kyiv-seven-sins-sevens";
+  players(11);
+  await render();
+  await act(async () => trigger().click());
+  const increases = () =>
+    Array.from(
+      container.querySelectorAll<HTMLButtonElement>(
+        '[aria-label="increaseQuantity"]',
+      ),
+    );
+  expect(increases().every((button) => button.disabled)).toBe(true);
+  team.rulesetId = "bb2025-default";
+  await render();
+  expect(increases()[0].disabled).toBe(false);
+  expect(container.textContent).not.toContain("sevensSpecialists");
+});

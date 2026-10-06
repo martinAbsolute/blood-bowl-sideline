@@ -2,8 +2,8 @@
 
 import { useRef, useState } from "react";
 import { useTranslations } from "gt-next";
-import { getRoster } from "@/domain/catalog";
-import { isSevens } from "@/domain/rules";
+import { getRoster, getRuleset } from "@/domain/catalog";
+import { isSevens, isLineman } from "@/domain/rules";
 import { needsPlayerRecruitment } from "@/lib/builder";
 import type { Team } from "@/domain/types";
 import { PlayerIcon } from "./player-icon";
@@ -54,6 +54,12 @@ export function PlayerRecruitment({
   );
   const playerCount = team.players.length + team.stars.length;
   const needsPlayers = needsPlayerRecruitment(team);
+  const rules = getRuleset(team.rulesetId);
+  const sevens = isSevens(team);
+  const specialists = team.players.filter((player) => {
+    const position = roster.players.find((p) => p.id === player.positionId);
+    return position && !isLineman(position);
+  }).length;
 
   function updateRecruitment(next: Team) {
     // Keep the controls in place while recruiting, even at the minimum.
@@ -81,6 +87,27 @@ export function PlayerRecruitment({
             {t("recruitPlayers")}
           </AccordionTrigger>
           <AccordionContent className="border-t p-0">
+            {sevens && (
+              <div
+                className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-2 text-xs text-muted-foreground"
+                role="status"
+              >
+                <span>
+                  {t(
+                    playerCount < rules.minPlayers
+                      ? "sevensRecruitMore"
+                      : "sevensBench",
+                    {
+                      count: Math.max(0, rules.minPlayers - playerCount),
+                      remaining: Math.max(0, rules.maxPlayers - playerCount),
+                    },
+                  )}
+                </span>
+                <span className="font-mono">
+                  {t("sevensSpecialists", { count: specialists, max: 4 })}
+                </span>
+              </div>
+            )}
             <Table
               aria-label={t("recruitPlayers")}
               className="min-w-[740px] table-auto md:table-fixed"
@@ -108,7 +135,10 @@ export function PlayerRecruitment({
                   const matching = team.players.filter(
                     (x) => x.positionId === p.id,
                   );
-                  const max = Number(p.qty.split("-")[1]);
+                  const max = Math.min(
+                    Number(p.qty.split("-")[1]),
+                    rules.maxPlayers,
+                  );
                   return (
                     <TableRow key={p.id} className="h-12">
                       <TableCell className="pl-3">
@@ -121,6 +151,15 @@ export function PlayerRecruitment({
                             {positionLabel(p.position)}
                           </strong>
                         </div>
+                        {sevens && (
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {t(
+                              isLineman(p)
+                                ? "sevensLineman"
+                                : "sevensSpecialist",
+                            )}
+                          </p>
+                        )}
                       </TableCell>
                       {[p.ma, p.st, p.ag, p.pa, p.av].map((stat, index) => (
                         <TableCell
@@ -139,13 +178,21 @@ export function PlayerRecruitment({
                       <TableCell className="text-right font-mono text-xs">
                         {p.cost / 1000}k
                       </TableCell>
-                      <TableCell className="sticky right-0 bg-card pr-3">
+                      <TableCell
+                        className="sticky right-0 bg-card pr-3"
+                        title={
+                          sevens && !isLineman(p) && specialists >= 4
+                            ? t("sevensSpecialistsFull")
+                            : undefined
+                        }
+                      >
                         <QuantityStepper
                           label={positionLabel(p.position)}
                           value={matching.length}
                           max={max}
                           increaseDisabled={
-                            playerCount >= (isSevens(team) ? 11 : 16)
+                            playerCount >= rules.maxPlayers ||
+                            (sevens && !isLineman(p) && specialists >= 4)
                           }
                           onDecrease={() => {
                             const player = matching[matching.length - 1];

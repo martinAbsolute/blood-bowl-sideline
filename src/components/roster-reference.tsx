@@ -2,7 +2,15 @@
 import { useTranslations } from "gt-next";
 import { SkillList } from "./skill-box";
 import { PositionName } from "./position-name";
-import type { Roster } from "@/domain/types";
+import type { Roster, RulesetId } from "@/domain/types";
+import { getRuleset, newTeam } from "@/domain/catalog";
+import {
+  budgetFor,
+  isLineman,
+  isSevens,
+  staffInfo,
+  tierFor,
+} from "@/domain/rules";
 import { PlayerIcon } from "./player-icon";
 import { TeamAffiliations } from "./team-affiliations";
 import {
@@ -14,8 +22,15 @@ import {
   TableRow,
 } from "./ui/table";
 
-export function RosterTable({ roster }: { roster: Roster }) {
+export function RosterTable({
+  roster,
+  rulesetId = "bb2025-default",
+}: {
+  roster: Roster;
+  rulesetId?: RulesetId;
+}) {
   const t = useTranslations();
+  const rules = getRuleset(rulesetId);
   return (
     <Table
       className="reference-table min-w-[856px] table-fixed"
@@ -55,7 +70,14 @@ export function RosterTable({ roster }: { roster: Roster }) {
                   <p className="font-medium">
                     <PositionName position={p.position} />
                   </p>
-                  <p className="text-[11px] text-muted-foreground">{p.qty}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    0–
+                    {Math.min(
+                      Number(p.qty.split("-")[1]),
+                      rules.maxPlayers,
+                      rules.sevens && !isLineman(p) ? 4 : Infinity,
+                    )}
+                  </p>
                 </div>
               </div>
             </TableCell>
@@ -83,22 +105,83 @@ export function RosterTable({ roster }: { roster: Roster }) {
   );
 }
 
-export function RosterFacts({ roster }: { roster: Roster }) {
+export function RosterFacts({
+  roster,
+  rulesetId = "bb2025-default",
+}: {
+  roster: Roster;
+  rulesetId?: RulesetId;
+}) {
   const t = useTranslations();
+  const team = {
+    ...newTeam("00000000-0000-4000-8000-000000000000", roster.id),
+    rulesetId,
+  };
+  const rules = getRuleset(rulesetId);
+  const staff = staffInfo(team);
+  const tier = tierFor(team);
+  const budget = budgetFor(team);
   return (
     <div className="space-y-1.5 border-t px-3 py-2.5 text-xs">
       <div className="flex flex-wrap gap-x-6 gap-y-1">
         <p>
           <span className="font-medium">{t("rerolls")}:</span> 0–
-          {roster.rerolls.max} · {roster.rerolls.cost / 1000}k GP
+          {staff.rerolls.max} · {staff.rerolls.cost / 1000}k GP
         </p>
         <p>
           <span className="font-medium">{t("apothecary")}:</span>{" "}
           {t(roster.apothecary ? "yes" : "no")}
+          {roster.apothecary && ` · ${staff.apothecary.cost / 1000}k GP`}
         </p>
         <p>
-          <span className="font-medium">{t("tier")}:</span> {roster.tier}
+          <span className="font-medium">{t("players")}:</span>{" "}
+          {rules.minPlayers}–{rules.maxPlayers}
         </p>
+        <p>
+          <span className="font-medium">{t("treasury")}:</span>{" "}
+          {budget.teamBudget / 1000}k GP
+        </p>
+        {tier > 0 && (
+          <p>
+            <span className="font-medium">{t("tier")}:</span> {tier}
+          </p>
+        )}
+        {isSevens(team) ? (
+          <p>
+            <span className="font-medium">{t("skillAllowance")}:</span>{" "}
+            {t("primary")}{" "}
+            {budget.skillGold - (rules.maxSecondaryByTier?.[tier] ?? 0)}
+            {(rules.maxSecondaryByTier?.[tier] ?? 0) > 0 && (
+              <>
+                {" "}
+                · {t("referenceFlexibleSkill")}{" "}
+                {rules.maxSecondaryByTier?.[tier]}
+              </>
+            )}
+          </p>
+        ) : (
+          <p>
+            <span className="font-medium">
+              {t(
+                rules.skillCurrency === "spp"
+                  ? "spp"
+                  : rules.skillCurrency === "sp"
+                    ? "skillPoints"
+                    : "skillGold",
+              )}
+              :
+            </span>{" "}
+            {rules.skillCurrency
+              ? budget.skillGold
+              : `${budget.skillGold / 1000}k GP`}
+          </p>
+        )}
+        {isSevens(team) && (
+          <p>
+            <span className="font-medium">{t("referenceSpecialists")}:</span>{" "}
+            0–4
+          </p>
+        )}
         {roster.bigGuyMax !== undefined && (
           <p>
             <span className="font-medium">{t("bigGuyLimit")}:</span>{" "}

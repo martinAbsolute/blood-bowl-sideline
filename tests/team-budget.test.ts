@@ -106,6 +106,20 @@ it("switches the rendered meters and currencies with the ruleset", async () => {
   }
 });
 
+it("shows Sevens skill slots without currency or the rules dump", async () => {
+  const team = newTeam(crypto.randomUUID());
+  team.rulesetId = "kyiv-seven-sins-sevens";
+  await act(async () =>
+    root.render(createElement(TeamBudget, { team, floating: false })),
+  );
+  const skillMeter = container.querySelector('[data-budget-meter="skills"]')!;
+  expect(skillMeter.textContent).toContain("addedSkills");
+  expect(skillMeter.textContent).toContain("0 / 1");
+  expect(skillMeter.textContent).not.toContain("SP");
+  expect(container.textContent).not.toContain("sevensPack");
+  expect(container.textContent).not.toContain("squadNotice");
+});
+
 it("shows legal EuroBowl Orc skills normally and warns when the shared reserve is exceeded", async () => {
   const team = newTeam(crypto.randomUUID(), "orc");
   team.rulesetId = "eurobowl-2026";

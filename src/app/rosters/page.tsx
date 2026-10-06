@@ -3,13 +3,19 @@ import { TeamCatalog } from "@/components/team-catalog";
 import { Suspense } from "react";
 import { WorkspaceLoading } from "@/components/workspace-loading";
 import { pageMetadata } from "@/lib/site-metadata";
+import { rosterRuleset } from "@/lib/roster-ruleset";
 export const metadata = pageMetadata(
   "BB2025 Rosters & Players",
   "/rosters",
   "Explore all 31 Blood Bowl rosters: player stats, skills, star players and team costs. Choose your roster and build a team for your next game.",
 );
 export default function Page(props: {
-  searchParams: Promise<{ roster?: string; draft?: string; new?: string }>;
+  searchParams: Promise<{
+    roster?: string;
+    draft?: string;
+    new?: string;
+    ruleset?: string | string[];
+  }>;
 }) {
   return (
     <Suspense fallback={<WorkspaceLoading variant="catalog" />}>
@@ -20,7 +26,12 @@ export default function Page(props: {
 async function RosterPage({
   searchParams,
 }: {
-  searchParams: Promise<{ roster?: string; draft?: string; new?: string }>;
+  searchParams: Promise<{
+    roster?: string;
+    draft?: string;
+    new?: string;
+    ruleset?: string | string[];
+  }>;
 }) {
   const params = await searchParams;
   return params.roster || params.draft || params.new === "1" ? (
@@ -30,6 +41,6 @@ async function RosterPage({
       fresh={params.new === "1"}
     />
   ) : (
-    <TeamCatalog />
+    <TeamCatalog rulesetId={rosterRuleset(params.ruleset)} />
   );
 }

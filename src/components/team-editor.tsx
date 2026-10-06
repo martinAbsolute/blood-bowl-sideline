@@ -62,6 +62,7 @@ import { Checkbox } from "./ui/checkbox";
 import { PlayerDialog } from "./player-dialog";
 import { positionLabel } from "./position-name";
 import { TeamSupport } from "./team-support";
+import { RuleInfo } from "./rule-help";
 import type { api } from "../../convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
 import { LeagueEnrollment } from "./league-enrollment";
@@ -132,6 +133,18 @@ export function TeamEditor({
     rules = getRuleset(team.rulesetId),
     totals = summarize(team, leagueContext?.league.startingTreasury);
   const requiresCaptain = roster.specialRules.includes("Team Captain");
+  const veteran = team.players.find((player) => player.id === team.veteranId);
+  const veteranPosition = roster.players.find(
+    (position) => position.id === veteran?.positionId,
+  );
+  const eligibleVeterans = team.players.flatMap((player, index) => {
+    const position = roster.players.find(
+      (item) => item.id === player.positionId,
+    );
+    return position && isLineman(position)
+      ? [{ player, position, number: index + 1 }]
+      : [];
+  });
   async function switchRoster(rosterId: string) {
     if (switchingRoster) return;
     const next = resetTeamRoster(
@@ -337,7 +350,9 @@ export function TeamEditor({
           <Badge
             variant="outline"
             className="h-auto min-h-6 max-w-full whitespace-normal text-left"
-            render={<Link href={`/rosters/${roster.id}`} />}
+            render={
+              <Link href={`/rosters/${roster.id}?ruleset=${team.rulesetId}`} />
+            }
           >
             <RosterIcon rosterId={roster.id} className="size-4" />
             {roster.name}
@@ -384,9 +399,52 @@ export function TeamEditor({
               </span>
             </div>
             {isSevens(team) && (
-              <p className="mb-3 px-1 text-xs leading-relaxed text-muted-foreground">
-                <strong>{t("sevensVeteran")}</strong> · {t("sevensVeteranHelp")}
-              </p>
+              <div className="mb-3 flex flex-wrap items-center gap-2 px-1">
+                <label htmlFor="sevens-veteran" className="text-xs font-medium">
+                  {t("sevensVeteran")}
+                </label>
+                <RuleInfo
+                  title={t("sevensVeteran")}
+                  description={t("sevensVeteranHelp")}
+                  label={t("explainRule", { name: t("sevensVeteran") })}
+                />
+                {readOnly ? (
+                  <span className="text-sm">
+                    {veteran?.name ||
+                      (veteranPosition
+                        ? positionLabel(veteranPosition.position)
+                        : t("sevensChooseVeteran"))}
+                  </span>
+                ) : (
+                  <EditorSelect
+                    id="sevens-veteran"
+                    value={team.veteranId ?? ""}
+                    disabled={eligibleVeterans.length === 0}
+                    wrapperClassName="mt-0 w-full sm:w-64"
+                    onChange={(event) => {
+                      const next = { ...team };
+                      if (event.target.value)
+                        next.veteranId = event.target.value;
+                      else delete next.veteranId;
+                      change(next);
+                    }}
+                  >
+                    <option value="">
+                      {t(
+                        eligibleVeterans.length
+                          ? "sevensChooseVeteran"
+                          : "sevensRecruitVeteran",
+                      )}
+                    </option>
+                    {eligibleVeterans.map(({ player, position, number }) => (
+                      <option key={player.id} value={player.id}>
+                        {number}.{" "}
+                        {player.name || positionLabel(position.position)}
+                      </option>
+                    ))}
+                  </EditorSelect>
+                )}
+              </div>
             )}
             <div className="overflow-hidden rounded-lg border bg-card">
               {!team.players.length && !team.stars.length ? (
@@ -414,14 +472,6 @@ export function TeamEditor({
                       {requiresCaptain && (
                         <TableHead className="w-16 text-center">
                           {t("teamCaptain")}
-                        </TableHead>
-                      )}
-                      {isSevens(team) && (
-                        <TableHead
-                          className="w-16 text-center"
-                          title={t("sevensVeteranHelp")}
-                        >
-                          {t("sevensVeteran")}
                         </TableHead>
                       )}
                       <TableHead className="w-16 pr-3 text-right">
@@ -533,45 +583,42 @@ export function TeamEditor({
                                 <Checkbox
                                   checked={team.captainId === p.id}
                                   disabled={
-                                    readOnly || pos.position.includes("Big Guy")
+                                    readOnly ||
+                                    pos.position.includes("Big Guy") ||
+                                    (isSevens(team) &&
+                                      totals.tier === 2 &&
+                                      p.skills.length > 0 &&
+                                      team.captainId !== p.id)
+                                  }
+                                  title={
+                                    isSevens(team) &&
+                                    totals.tier === 2 &&
+                                    p.skills.length > 0
+                                      ? t("sevensCaptainSkillConflict")
+                                      : undefined
                                   }
                                   aria-label={`${t("teamCaptain")} · ${p.name || positionLabel(pos.position)}`}
                                   onCheckedChange={(checked) => {
                                     const next = { ...team };
                                     if (checked) {
                                       next.captainId = p.id;
-                                      next.players = team.players.map(
-                                        (player) =>
-                                          player.id === p.id
-                                            ? {
-                                                ...player,
-                                                skills: player.skills.filter(
-                                                  (id) => id !== "pro",
-                                                ),
-                                              }
-                                            : player,
-                                      );
+                                      if (!isSevens(team))
+                                        next.players = team.players.map(
+                                          (player) =>
+                                            player.id === p.id
+                                              ? {
+                                                  ...player,
+                                                  skills: player.skills.filter(
+                                                    (id) => id !== "pro",
+                                                  ),
+                                                }
+                                              : player,
+                                        );
                                     } else delete next.captainId;
                                     change(next);
                                   }}
                                 />
                               </label>
-                            </TableCell>
-                          )}
-                          {isSevens(team) && (
-                            <TableCell className="text-center">
-                              <Checkbox
-                                checked={team.veteranId === p.id}
-                                disabled={readOnly || !isLineman(pos)}
-                                aria-label={`${t("sevensVeteran")} · ${p.name || positionLabel(pos.position)}`}
-                                title={t("sevensVeteranHelp")}
-                                onCheckedChange={(checked) => {
-                                  const next = { ...team };
-                                  if (checked) next.veteranId = p.id;
-                                  else delete next.veteranId;
-                                  change(next);
-                                }}
-                              />
                             </TableCell>
                           )}
                           <TableCell className="pr-5 text-right font-mono text-xs">
@@ -670,7 +717,6 @@ export function TeamEditor({
                               <TableSkills ids={s.skills} label={t("skills")} />
                             </TableCell>
                             {requiresCaptain && <TableCell />}
-                            {isSevens(team) && <TableCell />}
                             <TableCell className="pr-5 text-right font-mono text-xs">
                               {gold(s.cost)}
                             </TableCell>
@@ -687,7 +733,7 @@ export function TeamEditor({
                   </TableBody>
                 </Table>
               )}
-              {!readOnly && (
+              {!readOnly && !isSevens(team) && (
                 <div className="flex justify-end border-t px-3 py-2">
                   <Button
                     variant="ghost"
