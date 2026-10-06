@@ -165,6 +165,9 @@ settings:
 overrides:
   vitest>jsdom: '-'
 
+patchedDependencies:
+  '@convex-dev/auth@0.0.95': 0e70f8a0c21162c56f655021dc6def9e9702d644e9519fd6208edaaf0b33568a
+
 importers:
 
   .:
@@ -177,7 +180,7 @@ importers:
         version: 1.8.0(@date-fns/tz@1.5.0)(@types/react@19.3.0)(date-fns@4.4.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@convex-dev/auth':
         specifier: ^0.0.95
-        version: 0.0.95(@auth/core@0.41.3)(convex@1.46.0(react@19.3.0))(react@19.3.0)
+        version: 0.0.95(patch_hash=0e70f8a0c21162c56f655021dc6def9e9702d644e9519fd6208edaaf0b33568a)(@auth/core@0.41.3)(convex@1.46.0(react@19.3.0))(react@19.3.0)
       '@convex-dev/presence':
         specifier: ^0.4.0
         version: 0.4.0(convex@1.46.0(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -5427,7 +5430,7 @@ snapshots:
       picocolors: 1.1.1
       sisteransi: 1.0.5
 
-  '@convex-dev/auth@0.0.95(@auth/core@0.41.3)(convex@1.46.0(react@19.3.0))(react@19.3.0)':
+  '@convex-dev/auth@0.0.95(patch_hash=0e70f8a0c21162c56f655021dc6def9e9702d644e9519fd6208edaaf0b33568a)(@auth/core@0.41.3)(convex@1.46.0(react@19.3.0))(react@19.3.0)':
     dependencies:
       '@auth/core': 0.41.3
       '@oslojs/crypto': 1.0.1

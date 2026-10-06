@@ -12,9 +12,12 @@ afterEach(() => {
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
 });
-it.each([undefined, "https://app.test"])(
+it.each(["http://localhost:3000", "https://app.test", "https://app.test/"])(
   "completes code + PKCE + state + signed ID-token exchange with auth origin %s",
-  async (authOrigin) => {
+  async (siteUrl) => {
+    const authOrigin = siteUrl.startsWith("https://")
+      ? new URL(siteUrl).origin
+      : "https://test.convex.site";
     const clientId = "8809799343",
       signer = generateKeyPairSync("rsa", { modulusLength: 2048 }),
       telegram = await telegramSigningKey;
@@ -28,8 +31,7 @@ it.each([undefined, "https://app.test"])(
         .replace(/\n/g, " "),
     );
     vi.stubEnv("CONVEX_SITE_URL", "https://test.convex.site");
-    vi.stubEnv("SITE_URL", "https://app.test");
-    vi.stubEnv("CUSTOM_AUTH_SITE_URL", authOrigin);
+    vi.stubEnv("SITE_URL", siteUrl);
     const jwks = {
       keys: [
         {
@@ -69,7 +71,7 @@ it.each([undefined, "https://app.test"])(
           tokenCalls++;
           const body = new URLSearchParams(String(init?.body));
           expect(body.get("redirect_uri")).toBe(
-            `${authOrigin ?? "https://test.convex.site"}/api/auth/callback/telegram`,
+            `${authOrigin}/api/auth/callback/telegram`,
           );
           expect(
             createHash("sha256")
@@ -95,7 +97,7 @@ it.each([undefined, "https://app.test"])(
       params: { redirectTo: "/builder" },
     });
     const redirect = new URL(beginning.redirect!);
-    expect(redirect.origin).toBe(authOrigin ?? "https://test.convex.site");
+    expect(redirect.origin).toBe(authOrigin);
     const signin = await t.fetch(redirect.pathname + redirect.search);
     expect(signin.status).toBe(302);
     const authorization = new URL(signin.headers.get("Location")!);
@@ -123,7 +125,7 @@ it.each([undefined, "https://app.test"])(
     expect(callback.status).toBe(302);
     expect(tokenCalls).toBe(1);
     const completion = new URL(callback.headers.get("Location")!);
-    expect(completion.origin).toBe("https://app.test");
+    expect(completion.origin).toBe(new URL(siteUrl).origin);
     expect(completion.pathname).toBe("/builder");
     const code = completion.searchParams.get("code");
     expect(code).toBeTruthy();

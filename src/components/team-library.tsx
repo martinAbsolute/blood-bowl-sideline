@@ -1,7 +1,13 @@
 "use client";
 import { useDeferredValue, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "gt-next";
-import { useConvexAuth, useMutation, usePaginatedQuery } from "convex/react";
+import {
+  useConvex,
+  useConvexAuth,
+  useMutation,
+  usePaginatedQuery,
+  useQuery,
+} from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { rosters, rulesets } from "@/domain/catalog";
 import { teamSchema, type Team } from "@/domain/types";
@@ -34,6 +40,16 @@ import { libraryMatches } from "@/lib/team-library";
 import { finishDraftSignIn } from "@/lib/draft-sign-in";
 import { waitForTeamSave } from "@/lib/cloud-save";
 import { LibraryCardsLoading } from "./loading-layouts";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "./ui/alert-dialog";
 
 const selectClass = "h-10 rounded-lg pl-3";
 export function TeamLibrary() {
@@ -46,6 +62,17 @@ export function TeamLibrary() {
   const [rulesetId, setRuleset] = useState<Team["rulesetId"] | "">("");
   const [archived, setArchived] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+  const convex = useConvex();
+  const [confirmation, setConfirmation] = useState<{
+    team: Team;
+    action: "archive" | "delete";
+  } | null>(null);
+  const confirmedTeam = useQuery(
+    api.teams.getByUuid,
+    confirmation && isAuthenticated ? { uuid: confirmation.team.uuid } : "skip",
+  );
+  const confirmationLocked = !!confirmedTeam?.leagueLocked;
+  const confirmationLoading = isAuthenticated && confirmedTeam === undefined;
   const archive = useMutation(api.teams.setArchived);
   const { results, status, loadMore } = usePaginatedQuery(
     api.teams.listMine,
@@ -102,14 +129,17 @@ export function TeamLibrary() {
           .map((row) => ({ ...row, local: false })),
       ];
   const filtered = !!(search || rosterId || rulesetId);
-  async function toggleArchive(team: Team) {
+  async function toggleArchive(team: Team, nextArchived: boolean) {
+    if (busy || (nextArchived && leagueTeams.get(team.uuid)?.leagueLocked))
+      return;
     setBusy(team.uuid);
     const release = sync.editing(team.uuid);
     try {
       await waitForTeamSave(team.uuid);
-      await archive({ uuid: team.uuid, archived: !archived });
+      await archive({ uuid: team.uuid, archived: nextArchived });
       removeDraft(team.uuid);
       finishDraftSignIn(team.uuid);
+      setConfirmation(null);
     } catch {
       toast.add({ type: "error", title: t("saveFailed") });
     } finally {
@@ -118,12 +148,23 @@ export function TeamLibrary() {
     }
   }
   async function discard(team: Team) {
+    if (busy || leagueTeams.get(team.uuid)?.leagueLocked) return;
     setBusy(team.uuid);
     const release = sync.editing(team.uuid);
     try {
       await waitForTeamSave(team.uuid);
+      if (isAuthenticated) {
+        const current = await convex.query(api.teams.getByUuid, {
+          uuid: team.uuid,
+        });
+        if (current?.leagueLocked) {
+          toast.add({ type: "error", title: t("teamRemovalLocked") });
+          return;
+        }
+      }
       removeDraft(team.uuid);
       finishDraftSignIn(team.uuid);
+      setConfirmation(null);
     } catch {
       toast.add({ type: "error", title: t("storageError") });
     } finally {
@@ -296,9 +337,11 @@ export function TeamLibrary() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      disabled={busy === team.uuid}
+                      disabled={leagueLocked || busy !== null || isLoading}
                       aria-label={`${t(isAuthenticated ? "discardDraft" : "remove")} ${team.name}`}
-                      onClick={() => void discard(team)}
+                      onClick={() =>
+                        setConfirmation({ team, action: "delete" })
+                      }
                     >
                       <Trash2 className="size-4" />
                     </Button>
@@ -306,11 +349,18 @@ export function TeamLibrary() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      disabled={
-                        (!archived && leagueLocked) || busy === team.uuid
-                      }
+                      disabled={(!archived && leagueLocked) || busy !== null}
                       aria-label={`${t(archived ? "restore" : "archive")} ${team.name}`}
-                      onClick={() => void toggleArchive(team)}
+                      title={
+                        !archived && leagueLocked
+                          ? t("teamRemovalLocked")
+                          : undefined
+                      }
+                      onClick={() =>
+                        archived
+                          ? void toggleArchive(team, false)
+                          : setConfirmation({ team, action: "archive" })
+                      }
                     >
                       {busy === team.uuid ? (
                         <LoaderCircle className="size-4 animate-spin" />
@@ -342,6 +392,58 @@ export function TeamLibrary() {
           </p>
         )}
       </section>
+      <AlertDialog
+        open={confirmation !== null}
+        onOpenChange={(open) => {
+          if (!open && !busy) setConfirmation(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t(
+                confirmation?.action === "archive"
+                  ? "confirmArchiveTeam"
+                  : "confirmDeleteTeam",
+                { name: confirmation?.team.name ?? "" },
+              )}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t(
+                confirmationLocked
+                  ? "teamRemovalLocked"
+                  : confirmation?.action === "archive"
+                    ? "confirmArchiveTeamHint"
+                    : "confirmDeleteTeamHint",
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busy !== null}>
+              {t("cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={
+                busy !== null || confirmationLocked || confirmationLoading
+              }
+              onClick={() => {
+                if (!confirmation || confirmationLocked || confirmationLoading)
+                  return;
+                if (confirmation.action === "archive")
+                  void toggleArchive(confirmation.team, true);
+                else void discard(confirmation.team);
+              }}
+            >
+              {busy ? (
+                <LoaderCircle className="size-4 animate-spin" />
+              ) : (
+                t(confirmation?.action === "archive" ? "archive" : "remove")
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

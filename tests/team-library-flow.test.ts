@@ -30,21 +30,29 @@ import { teamSchema } from "../src/domain/types";
 import { convexTest } from "convex-test";
 import schema from "../convex/schema";
 import { api } from "../convex/_generated/api";
+import { getFunctionName } from "convex/server";
 
 const mocks = vi.hoisted(() => ({
   authenticated: false,
   account: null as string | null,
   save: vi.fn(),
   push: vi.fn(),
-  results: [] as { team: ReturnType<typeof newTeam> }[],
+  query: vi.fn(),
+  selectedTeam: null as { leagueLocked: boolean } | null | undefined,
+  results: [] as { team: ReturnType<typeof newTeam>; leagueLocked?: boolean }[],
 }));
 vi.mock("convex/react", () => ({
   useConvexAuth: () => ({
     isAuthenticated: mocks.authenticated,
     isLoading: false,
   }),
-  useQuery: () =>
-    mocks.account ? { id: mocks.account, name: "Telegram Coach" } : null,
+  useConvex: () => ({ query: mocks.query }),
+  useQuery: (ref: Parameters<typeof getFunctionName>[0]) =>
+    getFunctionName(ref) === "teams:getByUuid"
+      ? mocks.selectedTeam
+      : mocks.account
+        ? { id: mocks.account, name: "Telegram Coach" }
+        : null,
   useMutation: () =>
     Object.assign(mocks.save, { withOptimisticUpdate: () => mocks.save }),
   usePaginatedQuery: () => ({
@@ -80,6 +88,8 @@ beforeEach(() => {
   mocks.authenticated = false;
   mocks.account = null;
   mocks.results = [];
+  mocks.selectedTeam = null;
+  mocks.query.mockReset().mockResolvedValue(null);
   mocks.push.mockReset();
   mocks.save.mockReset().mockResolvedValue({ revision: 1 });
   container = document.createElement("div");
@@ -665,6 +675,12 @@ it("lets a signed-in coach discard a failed recovery draft and reveal the cloud 
   )!;
   expect(discard).not.toBeNull();
   await act(async () => discard.click());
+  expect(readDrafts()).toHaveLength(1);
+  await act(async () =>
+    document
+      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-action"]')!
+      .click(),
+  );
   expect(readDrafts()).toEqual([]);
   expect(container.querySelectorAll("article")).toHaveLength(1);
   expect(
@@ -672,6 +688,122 @@ it("lets a signed-in coach discard a failed recovery draft and reveal the cloud 
   ).not.toBeNull();
   await tick();
   expect(mocks.save).toHaveBeenCalledTimes(1);
+});
+
+it("requires confirmation to archive and leaves the team unchanged on cancel", async () => {
+  const team = { ...newTeam(randomUUID()), name: "Archive me" };
+  mocks.authenticated = true;
+  mocks.results = [{ team }];
+  await act(async () => root.render(createElement(TeamLibrary)));
+  const archive = container.querySelector<HTMLButtonElement>(
+    'button[aria-label="archive Archive me"]',
+  )!;
+  await act(async () => archive.click());
+  expect(mocks.save).not.toHaveBeenCalled();
+  await act(async () =>
+    document
+      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-cancel"]')!
+      .click(),
+  );
+  expect(mocks.save).not.toHaveBeenCalled();
+  await act(async () => archive.click());
+  await act(async () =>
+    document
+      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-action"]')!
+      .click(),
+  );
+  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({
+    uuid: team.uuid,
+    archived: true,
+  });
+});
+
+it("disables archive for league-locked cloud teams and hides their recovery delete action", async () => {
+  const team = { ...newTeam(randomUUID()), name: "League team" };
+  storeDraft({ ...team, name: "Old draft" });
+  mocks.authenticated = true;
+  mocks.results = [{ team, leagueLocked: true }];
+  await act(async () => root.render(createElement(TeamLibrary)));
+  expect(
+    container.querySelector<HTMLButtonElement>(
+      'button[aria-label="archive League team"]',
+    )!.disabled,
+  ).toBe(true);
+  expect(
+    container.querySelector('button[aria-label^="discardDraft"]'),
+  ).toBeNull();
+  expect(mocks.save).not.toHaveBeenCalled();
+});
+
+it("keeps a guest draft when deletion is cancelled", async () => {
+  const team = { ...newTeam(randomUUID()), name: "Keep me" };
+  storeDraft(team);
+  await act(async () => root.render(createElement(TeamLibrary)));
+  await act(async () =>
+    container
+      .querySelector<HTMLButtonElement>('button[aria-label="remove Keep me"]')!
+      .click(),
+  );
+  expect(readDrafts()).toHaveLength(1);
+  await act(async () =>
+    document
+      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-cancel"]')!
+      .click(),
+  );
+  expect(readDrafts()).toHaveLength(1);
+});
+
+it("disables confirmation while checking league status and when a team becomes locked", async () => {
+  const team = { ...newTeam(randomUUID()), name: "Pending draft" };
+  storeDraft(team);
+  mocks.authenticated = true;
+  mocks.selectedTeam = undefined;
+  await act(async () => root.render(createElement(TeamLibrary)));
+  await act(async () =>
+    container
+      .querySelector<HTMLButtonElement>(
+        'button[aria-label="discardDraft Pending draft"]',
+      )!
+      .click(),
+  );
+  expect(
+    document.querySelector<HTMLButtonElement>(
+      '[data-slot="alert-dialog-action"]',
+    )!.disabled,
+  ).toBe(true);
+  mocks.selectedTeam = { leagueLocked: true };
+  await act(async () => root.render(createElement(TeamLibrary)));
+  expect(
+    document.querySelector<HTMLButtonElement>(
+      '[data-slot="alert-dialog-action"]',
+    )!.disabled,
+  ).toBe(true);
+  expect(document.body.textContent).toContain("teamRemovalLocked");
+  expect(readDrafts()).toHaveLength(1);
+});
+
+it("rechecks league status before deleting a draft absent from the current library results", async () => {
+  const team = { ...newTeam(randomUUID()), name: "Late lock" };
+  storeDraft(team);
+  mocks.authenticated = true;
+  mocks.query.mockResolvedValue({ leagueLocked: true });
+  await act(async () => root.render(createElement(TeamLibrary)));
+  await act(async () =>
+    container
+      .querySelector<HTMLButtonElement>(
+        'button[aria-label="discardDraft Late lock"]',
+      )!
+      .click(),
+  );
+  await act(async () =>
+    document
+      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-action"]')!
+      .click(),
+  );
+  expect(mocks.query).toHaveBeenCalledWith(api.teams.getByUuid, {
+    uuid: team.uuid,
+  });
+  expect(readDrafts()).toHaveLength(1);
 });
 
 it("creates signed-in teams directly in Convex even when local storage is blocked", async () => {

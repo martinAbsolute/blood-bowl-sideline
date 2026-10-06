@@ -1,0 +1,52 @@
+diff --git a/dist/server/implementation/signIn.js b/dist/server/implementation/signIn.js
+index 9b763107d094b5cf585c13fb4d8678d91657f04e..7610d49ad5fdc36901b6c32d879425cec86cf6da 100644
+--- a/dist/server/implementation/signIn.js
++++ b/dist/server/implementation/signIn.js
+@@ -134,7 +134,7 @@ async function handleOAuthProvider(ctx, provider, args, options) {
+             signedIn: result,
+         };
+     }
+-    const redirect = new URL((process.env.CUSTOM_AUTH_SITE_URL ?? requireEnv("CONVEX_SITE_URL")) + `/api/auth/signin/${provider.id}`);
++    const redirect = new URL((process.env.SITE_URL?.startsWith("https://") ? process.env.SITE_URL.replace(/\/$/, "") : requireEnv("CONVEX_SITE_URL")) + `/api/auth/signin/${provider.id}`);
+     const verifier = await callVerifier(ctx);
+     redirect.searchParams.set("code", verifier);
+     if (args.params?.redirectTo !== undefined) {
+diff --git a/dist/server/oauth/convexAuth.js b/dist/server/oauth/convexAuth.js
+index ca12cc5df229391c96164162d442befb3a7baddd..2409e1d917660a7145e8345bc8b13ad93166e024 100644
+--- a/dist/server/oauth/convexAuth.js
++++ b/dist/server/oauth/convexAuth.js
+@@ -6,7 +6,7 @@ import { normalizeEndpoint } from "../provider_utils.js";
+ import { isLocalHost } from "../utils.js";
+ // ConvexAuth: The logic for the callback URL is different from Auth.js
+ export function callbackUrl(providerId) {
+-    return (process.env.CUSTOM_AUTH_SITE_URL ?? requireEnv("CONVEX_SITE_URL")) + "/api/auth/callback/" + providerId;
++    return (process.env.SITE_URL?.startsWith("https://") ? process.env.SITE_URL.replace(/\/$/, "") : requireEnv("CONVEX_SITE_URL")) + "/api/auth/callback/" + providerId;
+ }
+ // ConvexAuth: This is a ConvexAuth specific function that produces a string that the
+ // Convex functions will validate
+diff --git a/src/server/implementation/signIn.ts b/src/server/implementation/signIn.ts
+index ea0b45ce79c6deaf3b9f8479744cbed1858d6ec2..4cbd557ee6d3a0936089616973964a73525ec283 100644
+--- a/src/server/implementation/signIn.ts
++++ b/src/server/implementation/signIn.ts
+@@ -237,7 +237,7 @@ async function handleOAuthProvider(
+     };
+   }
+   const redirect = new URL(
+-    (process.env.CUSTOM_AUTH_SITE_URL ?? requireEnv("CONVEX_SITE_URL")) + `/api/auth/signin/${provider.id}`,
++    (process.env.SITE_URL?.startsWith("https://") ? process.env.SITE_URL.replace(/\/$/, "") : requireEnv("CONVEX_SITE_URL")) + `/api/auth/signin/${provider.id}`,
+   );
+   const verifier = await callVerifier(ctx);
+   redirect.searchParams.set("code", verifier);
+diff --git a/src/server/oauth/convexAuth.ts b/src/server/oauth/convexAuth.ts
+index f6166dd752ef6293ff2506dbc456c8e121ddc0c4..7031d334b64a5ea5f94fd5b43129d642df4e2378 100644
+--- a/src/server/oauth/convexAuth.ts
++++ b/src/server/oauth/convexAuth.ts
+@@ -10,7 +10,7 @@ import { OAuthConfig } from "@auth/core/providers/oauth.js";
+ 
+ // ConvexAuth: The logic for the callback URL is different from Auth.js
+ export function callbackUrl(providerId: string) {
+-  return (process.env.CUSTOM_AUTH_SITE_URL ?? requireEnv("CONVEX_SITE_URL")) + "/api/auth/callback/" + providerId;
++  return (process.env.SITE_URL?.startsWith("https://") ? process.env.SITE_URL.replace(/\/$/, "") : requireEnv("CONVEX_SITE_URL")) + "/api/auth/callback/" + providerId;
+ }
+ 
+ // ConvexAuth: This is a ConvexAuth specific function that produces a string that the
