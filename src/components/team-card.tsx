@@ -45,7 +45,7 @@ export function TeamCard({
     legal = selection ? !selection.disabled : validateTeam(team).valid;
   const content = (
     <>
-      <div className="relative overflow-hidden bg-primary px-5 pb-5 pt-4 text-primary-foreground">
+      <div className="relative overflow-hidden bg-primary px-5 pb-4 pt-4 text-primary-foreground">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -right-6 -top-6 size-40 rounded-full border-[24px] border-white/5"
@@ -54,23 +54,31 @@ export function TeamCard({
           <span className="text-xs font-medium text-white/75">
             {getRoster(team.rosterId)?.name}
           </span>
-          <span
-            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${legal && !archived ? "bg-lime-200 text-primary" : "bg-white/15 text-white"}`}
-          >
-            {t(
-              leagueLocked
-                ? "leagueUi.teamLocked"
-                : leagueExperienced
-                  ? "leagueUi.experiencedTeam"
-                  : archived
-                    ? "archived"
-                    : selection?.disabled
-                      ? "leagueUi.ineligibleTeam"
-                      : legal
-                        ? "ready"
-                        : "draft",
+          <div className="flex shrink-0 items-center gap-3">
+            <span
+              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${legal && !archived ? "bg-lime-200 text-primary" : "bg-white/15 text-white"}`}
+            >
+              {t(
+                leagueLocked
+                  ? "leagueUi.teamLocked"
+                  : leagueExperienced
+                    ? "leagueUi.experiencedTeam"
+                    : archived
+                      ? "archived"
+                      : selection?.disabled
+                        ? "leagueUi.ineligibleTeam"
+                        : legal
+                          ? "ready"
+                          : "draft",
+              )}
+            </span>
+            {href && !selection && (
+              <ArrowUpRight
+                aria-hidden="true"
+                className="size-4 shrink-0 text-white transition-transform motion-safe:group-hover:translate-x-0.5 motion-safe:group-hover:-translate-y-0.5"
+              />
             )}
-          </span>
+          </div>
         </div>
         <div className="relative flex items-start gap-4">
           <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-white/15 shadow-sm">
@@ -78,7 +86,7 @@ export function TeamCard({
           </span>
           <div className="min-w-0 flex-1">
             <h2
-              className="display-font line-clamp-2 min-h-14 break-words text-2xl leading-7"
+              className="display-font line-clamp-2 break-words text-2xl leading-7"
               title={team.name}
             >
               {team.name || t("untitled")}
@@ -87,8 +95,8 @@ export function TeamCard({
           </div>
         </div>
       </div>
-      <div className="space-y-4 p-5">
-        <p className="min-h-8 text-xs font-medium text-muted-foreground">
+      <div className="space-y-3 px-5 py-4">
+        <p className="text-xs font-medium text-muted-foreground">
           {getRuleset(team.rulesetId).name}
         </p>
         <dl className="grid grid-cols-3 divide-x rounded-lg border bg-secondary/25 py-3 text-center">
@@ -123,23 +131,18 @@ export function TeamCard({
             </dd>
           </div>
         </dl>
-        <div className="flex items-center justify-between text-xs font-semibold text-primary">
-          <span>
-            {t(
-              selection
-                ? selection.selected
+        {selection && (
+          <div className="flex items-center justify-between text-xs font-semibold text-primary">
+            <span>
+              {t(
+                selection.selected
                   ? "leagueUi.selectedTeam"
-                  : "leagueUi.chooseTeam"
-                : href
-                  ? "openTeam"
-                  : "archived",
-            )}
-          </span>
-          {selection?.selected && <Check className="size-4" />}
-          {href && (
-            <ArrowUpRight className="size-4 transition-transform motion-safe:group-hover:translate-x-0.5" />
-          )}
-        </div>
+                  : "leagueUi.chooseTeam",
+              )}
+            </span>
+            {selection.selected && <Check className="size-4" />}
+          </div>
+        )}
       </div>
     </>
   );

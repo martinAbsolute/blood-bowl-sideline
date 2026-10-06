@@ -37,7 +37,7 @@ export function TeamLineup({ team }: { team: Team }) {
 
   return (
     <ol
-      className="relative isolate mt-1 h-12 max-w-full"
+      className="relative isolate mt-1 h-11 max-w-full"
       style={{ width: 32 + (players.length - 1) * 20 }}
     >
       {players.map((player, index) => (
