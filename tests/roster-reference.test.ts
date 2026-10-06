@@ -6,6 +6,7 @@ import { RosterFacts, RosterTable } from "../src/components/roster-reference";
 import { TeamReference } from "../src/components/team-reference";
 
 vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
+vi.mock("next/navigation", () => ({ useSearchParams: () => null }));
 vi.mock("../src/components/team-affiliations", () => ({
   TeamAffiliations: () => null,
 }));

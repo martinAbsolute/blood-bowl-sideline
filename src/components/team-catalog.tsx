@@ -8,13 +8,15 @@ import { getRuleset, newTeam } from "@/domain/catalog";
 import { staffInfo } from "@/domain/rules";
 import { rosterChoices, sharedRosterBudget } from "@/lib/roster-ruleset";
 import { RuleInfo } from "./rule-help";
+import { useRosterRuleset } from "@/lib/use-roster-ruleset";
 
 export function TeamCatalog({
   rulesetId = "bb2025-default",
 }: {
   rulesetId?: RulesetId;
 }) {
-  return <Catalog key={rulesetId} rulesetId={rulesetId} />;
+  const activeRulesetId = useRosterRuleset(rulesetId);
+  return <Catalog rulesetId={activeRulesetId} />;
 }
 
 function Catalog({ rulesetId }: { rulesetId: RulesetId }) {
@@ -28,6 +30,11 @@ function Catalog({ rulesetId }: { rulesetId: RulesetId }) {
   const [selectedTiers, setSelectedTiers] = useState<Set<number>>(
     () => new Set(),
   );
+  const [previousRulesetId, setPreviousRulesetId] = useState(rulesetId);
+  if (previousRulesetId !== rulesetId) {
+    setPreviousRulesetId(rulesetId);
+    setSelectedTiers(new Set());
+  }
   const revealTier = useCallback((tier: number) => {
     setSelectedTiers((current) => {
       if (current.size === 0 || current.has(tier)) return current;

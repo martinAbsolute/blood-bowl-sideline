@@ -9,6 +9,7 @@ import { inducementInfo, starEligible } from "@/domain/rules";
 import type { Roster, RulesetId } from "@/domain/types";
 import { RosterRulesetPicker } from "./roster-ruleset-picker";
 import { rosterReferenceHref } from "@/lib/roster-ruleset";
+import { useRosterRuleset } from "@/lib/use-roster-ruleset";
 import { isSevens } from "@/domain/rules";
 import { CreateTeamButton } from "./create-team-button";
 import {
@@ -29,12 +30,13 @@ const referenceOnlyInducements = [
 
 export function TeamReference({
   roster,
-  rulesetId = "bb2025-default",
+  rulesetId: initialRulesetId = "bb2025-default",
 }: {
   roster: Roster;
   rulesetId?: RulesetId;
 }) {
   const t = useTranslations();
+  const rulesetId = useRosterRuleset(initialRulesetId);
   const team = newTeam("00000000-0000-4000-8000-000000000000", roster.id);
   team.rulesetId = rulesetId;
   const eligible = inducements.flatMap((i) => {

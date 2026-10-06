@@ -8,8 +8,11 @@ import { rulesets } from "../src/domain/catalog";
 import type { RulesetId } from "../src/domain/types";
 
 vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
-vi.mock("../src/components/roster-ruleset-picker", () => ({
-  RosterRulesetPicker: () => null,
+const navigation = vi.hoisted(() => ({
+  params: null as URLSearchParams | null,
+}));
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => navigation.params,
 }));
 vi.mock("../src/components/create-team-button", () => ({
   CreateTeamButton: () => null,
@@ -22,11 +25,45 @@ vi.mock("../src/components/roster-reference", () => ({
 
 let root: Root, container: HTMLDivElement;
 beforeEach(() => {
+  navigation.params = null;
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   window.history.replaceState(null, "", "/rosters");
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
+});
+
+it("switches rulesets through native history without remounting the catalog or waiting for server props", async () => {
+  window.history.replaceState(null, "", "/rosters?keep=1#human");
+  vi.spyOn(window, "requestAnimationFrame").mockImplementation(() => 0);
+  navigation.params = new URLSearchParams(window.location.search);
+  await render("bb2025-default");
+  const input = container.querySelector("input");
+  const picker = container.querySelector("select")!;
+  await act(async () => {
+    picker.value = "kyiv-seven-sins-sevens";
+    picker.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  expect(window.location.search).toBe("?keep=1&ruleset=kyiv-seven-sins-sevens");
+  expect(window.location.hash).toBe("#human");
+  // Next's native history integration supplies the new search params locally.
+  navigation.params = new URLSearchParams(window.location.search);
+  await render("bb2025-default");
+  expect(container.querySelector("select")?.value).toBe(
+    "kyiv-seven-sins-sevens",
+  );
+  expect(container.querySelector("input")).toBe(input);
+  expect(container.querySelector("[aria-pressed]")?.textContent).toBe("tier 1");
+  await act(async () => {
+    picker.value = "bb2025-default";
+    picker.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  expect(window.location.search).toBe("?keep=1");
+  navigation.params = new URLSearchParams(window.location.search);
+  await render("kyiv-seven-sins-sevens");
+  expect(container.querySelector("[aria-pressed]")).toBeNull();
+  expect(container.querySelector("input")).toBe(input);
+  vi.restoreAllMocks();
 });
 afterEach(async () => {
   await act(async () => root.unmount());
