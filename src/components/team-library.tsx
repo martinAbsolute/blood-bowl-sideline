@@ -30,6 +30,7 @@ import {
   FileText,
   Search,
   LoaderCircle,
+  ChevronDown,
 } from "lucide-react";
 import { LoginButton } from "./site-shell";
 import { toast } from "@/components/ui/toast";
@@ -60,25 +61,41 @@ export function TeamLibrary() {
   const deferredSearch = useDeferredValue(search);
   const [rosterId, setRoster] = useState("");
   const [rulesetId, setRuleset] = useState<Team["rulesetId"] | "">("");
-  const [archived, setArchived] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const convex = useConvex();
   const [confirmation, setConfirmation] = useState<{
     team: Team;
-    action: "archive" | "delete";
+    action: "archive" | "delete" | "permanent-delete";
   } | null>(null);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  function requestConfirmation(next: NonNullable<typeof confirmation>) {
+    setConfirmation(next);
+    setConfirmationOpen(true);
+  }
   const confirmedTeam = useQuery(
     api.teams.getByUuid,
-    confirmation && isAuthenticated ? { uuid: confirmation.team.uuid } : "skip",
+    confirmationOpen &&
+      confirmation &&
+      confirmation.action !== "permanent-delete" &&
+      isAuthenticated
+      ? { uuid: confirmation.team.uuid }
+      : "skip",
   );
   const confirmationLocked = !!confirmedTeam?.leagueLocked;
-  const confirmationLoading = isAuthenticated && confirmedTeam === undefined;
+  const confirmationLoading =
+    confirmationOpen &&
+    !!confirmation &&
+    confirmation.action !== "permanent-delete" &&
+    isAuthenticated &&
+    confirmedTeam === undefined;
+  const permanentlyDelete = useMutation(api.teams.deleteArchived);
   const archive = useMutation(api.teams.setArchived);
   const { results, status, loadMore } = usePaginatedQuery(
     api.teams.listMine,
     isAuthenticated
       ? {
-          archived,
+          archived: false,
           search: deferredSearch,
           rosterId: rosterId || undefined,
           rulesetId: rulesetId || undefined,
@@ -107,27 +124,25 @@ export function TeamLibrary() {
   ).length;
   const filter = { search: deferredSearch, rosterId, rulesetId };
   const pending = new Map(locals.map((team) => [team.uuid, team]));
-  const cards = archived
-    ? results.map((row) => ({ ...row, local: false }))
-    : [
-        ...locals
-          .filter(
-            (team) =>
-              !leagueTeams.get(team.uuid)?.leagueLocked &&
-              libraryMatches(team, filter),
-          )
-          .map((team) => ({
-            team,
-            local: true,
-            leagueLocked: false,
-            leagueExperienced: leagueTeams.get(team.uuid)?.leagueExperienced,
-          })),
-        ...results
-          .filter(
-            ({ team, leagueLocked }) => leagueLocked || !pending.has(team.uuid),
-          )
-          .map((row) => ({ ...row, local: false })),
-      ];
+  const cards = [
+    ...locals
+      .filter(
+        (team) =>
+          !leagueTeams.get(team.uuid)?.leagueLocked &&
+          libraryMatches(team, filter),
+      )
+      .map((team) => ({
+        team,
+        local: true,
+        leagueLocked: false,
+        leagueExperienced: leagueTeams.get(team.uuid)?.leagueExperienced,
+      })),
+    ...results
+      .filter(
+        ({ team, leagueLocked }) => leagueLocked || !pending.has(team.uuid),
+      )
+      .map((row) => ({ ...row, local: false })),
+  ];
   const filtered = !!(search || rosterId || rulesetId);
   async function toggleArchive(team: Team, nextArchived: boolean) {
     if (busy || (nextArchived && leagueTeams.get(team.uuid)?.leagueLocked))
@@ -139,7 +154,7 @@ export function TeamLibrary() {
       await archive({ uuid: team.uuid, archived: nextArchived });
       removeDraft(team.uuid);
       finishDraftSignIn(team.uuid);
-      setConfirmation(null);
+      setConfirmationOpen(false);
     } catch {
       toast.add({ type: "error", title: t("saveFailed") });
     } finally {
@@ -164,9 +179,26 @@ export function TeamLibrary() {
       }
       removeDraft(team.uuid);
       finishDraftSignIn(team.uuid);
-      setConfirmation(null);
+      setConfirmationOpen(false);
     } catch {
       toast.add({ type: "error", title: t("storageError") });
+    } finally {
+      release();
+      setBusy(null);
+    }
+  }
+  async function deleteArchived(team: Team) {
+    if (busy) return;
+    setBusy(team.uuid);
+    const release = sync.editing(team.uuid);
+    try {
+      await waitForTeamSave(team.uuid);
+      await permanentlyDelete({ uuid: team.uuid });
+      removeDraft(team.uuid);
+      finishDraftSignIn(team.uuid);
+      setConfirmationOpen(false);
+    } catch {
+      toast.add({ type: "error", title: t("saveFailed") });
     } finally {
       release();
       setBusy(null);
@@ -201,9 +233,7 @@ export function TeamLibrary() {
           </Button>
         </div>
       )}
-      <div
-        className={`mb-7 grid grid-cols-2 gap-3 ${isAuthenticated ? "lg:grid-cols-[minmax(200px,1fr)_180px_210px_150px]" : "lg:grid-cols-[minmax(200px,1fr)_180px_210px]"}`}
-      >
+      <div className="mb-7 grid grid-cols-2 gap-3 lg:grid-cols-[minmax(200px,1fr)_180px_210px]">
         <div className="relative col-span-2 lg:col-span-1">
           <Search
             aria-hidden="true"
@@ -246,18 +276,6 @@ export function TeamLibrary() {
             </option>
           ))}
         </EditorSelect>
-        {isAuthenticated && (
-          <EditorSelect
-            aria-label={t("teamLibraryView")}
-            wrapperClassName="mt-0 col-span-2 lg:col-span-1"
-            className={selectClass}
-            value={archived ? "archived" : "active"}
-            onChange={(e) => setArchived(e.target.value === "archived")}
-          >
-            <option value="active">{t("activeTeams")}</option>
-            <option value="archived">{t("archivedTeams")}</option>
-          </EditorSelect>
-        )}
       </div>
       <section
         className="min-h-[400px]"
@@ -274,28 +292,16 @@ export function TeamLibrary() {
           <LibraryCardsLoading
             label={t("loading")}
             text={(key) => t(key)}
-            actionLabel={t(archived ? "archived" : "openTeam")}
+            actionLabel={t("openTeam")}
           />
         ) : cards.length === 0 ? (
           <div className="flex min-h-[400px] flex-col items-center justify-center rounded-xl border border-dashed bg-card/50 px-6 py-16 text-center">
             <FileText className="mx-auto mb-4 size-7 text-muted-foreground" />
             <h2 className="text-lg font-semibold">
-              {t(
-                filtered
-                  ? "noMatchingTeams"
-                  : archived
-                    ? "noArchivedTeams"
-                    : "noTeams",
-              )}
+              {t(filtered ? "noMatchingTeams" : "noTeams")}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              {t(
-                filtered
-                  ? "clearFiltersHint"
-                  : archived
-                    ? "archiveHint"
-                    : "noTeamsHint",
-              )}
+              {t(filtered ? "clearFiltersHint" : "noTeamsHint")}
             </p>
             {filtered ? (
               <Button
@@ -310,7 +316,7 @@ export function TeamLibrary() {
                 {t("clearFilters")}
               </Button>
             ) : (
-              !archived && <CreateTeamButton className="mt-5" />
+              <CreateTeamButton className="mt-5" />
             )}
           </div>
         ) : (
@@ -319,10 +325,9 @@ export function TeamLibrary() {
               <TeamCard
                 key={team.uuid}
                 team={team}
-                archived={archived}
                 leagueLocked={leagueLocked}
                 leagueExperienced={leagueExperienced}
-                href={archived ? undefined : `/teams/${team.uuid}`}
+                href={`/teams/${team.uuid}`}
                 saveState={
                   local
                     ? isAuthenticated
@@ -340,7 +345,7 @@ export function TeamLibrary() {
                       disabled={leagueLocked || busy !== null || isLoading}
                       aria-label={`${t(isAuthenticated ? "discardDraft" : "remove")} ${team.name}`}
                       onClick={() =>
-                        setConfirmation({ team, action: "delete" })
+                        requestConfirmation({ team, action: "delete" })
                       }
                     >
                       <Trash2 className="size-4" />
@@ -349,23 +354,15 @@ export function TeamLibrary() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      disabled={(!archived && leagueLocked) || busy !== null}
-                      aria-label={`${t(archived ? "restore" : "archive")} ${team.name}`}
-                      title={
-                        !archived && leagueLocked
-                          ? t("teamRemovalLocked")
-                          : undefined
-                      }
+                      disabled={leagueLocked || busy !== null}
+                      aria-label={`${t("archive")} ${team.name}`}
+                      title={leagueLocked ? t("teamRemovalLocked") : undefined}
                       onClick={() =>
-                        archived
-                          ? void toggleArchive(team, false)
-                          : setConfirmation({ team, action: "archive" })
+                        requestConfirmation({ team, action: "archive" })
                       }
                     >
                       {busy === team.uuid ? (
                         <LoaderCircle className="size-4 animate-spin" />
-                      ) : archived ? (
-                        <Undo2 className="size-4" />
                       ) : (
                         <Archive className="size-4" />
                       )}
@@ -392,10 +389,39 @@ export function TeamLibrary() {
           </p>
         )}
       </section>
+      {isAuthenticated && (
+        <section className="mt-10 border-t pt-6">
+          <button
+            type="button"
+            aria-expanded={archiveOpen}
+            aria-controls="team-archive"
+            className="flex w-full items-center gap-3 rounded-lg py-3 text-left font-semibold focus-visible:outline-2 focus-visible:outline-ring"
+            onClick={() => setArchiveOpen(!archiveOpen)}
+          >
+            <Archive className="size-5 text-muted-foreground" />
+            {t("archivedTeams")}
+            <ChevronDown
+              className={`ml-auto size-5 transition-transform ${archiveOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+          {archiveOpen && (
+            <div id="team-archive" className="pt-4">
+              <ArchivedTeams
+                filter={filter}
+                busy={busy}
+                onRestore={(team) => void toggleArchive(team, false)}
+                onDelete={(team) =>
+                  requestConfirmation({ team, action: "permanent-delete" })
+                }
+              />
+            </div>
+          )}
+        </section>
+      )}
       <AlertDialog
-        open={confirmation !== null}
+        open={confirmationOpen}
         onOpenChange={(open) => {
-          if (!open && !busy) setConfirmation(null);
+          if (!open && !busy) setConfirmationOpen(false);
         }}
       >
         <AlertDialogContent>
@@ -404,7 +430,9 @@ export function TeamLibrary() {
               {t(
                 confirmation?.action === "archive"
                   ? "confirmArchiveTeam"
-                  : "confirmDeleteTeam",
+                  : confirmation?.action === "permanent-delete"
+                    ? "confirmPermanentDeleteTeam"
+                    : "confirmDeleteTeam",
                 { name: confirmation?.team.name ?? "" },
               )}
             </AlertDialogTitle>
@@ -414,7 +442,9 @@ export function TeamLibrary() {
                   ? "teamRemovalLocked"
                   : confirmation?.action === "archive"
                     ? "confirmArchiveTeamHint"
-                    : "confirmDeleteTeamHint",
+                    : confirmation?.action === "permanent-delete"
+                      ? "confirmPermanentDeleteTeamHint"
+                      : "confirmDeleteTeamHint",
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -432,18 +462,118 @@ export function TeamLibrary() {
                   return;
                 if (confirmation.action === "archive")
                   void toggleArchive(confirmation.team, true);
+                else if (confirmation.action === "permanent-delete")
+                  void deleteArchived(confirmation.team);
                 else void discard(confirmation.team);
               }}
             >
               {busy ? (
                 <LoaderCircle className="size-4 animate-spin" />
               ) : (
-                t(confirmation?.action === "archive" ? "archive" : "remove")
+                t(
+                  confirmation?.action === "archive"
+                    ? "archive"
+                    : confirmation?.action === "permanent-delete"
+                      ? "deletePermanently"
+                      : "remove",
+                )
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  );
+}
+
+function ArchivedTeams({
+  filter,
+  busy,
+  onRestore,
+  onDelete,
+}: {
+  filter: { search: string; rosterId: string; rulesetId: string };
+  busy: string | null;
+  onRestore: (team: Team) => void;
+  onDelete: (team: Team) => void;
+}) {
+  const t = useTranslations();
+  const { results, status, loadMore } = usePaginatedQuery(
+    api.teams.listMine,
+    {
+      archived: true,
+      search: filter.search,
+      rosterId: filter.rosterId || undefined,
+      rulesetId: (filter.rulesetId || undefined) as
+        Team["rulesetId"] | undefined,
+    },
+    { initialNumItems: 18 },
+  );
+  return (
+    <div aria-busy={status === "LoadingFirstPage"}>
+      {status === "LoadingFirstPage" ? (
+        <LibraryCardsLoading
+          label={t("loading")}
+          text={(key) => t(key)}
+          actionLabel={t("restore")}
+        />
+      ) : results.length === 0 ? (
+        <p className="rounded-xl border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
+          {t(
+            filter.search || filter.rosterId || filter.rulesetId
+              ? "noMatchingTeams"
+              : "noArchivedTeams",
+          )}
+        </p>
+      ) : (
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {results.map(({ team }) => (
+            <TeamCard
+              key={team.uuid}
+              team={team}
+              archived
+              saveState="cloud"
+              primaryAction={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={busy !== null}
+                  onClick={() => onRestore(team)}
+                >
+                  {busy === team.uuid ? (
+                    <LoaderCircle className="size-4 animate-spin" />
+                  ) : (
+                    <Undo2 className="size-4" />
+                  )}
+                  {t("restore")}
+                </Button>
+              }
+              action={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled={busy !== null}
+                  aria-label={`${t("deletePermanently")} ${team.name}`}
+                  onClick={() => onDelete(team)}
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              }
+            />
+          ))}
+        </div>
+      )}
+      {(status === "CanLoadMore" || status === "LoadingMore") && (
+        <div className="mt-7 text-center">
+          <Button
+            variant="outline"
+            disabled={status === "LoadingMore"}
+            onClick={() => loadMore(18)}
+          >
+            {t(status === "LoadingMore" ? "loading" : "loadMore")}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

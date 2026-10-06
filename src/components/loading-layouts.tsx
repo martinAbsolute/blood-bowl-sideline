@@ -4,30 +4,25 @@ import { SiteFooter } from "./site-footer";
 import { ShellFrame } from "./shell-frame";
 import { AccountLoading } from "./account-loading";
 import { Languages, PanelLeftClose, PanelRightOpen } from "lucide-react";
-import { getRoster, getRuleset } from "@/domain/catalog";
+import { getRoster, getRuleset, inducements } from "@/domain/catalog";
+import { inducementInfo, staffInfo } from "@/domain/rules";
+import { needsPlayerRecruitment } from "@/lib/builder";
 import { budgetSummary } from "@/domain/budget";
-import { BudgetOverview, BudgetBreakdown } from "./budget-details";
-import { TeamSupport } from "./team-support";
-import { TeamAffiliations } from "./team-affiliations";
-import { PlayerRecruitment } from "./player-recruitment";
 import type { Team } from "@/domain/types";
 import { TeamHeader } from "./team-header";
-import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { ArrowLeft, Copy, Printer, ChevronDown, Ellipsis } from "lucide-react";
 import { BookOpen, Flag, Shield, Trophy } from "lucide-react";
-import { EditorSelect } from "./editor-select";
 import { Card } from "./ui/card";
 import type { ReactNode } from "react";
 import { LeagueCardsLoading, UsersLoading } from "./list-loading";
 import { LeagueContentLoading } from "./league-content-loading";
 
-const ignoreChange = () => {};
-
 export type LoadingVariant =
   | "library"
   | "editor"
   | "catalog"
+  | "reference"
   | "leagues"
   | "league"
   | "league-match"
@@ -177,7 +172,59 @@ export function LoadingLayout({
   team?: Team;
   text?: (key: string) => string;
 }) {
-  const summary = team ? budgetSummary(team) : undefined;
+  const roster = team ? getRoster(team.rosterId) : undefined;
+  const budget = team ? budgetSummary(team) : undefined;
+  const budgetRows = budget
+    ? [
+        budget.totals.players,
+        budget.totals.starGold,
+        budget.totals.skills - budget.totals.starTax,
+        budget.totals.starTax,
+        budget.totals.staff,
+        budget.totals.inducements,
+      ].filter((cost) => cost > 0).length
+    : 0;
+  const recruitmentOpen = !team || needsPlayerRecruitment(team);
+  const supportRows = team
+    ? [
+        Object.keys(staffInfo(team)).length,
+        inducements.filter(
+          (item) =>
+            inducementInfo(team, item).allowed ||
+            (team.inducements[item.id] ?? 0) > 0,
+        ).length,
+      ]
+    : [5, 6];
+  if (variant === "reference")
+    return (
+      <div
+        className="page-width space-y-5 py-6"
+        role="status"
+        data-loading-layout={variant}
+        aria-label={label}
+      >
+        <span className="sr-only">{label}</span>
+        <div aria-hidden="true" className="space-y-5">
+          <Skeleton className="h-5 w-24" />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Skeleton className="size-10" />
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-9 w-48 max-w-full" />
+              </div>
+            </div>
+            <Skeleton className="h-11 w-32 sm:h-9" />
+          </div>
+          <Skeleton className="h-9 w-48" />
+          <TableLoading rows={5} title={false} />
+          <div className="grid items-start gap-5 xl:grid-cols-[300px_minmax(0,1fr)]">
+            <TableLoading rows={5} />
+            <TableLoading rows={6} />
+          </div>
+        </div>
+      </div>
+    );
   if (variant === "league-match" || variant === "league-career")
     return <LeagueContentLoading variant={variant} label={label} />;
   if (variant === "editor")
@@ -188,7 +235,7 @@ export function LoadingLayout({
         aria-label={label}
       >
         <span className="sr-only">{label}</span>
-        <div inert>
+        <div aria-hidden="true">
           <TeamHeader
             back={
               <div className="inline-flex min-h-8 items-center gap-1.5 text-sm text-muted-foreground">
@@ -206,27 +253,19 @@ export function LoadingLayout({
             status={<Skeleton className="h-3 w-16" />}
             actions={
               <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="hidden h-9 sm:inline-flex"
-                >
+                <span className="hidden h-9 items-center justify-center gap-2 rounded-lg border bg-background px-3 text-sm font-medium sm:inline-flex">
                   <Copy className="size-4" />
                   {text?.("duplicate")}
-                </Button>
-                <Button size="sm" className="h-11 flex-1 sm:h-9 sm:flex-none">
+                </span>
+                <span className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground sm:h-9 sm:flex-none">
                   <Printer className="size-4" />
                   {text?.("print")}
                   <ChevronDown className="size-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-11 flex-1 sm:hidden"
-                >
+                </span>
+                <span className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg border bg-background px-3 text-sm font-medium sm:hidden">
                   <Ellipsis className="size-4" />
                   {text?.("teamActions")}
-                </Button>
+                </span>
               </>
             }
           >
@@ -256,15 +295,12 @@ export function LoadingLayout({
           </TeamHeader>
           <div className="budget-grid">
             <div className="@container space-y-5">
-              {team ? (
-                <PlayerRecruitment team={team} onChange={ignoreChange} />
-              ) : (
-                <TableLoading
-                  rows={4}
-                  heading={text?.("recruitPlayers")}
-                  text={text}
-                />
-              )}
+              <TableLoading
+                rows={recruitmentOpen ? (roster?.players.length ?? 4) : 0}
+                empty={!recruitmentOpen}
+                heading={text?.("recruitPlayers")}
+                text={text}
+              />
               <div>
                 <div className="mb-2 flex h-6 items-center justify-between px-1">
                   <h2 className="section-title">{text?.("players")}</h2>
@@ -282,38 +318,34 @@ export function LoadingLayout({
                   </span>
                 </div>
               </div>
-              {team ? (
-                <TeamSupport team={team} onChange={ignoreChange} />
-              ) : (
-                <div className="grid items-start gap-4 @min-[780px]:grid-cols-2">
-                  {[5, 6].map((count) => (
-                    <section key={count}>
-                      <div className="mb-2 flex h-6 items-center justify-between px-1">
-                        <h2 className="section-title">
-                          {text?.(count === 5 ? "staff" : "inducements")}
-                        </h2>
-                        <Skeleton className="h-3 w-12" />
-                      </div>
-                      <div className="space-y-1.5">
-                        {Array.from({ length: count }, (_, index) => (
-                          <div
-                            key={index}
-                            className="flex h-14 items-center justify-between gap-2 rounded-lg border bg-card px-3"
-                          >
-                            <div className="flex-1 space-y-1.5">
-                              <Skeleton className="h-4 w-3/4" />
-                              <Skeleton className="h-3 w-2/3" />
-                            </div>
-                            <Skeleton className="size-8" />
-                            <Skeleton className="h-4 w-5" />
-                            <Skeleton className="size-8" />
+              <div className="grid items-start gap-4 @min-[780px]:grid-cols-2">
+                {supportRows.map((count, sectionIndex) => (
+                  <section key={sectionIndex}>
+                    <div className="mb-2 flex h-6 items-center justify-between px-1">
+                      <h2 className="section-title">
+                        {text?.(sectionIndex === 0 ? "staff" : "inducements")}
+                      </h2>
+                      <Skeleton className="h-3 w-12" />
+                    </div>
+                    <div className="space-y-1.5">
+                      {Array.from({ length: count }, (_, index) => (
+                        <div
+                          key={index}
+                          className="flex h-14 items-center justify-between gap-2 rounded-lg border bg-card px-3"
+                        >
+                          <div className="flex-1 space-y-1.5">
+                            <Skeleton className="h-4 w-3/4" />
+                            <Skeleton className="h-3 w-2/3" />
                           </div>
-                        ))}
-                      </div>
-                    </section>
-                  ))}
-                </div>
-              )}
+                          <Skeleton className="size-8" />
+                          <Skeleton className="h-4 w-5" />
+                          <Skeleton className="size-8" />
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
             </div>
             <aside className="budget-side space-y-3">
               <section className="rounded-lg border bg-card p-3">
@@ -337,18 +369,14 @@ export function LoadingLayout({
                         )}
                       </div>
                       {team && index < 2 ? (
-                        <EditorSelect
-                          tabIndex={-1}
-                          aria-label={text?.(
-                            index === 0 ? "ruleset" : "roster",
-                          )}
-                        >
-                          <option>
+                        <div className="flex h-9 items-center justify-between gap-2 rounded-lg border bg-background px-3 text-sm">
+                          <span className="truncate">
                             {index === 0
                               ? getRuleset(team.rulesetId).name
                               : getRoster(team.rosterId)?.name}
-                          </option>
-                        </EditorSelect>
+                          </span>
+                          <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
+                        </div>
                       ) : (
                         <Skeleton className="h-9 w-full" />
                       )}
@@ -356,34 +384,50 @@ export function LoadingLayout({
                   ))}
                 </div>
                 <div className="mt-4 border-t pt-4">
-                  {team ? (
-                    <TeamAffiliations
-                      roster={getRoster(team.rosterId)!}
-                      team={team}
-                    />
-                  ) : (
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-3/4" />
-                    </div>
-                  )}
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </div>
                 </div>
               </section>
               <section className="rounded-lg border bg-card">
-                {summary ? (
-                  <>
-                    <BudgetOverview pool={summary.pools[0]} />
-                    <BudgetBreakdown summary={summary} />
-                  </>
-                ) : (
-                  <div className="p-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-medium">
-                        {text?.("treasury")}
-                      </span>
-                      <Skeleton className="h-4 w-24" />
-                    </div>
-                    <Skeleton className="mt-1.5 h-1 w-full" />
+                <div className="p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-medium">
+                      {text?.("treasury")}
+                    </span>
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                  <Skeleton className="mt-1.5 h-1 w-full" />
+                </div>
+                {budget && (budget.pools.length > 1 || budgetRows > 0) && (
+                  <div className="space-y-3 px-3 pb-3">
+                    {budget.pools.slice(1).map((pool) => (
+                      <div key={pool.id}>
+                        <div className="flex h-4 justify-between">
+                          <Skeleton className="h-3 w-20" />
+                          <Skeleton className="h-3 w-24" />
+                        </div>
+                        <Skeleton className="mt-1.5 h-1 w-full" />
+                      </div>
+                    ))}
+                    {budgetRows > 0 && (
+                      <div className="space-y-1.5 border-t pt-3">
+                        {Array.from({ length: budgetRows }, (_, index) => (
+                          <div key={index} className="flex h-4 justify-between">
+                            <Skeleton className="h-3 w-20" />
+                            <Skeleton className="h-3 w-12" />
+                          </div>
+                        ))}
+                        {budget.counts.primary + budget.counts.secondary >
+                          0 && (
+                          <div className="flex h-[22px] items-end justify-between">
+                            <Skeleton className="h-3 w-20" />
+                            <Skeleton className="h-3 w-12" />
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </section>
@@ -466,7 +510,9 @@ export function LoadingLayout({
             <Skeleton className="h-5 w-80 max-w-full" />
           )}
         </div>
-        {variant === "leagues" && <Skeleton className="h-9 w-36" />}
+        {(variant === "leagues" || variant === "library") && (
+          <Skeleton className="h-11 w-36 sm:h-9" />
+        )}
       </div>
       {variant === "catalog" ? (
         <div className="catalog-layout" role="status">

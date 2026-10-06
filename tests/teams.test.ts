@@ -20,6 +20,39 @@ async function setup() {
   };
 }
 describe("Convex team ownership and sharing", () => {
+  it("only allows the owner to permanently delete an archived team", async () => {
+    const { t, a, b } = await setup();
+    const team = newTeam(randomUUID());
+    await a.mutation(api.teams.save, { team, expectedRevision: 0 });
+    await expect(
+      a.mutation(api.teams.deleteArchived, { uuid: team.uuid }),
+    ).rejects.toThrow("NOT_ARCHIVED");
+    await a.mutation(api.teams.setArchived, {
+      uuid: team.uuid,
+      archived: true,
+    });
+    expect(await t.query(api.teams.isArchived, { uuid: team.uuid })).toBe(true);
+    expect(await t.query(api.teams.getByUuid, { uuid: team.uuid })).toBeNull();
+    await expect(
+      b.mutation(api.teams.deleteArchived, { uuid: team.uuid }),
+    ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      t.mutation(api.teams.deleteArchived, { uuid: team.uuid }),
+    ).rejects.toThrow("UNAUTHENTICATED");
+    await a.mutation(api.teams.deleteArchived, { uuid: team.uuid });
+    expect(await t.query(api.teams.isArchived, { uuid: team.uuid })).toBe(true);
+    await expect(
+      a.mutation(api.teams.save, { team, expectedRevision: 0 }),
+    ).rejects.toThrow("ARCHIVED");
+    expect(
+      await t.run((ctx) =>
+        ctx.db
+          .query("teams")
+          .withIndex("by_uuid", (q) => q.eq("uuid", team.uuid))
+          .unique(),
+      ),
+    ).toBeNull();
+  });
   it("keeps archiving idempotent across tabs and refuses pending edits until an explicit restore", async () => {
     const { a } = await setup();
     const team = newTeam(randomUUID());

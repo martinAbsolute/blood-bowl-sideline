@@ -1,5 +1,6 @@
 import { Send } from "lucide-react";
 import { version } from "../../package.json";
+import { BrandPeriod } from "./brand-period";
 
 export function SiteFooter() {
   const linkClass =
@@ -9,7 +10,7 @@ export function SiteFooter() {
       <div className="page-width flex flex-col items-start justify-between gap-3 text-xs text-muted-foreground md:flex-row md:items-center md:gap-6">
         <p className="leading-relaxed">
           © 2026 Martin Bahniuk · Blood Bowl Sideline
-          <span className="text-orange-500">.</span>
+          <BrandPeriod />
         </p>
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
           <a

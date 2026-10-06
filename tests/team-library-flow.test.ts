@@ -40,6 +40,8 @@ const mocks = vi.hoisted(() => ({
   query: vi.fn(),
   selectedTeam: null as { leagueLocked: boolean } | null | undefined,
   results: [] as { team: ReturnType<typeof newTeam>; leagueLocked?: boolean }[],
+  archivedResults: [] as { team: ReturnType<typeof newTeam> }[],
+  libraryQueries: vi.fn(),
 }));
 vi.mock("convex/react", () => ({
   useConvexAuth: () => ({
@@ -55,8 +57,10 @@ vi.mock("convex/react", () => ({
         : null,
   useMutation: () =>
     Object.assign(mocks.save, { withOptimisticUpdate: () => mocks.save }),
-  usePaginatedQuery: () => ({
-    results: mocks.results,
+  usePaginatedQuery: (_ref: unknown, args: { archived: boolean } | "skip") => ({
+    results:
+      (mocks.libraryQueries(args),
+      args !== "skip" && args.archived ? mocks.archivedResults : mocks.results),
     status: "Exhausted",
     loadMore: vi.fn(),
   }),
@@ -88,6 +92,8 @@ beforeEach(() => {
   mocks.authenticated = false;
   mocks.account = null;
   mocks.results = [];
+  mocks.archivedResults = [];
+  mocks.libraryQueries.mockClear();
   mocks.selectedTeam = null;
   mocks.query.mockReset().mockResolvedValue(null);
   mocks.push.mockReset();
@@ -688,6 +694,52 @@ it("lets a signed-in coach discard a failed recovery draft and reveal the cloud 
   ).not.toBeNull();
   await tick();
   expect(mocks.save).toHaveBeenCalledTimes(1);
+});
+
+it("loads the archive only when expanded and provides restore and confirmed permanent deletion without team links", async () => {
+  const team = { ...newTeam(randomUUID()), name: "Archived team" };
+  mocks.authenticated = true;
+  mocks.archivedResults = [{ team }];
+  await act(async () => root.render(createElement(TeamLibrary)));
+  expect(mocks.libraryQueries.mock.calls.some(([args]) => args.archived)).toBe(
+    false,
+  );
+  const toggle = container.querySelector<HTMLButtonElement>(
+    '[aria-controls="team-archive"]',
+  )!;
+  await act(async () => toggle.click());
+  expect(mocks.libraryQueries.mock.calls.some(([args]) => args.archived)).toBe(
+    true,
+  );
+  const archive = container.querySelector("#team-archive")!;
+  expect(archive.querySelector("article a")).toBeNull();
+  await act(async () =>
+    Array.from(archive.querySelectorAll<HTMLButtonElement>("button"))
+      .find((button) => button.textContent === "restore")!
+      .click(),
+  );
+  expect(mocks.save).toHaveBeenLastCalledWith({
+    uuid: team.uuid,
+    archived: false,
+  });
+  mocks.save.mockClear();
+  await act(async () =>
+    archive
+      .querySelector<HTMLButtonElement>(
+        '[aria-label="deletePermanently Archived team"]',
+      )!
+      .click(),
+  );
+  expect(mocks.save).not.toHaveBeenCalled();
+  expect(document.body.textContent).toContain("confirmPermanentDeleteTeamHint");
+  await act(async () =>
+    document
+      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-action"]')!
+      .click(),
+  );
+  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({ uuid: team.uuid });
+  await act(async () => toggle.click());
+  expect(container.querySelector("#team-archive")).toBeNull();
 });
 
 it("requires confirmation to archive and leaves the team unchanged on cancel", async () => {

@@ -9,6 +9,7 @@ export function BrandLogo({ className }: { className?: string }) {
       alt=""
       aria-hidden="true"
       unoptimized
+      loading="eager"
       className={cn("h-9 w-auto shrink-0", className)}
     />
   );

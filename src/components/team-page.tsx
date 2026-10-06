@@ -16,6 +16,7 @@ import { useDraftSync } from "./draft-sync-provider";
 import { TeamEditor } from "./team-editor";
 import { WorkspaceLoading } from "./workspace-loading";
 import { TeamLeagueLinks } from "./team-league-links";
+import { PageStatus } from "./page-status";
 
 export function TeamPage({ uuid }: { uuid: string }) {
   const t = useTranslations();
@@ -65,13 +66,10 @@ export function TeamPage({ uuid }: { uuid: string }) {
       />
     );
   return (
-    <div className="page-width py-16">
-      <h1 className="section-title">
-        {t(!sync.ready || live === undefined ? "loading" : "notFound")}
-      </h1>
-      {live === null && (
-        <p className="mt-3 text-muted-foreground">{t("notFoundHint")}</p>
-      )}
-    </div>
+    <PageStatus
+      code="404"
+      title={t("notFound")}
+      description={t("notFoundHint")}
+    />
   );
 }

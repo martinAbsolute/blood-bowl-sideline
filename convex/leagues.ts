@@ -2057,17 +2057,17 @@ export const renameTeam = mutation({
     // The builder page and library subscribe to the source team. Keep its
     // identity in sync without replacing its roster with the career snapshot.
     const source = await ctx.db.get("teams", entry.teamId);
-    if (!source) throw new ConvexError("NOT_FOUND");
-    await ctx.db.patch("teams", source._id, {
-      team: { ...source.team, name: clean },
-      revision: source.revision + 1,
-      updatedAt: Date.now(),
-      searchText: [
-        clean,
-        getRoster(source.team.rosterId)!.name,
-        getRuleset(source.team.rulesetId).name,
-      ].join(" "),
-    });
+    if (source)
+      await ctx.db.patch("teams", source._id, {
+        team: { ...source.team, name: clean },
+        revision: source.revision + 1,
+        updatedAt: Date.now(),
+        searchText: [
+          clean,
+          getRoster(source.team.rosterId)!.name,
+          getRuleset(source.team.rulesetId).name,
+        ].join(" "),
+      });
     await auditEvent(
       ctx,
       entry.leagueId,
@@ -2301,7 +2301,8 @@ export const replaceEntryTeam = mutation({
       throw new ConvexError({ code: "INVALID_ROOKIE", issues });
     const oldPlayers = await entryPlayers(ctx, entryId);
     // Preserve experience even when replacement removes the old team's career link.
-    await ctx.db.patch("teams", entry.teamId, { leagueExperienced: true });
+    if (await ctx.db.get("teams", entry.teamId))
+      await ctx.db.patch("teams", entry.teamId, { leagueExperienced: true });
     await ctx.db.patch("teams", source._id, { leagueExperienced: true });
     for (const player of oldPlayers)
       await ctx.db.delete("leaguePlayers", player._id);

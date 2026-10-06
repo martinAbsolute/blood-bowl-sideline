@@ -12,15 +12,16 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
   if (!z.uuid().safeParse(slug).success) notFound();
+  const metadata = await contentMetadata(
+    api.teams.getByUuid,
+    { uuid: slug },
+    `/teams/${slug}`,
+    "Shared Blood Bowl Team",
+    "View a shared Blood Bowl roster, player advancements and team costs on Blood Bowl Sideline.",
+    (data) => data?.team.name,
+  );
   return {
-    ...(await contentMetadata(
-      api.teams.getByUuid,
-      { uuid: slug },
-      `/teams/${slug}`,
-      "Shared Blood Bowl Team",
-      "View a shared Blood Bowl roster, player advancements and team costs on Blood Bowl Sideline.",
-      (data) => data?.team.name,
-    )),
+    ...metadata,
     robots: { index: false, follow: false },
   };
 }

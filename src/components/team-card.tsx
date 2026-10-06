@@ -23,6 +23,7 @@ export function TeamCard({
   team,
   href,
   action,
+  primaryAction,
   archived,
   saveState,
   selection,
@@ -33,6 +34,7 @@ export function TeamCard({
   team: Team;
   href?: string;
   action?: ReactNode;
+  primaryAction?: ReactNode;
   archived?: boolean;
   saveState?: "cloud" | "device" | "pending" | "error";
   selection?: { disabled: boolean; selected: boolean; onSelect: () => void };
@@ -183,7 +185,7 @@ export function TeamCard({
             {content}
           </Link>
         ) : (
-          <div className="flex-1 opacity-75">{content}</div>
+          <div className="flex-1">{content}</div>
         )}
         {footer ? (
           <footer className="border-t bg-secondary/15 px-5 py-3">
@@ -209,6 +211,9 @@ export function TeamCard({
                         : "saveStatusError",
                 )}
               </span>
+              {primaryAction && (
+                <span className="ml-auto">{primaryAction}</span>
+              )}
               {action}
             </div>
           </footer>

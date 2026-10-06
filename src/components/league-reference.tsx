@@ -47,7 +47,7 @@ export function LeagueReference({ name }: { name: string }) {
   return (
     <div className="page-width space-y-6 py-6">
       <Link
-        href="/teams"
+        href="/rosters"
         className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:underline"
       >
         <ArrowLeft className="size-3.5" />

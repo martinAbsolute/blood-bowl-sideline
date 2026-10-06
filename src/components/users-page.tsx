@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { useConvexAuth, usePaginatedQuery, useQuery } from "convex/react";
 import { useLocale, useTranslations } from "gt-next";
 import { LoaderCircle, LockKeyhole, UsersRound } from "lucide-react";
@@ -23,7 +22,7 @@ export function UsersPage() {
         </p>
       </header>
       {isLoading || (isAuthenticated && viewer === undefined) ? (
-        <LoadingUsers />
+        <UsersLoading label={t("loading")} />
       ) : viewer?.role === "admin" ? (
         <UserDirectory />
       ) : (
@@ -41,19 +40,6 @@ export function UsersPage() {
   );
 }
 
-function LoadingUsers() {
-  const t = useTranslations();
-  return (
-    <p
-      role="status"
-      className="flex items-center gap-2 py-4 text-sm text-muted-foreground"
-    >
-      <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
-      {t("loading")}
-    </p>
-  );
-}
-
 function UserDirectory() {
   const t = useTranslations();
   const locale = useLocale();
@@ -62,10 +48,6 @@ function UserDirectory() {
     {},
     { initialNumItems: 30 },
   );
-  // Fetch the complete directory in bounded batches so sorting spans all users.
-  useEffect(() => {
-    if (status === "CanLoadMore") loadMore(30);
-  }, [status, loadMore]);
   const users = sortUsers(results);
   const dateFormat = new Intl.DateTimeFormat(
     locale === "uk" ? "uk-UA" : "en-GB",
@@ -108,11 +90,18 @@ function UserDirectory() {
       ) : null}
       {status === "LoadingFirstPage" ? (
         <UsersLoading label={t("loading")} />
-      ) : status === "LoadingMore" ? (
-        <LoadingUsers />
       ) : null}
-      {status === "CanLoadMore" ? (
-        <Button className="mt-4" variant="outline" onClick={() => loadMore(30)}>
+      {status === "CanLoadMore" || status === "LoadingMore" ? (
+        <Button
+          className="mt-4"
+          variant="outline"
+          disabled={status === "LoadingMore"}
+          aria-busy={status === "LoadingMore"}
+          onClick={() => loadMore(30)}
+        >
+          {status === "LoadingMore" && (
+            <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+          )}
           {t("loadMore")}
         </Button>
       ) : null}

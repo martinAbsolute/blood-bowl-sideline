@@ -35,7 +35,7 @@ function Artwork({
           alt=""
           unoptimized
           className="max-h-full max-w-full object-contain [image-rendering:pixelated]"
-          style={{ width: artwork.width, height: artwork.height }}
+          style={{ width: "auto", height: "auto" }}
         />
       ) : (
         <Fallback className="size-5 text-muted-foreground" />

@@ -30,7 +30,7 @@ export default function Page({
   searchParams: Promise<{ ruleset?: string | string[] }>;
 }) {
   return (
-    <Suspense fallback={<WorkspaceLoading variant="catalog" />}>
+    <Suspense fallback={<WorkspaceLoading variant="reference" />}>
       <ReferenceWithRuleset params={params} searchParams={searchParams} />
     </Suspense>
   );

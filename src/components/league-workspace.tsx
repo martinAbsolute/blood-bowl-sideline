@@ -41,6 +41,7 @@ import { LeagueField, LeagueSelect } from "./league-field";
 import { LeagueTeamPicker } from "./league-team-picker";
 import { LeagueDeleteDialog } from "./league-delete-dialog";
 import { LeagueNavigation } from "./league-navigation";
+import { HistoryLoading } from "./list-loading";
 import { RosterIcon } from "./player-icon";
 import { CommissionerWithdrawal } from "./league-commissioner";
 import {
@@ -95,6 +96,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
   );
   useContentTitle(data?.league.name);
   const [teamUuid, setTeamUuid] = useState("");
+  const [teamPickerOpen, setTeamPickerOpen] = useState(false);
   const requestedTab = searchParams.get("view") ?? "overview";
   const tab =
     [
@@ -116,7 +118,13 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
   const [copied, setCopied] = useState(false);
   const own = usePaginatedQuery(
     api.teams.listMine,
-    isAuthenticated ? { archived: false } : "skip",
+    isAuthenticated &&
+      tab === "overview" &&
+      data?.canRegister &&
+      !data.entries.some((entry) => entry.coachId === data.viewerId) &&
+      (teamPickerOpen || teamUuid)
+      ? { archived: false }
+      : "skip",
     { initialNumItems: 30 },
   );
   const audit = usePaginatedQuery(
@@ -356,6 +364,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                 </p>
                 <div className="flex flex-wrap items-end gap-3">
                   <LeagueTeamPicker
+                    onOpenChange={setTeamPickerOpen}
                     leagueId={leagueId}
                     startingTreasury={league.startingTreasury}
                     teams={own.results}
@@ -743,9 +752,6 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
             <div className="rounded-2xl border border-dashed bg-card px-6 py-12 text-center">
               <CalendarDays className="mx-auto mb-4 size-8 text-muted-foreground" />
               <p className="font-medium">{t("leagueUi.noFixtures")}</p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {t("leagueUx.fixturesHint")}
-              </p>
               {data.canCommission && (
                 <Button
                   variant="outline"
@@ -947,6 +953,11 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
       )}
       {tab === "participants" && (
         <LeagueSection title={t("leagueUi.participants")}>
+          {!entries.length && (
+            <p className="py-4 text-sm text-muted-foreground">
+              {t("leagueUx.noParticipants")}
+            </p>
+          )}
           <div className="divide-y">
             {entries.map((entry) => (
               <Link
@@ -978,18 +989,26 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
       {tab === "history" && (
         <LeagueSection title={t("leagueUi.history")}>
           <LeagueHistory records={audit.results} />
-          {!audit.results.length && (
+          {audit.status === "LoadingFirstPage" ? (
+            <HistoryLoading label={t("loading")} />
+          ) : !audit.results.length ? (
             <p className="text-sm text-muted-foreground">
               {t("leagueUi.noHistory")}
             </p>
-          )}
-          {audit.status === "CanLoadMore" && (
+          ) : null}
+          {(audit.status === "CanLoadMore" ||
+            audit.status === "LoadingMore") && (
             <Button
               variant="outline"
               className="mt-4"
+              disabled={audit.status === "LoadingMore"}
               onClick={() => audit.loadMore(15)}
             >
-              {t("leagueUi.loadMore")}
+              {t(
+                audit.status === "LoadingMore"
+                  ? "loading"
+                  : "leagueUi.loadMore",
+              )}
             </Button>
           )}
         </LeagueSection>

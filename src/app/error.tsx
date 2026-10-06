@@ -1,20 +1,19 @@
 "use client";
 import { useTranslations } from "gt-next";
 import { Button } from "@/components/ui/button";
+import { PageStatus } from "@/components/page-status";
 export default function ErrorPage({
-  reset,
+  retry,
 }: {
   error: Error;
-  reset: () => void;
+  retry: () => void;
 }) {
   const t = useTranslations();
   return (
-    <div className="page-width py-24">
-      <h1 className="display-font text-5xl">{t("errorTitle")}</h1>
-      <p className="mt-4 text-muted-foreground">{t("errorHint")}</p>
-      <Button className="mt-8" onClick={reset}>
-        {t("retry")}
-      </Button>
-    </div>
+    <PageStatus
+      title={t("errorTitle")}
+      description={t("errorHint")}
+      action={<Button onClick={retry}>{t("retry")}</Button>}
+    />
   );
 }

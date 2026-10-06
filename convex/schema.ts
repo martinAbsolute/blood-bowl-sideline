@@ -18,6 +18,8 @@ import {
 
 export default defineSchema({
   ...authTables,
+  // Keep only the removed UUID so stale device drafts cannot recreate deleted teams.
+  deletedTeams: defineTable({ uuid: v.string() }).index("by_uuid", ["uuid"]),
   devAuthAccounts: defineTable({
     identifier: v.union(v.literal("coach-a"), v.literal("coach-b")),
     userId: v.id("users"),

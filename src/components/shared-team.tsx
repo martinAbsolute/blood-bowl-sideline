@@ -4,6 +4,7 @@ import { useTranslations } from "gt-next";
 import { api } from "../../convex/_generated/api";
 import type { Team } from "@/domain/types";
 import { TeamEditor } from "./team-editor";
+import { PageStatus } from "./page-status";
 export function SharedTeam({
   initial,
 }: {
@@ -20,10 +21,11 @@ export function SharedTeam({
   const { isAuthenticated } = useConvexAuth();
   if (live === null)
     return (
-      <div className="page-width py-16">
-        <h1 className="section-title">{t("notFound")}</h1>
-        <p className="mt-3 text-muted-foreground">{t("notFoundHint")}</p>
-      </div>
+      <PageStatus
+        code="404"
+        title={t("notFound")}
+        description={t("notFoundHint")}
+      />
     );
   const data = live ?? initial;
   const canEdit = isAuthenticated && data.canEdit;

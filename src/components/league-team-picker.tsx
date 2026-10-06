@@ -35,6 +35,7 @@ export function LeagueTeamPicker({
   disabled,
   startingTreasury = DEFAULT_LEAGUE_TREASURY,
   leagueId,
+  onOpenChange,
 }: {
   teams: { team: Team; leagueExperienced?: boolean }[];
   value: string;
@@ -45,6 +46,7 @@ export function LeagueTeamPicker({
   disabled?: boolean;
   startingTreasury?: number;
   leagueId?: string;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
@@ -66,7 +68,13 @@ export function LeagueTeamPicker({
         Number(canEnrollTeam(a, startingTreasury)),
     );
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen);
+        onOpenChange?.(nextOpen);
+      }}
+    >
       <DialogTrigger
         render={
           <Button
@@ -129,6 +137,7 @@ export function LeagueTeamPicker({
                       onClick={() => {
                         onChange(team.uuid);
                         setOpen(false);
+                        onOpenChange?.(false);
                       }}
                       className="flex w-full items-center gap-3 bg-primary px-3 py-3 text-left text-primary-foreground transition-colors enabled:hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                     >

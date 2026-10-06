@@ -83,6 +83,24 @@ it("does not request the directory for anonymous or regular users", async () => 
   }
 });
 
+it("loads further directory pages only on request and preserves the button while loading", async () => {
+  mocks.role = "admin";
+  const loadMore = vi.fn();
+  const page = { results: [], status: "CanLoadMore", loadMore };
+  mocks.directory.mockReturnValue(page);
+  await act(async () => root.render(createElement(UsersPage)));
+  expect(loadMore).not.toHaveBeenCalled();
+  const button = container.querySelector<HTMLButtonElement>("button")!;
+  expect(button.textContent).toBe(en.loadMore);
+  await act(async () => button.click());
+  expect(loadMore).toHaveBeenCalledExactlyOnceWith(30);
+  mocks.directory.mockReturnValue({ ...page, status: "LoadingMore" });
+  await act(async () => root.render(createElement(UsersPage)));
+  expect(container.querySelector("button")).toBe(button);
+  expect(button.disabled).toBe(true);
+  expect(button.getAttribute("aria-busy")).toBe("true");
+});
+
 it("renders a read-only admin directory in online/last-seen order and removes it on demotion", async () => {
   mocks.role = "admin";
   const profile = { role: "user", image: null, email: null, joinedAt: 1 };

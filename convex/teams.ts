@@ -178,6 +178,14 @@ export const save = mutation({
       .query("teams")
       .withIndex("by_uuid", (q) => q.eq("uuid", team.uuid))
       .unique();
+    if (
+      !existing &&
+      (await ctx.db
+        .query("deletedTeams")
+        .withIndex("by_uuid", (q) => q.eq("uuid", team.uuid))
+        .unique())
+    )
+      throw new ConvexError("ARCHIVED");
     if (existing && existing.ownerId !== ownerId && viewer.role !== "admin")
       throw new ConvexError("FORBIDDEN");
     // A draft keeps its league allowance across navigation and background saves.
@@ -277,5 +285,45 @@ export const setArchived = mutation({
       revision: doc.revision + 1,
     });
     return null;
+  },
+});
+
+export const deleteArchived = mutation({
+  args: { uuid: v.string() },
+  returns: v.null(),
+  handler: async (ctx, { uuid }) => {
+    const viewer = await requireUser(ctx);
+    if (!z.uuid().safeParse(uuid).success)
+      throw new ConvexError("INVALID_INPUT");
+    const doc = await ctx.db
+      .query("teams")
+      .withIndex("by_uuid", (q) => q.eq("uuid", uuid))
+      .unique();
+    if (!doc || doc.ownerId !== viewer._id) throw new ConvexError("FORBIDDEN");
+    if (!doc.archived) throw new ConvexError("NOT_ARCHIVED");
+    if ((await teamLeagueState(ctx, doc)).leagueLocked)
+      throw new ConvexError("TEAM_IN_LEAGUE");
+    // League entries retain their own team snapshots and match history.
+    await ctx.db.insert("deletedTeams", { uuid });
+    await ctx.db.delete("teams", doc._id);
+    return null;
+  },
+});
+export const isArchived = query({
+  args: { uuid: v.string() },
+  returns: v.boolean(),
+  handler: async (ctx, { uuid }) => {
+    if (!z.uuid().safeParse(uuid).success) return false;
+    const doc = await ctx.db
+      .query("teams")
+      .withIndex("by_uuid", (q) => q.eq("uuid", uuid))
+      .unique();
+    if (doc) return doc.archived;
+    return (
+      (await ctx.db
+        .query("deletedTeams")
+        .withIndex("by_uuid", (q) => q.eq("uuid", uuid))
+        .unique()) !== null
+    );
   },
 });

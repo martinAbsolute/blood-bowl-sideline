@@ -1,6 +1,24 @@
 import { Card } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
 
+export function HistoryLoading({ label }: { label: string }) {
+  return (
+    <div role="status" aria-label={label} className="space-y-4">
+      <span className="sr-only">{label}</span>
+      {[0, 1, 2].map((index) => (
+        <div
+          key={index}
+          aria-hidden="true"
+          className="space-y-2 border-b pb-4 last:border-0"
+        >
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-3 w-40 max-w-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function LeagueCardsLoading({ label }: { label: string }) {
   return (
     <div role="status" className="grid gap-5">

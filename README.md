@@ -18,7 +18,7 @@ The roster builder includes:
 - Default, Matched Play, EuroBowl 2026, and NAF World Cup 2027 v2.1 presets, with shared validation of budgets, skills, and eligibility.
 - Guest drafts that save on your device; Telegram sign-in brings all guest teams into your account library.
 - Automatic cloud saving with account-scoped recovery copies for unfinished or failed edits.
-- Team search, filters, duplication, archiving, and shareable UUID links. Owners and admins edit teams; visitors see the public roster.
+- Team search, filters, duplication, and shareable UUID links. Owners and admins edit teams; visitors see the public roster. The expandable Archive loads on demand and supports restore or permanent deletion; archived and deleted team links return 404.
 - Responsive sidebar navigation and an admin-only user directory with online and last-seen status.
 - Portrait and landscape printouts with full skill references and clearly marked advancements.
 - English and Ukrainian, with a persistent language choice.

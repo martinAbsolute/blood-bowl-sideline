@@ -71,13 +71,16 @@ function CareerReplacement({
 }) {
   const t = useTranslations();
   const viewer = useQuery(api.users.viewer, {});
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [uuid, setUuid] = useState("");
   const teams = usePaginatedQuery(
     api.teams.listMine,
-    { archived: false },
+    viewer?.id === entry.coachId && (pickerOpen || uuid)
+      ? { archived: false }
+      : "skip",
     { initialNumItems: 30 },
   );
   const replace = useMutation(api.leagues.replaceEntryTeam);
-  const [uuid, setUuid] = useState("");
   const action = useLeagueAction();
   if (viewer?.id !== entry.coachId) return null;
   return (
@@ -88,6 +91,7 @@ function CareerReplacement({
       <LeagueError message={action.error} />
       <div className="flex flex-wrap gap-3">
         <LeagueTeamPicker
+          onOpenChange={setPickerOpen}
           startingTreasury={startingTreasury}
           teams={teams.results}
           value={uuid}
@@ -109,13 +113,14 @@ function CareerReplacement({
             )
           }
           onClick={() =>
-            void action.run(() =>
-              replace({
+            void action.run(async () => {
+              await replace({
                 entryId: entry._id,
                 teamUuid: uuid,
                 expectedRevision: entry.revision,
-              }),
-            )
+              });
+              setUuid("");
+            })
           }
         >
           {t("leagueUi.replaceTeam")}

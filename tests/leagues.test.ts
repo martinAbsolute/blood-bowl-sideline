@@ -778,6 +778,32 @@ describe("league registration and fixtures", () => {
     ).toHaveLength(0);
   });
 
+  it("preserves league history and career renaming after permanently deleting the archived source", async () => {
+    const s = await setup();
+    await s.t.run((ctx) =>
+      ctx.db.patch("leagues", s.leagueId, { status: "completed" }),
+    );
+    await s.coaches[1].mutation(api.teams.setArchived, {
+      uuid: s.teams[1].uuid,
+      archived: true,
+    });
+    await s.coaches[1].mutation(api.teams.deleteArchived, {
+      uuid: s.teams[1].uuid,
+    });
+    await s.coaches[0].mutation(api.leagues.renameTeam, {
+      entryId: s.entries[1],
+      name: "Historic roster",
+      expectedRevision: 1,
+    });
+    const league = await s.t.query(api.leagues.get, { leagueId: s.leagueId });
+    expect(
+      league.entries.find((entry) => entry._id === s.entries[1])?.team.name,
+    ).toBe("Historic roster");
+    expect(
+      await s.t.query(api.teams.getByUuid, { uuid: s.teams[1].uuid }),
+    ).toBeNull();
+  });
+
   it.each(["withdrawn", "completed"] as const)(
     "releases the builder after %s but keeps experience permanently",
     async (ended) => {

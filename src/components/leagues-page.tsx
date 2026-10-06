@@ -79,6 +79,8 @@ export function LeaguesPage() {
         startingTreasury: treasury,
         roundDays,
       });
+      setCreating(false);
+      setName("");
       router.push(`/leagues/manage/${leagueId}`);
     });
   }

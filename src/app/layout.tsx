@@ -74,7 +74,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${display.variable}`}>
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      className={`${geistSans.variable} ${display.variable}`}
+    >
       <body className="bg-background font-sans text-foreground antialiased">
         <Suspense
           fallback={
