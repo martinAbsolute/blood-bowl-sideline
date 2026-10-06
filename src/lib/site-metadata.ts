@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const siteName = "Blood Bowl Sideline";
+export const siteName = "Blood Bowl Sideline.";
 export const siteUrl = new URL(
   process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
@@ -13,7 +13,7 @@ export const shareImage = {
   url: new URL("/opengraph-image.png", siteUrl).href,
   width: 1200,
   height: 630,
-  alt: "Blood Bowl Sideline — orange and forest green logo on a warm cream background",
+  alt: "Blood Bowl Sideline. — orange and forest green logo on a warm cream background",
 };
 
 export function pageMetadata(

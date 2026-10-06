@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale, useTranslations } from "gt-next";
+import { useTranslations } from "gt-next";
 import { getRoster, inducements } from "@/domain/catalog";
 import { inducementInfo } from "@/domain/rules";
 import type { Team } from "@/domain/types";
@@ -19,7 +19,7 @@ function SupportItem({
   onChange,
   readOnly,
   toggle = false,
-  href,
+  longRule = false,
 }: {
   label: string;
   description: string;
@@ -29,7 +29,7 @@ function SupportItem({
   onChange: (value: number) => void;
   readOnly: boolean;
   toggle?: boolean;
-  href?: string;
+  longRule?: boolean;
 }) {
   const t = useTranslations();
   const meta =
@@ -47,7 +47,7 @@ function SupportItem({
             title={label}
             description={description}
             meta={meta}
-            href={href}
+            skillPreview={longRule}
             label={t("explainRule", { name: label })}
             className="no-print -my-1 size-6 [&>svg]:size-3.5"
           />
@@ -95,7 +95,6 @@ export function TeamSupport({
   readOnly?: boolean;
 }) {
   const t = useTranslations();
-  const locale = useLocale() === "uk" ? "uk" : "en";
   const roster = getRoster(team.rosterId)!;
   const staffItems = [
     { key: "rerolls", cost: roster.rerolls.cost, max: roster.rerolls.max },
@@ -173,7 +172,7 @@ export function TeamSupport({
                   max={info.allowed ? info.max : 0}
                   cost={info.cost}
                   readOnly={readOnly}
-                  href={`https://bb-rules-g2p.pages.dev/${locale}/inducements/${item.id}`}
+                  longRule
                   onChange={(value) =>
                     onChange({
                       ...team,

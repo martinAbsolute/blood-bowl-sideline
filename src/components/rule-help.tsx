@@ -15,6 +15,50 @@ import {
 import { Button } from "./ui/button";
 import { CircleHelp } from "lucide-react";
 
+function LabeledRuleText({ text }: { text: string }) {
+  const label = /^([^:\n]{1,65}):\s/.exec(text);
+  return label ? (
+    <>
+      <strong className="font-semibold">{label[1]}:</strong>{" "}
+      {text.slice(label[0].length)}
+    </>
+  ) : (
+    text
+  );
+}
+
+export function RuleDescription({ description }: { description: string }) {
+  return (
+    <div className="space-y-3 text-base leading-relaxed">
+      {description.split(/\n{2,}/).map((block, index) => {
+        const lines = block.split("\n");
+        if (
+          lines.length > 1 &&
+          lines.slice(1).every((line) => /^\d+\.\s/.test(line))
+        ) {
+          return (
+            <section key={index}>
+              <h3 className="mb-2 font-semibold">{lines[0]}</h3>
+              <ol className="list-decimal space-y-2 pl-6 marker:font-semibold">
+                {lines.slice(1).map((line) => (
+                  <li key={line} className="pl-1">
+                    <LabeledRuleText text={line.replace(/^\d+\.\s/, "")} />
+                  </li>
+                ))}
+              </ol>
+            </section>
+          );
+        }
+        return (
+          <p key={index} className="whitespace-pre-wrap">
+            <LabeledRuleText text={block} />
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 /** Hover/focus for a quick explanation; click, tap or Enter for a persistent one. */
 export function RuleHelp({
   title,
@@ -23,7 +67,6 @@ export function RuleHelp({
   children,
   className,
   label,
-  href,
   action,
   fullDescription = false,
   skillPreview = false,
@@ -34,7 +77,6 @@ export function RuleHelp({
   children: ReactNode;
   className?: string;
   label?: string;
-  href?: string;
   action?: {
     label: string;
     onClick: () => void;
@@ -57,6 +99,7 @@ export function RuleHelp({
     [description],
   );
   const trigger = useRef<HTMLButtonElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const descriptionId = useId();
   return (
     <>
@@ -110,31 +153,22 @@ export function RuleHelp({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           aria-describedby={meta ? descriptionId : undefined}
-          className="max-h-[85dvh] overflow-y-auto sm:max-w-md"
+          className="max-h-[85dvh] overflow-y-auto sm:max-w-xl"
+          initialFocus={titleRef}
           finalFocus={() => {
             setHovered(false);
             return action?.finalFocus?.() ?? trigger.current;
           }}
         >
           <DialogHeader className="pr-6">
-            <DialogTitle>{title}</DialogTitle>
+            <DialogTitle ref={titleRef} tabIndex={-1}>
+              {title}
+            </DialogTitle>
             {meta && (
               <DialogDescription id={descriptionId}>{meta}</DialogDescription>
             )}
           </DialogHeader>
-          <p className="whitespace-pre-wrap text-base leading-relaxed">
-            {description}
-          </p>
-          {href && (
-            <a
-              href={href}
-              target="_blank"
-              rel="noreferrer"
-              className="text-sm text-primary underline underline-offset-4"
-            >
-              {t("fullRule")}
-            </a>
-          )}
+          <RuleDescription description={description} />
           {action ? (
             <div className="mt-2 flex flex-wrap justify-end gap-2">
               <DialogClose

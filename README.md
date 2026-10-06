@@ -1,6 +1,6 @@
-# Blood Bowl Sideline
+# Blood Bowl Sideline.
 
-**Your Blood Bowl sideline, from the first roster to the final whistle.**
+**Your Blood Bowl Sideline. From the first roster to the final whistle.**
 
 A home for building and sharing teams, managing player advancements, tracking games, and running leagues and tournaments. Made with love for the Ukrainian Blood Bowl community, with an English and Ukrainian interface.
 

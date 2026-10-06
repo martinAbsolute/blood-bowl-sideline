@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     { name: "Martin Bahniuk", url: "https://github.com/martinAbsolute/" },
   ],
   title: {
-    default: "Blood Bowl Sideline — Teams, Leagues & Tournaments",
+    default: "Blood Bowl Sideline. — Teams, Leagues & Tournaments",
     template: `%s | ${siteName}`,
   },
   description: siteDescription,
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName,
-    title: "Blood Bowl Sideline — Teams, Leagues & Tournaments",
+    title: "Blood Bowl Sideline. — Teams, Leagues & Tournaments",
     description: siteDescription,
     locale: "en_US",
     alternateLocale: ["uk_UA"],
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Blood Bowl Sideline — Teams, Leagues & Tournaments",
+    title: "Blood Bowl Sideline. — Teams, Leagues & Tournaments",
     description: siteDescription,
     images: [shareImage],
   },

@@ -22,11 +22,11 @@ it("uses public team content in page and social sharing titles without passing a
   const result = await metadata();
   expect(result.title).toBe("Reikland Reavers");
   expect(result.openGraph).toMatchObject({
-    title: "Reikland Reavers | Blood Bowl Sideline",
+    title: "Reikland Reavers | Blood Bowl Sideline.",
     url: `/teams/${uuid}`,
   });
   expect(result.twitter).toMatchObject({
-    title: "Reikland Reavers | Blood Bowl Sideline",
+    title: "Reikland Reavers | Blood Bowl Sideline.",
   });
   expect(mocks.fetchQuery).toHaveBeenCalledWith(api.teams.getByUuid, { uuid });
 });

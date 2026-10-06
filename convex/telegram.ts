@@ -21,7 +21,7 @@ export const sendLogin = internalAction({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             chat_id: chatId,
-            text: "🏈 Blood Bowl Sideline\n\nWelcome, coach! / Вітаємо, тренере!\nSign in to save your teams. / Увійди, щоб зберегти команди.",
+            text: "🏈 Blood Bowl Sideline.\n\nWelcome, coach! / Вітаємо, тренере!\nSign in to save your teams. / Увійди, щоб зберегти команди.",
             reply_markup: {
               inline_keyboard: [
                 [

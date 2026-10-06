@@ -19,6 +19,11 @@ import {
 import { RosterIcon, StarPlayerIcon } from "./player-icon";
 import { RosterFacts, RosterTable } from "./roster-reference";
 
+const referenceOnlyInducements = [
+  { id: "mercenary-players", name: "Mercenary Players", max: 3, cost: null },
+  { id: "star-players-inducement", name: "Star Players", max: 2, cost: null },
+];
+
 export function TeamReference({ roster }: { roster: Roster }) {
   const t = useTranslations();
   const team = newTeam("00000000-0000-4000-8000-000000000000", roster.id);
@@ -27,6 +32,13 @@ export function TeamReference({ roster }: { roster: Roster }) {
     return info.allowed ? [{ ...i, ...info }] : [];
   });
   const eligibleStars = stars.filter((s) => starEligible(team, s));
+  const referenceInducements = [
+    ...eligible.filter((item) => item.id !== "wizard-sports-wizard"),
+    ...referenceOnlyInducements.filter(
+      (item) => item.id !== "star-players-inducement" || eligibleStars.length,
+    ),
+    ...eligible.filter((item) => item.id === "wizard-sports-wizard"),
+  ];
   return (
     <div className="page-width space-y-5 py-6">
       <Link
@@ -64,12 +76,13 @@ export function TeamReference({ roster }: { roster: Roster }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {eligible.map((i) => (
+              {referenceInducements.map((i) => (
                 <TableRow key={i.id}>
                   <TableCell className="whitespace-normal">
                     <RuleHelp
                       title={i.name}
                       description={t(`inducementDescriptions.${i.id}`)}
+                      skillPreview
                       className="underline decoration-dotted underline-offset-4"
                     >
                       {i.name}
@@ -79,7 +92,7 @@ export function TeamReference({ roster }: { roster: Roster }) {
                     </p>
                   </TableCell>
                   <TableCell className="text-right font-mono">
-                    {i.cost / 1000}k
+                    {i.cost === null ? t("priceVaries") : `${i.cost / 1000}k`}
                   </TableCell>
                 </TableRow>
               ))}

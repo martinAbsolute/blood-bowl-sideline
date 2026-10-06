@@ -63,13 +63,13 @@ it("creates a league directly with today's date and the selected treasury", asyn
     'input[maxlength="100"]',
   )!;
   const treasury = dialog.querySelector<HTMLInputElement>(
-    'input[type="number"]',
+    'input[aria-describedby="treasury-hint"]',
   )!;
   const setter = Object.getOwnPropertyDescriptor(
     HTMLInputElement.prototype,
     "value",
   )!.set!;
-  expect(treasury.value).toBe("1000000");
+  expect(treasury.value.replace(/\D/g, "")).toBe("1000000");
   await act(async () => {
     setter.call(name, "Kyiv autumn league");
     name.dispatchEvent(new Event("input", { bubbles: true }));
