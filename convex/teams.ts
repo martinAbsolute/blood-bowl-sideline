@@ -120,6 +120,16 @@ export const listMine = query({
                   q.eq("ownerId", owner).eq("archived", archived),
                 )
                 .order("desc");
+    // Reactive pages can grow beyond numItems. Bound reads while preserving
+    // endCursor/id and the native split metadata used by usePaginatedQuery.
+    paginationOpts.maximumRowsRead = Math.min(
+      paginationOpts.maximumRowsRead ?? 60,
+      60,
+    );
+    paginationOpts.maximumBytesRead = Math.min(
+      paginationOpts.maximumBytesRead ?? 512 * 1024,
+      512 * 1024,
+    );
     const result = await source.paginate(paginationOpts);
     return {
       ...result,

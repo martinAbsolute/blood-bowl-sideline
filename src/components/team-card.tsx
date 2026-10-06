@@ -17,6 +17,7 @@ import type { Team } from "@/domain/types";
 import { cn } from "@/lib/utils";
 import { Card } from "./ui/card";
 import { RosterIcon } from "./player-icon";
+import { TeamLineup } from "./team-lineup";
 
 export function TeamCard({
   team,
@@ -71,7 +72,7 @@ export function TeamCard({
             )}
           </span>
         </div>
-        <div className="relative flex items-center gap-4">
+        <div className="relative flex items-start gap-4">
           <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-white/15 shadow-sm">
             <RosterIcon rosterId={team.rosterId} className="size-12" />
           </span>
@@ -82,6 +83,7 @@ export function TeamCard({
             >
               {team.name || t("untitled")}
             </h2>
+            {saveState && <TeamLineup team={team} />}
           </div>
         </div>
       </div>
