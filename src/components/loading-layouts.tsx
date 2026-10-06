@@ -472,10 +472,12 @@ export function LoadingLayout({
         <div className="catalog-layout" role="status">
           <span className="sr-only">{label}</span>
           <aside aria-hidden="true" className="catalog-index">
-            <Skeleton className="h-9 w-full" />
-            <div className="mt-3 flex gap-1 overflow-hidden lg:flex-col">
+            <div className="flex min-h-11 items-center lg:min-h-9">
+              <Skeleton className="h-9 w-full" />
+            </div>
+            <div className="scroll-fade-x mt-3 flex gap-1 overflow-hidden lg:flex-col lg:scroll-fade-none">
               {Array.from({ length: 8 }, (_, index) => (
-                <Skeleton key={index} className="h-7 w-28 shrink-0" />
+                <Skeleton key={index} className="h-11 w-28 shrink-0 lg:h-7" />
               ))}
             </div>
           </aside>
@@ -485,9 +487,14 @@ export function LoadingLayout({
                 key={index}
                 className="overflow-hidden rounded-lg border bg-card"
               >
-                <div className="flex h-[49px] items-center justify-between gap-4 bg-secondary/40 px-3">
-                  <Skeleton className="h-6 w-36" />
-                  <Skeleton className="h-7 w-24" />
+                <div className="flex items-center gap-1 border-b bg-secondary/40 px-2 py-2 md:gap-2 md:px-3">
+                  <Skeleton className="size-4 shrink-0 min-[360px]:size-6 md:size-8" />
+                  <Skeleton className="h-4 min-w-0 max-w-36 flex-1 md:h-5" />
+                  <Skeleton className="h-11 w-16 shrink-0 md:h-7 md:w-24" />
+                  <Skeleton className="h-11 w-20 shrink-0 md:h-7 md:w-28" />
+                  <span className="flex h-11 w-7 shrink-0 items-center justify-center md:hidden">
+                    <ChevronDown className="size-5 text-muted-foreground" />
+                  </span>
                 </div>
                 <div className="hidden md:block">
                   <TableLoading rows={4} title={false} framed={false} />

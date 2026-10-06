@@ -9,7 +9,6 @@ import {
   subscribeDrafts,
   draftAccount,
 } from "@/lib/drafts";
-import { TeamCatalog } from "./team-catalog";
 import { TeamLibrary } from "./team-library";
 import { useDraftSync } from "./draft-sync-provider";
 
@@ -32,7 +31,6 @@ export function WorkspaceLoading({
           );
         })
       : undefined;
-  if (variant === "catalog") return <TeamCatalog />;
   if (variant === "library") return <TeamLibrary />;
   return (
     <LoadingLayout

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "gt-next";
 import { Search, ArrowUpRight, ChevronDown } from "lucide-react";
@@ -14,6 +14,29 @@ export function RosterExplorer() {
   const t = useTranslations();
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    function openHashRoster() {
+      const id = window.location.hash.slice(1);
+      if (!rosters.some((roster) => roster.id === id)) return;
+
+      setSearch("");
+      setExpanded((current) => new Set(current).add(id));
+      window.requestAnimationFrame(() => {
+        document.getElementById(id)?.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+            .matches
+            ? "instant"
+            : "smooth",
+          block: "start",
+        });
+      });
+    }
+
+    openHashRoster();
+    window.addEventListener("hashchange", openHashRoster);
+    return () => window.removeEventListener("hashchange", openHashRoster);
+  }, []);
 
   function toggleRoster(id: string) {
     setExpanded((current) => {
@@ -80,7 +103,7 @@ export function RosterExplorer() {
                     rosterId={r.id}
                     className="size-4 shrink-0 min-[360px]:size-6"
                   />
-                  <span className="truncate" title={r.name}>
+                  <span className="line-clamp-2 leading-tight" title={r.name}>
                     {r.name}
                   </span>
                 </span>
@@ -111,10 +134,14 @@ export function RosterExplorer() {
                   iconClassName="hidden size-4 md:block"
                 />
               </div>
-              <ChevronDown
+              <span
                 aria-hidden="true"
-                className={`pointer-events-none relative size-4 shrink-0 text-primary transition-transform md:hidden ${expanded.has(r.id) ? "rotate-180" : ""}`}
-              />
+                className="pointer-events-none relative flex h-11 w-7 shrink-0 items-center justify-center md:hidden"
+              >
+                <ChevronDown
+                  className={`size-5 text-primary transition-transform ${expanded.has(r.id) ? "rotate-180" : ""}`}
+                />
+              </span>
             </div>
             <div
               id={`roster-content-${r.id}`}

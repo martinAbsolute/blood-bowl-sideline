@@ -310,6 +310,9 @@ html {
   scrollbar-gutter: stable;
   scroll-padding-top: var(--site-content-top);
 }
+html:has(.catalog-layout) {
+  scroll-behavior: smooth;
+}
 .eyebrow {
   font-size: 10px;
   letter-spacing: 0.18em;
