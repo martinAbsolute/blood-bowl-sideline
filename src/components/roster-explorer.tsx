@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "gt-next";
 import { Search, ArrowUpRight, ChevronDown } from "lucide-react";
@@ -35,24 +35,27 @@ export function RosterExplorer({
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
 
+  const openHashRoster = useEffectEvent(() => {
+    const id = window.location.hash.slice(1);
+    const choice = rosterChoices(rulesetId).find(
+      ({ roster }) => roster.id === id,
+    );
+    if (!choice) return;
+
+    setSearch("");
+    onRevealTier?.(choice.tier);
+    setExpanded((current) => new Set(current).add(id));
+    scrollToRoster(id);
+  });
   useEffect(() => {
-    function openHashRoster() {
-      const id = window.location.hash.slice(1);
-      const choice = rosterChoices(rulesetId).find(
-        ({ roster }) => roster.id === id,
-      );
-      if (!choice) return;
-
-      setSearch("");
-      onRevealTier?.(choice.tier);
-      setExpanded((current) => new Set(current).add(id));
-      scrollToRoster(id);
-    }
-
-    openHashRoster();
-    window.addEventListener("hashchange", openHashRoster);
-    return () => window.removeEventListener("hashchange", openHashRoster);
-  }, [rulesetId, onRevealTier]);
+    const initialFrame = window.requestAnimationFrame(() => openHashRoster());
+    const onHashChange = () => openHashRoster();
+    window.addEventListener("hashchange", onHashChange);
+    return () => {
+      window.cancelAnimationFrame(initialFrame);
+      window.removeEventListener("hashchange", onHashChange);
+    };
+  }, []);
 
   function toggleRoster(id: string) {
     setExpanded((current) => {

@@ -35,9 +35,19 @@ beforeEach(() => {
 
 it("switches rulesets through native history without remounting the catalog or waiting for server props", async () => {
   window.history.replaceState(null, "", "/rosters?keep=1#human");
-  vi.spyOn(window, "requestAnimationFrame").mockImplementation(() => 0);
+  // Flush happy-dom's hashchange from replaceState (browsers do not emit one).
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const scrollFrame = vi
+    .spyOn(window.HTMLElement.prototype, "scrollIntoView")
+    .mockImplementation(() => {});
+  vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
+    callback(0);
+    return 0;
+  });
   navigation.params = new URLSearchParams(window.location.search);
   await render("bb2025-default");
+  expect(scrollFrame).toHaveBeenCalled();
+  scrollFrame.mockClear();
   const input = container.querySelector("input");
   const picker = container.querySelector("select")!;
   await act(async () => {
@@ -53,6 +63,7 @@ it("switches rulesets through native history without remounting the catalog or w
     "kyiv-seven-sins-sevens",
   );
   expect(container.querySelector("input")).toBe(input);
+  expect(scrollFrame).not.toHaveBeenCalled();
   expect(container.querySelector("[aria-pressed]")?.textContent).toBe("tier 1");
   await act(async () => {
     picker.value = "bb2025-default";
@@ -63,6 +74,7 @@ it("switches rulesets through native history without remounting the catalog or w
   await render("kyiv-seven-sins-sevens");
   expect(container.querySelector("[aria-pressed]")).toBeNull();
   expect(container.querySelector("input")).toBe(input);
+  expect(scrollFrame).not.toHaveBeenCalled();
   vi.restoreAllMocks();
 });
 afterEach(async () => {
