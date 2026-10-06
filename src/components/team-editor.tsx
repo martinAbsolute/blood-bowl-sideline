@@ -416,15 +416,16 @@ export function TeamEditor({
                       )}
                       {isSevens(team) && (
                         <TableHead className="w-20 text-center">
-                          <span className="inline-flex items-center gap-1">
-                            {t("sevensVeteran")}
+                          <span className="inline-flex items-center gap-0.5">
                             <RuleInfo
+                              className="size-5"
                               title={t("sevensVeteran")}
                               description={t("sevensVeteranHelp")}
                               label={t("explainRule", {
                                 name: t("sevensVeteran"),
                               })}
                             />
+                            <span>{t("sevensVeteran")}</span>
                           </span>
                         </TableHead>
                       )}
@@ -533,79 +534,74 @@ export function TeamEditor({
                           </TableCell>
                           {requiresCaptain && (
                             <TableCell className="text-center">
-                              <label
-                                className="inline-flex size-8 items-center justify-center"
-                                onClick={(event) => event.stopPropagation()}
-                              >
-                                <Checkbox
-                                  checked={team.captainId === p.id}
-                                  disabled={
-                                    readOnly ||
-                                    pos.position.includes("Big Guy") ||
-                                    (team.rulesetId ===
-                                      "kyiv-seven-sins-sevens" &&
-                                      totals.tier === 2 &&
-                                      p.skills.length > 0 &&
-                                      team.captainId !== p.id)
-                                  }
-                                  title={
-                                    team.rulesetId ===
-                                      "kyiv-seven-sins-sevens" &&
-                                    totals.tier === 2 &&
-                                    p.skills.length > 0
-                                      ? t("sevensCaptainSkillConflict")
-                                      : undefined
-                                  }
-                                  aria-label={`${t("teamCaptain")} · ${p.name || positionLabel(pos.position)}`}
-                                  onCheckedChange={(checked) => {
-                                    const next = { ...team };
-                                    if (checked) {
-                                      next.captainId = p.id;
-                                      if (!isSevens(team))
-                                        next.players = team.players.map(
-                                          (player) =>
-                                            player.id === p.id
-                                              ? {
-                                                  ...player,
-                                                  skills: player.skills.filter(
-                                                    (id) => id !== "pro",
-                                                  ),
-                                                }
-                                              : player,
-                                        );
-                                    } else delete next.captainId;
-                                    change(next);
-                                  }}
-                                />
-                              </label>
+                              {!pos.position.includes("Big Guy") &&
+                                !(
+                                  team.rulesetId === "kyiv-seven-sins-sevens" &&
+                                  totals.tier === 2 &&
+                                  p.skills.length > 0 &&
+                                  team.captainId !== p.id
+                                ) && (
+                                  <label
+                                    className="inline-flex size-8 items-center justify-center"
+                                    onClick={(event) => event.stopPropagation()}
+                                  >
+                                    <Checkbox
+                                      checked={team.captainId === p.id}
+                                      disabled={readOnly}
+                                      title={
+                                        team.rulesetId ===
+                                          "kyiv-seven-sins-sevens" &&
+                                        totals.tier === 2 &&
+                                        p.skills.length > 0
+                                          ? t("sevensCaptainSkillConflict")
+                                          : undefined
+                                      }
+                                      aria-label={`${t("teamCaptain")} · ${p.name || positionLabel(pos.position)}`}
+                                      onCheckedChange={(checked) => {
+                                        const next = { ...team };
+                                        if (checked) {
+                                          next.captainId = p.id;
+                                          if (!isSevens(team))
+                                            next.players = team.players.map(
+                                              (player) =>
+                                                player.id === p.id
+                                                  ? {
+                                                      ...player,
+                                                      skills:
+                                                        player.skills.filter(
+                                                          (id) => id !== "pro",
+                                                        ),
+                                                    }
+                                                  : player,
+                                            );
+                                        } else delete next.captainId;
+                                        change(next);
+                                      }}
+                                    />
+                                  </label>
+                                )}
                             </TableCell>
                           )}
                           {isSevens(team) && (
                             <TableCell className="text-center">
-                              <label
-                                className="inline-flex size-8 items-center justify-center"
-                                onClick={(event) => event.stopPropagation()}
-                              >
-                                <Checkbox
-                                  checked={team.veteranId === p.id}
-                                  disabled={
-                                    readOnly ||
-                                    (!isLineman(pos) && team.veteranId !== p.id)
-                                  }
-                                  aria-label={`${t("sevensVeteran")} · ${p.name || positionLabel(pos.position)}`}
-                                  title={
-                                    !isLineman(pos)
-                                      ? t("sevensChooseVeteran")
-                                      : undefined
-                                  }
-                                  onCheckedChange={(checked) => {
-                                    const next = { ...team };
-                                    if (checked) next.veteranId = p.id;
-                                    else delete next.veteranId;
-                                    change(next);
-                                  }}
-                                />
-                              </label>
+                              {isLineman(pos) && (
+                                <label
+                                  className="inline-flex size-8 items-center justify-center"
+                                  onClick={(event) => event.stopPropagation()}
+                                >
+                                  <Checkbox
+                                    checked={team.veteranId === p.id}
+                                    disabled={readOnly}
+                                    aria-label={`${t("sevensVeteran")} · ${p.name || positionLabel(pos.position)}`}
+                                    onCheckedChange={(checked) => {
+                                      const next = { ...team };
+                                      if (checked) next.veteranId = p.id;
+                                      else delete next.veteranId;
+                                      change(next);
+                                    }}
+                                  />
+                                </label>
+                              )}
                             </TableCell>
                           )}
                           <TableCell className="pr-5 text-right font-mono text-xs">

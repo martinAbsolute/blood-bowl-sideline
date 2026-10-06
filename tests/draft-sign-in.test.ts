@@ -294,7 +294,7 @@ it("assigns one Sevens veteran using eligible player checkboxes and persists its
       `[role="checkbox"][aria-label="sevensVeteran · Player ${number}"]`,
     )!;
   expect(container.querySelector("#sevens-veteran")).toBeNull();
-  expect(checkbox(3).getAttribute("aria-disabled")).toBe("true");
+  expect(checkbox(3)).toBeNull();
   const toggle = async (number: number) =>
     act(async () => {
       checkbox(number)
