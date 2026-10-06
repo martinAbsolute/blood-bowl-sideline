@@ -133,11 +133,13 @@ export function RosterFacts({
   return (
     <div className="space-y-1.5 border-t px-3 py-2.5 text-xs">
       <div className="flex flex-wrap gap-x-6 gap-y-1">
-        <p>
-          <span className="font-medium">{t("rerolls")}:</span>{" "}
-          {!comparison && `0–${staff.rerolls.max} · `}
-          {staff.rerolls.cost / 1000}k GP
-        </p>
+        {(!comparison || !rules.sevens) && (
+          <p>
+            <span className="font-medium">{t("rerolls")}:</span>{" "}
+            {!comparison && `0–${staff.rerolls.max} · `}
+            {staff.rerolls.cost / 1000}k GP
+          </p>
+        )}
         <p>
           <span className="font-medium">{t("apothecary")}:</span>{" "}
           {t(roster.apothecary ? "yes" : "no")}

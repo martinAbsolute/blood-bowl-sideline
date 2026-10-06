@@ -24,11 +24,11 @@ function scrollToRoster(id: string) {
 
 export function RosterExplorer({
   rulesetId = "bb2025-default",
-  hiddenTiers,
+  selectedTiers,
   onRevealTier,
 }: {
   rulesetId?: RulesetId;
-  hiddenTiers?: ReadonlySet<number>;
+  selectedTiers?: ReadonlySet<number>;
   onRevealTier?: (tier: number) => void;
 }) {
   const t = useTranslations();
@@ -67,7 +67,7 @@ export function RosterExplorer({
     roster.name.toLowerCase().includes(search.trim().toLowerCase()),
   );
   const list = matchingSearch
-    .filter(({ tier }) => !hiddenTiers?.has(tier))
+    .filter(({ tier }) => !selectedTiers?.size || selectedTiers.has(tier))
     .map(({ roster }) => roster);
   return (
     <div className="catalog-layout">

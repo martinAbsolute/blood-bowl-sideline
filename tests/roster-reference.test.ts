@@ -43,7 +43,7 @@ describe("ruleset-aware roster references", () => {
     expect(html).not.toContain("referenceSpecialists");
     expect(html).toContain("tier:</span> 2");
     expect(html).toContain("skillAllowance");
-    expect(html).toContain("100k GP");
+    expect(html).not.toContain("rerolls");
     expect(html).toContain("80k GP");
   });
   it("shows the standard Sevens SP package separately from Kyiv", () => {

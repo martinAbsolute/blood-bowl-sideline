@@ -1,18 +1,13 @@
 "use client";
 import { useCallback, useState } from "react";
 import { useTranslations } from "gt-next";
-import { CircleHelp } from "lucide-react";
 import { RosterExplorer } from "./roster-explorer";
 import type { RulesetId } from "@/domain/types";
 import { RosterRulesetPicker } from "./roster-ruleset-picker";
-import { getRuleset } from "@/domain/catalog";
+import { getRuleset, newTeam } from "@/domain/catalog";
+import { staffInfo } from "@/domain/rules";
 import { rosterChoices, sharedRosterBudget } from "@/lib/roster-ruleset";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTitle,
-  PopoverTrigger,
-} from "./ui/popover";
+import { RuleInfo } from "./rule-help";
 
 export function TeamCatalog({
   rulesetId = "bb2025-default",
@@ -26,16 +21,17 @@ function Catalog({ rulesetId }: { rulesetId: RulesetId }) {
   const t = useTranslations();
   const rules = getRuleset(rulesetId);
   const sharedBudget = sharedRosterBudget(rulesetId);
+  const staff = staffInfo({ ...newTeam(""), rulesetId });
   const tiers = [...new Set(rosterChoices(rulesetId).map(({ tier }) => tier))]
     .filter((tier) => tier > 0)
     .sort((a, b) => a - b);
-  const [hiddenTiers, setHiddenTiers] = useState<Set<number>>(() => new Set());
+  const [selectedTiers, setSelectedTiers] = useState<Set<number>>(
+    () => new Set(),
+  );
   const revealTier = useCallback((tier: number) => {
-    setHiddenTiers((current) => {
-      if (!current.has(tier)) return current;
-      const next = new Set(current);
-      next.delete(tier);
-      return next;
+    setSelectedTiers((current) => {
+      if (current.size === 0 || current.has(tier)) return current;
+      return new Set();
     });
   }, []);
   return (
@@ -53,9 +49,9 @@ function Catalog({ rulesetId }: { rulesetId: RulesetId }) {
                 <button
                   key={tier}
                   type="button"
-                  aria-pressed={!hiddenTiers.has(tier)}
+                  aria-pressed={selectedTiers.has(tier)}
                   onClick={() =>
-                    setHiddenTiers((current) => {
+                    setSelectedTiers((current) => {
                       const next = new Set(current);
                       if (next.has(tier)) next.delete(tier);
                       else next.add(tier);
@@ -64,9 +60,9 @@ function Catalog({ rulesetId }: { rulesetId: RulesetId }) {
                   }
                   className={
                     "rounded-full border px-2.5 py-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-ring " +
-                    (hiddenTiers.has(tier)
-                      ? "border-border text-muted-foreground hover:bg-secondary"
-                      : "border-primary/30 bg-primary/10 text-primary")
+                    (selectedTiers.has(tier)
+                      ? "border-border bg-secondary text-foreground"
+                      : "border-transparent text-muted-foreground hover:bg-secondary/50")
                   }
                 >
                   {t("tier")} {tier}
@@ -77,36 +73,36 @@ function Catalog({ rulesetId }: { rulesetId: RulesetId }) {
           <div className="flex min-w-0 items-end gap-1">
             <RosterRulesetPicker rulesetId={rulesetId} />
             {rulesetId !== "bb2025-default" && (
-              <Popover>
-                <PopoverTrigger
-                  aria-label={t("ruleset")}
-                  className="mb-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-secondary focus-visible:outline-2 focus-visible:outline-ring"
-                >
-                  <CircleHelp className="size-4" aria-hidden="true" />
-                </PopoverTrigger>
-                <PopoverContent
-                  align="end"
-                  className="max-w-[calc(100vw-2rem)] text-xs"
-                >
-                  <PopoverTitle>{rules.name}</PopoverTitle>
-                  {sharedBudget !== undefined && (
-                    <p>
-                      {t("treasury")}: {sharedBudget / 1000}k GP
-                    </p>
-                  )}
-                  <p>
-                    {t("players")}: {rules.minPlayers}–{rules.maxPlayers}
-                  </p>
-                  {rules.sevens && <p>{t("referenceSpecialists")}: 0–4</p>}
-                </PopoverContent>
-              </Popover>
+              <RuleInfo
+                title={rules.name}
+                className="mb-0.5"
+                description={[
+                  ...(sharedBudget !== undefined
+                    ? [t("treasury") + ": " + sharedBudget / 1000 + "k GP"]
+                    : []),
+                  t("players") +
+                    ": " +
+                    rules.minPlayers +
+                    "–" +
+                    rules.maxPlayers,
+                  ...(rules.sevens
+                    ? [
+                        t("referenceSpecialists") + ": 0–4",
+                        t("rerolls") +
+                          ": " +
+                          staff.rerolls.cost / 1000 +
+                          "k GP",
+                      ]
+                    : []),
+                ].join("\n\n")}
+              />
             )}
           </div>
         </div>
       </div>
       <RosterExplorer
         rulesetId={rulesetId}
-        hiddenTiers={hiddenTiers}
+        selectedTiers={selectedTiers}
         onRevealTier={revealTier}
       />
     </div>
