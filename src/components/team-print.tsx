@@ -23,7 +23,13 @@ const gold = (value: number) => `${(value / 1000).toLocaleString("en")}k`;
 
 export function printStyles(orientation: PrintOrientation) {
   return `
-    @page { size: A4 ${orientation}; margin: 10mm; }
+    @page {
+      size: A4 ${orientation}; margin: 6mm 10mm 10mm;
+      @top-left { content: ""; }
+      @top-right { content: ""; }
+      @bottom-left { content: "sideline.com.ua | Blood Bowl Sideline."; font: 8pt Arial, sans-serif; }
+      @bottom-right { content: counter(page) " / " counter(pages); font: 8pt Arial, sans-serif; }
+    }
     * { box-sizing: border-box; }
     body { margin: 0; color: #000; background: #fff; font: 10pt Arial, sans-serif; }
     h1 { font: bold 20pt Georgia, serif; margin: 0 0 3mm; overflow-wrap: anywhere; }
@@ -38,8 +44,10 @@ export function printStyles(orientation: PrintOrientation) {
     dl div { display: flex; justify-content: space-between; gap: 2mm; margin-bottom: 1mm; }
     dt, dd { margin: 0; }
     dd { text-align: right; font-variant-numeric: tabular-nums; }
-    table { width: 100%; border-collapse: collapse; font-size: ${orientation === "portrait" ? "9" : "10"}pt; table-layout: fixed; }
-    th, td { border: 1px solid; padding: 1.3mm; vertical-align: top; overflow-wrap: anywhere; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; border: 0.75pt solid; font-size: ${orientation === "portrait" ? "9" : "10"}pt; table-layout: fixed; }
+    th, td { border: 0; border-right: 0.75pt solid; border-bottom: 0.75pt solid; padding: 1.3mm; vertical-align: top; overflow-wrap: anywhere; }
+    th:last-child, td:last-child { border-right: 0; }
+    tbody tr:last-child td { border-bottom: 0; }
     th { text-align: left; }
     .number { width: 7mm; text-align: center; }
     .position { width: ${orientation === "portrait" ? "32" : "43"}mm; }
@@ -48,7 +56,7 @@ export function printStyles(orientation: PrintOrientation) {
     tr { break-inside: avoid; }
     thead { display: table-header-group; }
     .added { font-weight: bold; }
-    .reference { margin-top: 4mm; }
+    .reference { break-before: page; page-break-before: always; }
     .rules { columns: ${orientation === "portrait" ? 2 : 3}; column-gap: 5mm; font-size: 9pt; line-height: 1.3; }
     .rule { margin-bottom: 3mm; break-inside: avoid; page-break-inside: avoid; }
     .team-rules { margin-top: 4mm; font-size: 9pt; line-height: 1.3; }
@@ -113,19 +121,10 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
       ...(team.captainId ? ["pro"] : []),
     ]),
   ].sort((a, b) => skillName(a).localeCompare(skillName(b)));
-  const appendix = [
-    ...skillIds.map((id) => ({
-      name: skillName(id),
-      text: t(`skillDescriptions.${id.split(":")[0]}`),
-    })),
-    ...selectedInducements.map((item) => ({
-      name: item.name,
-      text: t(`inducementDescriptions.${item.id}`),
-    })),
-    ...Object.entries(team.staff)
-      .filter(([, count]) => count > 0)
-      .map(([key]) => ({ name: t(key), text: t(`staffDescriptions.${key}`) })),
-  ];
+  const appendix = skillIds.map((id) => ({
+    name: skillName(id),
+    text: t(`skillDescriptions.${id.split(":")[0]}`),
+  }));
   return (
     <>
       <section className="roster-sheet">
@@ -182,7 +181,6 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
                       : gold(totals.skills),
                   ],
                   [t("teamValue"), `${gold(totals.teamGold)} GP`],
-                  [t("remaining"), `${gold(totals.remaining)} GP`],
                 ].map(([label, value]) => (
                   <div key={label}>
                     <dt>{label}</dt>
@@ -277,16 +275,18 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
           </section>
         )}
       </section>
-      <section className="reference">
-        <div className="rules">
-          {appendix.map((rule) => (
-            <article className="rule" key={rule.name}>
-              <strong>{rule.name}</strong>
-              <p>{rule.text}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+      {appendix.length > 0 && (
+        <section className="reference">
+          <div className="rules">
+            {appendix.map((rule) => (
+              <article className="rule" key={rule.name}>
+                <strong>{rule.name}</strong>
+                <p>{rule.text}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
     </>
   );
 }

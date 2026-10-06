@@ -152,11 +152,62 @@ it("omits empty panels and the skill legend, and puts team rules below the roste
   expect(orc.split(en.teamSpecialRules.captain)).toHaveLength(2);
 });
 
-it("uses A4 in both orientations, flows rules after the roster, and keeps definitions together", () => {
+it("prints staff and inducement counts without their rules and limits the appendix to skills", () => {
+  const team = newTeam(randomUUID(), "orc");
+  team.players = [
+    { id: randomUUID(), positionId: "orc-3", name: "", skills: ["guard"] },
+  ];
+  team.staff.rerolls = 3;
+  team.staff.apothecary = 1;
+  team.inducements["blitzers-best-kegs"] = 1;
+  for (const dictionary of [en, uk]) {
+    const t = translator(dictionary);
+    const html = renderToStaticMarkup(createElement(TeamPrint, { team, t }));
+    const [roster, appendix] = html.split('<section class="reference">');
+    expect(roster).toContain(`<dt>${t("rerolls")}</dt><dd>3</dd>`);
+    expect(roster).toContain(`<dt>${t("apothecary")}</dt><dd>1</dd>`);
+    expect(roster).toContain("1 ×");
+    expect(html).not.toContain(t("remaining"));
+    expect(appendix).toContain(t("skillDescriptions.guard"));
+    expect(appendix).not.toContain(t("rerolls"));
+    expect(appendix).not.toContain(t("apothecary"));
+    for (const description of [
+      ...Object.values(dictionary.staffDescriptions),
+      ...Object.values(dictionary.inducementDescriptions),
+    ]) {
+      expect(html).not.toContain(
+        renderToStaticMarkup(createElement("p", null, description)),
+      );
+    }
+  }
+});
+
+it("omits an empty skill appendix", () => {
+  const html = renderToStaticMarkup(
+    createElement(TeamPrint, {
+      team: newTeam(randomUUID(), "amazon"),
+      t: translator(en),
+    }),
+  );
+  expect(html).not.toContain('class="reference"');
+});
+
+it("uses A4, starts skills on a new page, and controls print margins in both orientations", () => {
   expect(printStyles("portrait")).toContain("size: A4 portrait");
   expect(printStyles("landscape")).toContain("size: A4 landscape");
   for (const orientation of ["portrait", "landscape"] as const) {
-    expect(printStyles(orientation)).not.toContain("break-before: page");
+    expect(printStyles(orientation)).toContain("break-before: page");
+    expect(printStyles(orientation)).toContain('@top-left { content: ""; }');
+    expect(printStyles(orientation)).toContain('@top-right { content: ""; }');
+    expect(printStyles(orientation)).toContain(
+      'content: "sideline.com.ua | Blood Bowl Sideline."',
+    );
+    expect(printStyles(orientation)).toContain(
+      "border-collapse: separate; border-spacing: 0; border: 0.75pt solid;",
+    );
+    expect(printStyles(orientation)).toContain(
+      "border-right: 0.75pt solid; border-bottom: 0.75pt solid;",
+    );
     expect(printStyles(orientation)).toContain(
       ".rule { margin-bottom: 3mm; break-inside: avoid; page-break-inside: avoid; }",
     );
