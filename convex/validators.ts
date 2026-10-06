@@ -11,6 +11,7 @@ export const teamValidator = v.object({
     v.literal("bb2025-matched-play"),
     v.literal("eurobowl-2026"),
     v.literal("world-cup-2027"),
+    v.literal("kyiv-seven-sins-sevens"),
   ),
   favouredOf: v.union(
     v.literal("Undivided"),
@@ -43,6 +44,7 @@ export const teamValidator = v.object({
   inducements: v.record(v.string(), v.number()),
   notes: v.string(),
   captainId: v.optional(v.string()),
+  veteranId: v.optional(v.string()),
 });
 export const publicTeam = v.object({
   draftLeagueId: v.optional(v.id("leagues")),

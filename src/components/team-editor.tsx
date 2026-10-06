@@ -12,7 +12,14 @@ import {
   starPairs,
   starChoices,
 } from "@/domain/catalog";
-import { playerSkillCost, starEligible, summarize } from "@/domain/rules";
+import {
+  isLineman,
+  isSevens,
+  playerMovement,
+  playerSkillCost,
+  starEligible,
+  summarize,
+} from "@/domain/rules";
 import type { Team } from "@/domain/types";
 import { storeDraft } from "@/lib/drafts";
 import { saveCloudDraft } from "@/lib/cloud-save";
@@ -373,9 +380,14 @@ export function TeamEditor({
                 {t("players")}
               </h2>
               <span className="font-mono text-xs text-muted-foreground">
-                {totals.playerCount}/16
+                {totals.playerCount}/{isSevens(team) ? 11 : 16}
               </span>
             </div>
+            {isSevens(team) && (
+              <p className="mb-3 px-1 text-xs leading-relaxed text-muted-foreground">
+                <strong>{t("sevensVeteran")}</strong> · {t("sevensVeteranHelp")}
+              </p>
+            )}
             <div className="overflow-hidden rounded-lg border bg-card">
               {!team.players.length && !team.stars.length ? (
                 <p className="px-4 py-6 text-center text-xs leading-relaxed text-muted-foreground">
@@ -402,6 +414,14 @@ export function TeamEditor({
                       {requiresCaptain && (
                         <TableHead className="w-16 text-center">
                           {t("teamCaptain")}
+                        </TableHead>
+                      )}
+                      {isSevens(team) && (
+                        <TableHead
+                          className="w-16 text-center"
+                          title={t("sevensVeteranHelp")}
+                        >
+                          {t("sevensVeteran")}
                         </TableHead>
                       )}
                       <TableHead className="w-16 pr-3 text-right">
@@ -482,16 +502,20 @@ export function TeamEditor({
                               </div>
                             </div>
                           </TableCell>
-                          {[pos.ma, pos.st, pos.ag, pos.pa, pos.av].map(
-                            (x, i) => (
-                              <TableCell
-                                key={i}
-                                className="text-center font-mono text-xs"
-                              >
-                                {x}
-                              </TableCell>
-                            ),
-                          )}
+                          {[
+                            playerMovement(team, p.id, pos),
+                            pos.st,
+                            pos.ag,
+                            pos.pa,
+                            pos.av,
+                          ].map((x, i) => (
+                            <TableCell
+                              key={i}
+                              className="text-center font-mono text-xs"
+                            >
+                              {x}
+                            </TableCell>
+                          ))}
                           <TableCell>
                             <TableSkills
                               ids={pos.skills}
@@ -532,6 +556,22 @@ export function TeamEditor({
                                   }}
                                 />
                               </label>
+                            </TableCell>
+                          )}
+                          {isSevens(team) && (
+                            <TableCell className="text-center">
+                              <Checkbox
+                                checked={team.veteranId === p.id}
+                                disabled={readOnly || !isLineman(pos)}
+                                aria-label={`${t("sevensVeteran")} · ${p.name || positionLabel(pos.position)}`}
+                                title={t("sevensVeteranHelp")}
+                                onCheckedChange={(checked) => {
+                                  const next = { ...team };
+                                  if (checked) next.veteranId = p.id;
+                                  else delete next.veteranId;
+                                  change(next);
+                                }}
+                              />
                             </TableCell>
                           )}
                           <TableCell className="pr-5 text-right font-mono text-xs">
@@ -630,6 +670,7 @@ export function TeamEditor({
                               <TableSkills ids={s.skills} label={t("skills")} />
                             </TableCell>
                             {requiresCaptain && <TableCell />}
+                            {isSevens(team) && <TableCell />}
                             <TableCell className="pr-5 text-right font-mono text-xs">
                               {gold(s.cost)}
                             </TableCell>
@@ -679,12 +720,14 @@ export function TeamEditor({
                   {t("ruleset")}
                   <EditorSelect
                     value={team.rulesetId}
-                    onChange={(e) =>
-                      change({
+                    onChange={(e) => {
+                      const next = {
                         ...team,
                         rulesetId: e.target.value as Team["rulesetId"],
-                      })
-                    }
+                      };
+                      if (!isSevens(next)) delete next.veteranId;
+                      change(next);
+                    }}
                   >
                     {rulesets.map((r) => (
                       <option key={r.id} value={r.id}>

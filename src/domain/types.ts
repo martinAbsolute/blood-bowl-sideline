@@ -7,6 +7,7 @@ export const rulesetIds = [
   "bb2025-matched-play",
   "eurobowl-2026",
   "world-cup-2027",
+  "kyiv-seven-sins-sevens",
 ] as const;
 export type RulesetId = (typeof rulesetIds)[number];
 const count = (max: number) => z.number().int().min(0).max(max);
@@ -54,6 +55,7 @@ export const teamSchema = z
       .refine((x) => Object.keys(x).length <= 20),
     notes: z.string().max(2000),
     captainId: z.uuid().optional(),
+    veteranId: z.uuid().optional(),
   })
   .strict();
 export type Team = z.infer<typeof teamSchema>;
@@ -113,6 +115,7 @@ export interface Ruleset {
   id: RulesetId;
   name: string;
   skillCurrency?: "sp" | "spp";
+  sevens?: boolean;
   tiers: Record<string, string[]>;
   tierBudgets: Record<
     string,

@@ -354,6 +354,20 @@ it("removes a single star through the modal", async () => {
   expect(team.players).toHaveLength(1);
 });
 
+it("shows the Sevens veteran ability and clears the designation on player removal", async () => {
+  team.rulesetId = "kyiv-seven-sins-sevens";
+  team.veteranId = selected;
+  await render();
+  expect(
+    document.querySelector(".player-dialog-profile")?.textContent,
+  ).toContain("sevensVeteranHelp");
+  await click("removePlayer");
+  expect(confirmation().textContent).toContain("sevensVeteran");
+  await click("removePlayer", confirmation());
+  expect(team.players).toHaveLength(0);
+  expect(team.veteranId).toBeUndefined();
+});
+
 it("explains paired stars and removes the pair together", async () => {
   selected = starPairs[0][0];
   team.stars = [...starPairs[0]];

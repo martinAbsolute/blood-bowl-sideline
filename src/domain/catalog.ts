@@ -28,7 +28,16 @@ export function starChoices(ids: string[]) {
     ),
   ];
 }
-export const inducements = inducementData as Inducement[];
+export const inducements: Inducement[] = [
+  ...inducementData,
+  {
+    id: "desperate-measures",
+    name: "Desperate Measures",
+    cost: 50000,
+    max: "0-5",
+    availability: "Sevens only",
+  },
+];
 export const rulesets: Ruleset[] = [
   {
     id: "bb2025-default",
@@ -49,7 +58,7 @@ export const rulesets: Ruleset[] = [
     bannedStarPlayers: [],
     veteranStarPlayers: [],
     legendStarPlayers: [],
-    allowedInducements: inducements.map((i) => i.id),
+    allowedInducements: inducementData.map((i) => i.id),
     minPlayers: 11,
     maxPlayers: 16,
     starPlayerBlocksAdvancements: false,

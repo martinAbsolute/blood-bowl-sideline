@@ -10,7 +10,7 @@ import {
   starPairs,
   stars,
 } from "@/domain/catalog";
-import { playerSkillCost } from "@/domain/rules";
+import { isSevens, playerMovement, playerSkillCost } from "@/domain/rules";
 import type { Team } from "@/domain/types";
 import {
   Dialog,
@@ -68,6 +68,7 @@ export function PlayerDialog({
 
   const editable = !!player && !readOnly;
   const captain = team.captainId === selected;
+  const veteran = isSevens(team) && team.veteranId === selected;
   const type = position
     ? positionLabel(position.position)
     : star?.playerType || t("starPlayers");
@@ -104,7 +105,8 @@ export function PlayerDialog({
     : [];
   const savedName = player?.name.trim();
   const savedSkills = player?.skills ?? [];
-  const savedCustomisation = !!savedName || savedSkills.length > 0 || captain;
+  const savedCustomisation =
+    !!savedName || savedSkills.length > 0 || captain || veteran;
 
   function requestClose() {
     if (dirty) setConfirmation("discard");
@@ -123,6 +125,7 @@ export function PlayerDialog({
       stars: team.stars.filter((id) => !removedStars.includes(id)),
     };
     if (next.captainId === selected) delete next.captainId;
+    if (next.veteranId === selected) delete next.veteranId;
     onChange(next);
     onClose();
   }
@@ -237,7 +240,12 @@ export function PlayerDialog({
           >
             <dl className="grid grid-cols-5 divide-x overflow-hidden rounded-lg border bg-card text-center">
               {[
-                ["MA", profile.ma],
+                [
+                  "MA",
+                  position
+                    ? playerMovement(team, selected, position)
+                    : profile.ma,
+                ],
                 ["ST", profile.st],
                 ["AG", profile.ag],
                 ["PA", profile.pa],
@@ -320,6 +328,12 @@ export function PlayerDialog({
                 <p className="flex items-center gap-1.5 text-xs font-medium text-primary">
                   <ShieldCheck className="size-3.5" />
                   {t("teamCaptain")}
+                </p>
+              )}
+              {veteran && (
+                <p className="text-xs text-muted-foreground">
+                  <strong>{t("sevensVeteran")}</strong> ·{" "}
+                  {t("sevensVeteranHelp")}
                 </p>
               )}
             </div>
@@ -425,6 +439,7 @@ export function PlayerDialog({
                         {t("teamCaptain")}
                       </p>
                     )}
+                    {veteran && <p>{t("sevensVeteran")}</p>}
                   </div>
                 )}
                 {removedStars.length > 1 && (

@@ -9,12 +9,14 @@ export function duplicateTeam(team: Team, suffix: string): Team {
     skills: [...player.skills],
   }));
   const captainIndex = team.players.findIndex((p) => p.id === team.captainId);
+  const veteranIndex = team.players.findIndex((p) => p.id === team.veteranId);
   return {
     ...team,
     uuid: crypto.randomUUID(),
     name: `${team.name.slice(0, TEAM_NAME_MAX_LENGTH - ending.length).trimEnd()}${ending}`,
     players,
     captainId: captainIndex < 0 ? undefined : players[captainIndex].id,
+    veteranId: veteranIndex < 0 ? undefined : players[veteranIndex].id,
     stars: [...team.stars],
     staff: { ...team.staff },
     inducements: { ...team.inducements },

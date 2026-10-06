@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslations } from "gt-next";
-import { getRoster, inducements } from "@/domain/catalog";
-import { inducementInfo } from "@/domain/rules";
+import { inducements } from "@/domain/catalog";
+import { inducementInfo, staffInfo, isSevens } from "@/domain/rules";
 import type { Team } from "@/domain/types";
 import { QuantityStepper } from "./quantity-stepper";
 import { RuleInfo } from "./rule-help";
@@ -95,18 +95,10 @@ export function TeamSupport({
   readOnly?: boolean;
 }) {
   const t = useTranslations();
-  const roster = getRoster(team.rosterId)!;
-  const staffItems = [
-    { key: "rerolls", cost: roster.rerolls.cost, max: roster.rerolls.max },
-    { key: "apothecary", cost: 50000, max: roster.apothecary ? 1 : 0 },
-    { key: "assistantCoaches", cost: 10000, max: 6 },
-    { key: "cheerleaders", cost: 10000, max: 6 },
-    {
-      key: "dedicatedFans",
-      cost: 5000,
-      max: team.rulesetId === "bb2025-default" ? 6 : 0,
-    },
-  ] as const;
+  const staff = staffInfo(team);
+  const staffItems = (Object.keys(staff) as (keyof Team["staff"])[]).map(
+    (key) => ({ key, ...staff[key] }),
+  );
   const eligible = inducements.filter(
     (item) =>
       inducementInfo(team, item).allowed ||
@@ -136,8 +128,18 @@ export function TeamSupport({
           {staffItems.map(({ key, cost, max }) => (
             <SupportItem
               key={key}
-              label={t(key)}
-              description={t(`staffDescriptions.${key}`)}
+              label={t(
+                isSevens(team) && key === "dedicatedFans"
+                  ? "sevensDedicatedFans"
+                  : key,
+              )}
+              description={t(
+                isSevens(team) && key === "apothecary"
+                  ? "sevensApothecaryHelp"
+                  : isSevens(team) && key === "dedicatedFans"
+                    ? "sevensFansHelp"
+                    : `staffDescriptions.${key}`,
+              )}
               value={team.staff[key]}
               max={max}
               cost={cost}
@@ -167,7 +169,13 @@ export function TeamSupport({
                 <SupportItem
                   key={item.id}
                   label={item.name}
-                  description={t(`inducementDescriptions.${item.id}`)}
+                  description={t(
+                    isSevens(team) && item.id === "prayers-to-nuffle"
+                      ? "sevensPrayersHelp"
+                      : isSevens(team) && item.id === "wandering-apothecary"
+                        ? "sevensApothecaryHelp"
+                        : `inducementDescriptions.${item.id}`,
+                  )}
                   value={team.inducements[item.id] ?? 0}
                   max={info.allowed ? info.max : 0}
                   cost={info.cost}

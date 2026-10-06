@@ -31,7 +31,7 @@ describe("rule explanations", () => {
         expect(dictionary.skillCategories).toHaveProperty(skill.category);
     });
     it(`${locale} explains every inducement and staff item`, () => {
-      expect(Object.keys(dictionary.inducementDescriptions)).toHaveLength(18);
+      expect(Object.keys(dictionary.inducementDescriptions)).toHaveLength(19);
       for (const item of inducements)
         expect(dictionary.inducementDescriptions).toHaveProperty(item.id);
       for (const id of ["mercenary-players", "star-players-inducement"])

@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useTranslations } from "gt-next";
 import { getRoster } from "@/domain/catalog";
+import { isSevens } from "@/domain/rules";
 import { needsPlayerRecruitment } from "@/lib/builder";
 import type { Team } from "@/domain/types";
 import { PlayerIcon } from "./player-icon";
@@ -63,6 +64,7 @@ export function PlayerRecruitment({
   function removePlayer(id: string) {
     const next = { ...team, players: team.players.filter((p) => p.id !== id) };
     if (next.captainId === id) delete next.captainId;
+    if (next.veteranId === id) delete next.veteranId;
     updateRecruitment(next);
     setPendingRemoval(null);
   }
@@ -142,14 +144,17 @@ export function PlayerRecruitment({
                           label={positionLabel(p.position)}
                           value={matching.length}
                           max={max}
-                          increaseDisabled={playerCount >= 16}
+                          increaseDisabled={
+                            playerCount >= (isSevens(team) ? 11 : 16)
+                          }
                           onDecrease={() => {
                             const player = matching[matching.length - 1];
                             if (!player) return;
                             if (
                               player.name.trim() ||
                               player.skills.length ||
-                              team.captainId === player.id
+                              team.captainId === player.id ||
+                              team.veteranId === player.id
                             ) {
                               removalTrigger.current =
                                 document.activeElement as HTMLElement;
@@ -231,6 +236,11 @@ export function PlayerRecruitment({
               {team.captainId === pendingPlayer.id && (
                 <p className="text-sm font-semibold text-primary">
                   {t("teamCaptain")}
+                </p>
+              )}
+              {isSevens(team) && team.veteranId === pendingPlayer.id && (
+                <p className="text-sm font-semibold text-primary">
+                  {t("sevensVeteran")}
                 </p>
               )}
             </div>

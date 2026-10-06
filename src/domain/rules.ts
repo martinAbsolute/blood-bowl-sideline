@@ -17,6 +17,50 @@ import {
 } from "./types";
 
 export type Issue = { code: string; values: Record<string, string | number> };
+export const isLineman = (position: Position) =>
+  /\bLineman\b/.test(position.position);
+export const isSevens = (team: Team) =>
+  getRuleset(team.rulesetId).sevens === true;
+export function playerMovement(
+  team: Team,
+  playerId: string,
+  position: Position,
+) {
+  return position.ma - (isSevens(team) && team.veteranId === playerId ? 1 : 0);
+}
+export function staffInfo(team: Team) {
+  const roster = getRoster(team.rosterId)!;
+  const sevens = isSevens(team);
+  return {
+    rerolls: {
+      cost: sevens ? 100000 : roster.rerolls.cost,
+      max: roster.rerolls.max,
+    },
+    apothecary: {
+      cost: sevens ? 80000 : 50000,
+      max: roster.apothecary ? 1 : 0,
+    },
+    assistantCoaches: { cost: sevens ? 20000 : 10000, max: sevens ? 3 : 6 },
+    cheerleaders: { cost: sevens ? 20000 : 10000, max: sevens ? 3 : 6 },
+    dedicatedFans: {
+      cost: sevens ? 20000 : 5000,
+      max: sevens ? 4 : team.rulesetId === "bb2025-default" ? 6 : 0,
+    },
+  };
+}
+const sevensInducements: Record<string, { cost?: number; max: number }> = {
+  "temp-agency-cheerleaders": { cost: 15000, max: 2 },
+  "part-time-assistant-coaches": { cost: 15000, max: 2 },
+  "blitzers-best-kegs": { max: 2 },
+  "prayers-to-nuffle": { cost: 5000, max: 2 },
+  "extra-team-training": { cost: 125000, max: 6 },
+  bribes: { max: 2 },
+  "wandering-apothecary": { cost: 100000, max: 1 },
+  "mortuary-assistant": { cost: 100000, max: 1 },
+  "plague-doctor": { cost: 100000, max: 1 },
+  "halfling-master-chef": { max: 1 },
+  "desperate-measures": { max: 5 },
+};
 export function tierFor(team: Team) {
   return Number(
     Object.entries(getRuleset(team.rulesetId).tiers).find(([, ids]) =>
@@ -140,9 +184,17 @@ export function inducementInfo(team: Team, inducement: Inducement) {
     "riotous-rookies": roster.specialRules.includes("Low Cost Linemen"),
     "wandering-apothecary": roster.apothecary,
   };
+  const sevensOverride = isSevens(team)
+    ? sevensInducements[inducement.id]
+    : undefined;
   return {
-    cost: matching?.cost ?? inducement.cost,
-    max,
+    cost:
+      isSevens(team) && inducement.id === "halfling-master-chef"
+        ? roster.id === "halfling"
+          ? 100000
+          : 300000
+        : (sevensOverride?.cost ?? matching?.cost ?? inducement.cost),
+    max: sevensOverride?.max ?? max,
     allowed:
       getRuleset(team.rulesetId).allowedInducements.includes(inducement.id) &&
       (required[inducement.id] ?? true),
@@ -161,11 +213,11 @@ export function summarize(team: Team, startingTreasury?: number) {
     0,
   );
   const starGold = selectedStars.reduce((sum, s) => sum + s.cost, 0);
-  const staff =
-    team.staff.rerolls * roster.rerolls.cost +
-    team.staff.apothecary * 50000 +
-    (team.staff.assistantCoaches + team.staff.cheerleaders) * 10000 +
-    team.staff.dedicatedFans * 5000;
+  const staffPrices = staffInfo(team);
+  const staff = (Object.keys(team.staff) as (keyof Team["staff"])[]).reduce(
+    (sum, key) => sum + team.staff[key] * staffPrices[key].cost,
+    0,
+  );
   const induced = Object.entries(team.inducements).reduce((sum, [id, qty]) => {
     const item = inducements.find((i) => i.id === id);
     return sum + (item ? inducementInfo(team, item).cost * qty : 0);
@@ -255,6 +307,24 @@ export function validateTeam(
     )
       issue("captain");
   }
+  if (isSevens(team)) {
+    const veteran = team.players.find((p) => p.id === team.veteranId);
+    const position = roster.players.find((p) => p.id === veteran?.positionId);
+    if (!veteran || !position || !isLineman(position)) issue("veteran");
+    const specialists = team.players.filter((p) => {
+      const position = roster.players.find((x) => x.id === p.positionId);
+      return position && !isLineman(position);
+    }).length;
+    if (specialists > 4) issue("specialists", { max: 4 });
+    if (team.staff.dedicatedFans > 4) issue("sevensFans");
+    if (
+      totals.tier === 2 &&
+      team.players.some((p) => p.id === team.captainId && p.skills.length)
+    )
+      issue("captainSkills");
+    for (const key of ["assistantCoaches", "cheerleaders"] as const)
+      if (team.staff[key] > 3) issue("sevensStaff", { max: 3 });
+  } else if (team.veteranId) issue("veteranRuleset");
   if (new Set(team.players.map((p) => p.id)).size !== team.players.length)
     issue("duplicatePlayer");
   if (totals.playerCount < rules.minPlayers)
@@ -302,6 +372,7 @@ export function validateTeam(
     if (new Set(p.skills).size !== p.skills.length)
       issue("duplicateSkill", { player: p.name || position.position });
     for (const id of p.skills) {
+      if (isSevens(team) && id === "leader") issue("leaderBanned");
       if (
         !skillAccess(position, id) ||
         !getSkill(id) ||
@@ -314,7 +385,7 @@ export function validateTeam(
       if (getSkill(id)?.isElite) eliteSkills++;
     }
   }
-  if (insignificant > team.players.length - insignificant)
+  if (!isSevens(team) && insignificant > team.players.length - insignificant)
     issue("insignificant");
   if (roster.bigGuyMax !== undefined && bigGuys > roster.bigGuyMax)
     issue("bigGuys", { max: roster.bigGuyMax });
@@ -371,7 +442,11 @@ export function validateTeam(
   for (const [a, b] of starPairs)
     if (team.stars.includes(a) !== team.stars.includes(b)) issue("starPair");
   if (!roster.apothecary && team.staff.apothecary) issue("apothecary");
-  if (team.rulesetId !== "bb2025-default" && team.staff.dedicatedFans)
+  if (
+    team.rulesetId !== "bb2025-default" &&
+    !isSevens(team) &&
+    team.staff.dedicatedFans
+  )
     issue("fans");
   for (const [id, qty] of Object.entries(team.inducements)) {
     const item = inducements.find((x) => x.id === id);
@@ -402,6 +477,8 @@ export function validateTeam(
 export function teamSaveIssues(team: Team, startingTreasury?: number): Issue[] {
   return validateTeam(team, startingTreasury).issues.filter(
     ({ code }) =>
-      code !== "minPlayers" && !(code === "captain" && !team.captainId),
+      code !== "minPlayers" &&
+      !(code === "captain" && !team.captainId) &&
+      !(code === "veteran" && !team.veteranId),
   );
 }

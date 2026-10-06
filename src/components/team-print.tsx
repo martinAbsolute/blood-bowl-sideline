@@ -10,6 +10,8 @@ import {
 import {
   affiliation,
   inducementInfo,
+  isSevens,
+  playerMovement,
   playerSkillCost,
   summarize,
 } from "@/domain/rules";
@@ -69,11 +71,13 @@ function PrintedSkills({
   builtIn,
   added = [],
   captain = false,
+  veteran = false,
   t,
 }: {
   builtIn: string[];
   added?: string[];
   captain?: boolean;
+  veteran?: boolean;
   t: Translate;
 }) {
   const entries = [
@@ -86,6 +90,7 @@ function PrintedSkills({
       className: "added",
     })),
     ...(captain ? [{ name: t("proCaptain"), className: "captain" }] : []),
+    ...(veteran ? [{ name: t("sevensVeteran"), className: "added" }] : []),
   ];
   return entries.map((entry, index) => (
     <Fragment key={`${index}-${entry.name}`}>
@@ -125,6 +130,9 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
     name: skillName(id),
     text: t(`skillDescriptions.${id.split(":")[0]}`),
   }));
+  if (isSevens(team) && team.veteranId) {
+    appendix.push({ name: t("sevensVeteran"), text: t("sevensVeteranHelp") });
+  }
   return (
     <>
       <section className="roster-sheet">
@@ -142,7 +150,11 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
                 {Object.entries(team.staff).map(([key, count]) => (
                   <div key={key}>
                     <dt>{t(key)}</dt>
-                    <dd>{count}</dd>
+                    <dd>
+                      {isSevens(team) && key === "dedicatedFans"
+                        ? count + 1
+                        : count}
+                    </dd>
                   </div>
                 ))}
               </dl>
@@ -223,7 +235,7 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
                     {player.name && <div>{player.name}</div>}
                   </td>
                   {[
-                    position.ma,
+                    playerMovement(team, player.id, position),
                     position.st,
                     position.ag,
                     position.pa,
@@ -238,6 +250,7 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
                       builtIn={position.skills}
                       added={player.skills}
                       captain={team.captainId === player.id}
+                      veteran={isSevens(team) && team.veteranId === player.id}
                       t={t}
                     />
                   </td>

@@ -1,5 +1,104 @@
 [
   {
+    "id": "kyiv-seven-sins-sevens",
+    "name": "Kyiv \"Seven Sins\" Sevens",
+    "sevens": true,
+    "skillCurrency": "sp",
+    "tiers": {
+      "1": [
+        "amazon",
+        "dark-elf",
+        "high-elf",
+        "lizardmen",
+        "norse",
+        "old-world-alliance",
+        "skaven",
+        "slann",
+        "underworld-denizens",
+        "wood-elf",
+        "vampire"
+      ],
+      "2": [
+        "bretonnian",
+        "elven-union",
+        "human",
+        "imperial-nobility",
+        "necromantic-horror",
+        "orc",
+        "shambling-undead",
+        "tomb-kings"
+      ],
+      "3": [
+        "black-orc",
+        "chaos-chosen",
+        "chaos-dwarf",
+        "chaos-renegade",
+        "dwarf",
+        "khorne",
+        "nurgle"
+      ],
+      "4": ["gnome", "goblin", "halfling", "ogre", "snotling"]
+    },
+    "tierBudgets": {
+      "1": {
+        "teamBudget": 650000,
+        "skillGold": 0,
+        "flowingFunds": 0
+      },
+      "2": {
+        "teamBudget": 650000,
+        "skillGold": 1,
+        "flowingFunds": 0
+      },
+      "3": {
+        "teamBudget": 650000,
+        "skillGold": 2,
+        "flowingFunds": 0
+      },
+      "4": {
+        "teamBudget": 650000,
+        "skillGold": 3,
+        "flowingFunds": 0
+      }
+    },
+    "skillCosts": {
+      "primaryNonElite": 1,
+      "primaryElite": 1,
+      "secondaryNonElite": 1,
+      "secondaryElite": 1,
+      "stackCosts": []
+    },
+    "maxAdvancementsPerPlayer": 1,
+    "maxSecondaryPerTeam": 1,
+    "maxSecondaryByTier": {
+      "1": 0,
+      "2": 0,
+      "3": 1,
+      "4": 1
+    },
+    "maxStackPerTeam": 0,
+    "starPlayerTierRules": {},
+    "bannedStarPlayers": [],
+    "veteranStarPlayers": [],
+    "legendStarPlayers": [],
+    "allowedInducements": [
+      "temp-agency-cheerleaders",
+      "part-time-assistant-coaches",
+      "blitzers-best-kegs",
+      "prayers-to-nuffle",
+      "extra-team-training",
+      "bribes",
+      "wandering-apothecary",
+      "mortuary-assistant",
+      "plague-doctor",
+      "halfling-master-chef",
+      "desperate-measures"
+    ],
+    "minPlayers": 7,
+    "maxPlayers": 11,
+    "starPlayerBlocksAdvancements": false
+  },
+  {
     "id": "bb2025-matched-play",
     "name": "BB2025 Matched Play",
     "skillCurrency": "sp",
