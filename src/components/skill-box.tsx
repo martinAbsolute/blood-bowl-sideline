@@ -5,6 +5,20 @@ import { getSkill, skillName, sortSkillIds } from "@/domain/catalog";
 import { RuleHelp } from "./rule-help";
 import { X } from "lucide-react";
 
+export function VeteranSkill() {
+  const t = useTranslations();
+  return (
+    <RuleHelp
+      title={t("sevensVeteran")}
+      description={t("sevensVeteranHelp")}
+      skillPreview
+      className="skill-box skill-trait skill-added"
+    >
+      {t("sevensVeteran")}
+    </RuleHelp>
+  );
+}
+
 export function SkillBox({
   id,
   added = false,
@@ -60,14 +74,16 @@ export function SkillList({
   added = false,
   additionalIds = [],
   captain = false,
+  veteran = false,
 }: {
   ids: string[];
   added?: boolean;
   additionalIds?: string[];
   captain?: boolean;
+  veteran?: boolean;
 }) {
   const t = useTranslations();
-  return ids.length || additionalIds.length || captain ? (
+  return ids.length || additionalIds.length || captain || veteran ? (
     <div className="flex flex-wrap gap-1.5">
       {sortSkillIds(ids).map((id) => (
         <SkillBox key={id} id={id} added={added} />
@@ -76,6 +92,7 @@ export function SkillList({
         <SkillBox key={`added-${id}`} id={id} added />
       ))}
       {captain && <SkillBox id="pro" captain />}
+      {veteran && <VeteranSkill />}
     </div>
   ) : (
     <span className="text-xs text-muted-foreground">{t("noSkills")}</span>

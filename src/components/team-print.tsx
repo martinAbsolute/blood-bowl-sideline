@@ -9,6 +9,7 @@ import {
 } from "@/domain/catalog";
 import {
   affiliation,
+  dedicatedFansBase,
   inducementInfo,
   isSevens,
   playerMovement,
@@ -152,7 +153,7 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
                     <dt>{t(key)}</dt>
                     <dd>
                       {isSevens(team) && key === "dedicatedFans"
-                        ? count + 1
+                        ? count + dedicatedFansBase(team)
                         : count}
                     </dd>
                   </div>

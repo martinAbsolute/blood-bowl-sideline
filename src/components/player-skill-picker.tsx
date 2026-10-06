@@ -13,7 +13,6 @@ import {
 } from "@/domain/catalog";
 import {
   budgetFor,
-  isSevens,
   playerSkillCost,
   skillAccess,
   teamSaveIssues,
@@ -52,7 +51,7 @@ export function PlayerSkillPicker({
   const searchRef = useRef<HTMLInputElement>(null);
   const deferredSearch = useDeferredValue(search).trim().toLowerCase();
   const rules = getRuleset(team.rulesetId);
-  const sevens = isSevens(team);
+  const kyiv = rules.id === "kyiv-seven-sins-sevens";
   const tier = tierFor(team);
   const allowance = budgetFor(team).skillGold;
   const otherPlayers = team.players.filter((player) => player.id !== playerId);
@@ -80,7 +79,7 @@ export function PlayerSkillPicker({
     selected.filter((id) => skillAccess(position, id) === "secondary").length;
   const secondaryRemaining = Math.max(0, secondaryMax - secondaryUsed);
   const guidance =
-    sevens &&
+    kyiv &&
     (tier === 1
       ? "playerModal.sevensTierOne"
       : tier === 2 && captain
@@ -108,14 +107,14 @@ export function PlayerSkillPicker({
     );
   }
   const available = [
-    ...new Set([...orderedSkills, ...(sevens ? selected : [])]),
+    ...new Set([...orderedSkills, ...(kyiv ? selected : [])]),
   ].filter(
     (id) =>
-      (sevens && selected.includes(id)) ||
+      (kyiv && selected.includes(id)) ||
       (skillAccess(position, id) &&
         !position.skills.some((base) => base.split(":")[0] === id) &&
         !(captain && id === "pro") &&
-        (!sevens ||
+        (!kyiv ||
           (!guidance &&
             !full &&
             id !== "leader" &&
@@ -137,7 +136,7 @@ export function PlayerSkillPicker({
       aria-label={t("playerModal.browseSkills")}
     >
       <div className="player-skill-toolbar">
-        {sevens && (
+        {kyiv && (
           <div
             role="status"
             className="mb-3 space-y-1 rounded-md bg-secondary/50 p-3 text-sm"
@@ -166,7 +165,7 @@ export function PlayerSkillPicker({
             )}
           </div>
         )}
-        {(!sevens || (!guidance && !full)) && (
+        {(!kyiv || (!guidance && !full)) && (
           <>
             <div className="mb-3 flex items-center justify-between gap-3">
               <h3 className="text-sm font-semibold">
@@ -291,7 +290,7 @@ export function PlayerSkillPicker({
                   {skill?.isElite ? ` · ${t("elite")}` : ""}
                 </p>
               </div>
-              {!sevens && (
+              {!kyiv && (
                 <span className="shrink-0 font-mono text-xs text-muted-foreground">
                   {chosen ? "−" : "+"}
                   {formatCost(Math.abs(delta))}

@@ -21,6 +21,10 @@ export const isLineman = (position: Position) =>
   /\bLineman\b/.test(position.position);
 export const isSevens = (team: Team) =>
   getRuleset(team.rulesetId).sevens === true;
+export const isKyivSevens = (team: Team) =>
+  team.rulesetId === "kyiv-seven-sins-sevens";
+export const dedicatedFansBase = (team: Team) =>
+  isSevens(team) && team.rulesetId !== "bb2025-sevens" ? 1 : 0;
 export function playerMovement(
   team: Team,
   playerId: string,
@@ -44,7 +48,11 @@ export function staffInfo(team: Team) {
     cheerleaders: { cost: sevens ? 20000 : 10000, max: sevens ? 3 : 6 },
     dedicatedFans: {
       cost: sevens ? 20000 : 5000,
-      max: sevens ? 4 : team.rulesetId === "bb2025-default" ? 6 : 0,
+      max: sevens
+        ? 5 - dedicatedFansBase(team)
+        : team.rulesetId === "bb2025-default"
+          ? 6
+          : 0,
     },
   };
 }
@@ -286,6 +294,11 @@ export function validateTeam(
     rules = getRuleset(team.rulesetId);
   if (!roster)
     return { issues: [{ code: "unknownRoster", values: {} }], valid: false };
+  if (rules.excludedRosters?.includes(team.rosterId))
+    return {
+      issues: [{ code: "unsupportedRoster", values: {} }],
+      valid: false,
+    };
   const totals = summarize(team, startingTreasury),
     overrides = rules.teamOverrides?.[roster.id];
   if (
@@ -316,8 +329,10 @@ export function validateTeam(
       return position && !isLineman(position);
     }).length;
     if (specialists > 4) issue("specialists", { max: 4 });
-    if (team.staff.dedicatedFans > 4) issue("sevensFans");
+    if (team.staff.dedicatedFans > staffInfo(team).dedicatedFans.max)
+      issue("sevensFans");
     if (
+      isKyivSevens(team) &&
       totals.tier === 2 &&
       team.players.some((p) => p.id === team.captainId && p.skills.length)
     )
@@ -372,7 +387,7 @@ export function validateTeam(
     if (new Set(p.skills).size !== p.skills.length)
       issue("duplicateSkill", { player: p.name || position.position });
     for (const id of p.skills) {
-      if (isSevens(team) && id === "leader") issue("leaderBanned");
+      if (isKyivSevens(team) && id === "leader") issue("leaderBanned");
       if (
         !skillAccess(position, id) ||
         !getSkill(id) ||

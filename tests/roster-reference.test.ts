@@ -30,6 +30,18 @@ vi.mock("../src/components/position-name", () => ({
 }));
 
 describe("ruleset-aware roster references", () => {
+  it("shows the standard Sevens SP package separately from Kyiv", () => {
+    const html = renderToStaticMarkup(
+      createElement(RosterFacts, {
+        roster: getRoster("human")!,
+        rulesetId: "bb2025-sevens",
+      }),
+    );
+    expect(html).toContain("600k GP");
+    expect(html).toContain("tier:</span> 1");
+    expect(html).toContain("skillPoints:</span> 1");
+    expect(html).not.toContain("referenceFlexibleSkill");
+  });
   it("uses each tournament currency and displays flexible Sevens skill slots", () => {
     const roster = getRoster("dwarf")!;
     const render = (

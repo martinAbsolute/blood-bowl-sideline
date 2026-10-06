@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { newTeam } from "@/domain/catalog";
+import { newTeam, getRuleset } from "@/domain/catalog";
 import { storeDraft } from "@/lib/drafts";
 import { useDraftSync } from "./draft-sync-provider";
 import { toast } from "./ui/toast";
@@ -35,14 +35,20 @@ export function CreateTeamButton({
   const { isAuthenticated } = useConvexAuth();
   const save = useTeamSave(leagueId);
   const [creating, setCreating] = useState(false);
+  const unavailable =
+    !!rosterId &&
+    !!getRuleset(rulesetId ?? "bb2025-default").excludedRosters?.includes(
+      rosterId,
+    );
   if (rosterId)
     return (
       <Button
         className={className}
         size={size}
-        disabled={creating || !sync.ready}
+        disabled={creating || !sync.ready || unavailable}
+        title={unavailable ? t("rosterUnavailable") : undefined}
         onClick={async () => {
-          if (creating) return;
+          if (creating || unavailable) return;
           const team = newTeam(crypto.randomUUID(), rosterId);
           if (rulesetId) team.rulesetId = rulesetId;
           setCreating(true);

@@ -28,9 +28,8 @@ import { Button } from "./ui/button";
 import { PlayerIcon, StarPlayerIcon } from "./player-icon";
 import { PlayerName } from "./player-name";
 import { PlayerSkillPicker } from "./player-skill-picker";
-import { SkillBox, SkillList } from "./skill-box";
+import { SkillBox, SkillList, VeteranSkill } from "./skill-box";
 import { positionLabel } from "./position-name";
-import { RuleInfo } from "./rule-help";
 
 const gold = (value: number) => (value / 1000).toLocaleString("en") + "k GP";
 
@@ -98,7 +97,8 @@ export function PlayerDialog({
     ? playerSkillCost(draftTeam, position, draft.skills)
     : 0;
   const sevensSkillBlocked =
-    isSevens(team) && (tierFor(team) === 1 || (tierFor(team) === 2 && captain));
+    team.rulesetId === "kyiv-seven-sins-sevens" &&
+    (tierFor(team) === 1 || (tierFor(team) === 2 && captain));
   const max = sevensSkillBlocked
     ? 0
     : Math.min(
@@ -281,7 +281,7 @@ export function PlayerDialog({
                   )}
                 </dd>
               </div>
-              {player && !isSevens(team) && (
+              {player && team.rulesetId !== "kyiv-seven-sins-sevens" && (
                 <div className="flex items-center justify-between gap-3">
                   <dt className="text-muted-foreground">
                     {t("playerModal.skillSpend")}
@@ -328,27 +328,21 @@ export function PlayerDialog({
                     />
                   ))}
                 {captain && <SkillBox id="pro" captain />}
-                {!profile.skills.length && !draft.skills.length && !captain && (
-                  <span className="text-xs text-muted-foreground">
-                    {t("noSkills")}
-                  </span>
-                )}
+                {veteran && <VeteranSkill />}
+                {!profile.skills.length &&
+                  !draft.skills.length &&
+                  !captain &&
+                  !veteran && (
+                    <span className="text-xs text-muted-foreground">
+                      {t("noSkills")}
+                    </span>
+                  )}
               </div>
               {captain && (
                 <p className="flex items-center gap-1.5 text-xs font-medium text-primary">
                   <ShieldCheck className="size-3.5" />
                   {t("teamCaptain")}
                 </p>
-              )}
-              {veteran && (
-                <div className="flex items-center gap-1 text-xs font-medium text-primary">
-                  {t("sevensVeteran")}
-                  <RuleInfo
-                    title={t("sevensVeteran")}
-                    description={t("sevensVeteranHelp")}
-                    label={t("explainRule", { name: t("sevensVeteran") })}
-                  />
-                </div>
               )}
             </div>
           </section>

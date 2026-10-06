@@ -34,6 +34,32 @@ function sevensTeam(): Team {
 }
 
 describe("Kyiv Seven Sins cloud persistence and enforcement", () => {
+  it("saves and filters standard Sevens while rejecting forged skill budgets", async () => {
+    const { owner } = await setup();
+    const team = sevensTeam();
+    team.rulesetId = "bb2025-sevens";
+    team.players[0].skills = ["block"];
+    const saved = await owner.mutation(api.teams.save, {
+      team,
+      expectedRevision: 0,
+    });
+    expect(saved.legal).toBe(true);
+    const library = await owner.query(api.teams.listMine, {
+      archived: false,
+      rulesetId: "bb2025-sevens",
+      paginationOpts: { numItems: 12, cursor: null },
+    });
+    expect(library.page.map((row) => row.team.rulesetId)).toEqual([
+      "bb2025-sevens",
+    ]);
+    team.players[2].skills = ["wrestle"];
+    await expect(
+      owner.mutation(api.teams.save, {
+        team,
+        expectedRevision: saved.revision,
+      }),
+    ).rejects.toThrow();
+  });
   it("accepts the tier-two primary skill allowance on a non-captain", async () => {
     const { owner } = await setup();
     const team = sevensTeam();

@@ -5,7 +5,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { randomUUID } from "node:crypto";
 import { ConvexError } from "convex/values";
 import { getFunctionName, type FunctionReference } from "convex/server";
-import { newTeam } from "../src/domain/catalog";
+import { getRoster, newTeam } from "../src/domain/catalog";
 import {
   readDrafts,
   readRevision,
@@ -277,6 +277,58 @@ function editor(team = newTeam(randomUUID())) {
     ),
   );
 }
+
+it("assigns one Sevens veteran using eligible player checkboxes and persists its skill badge", async () => {
+  const team = newTeam(randomUUID(), "human");
+  team.rulesetId = "kyiv-seven-sins-sevens";
+  const positions = getRoster("human")!.players;
+  team.players = [0, 0, 2].map((positionIndex, index) => ({
+    id: randomUUID(),
+    positionId: positions[positionIndex].id,
+    name: `Player ${index + 1}`,
+    skills: [],
+  }));
+  await act(async () => root.render(editor(team)));
+  const checkbox = (number: number) =>
+    container.querySelector<HTMLElement>(
+      `[role="checkbox"][aria-label="sevensVeteran · Player ${number}"]`,
+    )!;
+  expect(container.querySelector("#sevens-veteran")).toBeNull();
+  expect(checkbox(3).getAttribute("aria-disabled")).toBe("true");
+  const toggle = async (number: number) =>
+    act(async () => {
+      checkbox(number)
+        .closest("label")!
+        .querySelector<HTMLInputElement>('input[type="checkbox"]')!
+        .click();
+    });
+  await toggle(1);
+  expect(readDrafts()[0].veteranId).toBe(team.players[0].id);
+  expect(
+    checkbox(1).closest("tr")?.querySelector(".table-skills")?.textContent,
+  ).toContain("sevensVeteran");
+  await toggle(2);
+  expect(readDrafts()[0].veteranId).toBe(team.players[1].id);
+  expect(checkbox(1).getAttribute("aria-checked")).toBe("false");
+  expect(checkbox(2).getAttribute("aria-checked")).toBe("true");
+  await toggle(2);
+  expect(readDrafts()[0].veteranId).toBeUndefined();
+  await act(async () =>
+    root.render(
+      createElement(
+        DraftSignInProvider,
+        null,
+        createElement(TeamEditor, {
+          initial: { ...team, veteranId: team.players[0].id },
+          readOnly: true,
+        }),
+      ),
+    ),
+  );
+  expect(checkbox(1).getAttribute("aria-checked")).toBe("true");
+  expect(checkbox(1).getAttribute("aria-disabled")).toBe("true");
+  expect(checkbox(2).getAttribute("aria-disabled")).toBe("true");
+});
 
 it("header login preserves the exact draft; returning saves the entire unfinished roster only after authenticated", async () => {
   const team = newTeam(randomUUID(), "dwarf");

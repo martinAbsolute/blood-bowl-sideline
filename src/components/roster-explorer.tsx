@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "gt-next";
 import { Search, ArrowUpRight, ChevronDown } from "lucide-react";
-import { rosters } from "@/domain/catalog";
+import { rosters, getRuleset } from "@/domain/catalog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { RosterIcon } from "./player-icon";
@@ -52,8 +52,10 @@ export function RosterExplorer({
       return next;
     });
   }
-  const list = rosters.filter((r) =>
-    r.name.toLowerCase().includes(search.trim().toLowerCase()),
+  const list = rosters.filter(
+    (r) =>
+      !getRuleset(rulesetId).excludedRosters?.includes(r.id) &&
+      r.name.toLowerCase().includes(search.trim().toLowerCase()),
   );
   return (
     <div className="catalog-layout">

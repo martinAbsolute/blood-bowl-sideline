@@ -121,6 +121,12 @@ export function RosterFacts({
   const staff = staffInfo(team);
   const tier = tierFor(team);
   const budget = budgetFor(team);
+  if (rules.excludedRosters?.includes(roster.id))
+    return (
+      <p className="border-t px-3 py-2.5 text-xs text-muted-foreground">
+        {t("rosterUnavailable")}
+      </p>
+    );
   return (
     <div className="space-y-1.5 border-t px-3 py-2.5 text-xs">
       <div className="flex flex-wrap gap-x-6 gap-y-1">
@@ -146,7 +152,7 @@ export function RosterFacts({
             <span className="font-medium">{t("tier")}:</span> {tier}
           </p>
         )}
-        {isSevens(team) ? (
+        {rules.id === "kyiv-seven-sins-sevens" ? (
           <p>
             <span className="font-medium">{t("skillAllowance")}:</span>{" "}
             {t("primary")}{" "}

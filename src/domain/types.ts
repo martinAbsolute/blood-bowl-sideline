@@ -5,6 +5,7 @@ export const RULES_VERSION = "bb2025-2026-09-30";
 export const rulesetIds = [
   "bb2025-default",
   "bb2025-matched-play",
+  "bb2025-sevens",
   "eurobowl-2026",
   "world-cup-2027",
   "kyiv-seven-sins-sevens",
@@ -116,6 +117,7 @@ export interface Ruleset {
   name: string;
   skillCurrency?: "sp" | "spp";
   sevens?: boolean;
+  excludedRosters?: string[];
   tiers: Record<string, string[]>;
   tierBudgets: Record<
     string,

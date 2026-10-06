@@ -129,7 +129,8 @@ export function TeamSupport({
             <SupportItem
               key={key}
               label={t(
-                isSevens(team) && key === "dedicatedFans"
+                team.rulesetId === "kyiv-seven-sins-sevens" &&
+                  key === "dedicatedFans"
                   ? "sevensDedicatedFans"
                   : key,
               )}
@@ -137,7 +138,9 @@ export function TeamSupport({
                 isSevens(team) && key === "apothecary"
                   ? "sevensApothecaryHelp"
                   : isSevens(team) && key === "dedicatedFans"
-                    ? "sevensFansHelp"
+                    ? team.rulesetId === "bb2025-sevens"
+                      ? "sevensMatchedFansHelp"
+                      : "sevensFansHelp"
                     : `staffDescriptions.${key}`,
               )}
               value={team.staff[key]}

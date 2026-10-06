@@ -1,5 +1,101 @@
 [
   {
+    "id": "bb2025-sevens",
+    "name": "Blood Bowl Sevens 2025 Edition",
+    "excludedRosters": ["slann"],
+    "sevens": true,
+    "skillCurrency": "sp",
+    "tiers": {
+      "1": [
+        "amazon",
+        "chaos-dwarf",
+        "dark-elf",
+        "elven-union",
+        "human",
+        "high-elf",
+        "necromantic-horror",
+        "norse",
+        "old-world-alliance",
+        "skaven",
+        "wood-elf"
+      ],
+      "2": [
+        "bretonnian",
+        "dwarf",
+        "imperial-nobility",
+        "lizardmen",
+        "nurgle",
+        "orc",
+        "shambling-undead",
+        "tomb-kings",
+        "vampire"
+      ],
+      "3": [
+        "black-orc",
+        "chaos-chosen",
+        "chaos-renegade",
+        "halfling",
+        "khorne",
+        "underworld-denizens"
+      ],
+      "4": ["gnome", "goblin", "ogre", "snotling"]
+    },
+    "tierBudgets": {
+      "0": { "teamBudget": 600000, "skillGold": 0, "flowingFunds": 0 },
+      "1": {
+        "teamBudget": 600000,
+        "skillGold": 1,
+        "flowingFunds": 0
+      },
+      "2": {
+        "teamBudget": 600000,
+        "skillGold": 2,
+        "flowingFunds": 0
+      },
+      "3": {
+        "teamBudget": 600000,
+        "skillGold": 3,
+        "flowingFunds": 0
+      },
+      "4": {
+        "teamBudget": 600000,
+        "skillGold": 4,
+        "flowingFunds": 0
+      }
+    },
+    "skillCosts": {
+      "primaryNonElite": 1,
+      "primaryElite": 1,
+      "secondaryNonElite": 2,
+      "secondaryElite": 2,
+      "stackCosts": []
+    },
+    "maxAdvancementsPerPlayer": 1,
+    "maxSecondaryPerTeam": 1,
+    "maxStackPerTeam": 0,
+    "maxElitePerTeam": 2,
+    "starPlayerTierRules": {},
+    "bannedStarPlayers": [],
+    "veteranStarPlayers": [],
+    "legendStarPlayers": [],
+    "allowedInducements": [
+      "temp-agency-cheerleaders",
+      "part-time-assistant-coaches",
+      "blitzers-best-kegs",
+      "prayers-to-nuffle",
+      "extra-team-training",
+      "bribes",
+      "wandering-apothecary",
+      "mortuary-assistant",
+      "plague-doctor",
+      "halfling-master-chef",
+      "desperate-measures"
+    ],
+    "minPlayers": 7,
+    "maxPlayers": 11,
+    "starPlayerBlocksAdvancements": false
+  },
+  {
     "id": "kyiv-seven-sins-sevens",
     "name": "Kyiv \"Seven Sins\" Sevens",
     "sevens": true,

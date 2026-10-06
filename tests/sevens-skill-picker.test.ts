@@ -166,3 +166,16 @@ it("keeps ordinary preset prices and Leader choices", async () => {
   expect(container.textContent).toContain("k GP");
   expect(container.textContent).not.toContain("playerModal.sevensSlots");
 });
+
+it("uses SP and permits Leader for standard Sevens without Kyiv tier restrictions", async () => {
+  const value = team();
+  value.rulesetId = "bb2025-sevens";
+  value.players[1].positionId = getRoster("human")!.players.find((position) =>
+    position.position.includes("Thrower"),
+  )!.id;
+  await render(value);
+  expect(rows()).toContain("leader");
+  expect(container.textContent).toContain("1 sp");
+  expect(container.textContent).not.toContain("playerModal.sevensTierOne");
+  expect(container.textContent).not.toContain("playerModal.sevensSlots");
+});

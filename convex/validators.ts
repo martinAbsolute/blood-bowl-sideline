@@ -9,6 +9,7 @@ export const teamValidator = v.object({
   rulesetId: v.union(
     v.literal("bb2025-default"),
     v.literal("bb2025-matched-play"),
+    v.literal("bb2025-sevens"),
     v.literal("eurobowl-2026"),
     v.literal("world-cup-2027"),
     v.literal("kyiv-seven-sins-sevens"),

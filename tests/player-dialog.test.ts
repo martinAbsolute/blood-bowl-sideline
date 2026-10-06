@@ -22,6 +22,7 @@ vi.mock("../src/components/player-icon", () => ({
   StarPlayerIcon: () => null,
 }));
 vi.mock("../src/components/skill-box", () => ({
+  VeteranSkill: () => createElement("span", null, "sevensVeteran"),
   SkillBox: ({ id, onRemove }: { id: string; onRemove?: () => void }) =>
     createElement(
       "span",

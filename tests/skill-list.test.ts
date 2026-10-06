@@ -20,6 +20,7 @@ it("keeps starting skills before additional skills and captain Pro, sorting only
       ids: ["sure_hands", "pass"],
       additionalIds: ["tackle", "block"],
       captain: true,
+      veteran: true,
     }),
   );
   const names = [...html.matchAll(/<span[^>]*>([^<]*)<\/span>/g)].map(
@@ -31,5 +32,15 @@ it("keeps starting skills before additional skills and captain Pro, sorting only
     "Block",
     "Tackle",
     "proCaptain",
+    "sevensVeteran",
   ]);
+});
+
+it("renders a veteran designation as a skill badge even without other skills", () => {
+  const html = renderToStaticMarkup(
+    createElement(SkillList, { ids: [], veteran: true }),
+  );
+  expect(html).toContain('class="skill-box skill-trait skill-added"');
+  expect(html).toContain("sevensVeteran");
+  expect(html).not.toContain("noSkills");
 });
