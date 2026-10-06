@@ -51,24 +51,23 @@ it("offers only the selected ruleset's tiers and resets selection when ruleset c
     [...container.querySelectorAll("section")].map((item) => item.id),
   ).toEqual(
     rosterChoices("world-cup-2027")
-      .filter((item) => item.tier === 3)
+      .filter((item) => item.tier !== 3)
       .map((item) => item.roster.id),
   );
   await render("kyiv-seven-sins-sevens");
-  expect(
-    container.querySelector('[aria-pressed="true"]')?.textContent,
-  ).toContain("rosterAllTiers");
+  expect(container.querySelector('[aria-pressed="false"]')).toBeNull();
   expect(container.querySelectorAll("section")).toHaveLength(
     rosterChoices("kyiv-seven-sins-sevens").length,
   );
   await render("bb2025-default");
   expect(container.querySelector("fieldset")).toBeNull();
-  expect(container.textContent).toContain("rosterNoTiers");
+  expect(container.querySelector("[aria-pressed]")).toBeNull();
+  expect(container.querySelector('[data-slot="popover-trigger"]')).toBeNull();
 });
 
 it("combines search and tier filtering and recovers from no matches", async () => {
   await render("kyiv-seven-sins-sevens");
-  await click("tier 1");
+  await click("tier 2");
   const input = container.querySelector("input")!;
   await act(async () => {
     Object.getOwnPropertyDescriptor(
@@ -83,11 +82,6 @@ it("combines search and tier filtering and recovers from no matches", async () =
   expect(
     [...container.querySelectorAll("section")].map((item) => item.id),
   ).toEqual(["human"]);
-  await click("clearFilters");
-  expect(input.value).toBe("");
-  expect(container.querySelectorAll("section")).toHaveLength(
-    rosterChoices("kyiv-seven-sins-sevens").length,
-  );
 });
 
 it("includes only eligible rosters and recognizes shared budgets for every ruleset", () => {
@@ -108,7 +102,7 @@ it("includes only eligible rosters and recognizes shared budgets for every rules
 it("opens stats on demand and preserves the tier when using the roster index", async () => {
   vi.spyOn(window, "requestAnimationFrame").mockImplementation(() => 0);
   await render("kyiv-seven-sins-sevens");
-  await click("tier 2");
+  await click("tier 1");
   // Browsers do not fire hashchange for replaceState; happy-dom does.
   const replace = vi
     .spyOn(window.history, "replaceState")
@@ -119,8 +113,8 @@ it("opens stats on demand and preserves the tier when using the roster index", a
   await act(async () => link.click());
   expect(replace).toHaveBeenCalledWith(window.history.state, "", "#human");
   expect(
-    container.querySelector('[aria-pressed="true"]')?.textContent,
-  ).toContain("tier 2");
+    container.querySelector('[aria-pressed="false"]')?.textContent,
+  ).toContain("tier 1");
   expect(
     container
       .querySelector("#roster-content-human")
@@ -141,19 +135,33 @@ it("opens stats on demand and preserves the tier when using the roster index", a
 it("reveals an incoming roster anchor even when filtered out", async () => {
   vi.spyOn(window, "requestAnimationFrame").mockImplementation(() => 0);
   await render("kyiv-seven-sins-sevens");
-  await click("tier 1");
+  await click("tier 2");
   expect(container.querySelector("#human")).toBeNull();
   await act(async () => {
     window.history.replaceState(null, "", "#human");
     window.dispatchEvent(new Event("hashchange"));
   });
-  expect(
-    container.querySelector('[aria-pressed="true"]')?.textContent,
-  ).toContain("rosterAllTiers");
+  expect(container.querySelector('[aria-pressed="false"]')).toBeNull();
   expect(
     container
       .querySelector("#roster-content-human")
       ?.classList.contains("hidden"),
   ).toBe(false);
   vi.restoreAllMocks();
+});
+
+it("keeps shared rules behind the non-standard ruleset help button", async () => {
+  await render("kyiv-seven-sins-sevens");
+  expect(document.body.textContent).not.toContain("650k GP");
+  const trigger = container.querySelector<HTMLButtonElement>(
+    '[data-slot="popover-trigger"]',
+  )!;
+  expect(trigger).not.toBeNull();
+  await act(async () => trigger.click());
+  expect(
+    document.body.querySelector('[data-slot="popover-content"]')?.textContent,
+  ).toContain("650k GP");
+  expect(
+    document.body.querySelector('[data-slot="popover-content"]')?.textContent,
+  ).toContain("7–11");
 });

@@ -24,22 +24,27 @@ function scrollToRoster(id: string) {
 
 export function RosterExplorer({
   rulesetId = "bb2025-default",
+  hiddenTiers,
+  onRevealTier,
 }: {
   rulesetId?: RulesetId;
+  hiddenTiers?: ReadonlySet<number>;
+  onRevealTier?: (tier: number) => void;
 }) {
   const t = useTranslations();
   const [search, setSearch] = useState("");
-  const [selectedTier, setSelectedTier] = useState<number | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
     function openHashRoster() {
       const id = window.location.hash.slice(1);
-      if (!rosterChoices(rulesetId).some(({ roster }) => roster.id === id))
-        return;
+      const choice = rosterChoices(rulesetId).find(
+        ({ roster }) => roster.id === id,
+      );
+      if (!choice) return;
 
       setSearch("");
-      setSelectedTier(null);
+      onRevealTier?.(choice.tier);
       setExpanded((current) => new Set(current).add(id));
       scrollToRoster(id);
     }
@@ -47,7 +52,7 @@ export function RosterExplorer({
     openHashRoster();
     window.addEventListener("hashchange", openHashRoster);
     return () => window.removeEventListener("hashchange", openHashRoster);
-  }, [rulesetId]);
+  }, [rulesetId, onRevealTier]);
 
   function toggleRoster(id: string) {
     setExpanded((current) => {
@@ -58,14 +63,11 @@ export function RosterExplorer({
     });
   }
   const choices = rosterChoices(rulesetId);
-  const tiers = [...new Set(choices.map(({ tier }) => tier))]
-    .filter((tier) => tier > 0)
-    .sort((a, b) => a - b);
   const matchingSearch = choices.filter(({ roster }) =>
     roster.name.toLowerCase().includes(search.trim().toLowerCase()),
   );
   const list = matchingSearch
-    .filter(({ tier }) => selectedTier === null || tier === selectedTier)
+    .filter(({ tier }) => !hiddenTiers?.has(tier))
     .map(({ roster }) => roster);
   return (
     <div className="catalog-layout">
@@ -114,63 +116,6 @@ export function RosterExplorer({
         </nav>
       </aside>
       <div className="min-w-0 space-y-5">
-        <div className="no-print space-y-3">
-          {tiers.length > 0 ? (
-            <fieldset>
-              <legend className="mb-2 text-sm font-medium">
-                {t("rosterFilterTier")}
-              </legend>
-              <div className="flex flex-wrap gap-2">
-                {[null, ...tiers].map((tier) => (
-                  <Button
-                    key={tier ?? "all"}
-                    variant={selectedTier === tier ? "default" : "outline"}
-                    aria-pressed={selectedTier === tier}
-                    onClick={() => setSelectedTier(tier)}
-                    className="min-h-11 gap-2"
-                  >
-                    {tier === null
-                      ? t("rosterAllTiers")
-                      : `${t("tier")} ${tier}`}
-                    <span className="tabular-nums opacity-70">
-                      {
-                        matchingSearch.filter(
-                          (choice) => tier === null || choice.tier === tier,
-                        ).length
-                      }
-                    </span>
-                  </Button>
-                ))}
-              </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                {t("rosterTierHelp")}
-              </p>
-            </fieldset>
-          ) : (
-            <p className="text-xs text-muted-foreground">
-              {t("rosterNoTiers")}
-            </p>
-          )}
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p role="status" className="text-sm text-muted-foreground">
-              {t("rosterResultCount", {
-                count: list.length,
-                total: choices.length,
-              })}
-            </p>
-            {(search || selectedTier !== null) && (
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setSearch("");
-                  setSelectedTier(null);
-                }}
-              >
-                {t("clearFilters")}
-              </Button>
-            )}
-          </div>
-        </div>
         {list.map((r) => (
           <section
             id={r.id}
@@ -233,25 +178,12 @@ export function RosterExplorer({
                 />
               </span>
             </div>
-            <RosterFacts roster={r} rulesetId={rulesetId} comparison />
-            <button
-              type="button"
-              aria-expanded={expanded.has(r.id)}
-              aria-controls={`roster-content-${r.id}`}
-              onClick={() => toggleRoster(r.id)}
-              className="no-print flex min-h-11 w-full items-center justify-between border-t px-3 text-xs font-medium text-muted-foreground hover:bg-secondary focus-visible:outline-2 focus-visible:outline-ring"
-            >
-              {t(expanded.has(r.id) ? "rosterHideStats" : "rosterShowStats")}
-              <ChevronDown
-                aria-hidden="true"
-                className={`size-4 transition-transform motion-reduce:transition-none ${expanded.has(r.id) ? "rotate-180" : ""}`}
-              />
-            </button>
             <div
               id={`roster-content-${r.id}`}
-              className={`${expanded.has(r.id) ? "block" : "hidden"} print:block`}
+              className={`${expanded.has(r.id) ? "block" : "hidden"} md:block print:block`}
             >
               <RosterTable roster={r} rulesetId={rulesetId} />
+              <RosterFacts roster={r} rulesetId={rulesetId} comparison />
             </div>
           </section>
         ))}
