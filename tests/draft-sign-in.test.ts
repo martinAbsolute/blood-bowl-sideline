@@ -493,6 +493,7 @@ it("retains a failed duplicate as a recovery draft and reports the cloud failure
 });
 
 it("shares only an authenticated owner's saved team and reports clipboard denial", async () => {
+  vi.useFakeTimers();
   mocks.auth = { isAuthenticated: true, isLoading: false };
   const writeText = vi.fn().mockResolvedValue(undefined);
   Object.defineProperty(navigator, "clipboard", {
@@ -509,20 +510,25 @@ it("shares only an authenticated owner's saved team and reports clipboard denial
       ),
     ),
   );
-  await act(async () => action("share").click());
+  const shareButton = action("share");
+  await act(async () => shareButton.click());
   expect(writeText).toHaveBeenCalledWith(
     `${window.location.origin}/teams/${team.uuid}`,
   );
-  expect(mocks.toast).toHaveBeenCalledWith({
-    type: "success",
-    title: "copied",
-  });
+  expect(shareButton.dataset.actionState).toBe("success");
+  expect(shareButton.querySelector('[role="status"]')?.textContent).toBe(
+    "shareSucceeded",
+  );
+  expect(shareButton.disabled).toBe(true);
+  await act(async () => vi.advanceTimersByTimeAsync(1500));
+  expect(shareButton.dataset.actionState).toBe("idle");
+  expect(shareButton.disabled).toBe(false);
   writeText.mockRejectedValue(new Error("Clipboard denied"));
-  await act(async () => action("share").click());
-  expect(mocks.toast).toHaveBeenCalledWith({
-    type: "error",
-    title: "copyFailed",
-  });
+  await act(async () => shareButton.click());
+  expect(shareButton.dataset.actionState).toBe("error");
+  expect(shareButton.querySelector('[role="status"]')?.textContent).toBe(
+    "copyFailed",
+  );
   expect(action("duplicate")).toBeDefined();
 });
 
