@@ -72,7 +72,7 @@ export function TeamCard({
           </span>
         </div>
         <div className="relative flex items-center gap-4">
-          <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-white/90 shadow-sm">
+          <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-white/15 shadow-sm">
             <RosterIcon rosterId={team.rosterId} className="size-12" />
           </span>
           <div className="min-w-0 flex-1">

@@ -10,5 +10,10 @@ checksums, and lossless crop coordinates are recorded in that directory's
 source pages and the supplemental Josef Bugman source. Attribution does not
 assert permission to relicense the artwork.
 
+Roster SVGs under `public/assets/team-icons/` were downloaded from the
+[Blood Bowl 2025 teams reference](https://bb-rules-g2p.pages.dev/en/teams).
+See the [icon notes](public/assets/team-icons/README.md) for the source URL
+pattern and usage. Attribution does not assert permission to relicense them.
+
 Blood Bowl is a trademark of Games Workshop. This independent community project
 is not affiliated with, endorsed by, or sponsored by Games Workshop or FUMBBL.

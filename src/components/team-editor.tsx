@@ -32,6 +32,7 @@ import {
 } from "./ui/dropdown-menu";
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
+import { RosterIcon } from "./player-icon";
 import {
   Dialog,
   DialogContent,
@@ -331,6 +332,7 @@ export function TeamEditor({
             className="h-auto min-h-6 max-w-full whitespace-normal text-left"
             render={<Link href={`/rosters/${roster.id}`} />}
           >
+            <RosterIcon rosterId={roster.id} className="size-4" />
             {roster.name}
           </Badge>
           <Badge

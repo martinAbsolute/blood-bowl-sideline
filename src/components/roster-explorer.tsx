@@ -50,9 +50,10 @@ export function RosterExplorer() {
               onClick={() =>
                 setExpanded((current) => new Set([...current, r.id]))
               }
-              className="shrink-0 rounded px-2 py-1.5 text-xs hover:bg-secondary"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded px-2 py-1.5 text-xs hover:bg-secondary"
             >
-              {r.name}
+              <RosterIcon rosterId={r.id} className="size-4" />
+              <span>{r.name}</span>
             </a>
           ))}
         </nav>

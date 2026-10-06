@@ -2,10 +2,10 @@ import Image from "next/image";
 import { Shield, Star, Users } from "lucide-react";
 import {
   getPositionArtwork,
-  getRosterArtwork,
   getStarArtwork,
   type PlayerArtwork,
 } from "@/domain/player-icons";
+import { getRoster } from "@/domain/catalog";
 import { cn } from "@/lib/utils";
 
 function Artwork({
@@ -68,12 +68,30 @@ export function RosterIcon({
   rosterId: string;
   className?: string;
 }) {
+  const iconUrl = `/assets/team-icons/${rosterId}.svg`;
   return (
-    <Artwork
-      artwork={getRosterArtwork(rosterId)}
-      className={className}
-      fallback={Shield}
-    />
+    <span
+      aria-hidden="true"
+      className={cn(
+        "inline-flex size-12 shrink-0 items-center justify-center",
+        className,
+      )}
+    >
+      {getRoster(rosterId) ? (
+        <span
+          className="block size-full bg-current"
+          style={{
+            maskImage: `url("${iconUrl}")`,
+            maskPosition: "center",
+            maskRepeat: "no-repeat",
+            maskSize: "contain",
+            WebkitMaskImage: `url("${iconUrl}")`,
+          }}
+        />
+      ) : (
+        <Shield className="size-2/3" />
+      )}
+    </span>
   );
 }
 export function StarPlayerIcon({

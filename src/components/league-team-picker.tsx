@@ -132,7 +132,7 @@ export function LeagueTeamPicker({
                       }}
                       className="flex w-full items-center gap-3 bg-primary px-3 py-3 text-left text-primary-foreground transition-colors enabled:hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-white/90">
+                      <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-white/15">
                         <RosterIcon
                           rosterId={team.rosterId}
                           className="size-9"
