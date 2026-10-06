@@ -41,6 +41,7 @@ import { libraryMatches } from "@/lib/team-library";
 import { finishDraftSignIn } from "@/lib/draft-sign-in";
 import { waitForTeamSave } from "@/lib/cloud-save";
 import { LibraryCardsLoading } from "./loading-layouts";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -103,8 +104,31 @@ export function TeamLibrary() {
       : "skip",
     { initialNumItems: 18 },
   );
+  const [settledResults, setSettledResults] = useState<{
+    account: string;
+    results: typeof results;
+  } | null>(null);
+  if (
+    status !== "LoadingFirstPage" &&
+    sync.account &&
+    (settledResults?.account !== sync.account ||
+      settledResults.results !== results)
+  ) {
+    setSettledResults({ account: sync.account, results });
+  }
+  const cachedResults =
+    isAuthenticated && settledResults?.account === sync.account
+      ? settledResults.results
+      : null;
+  const visibleResults = isAuthenticated
+    ? status === "LoadingFirstPage"
+      ? (cachedResults ?? [])
+      : results
+    : [];
   const raw = useSyncExternalStore(subscribeDrafts, draftSnapshot, () => "[]");
-  const leagueTeams = new Map(results.map((row) => [row.team.uuid, row]));
+  const leagueTeams = new Map(
+    visibleResults.map((row) => [row.team.uuid, row]),
+  );
   const locals = parseDrafts(raw).filter((team) => {
     const owner = draftAccount(team.uuid);
     if (owner && (!isAuthenticated || owner !== sync.account)) return false;
@@ -137,7 +161,7 @@ export function TeamLibrary() {
         leagueLocked: false,
         leagueExperienced: leagueTeams.get(team.uuid)?.leagueExperienced,
       })),
-    ...results
+    ...visibleResults
       .filter(
         ({ team, leagueLocked }) => leagueLocked || !pending.has(team.uuid),
       )
@@ -288,7 +312,9 @@ export function TeamLibrary() {
         {cards.length === 0 &&
         (!sync.ready ||
           isLoading ||
-          (isAuthenticated && status === "LoadingFirstPage")) ? (
+          (isAuthenticated &&
+            status === "LoadingFirstPage" &&
+            !cachedResults)) ? (
           <LibraryCardsLoading
             label={t("loading")}
             text={(key) => t(key)}
@@ -351,22 +377,28 @@ export function TeamLibrary() {
                       <Trash2 className="size-4" />
                     </Button>
                   ) : (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={leagueLocked || busy !== null}
-                      aria-label={`${t("archive")} ${team.name}`}
-                      title={leagueLocked ? t("teamRemovalLocked") : undefined}
-                      onClick={() =>
-                        requestConfirmation({ team, action: "archive" })
-                      }
-                    >
-                      {busy === team.uuid ? (
-                        <LoaderCircle className="size-4 animate-spin" />
-                      ) : (
-                        <Archive className="size-4" />
-                      )}
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={leagueLocked || busy !== null}
+                            aria-label={`${t("archive")} ${team.name}`}
+                            onClick={() =>
+                              requestConfirmation({ team, action: "archive" })
+                            }
+                          />
+                        }
+                      >
+                        {busy === team.uuid ? (
+                          <LoaderCircle className="size-4 animate-spin" />
+                        ) : (
+                          <Archive className="size-4" />
+                        )}
+                      </TooltipTrigger>
+                      <TooltipContent>{t("archiveLabel")}</TooltipContent>
+                    </Tooltip>
                   )
                 }
               />
@@ -509,15 +541,21 @@ function ArchivedTeams({
     },
     { initialNumItems: 18 },
   );
+  const [lastResults, setLastResults] = useState<typeof results | null>(null);
+  if (status !== "LoadingFirstPage" && lastResults !== results) {
+    setLastResults(results);
+  }
+  const visibleResults =
+    status === "LoadingFirstPage" ? (lastResults ?? []) : results;
   return (
     <div aria-busy={status === "LoadingFirstPage"}>
-      {status === "LoadingFirstPage" ? (
+      {status === "LoadingFirstPage" && !lastResults ? (
         <LibraryCardsLoading
           label={t("loading")}
           text={(key) => t(key)}
           actionLabel={t("restore")}
         />
-      ) : results.length === 0 ? (
+      ) : visibleResults.length === 0 ? (
         <p className="rounded-xl border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
           {t(
             filter.search || filter.rosterId || filter.rulesetId
@@ -527,37 +565,51 @@ function ArchivedTeams({
         </p>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {results.map(({ team }) => (
+          {visibleResults.map(({ team }) => (
             <TeamCard
               key={team.uuid}
               team={team}
               archived
               saveState="cloud"
               primaryAction={
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={busy !== null}
-                  onClick={() => onRestore(team)}
-                >
-                  {busy === team.uuid ? (
-                    <LoaderCircle className="size-4 animate-spin" />
-                  ) : (
-                    <Undo2 className="size-4" />
-                  )}
-                  {t("restore")}
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={busy !== null}
+                        aria-label={`${t("restore")} ${team.name}`}
+                        onClick={() => onRestore(team)}
+                      />
+                    }
+                  >
+                    {busy === team.uuid ? (
+                      <LoaderCircle className="size-4 animate-spin" />
+                    ) : (
+                      <Undo2 className="size-4" />
+                    )}
+                  </TooltipTrigger>
+                  <TooltipContent>{t("restoreLabel")}</TooltipContent>
+                </Tooltip>
               }
               action={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  disabled={busy !== null}
-                  aria-label={`${t("deletePermanently")} ${team.name}`}
-                  onClick={() => onDelete(team)}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={busy !== null}
+                        aria-label={`${t("deletePermanently")} ${team.name}`}
+                        onClick={() => onDelete(team)}
+                      />
+                    }
+                  >
+                    <Trash2 className="size-4" />
+                  </TooltipTrigger>
+                  <TooltipContent>{t("deleteLabel")}</TooltipContent>
+                </Tooltip>
               }
             />
           ))}

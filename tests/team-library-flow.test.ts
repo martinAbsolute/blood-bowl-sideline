@@ -41,6 +41,8 @@ const mocks = vi.hoisted(() => ({
   selectedTeam: null as { leagueLocked: boolean } | null | undefined,
   results: [] as { team: ReturnType<typeof newTeam>; leagueLocked?: boolean }[],
   archivedResults: [] as { team: ReturnType<typeof newTeam> }[],
+  activeStatus: "Exhausted" as "Exhausted" | "LoadingFirstPage",
+  archivedStatus: "Exhausted" as "Exhausted" | "LoadingFirstPage",
   libraryQueries: vi.fn(),
 }));
 vi.mock("convex/react", () => ({
@@ -61,7 +63,10 @@ vi.mock("convex/react", () => ({
     results:
       (mocks.libraryQueries(args),
       args !== "skip" && args.archived ? mocks.archivedResults : mocks.results),
-    status: "Exhausted",
+    status:
+      args !== "skip" && args.archived
+        ? mocks.archivedStatus
+        : mocks.activeStatus,
     loadMore: vi.fn(),
   }),
 }));
@@ -93,6 +98,8 @@ beforeEach(() => {
   mocks.account = null;
   mocks.results = [];
   mocks.archivedResults = [];
+  mocks.activeStatus = "Exhausted";
+  mocks.archivedStatus = "Exhausted";
   mocks.libraryQueries.mockClear();
   mocks.selectedTeam = null;
   mocks.query.mockReset().mockResolvedValue(null);
@@ -375,6 +382,30 @@ it("filters the guest library by search and roster and lets the coach clear an e
       .click(),
   );
   expect(container.querySelectorAll("article")).toHaveLength(2);
+});
+it("keeps settled team cards visible while a new search loads", async () => {
+  const first = { ...newTeam(randomUUID()), name: "First team" };
+  const second = { ...newTeam(randomUUID()), name: "Second team" };
+  mocks.authenticated = true;
+  mocks.account = "account-a";
+  mocks.results = [{ team: first }];
+  const view = () =>
+    createElement(DraftSyncProvider, null, createElement(TeamLibrary));
+  await act(async () => root.render(view()));
+  await tick();
+  expect(container.textContent).toContain("First team");
+
+  mocks.activeStatus = "LoadingFirstPage";
+  mocks.results = [];
+  await act(async () => root.render(view()));
+  expect(container.textContent).toContain("First team");
+  expect(container.querySelector('[data-slot="skeleton"]')).toBeNull();
+
+  mocks.activeStatus = "Exhausted";
+  mocks.results = [{ team: second }];
+  await act(async () => root.render(view()));
+  expect(container.textContent).toContain("Second team");
+  expect(container.textContent).not.toContain("First team");
 });
 it("matches team names and ruleset prefixes without ignoring combined filters", () => {
   const team = { ...newTeam(randomUUID(), "goblin"), name: "Олександр" };
@@ -714,8 +745,8 @@ it("loads the archive only when expanded and provides restore and confirmed perm
   const archive = container.querySelector("#team-archive")!;
   expect(archive.querySelector("article a")).toBeNull();
   await act(async () =>
-    Array.from(archive.querySelectorAll<HTMLButtonElement>("button"))
-      .find((button) => button.textContent === "restore")!
+    archive
+      .querySelector<HTMLButtonElement>('[aria-label="restore Archived team"]')!
       .click(),
   );
   expect(mocks.save).toHaveBeenLastCalledWith({

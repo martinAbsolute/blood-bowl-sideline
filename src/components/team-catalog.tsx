@@ -9,6 +9,7 @@ import { staffInfo } from "@/domain/rules";
 import { rosterChoices, sharedRosterBudget } from "@/lib/roster-ruleset";
 import { RuleInfo } from "./rule-help";
 import { useRosterRuleset } from "@/lib/use-roster-ruleset";
+import { BrandPeriod } from "./brand-period";
 
 export function TeamCatalog({
   rulesetId = "bb2025-default",
@@ -44,7 +45,10 @@ function Catalog({ rulesetId }: { rulesetId: RulesetId }) {
   return (
     <div className="page-width py-8 sm:py-10">
       <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
-        <h1 className="page-heading">{t("rosters")}</h1>
+        <h1 className="page-heading">
+          {t("rosters")}
+          <BrandPeriod />
+        </h1>
         <div className="no-print flex max-w-full flex-wrap items-end gap-x-4 gap-y-2">
           {tiers.length > 0 && (
             <div

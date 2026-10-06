@@ -32,6 +32,16 @@ import { EditorSelect } from "./editor-select";
 import { TeamReadiness } from "./team-readiness";
 import { Button } from "./ui/button";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
+import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -113,6 +123,7 @@ export function TeamEditor({
   const draftSync = useDraftSync();
   const locale = useLocale();
   const [duplicating, setDuplicating] = useState(false);
+  const [copyConfirmationOpen, setCopyConfirmationOpen] = useState(false);
   const autosave = useTeamAutosave(
     initial,
     initialRevision,
@@ -247,7 +258,7 @@ export function TeamEditor({
               size="sm"
               className="hidden h-9 sm:inline-flex"
               disabled={duplicating || isLoading || !draftSync.ready}
-              onClick={() => void copy()}
+              onClick={() => setCopyConfirmationOpen(true)}
             >
               <Copy className="size-4" />
               {t("duplicate")}
@@ -307,7 +318,7 @@ export function TeamEditor({
                 <DropdownMenuItem
                   className="min-h-11"
                   disabled={duplicating || isLoading || !draftSync.ready}
-                  onClick={() => void copy()}
+                  onClick={() => setCopyConfirmationOpen(true)}
                 >
                   <Copy className="size-4" />
                   {t("duplicate")}
@@ -1017,6 +1028,33 @@ export function TeamEditor({
           </Button>
         </DialogContent>
       </Dialog>
+      <AlertDialog
+        open={copyConfirmationOpen}
+        onOpenChange={setCopyConfirmationOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("confirmCopyTeam", { name: team.name || t("untitled") })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("confirmCopyTeamHint")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={duplicating}
+              onClick={() => {
+                setCopyConfirmationOpen(false);
+                void copy();
+              }}
+            >
+              {t("duplicate")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {selected && (
         <PlayerDialog
           key={selected}

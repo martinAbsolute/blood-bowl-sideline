@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "gt-next";
 import { SidebarTooltip } from "./sidebar-tooltip";
-import { BookOpen, Flag, Shield, Trophy, UsersRound } from "lucide-react";
+import { BookOpen, Flag, House, Trophy, UsersRound } from "lucide-react";
 
 export function AppNavigation({
   admin = false,
@@ -18,7 +18,7 @@ export function AppNavigation({
   const t = useTranslations();
   const pathname = usePathname();
   const items = [
-    { href: "/teams", key: "myTeams", icon: Shield },
+    { href: "/teams", key: "myTeams", icon: House },
     { href: "/rosters", key: "rosters", icon: BookOpen },
     { href: "/leagues", key: "leagues", icon: Flag },
     { href: null, key: "tournaments", icon: Trophy },

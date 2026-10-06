@@ -6,15 +6,19 @@ export function PageStatus({
   title,
   description,
   action,
+  accent = true,
 }: {
   code?: string;
   title: ReactNode;
   description: ReactNode;
   action?: ReactNode;
+  accent?: boolean;
 }) {
   return (
     <section className="page-width flex min-h-[60svh] items-center py-16 sm:py-24">
-      <div className="w-full max-w-2xl border-l-4 border-orange-500 pl-6 sm:pl-10">
+      <div
+        className={`w-full max-w-2xl ${accent ? "border-l-4 border-orange-500 pl-6 sm:pl-10" : ""}`}
+      >
         {code ? (
           <p className="display-font mb-5 text-7xl leading-none tracking-tight text-muted-foreground/30 sm:text-8xl">
             {code}

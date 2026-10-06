@@ -486,6 +486,20 @@ it("duplicates a public team into a new guest draft without changing the source"
   expect(action("share")).toBeUndefined();
   expect(action("export")).toBeUndefined();
   await act(async () => action("duplicate").click());
+  expect(readDrafts()).toEqual([]);
+  expect(document.body.textContent).toContain("confirmCopyTeamHint");
+  await act(async () =>
+    document
+      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-cancel"]')!
+      .click(),
+  );
+  expect(readDrafts()).toEqual([]);
+  await act(async () => action("duplicate").click());
+  await act(async () =>
+    document
+      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-action"]')!
+      .click(),
+  );
   const duplicate = readDrafts()[0];
   expect(duplicate.name).toBe("Absolute Orcs (copySuffix)");
   expect(duplicate.uuid).not.toBe(team.uuid);
@@ -510,6 +524,12 @@ it("saves a duplicate to the signed-in account and clears its exact local recove
     ),
   );
   await act(async () => action("duplicate").click());
+  expect(mocks.save).not.toHaveBeenCalled();
+  await act(async () =>
+    document
+      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-action"]')!
+      .click(),
+  );
   const request = mocks.save.mock.calls[0][0];
   expect(request.team.uuid).not.toBe(team.uuid);
   expect(request.expectedRevision).toBe(0);
@@ -536,6 +556,11 @@ it("retains a failed duplicate as a recovery draft and reports the cloud failure
     ),
   );
   await act(async () => action("duplicate").click());
+  await act(async () =>
+    document
+      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-action"]')!
+      .click(),
+  );
   expect(readDrafts()).toHaveLength(1);
   expect(mocks.toast).toHaveBeenCalledWith({
     type: "error",
