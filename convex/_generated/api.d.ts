@@ -11,6 +11,7 @@
 import type * as auth from "../auth.js";
 import type * as devAuth from "../devAuth.js";
 import type * as http from "../http.js";
+import type * as leagueDeletion from "../leagueDeletion.js";
 import type * as leagueValidators from "../leagueValidators.js";
 import type * as leagues from "../leagues.js";
 import type * as presence from "../presence.js";
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   devAuth: typeof devAuth;
   http: typeof http;
+  leagueDeletion: typeof leagueDeletion;
   leagueValidators: typeof leagueValidators;
   leagues: typeof leagues;
   presence: typeof presence;

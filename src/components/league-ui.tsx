@@ -46,6 +46,7 @@ export function useLeagueAction() {
         "CONFLICT",
         "FORBIDDEN",
         "INVALID_INPUT",
+        "LEAGUE_NAME_MISMATCH",
         "INVALID_STATS",
         "INVALID_DICE",
         "INJURY_STAT_REQUIRED",

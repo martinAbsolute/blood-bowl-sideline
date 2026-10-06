@@ -4,6 +4,7 @@ import {
 } from "convex/server";
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import schema from "./schema";
@@ -380,6 +381,25 @@ export const create = mutation({
       startingTreasury,
     });
     return id;
+  },
+});
+
+export const deleteLeague = mutation({
+  args: { leagueId: v.id("leagues"), confirmationName: v.string() },
+  returns: v.null(),
+  handler: async (ctx, { leagueId, confirmationName }) => {
+    const league = await leagueDoc(ctx, leagueId);
+    await commissioner(ctx, league);
+    if (confirmationName !== league.name)
+      throw new ConvexError("LEAGUE_NAME_MISMATCH");
+    const entries = await leagueEntries(ctx, leagueId);
+    const teamIds = [...new Set(entries.map((entry) => entry.teamId))];
+    await ctx.scheduler.runAfter(0, internal.leagueDeletion.sweep, {
+      leagueId,
+      teamIds,
+    });
+    await ctx.db.delete("leagues", leagueId);
+    return null;
   },
 });
 

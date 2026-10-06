@@ -225,6 +225,7 @@ export default defineSchema({
     searchText: v.optional(v.string()),
   })
     .index("by_uuid", ["uuid"])
+    .index("by_draftLeagueId", ["draftLeagueId"])
     .index("by_ownerId_and_archived", ["ownerId", "archived"])
     .index("by_owner_archive_roster", ["ownerId", "archived", "team.rosterId"])
     .index("by_owner_archive_ruleset", [

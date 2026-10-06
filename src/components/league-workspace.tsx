@@ -39,6 +39,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { LeagueField, LeagueSelect } from "./league-field";
 import { LeagueTeamPicker } from "./league-team-picker";
+import { LeagueDeleteDialog } from "./league-delete-dialog";
 import { LeagueNavigation } from "./league-navigation";
 import { RosterIcon } from "./player-icon";
 import { CommissionerWithdrawal } from "./league-commissioner";
@@ -855,6 +856,12 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
               <CommissionerWithdrawal entries={entries} />
             </div>
           </details>
+          <LeagueSection title={t("leagueUx.deleteLeague")}>
+            <p className="text-sm text-muted-foreground">
+              {t("leagueUx.deleteLeagueHint")}
+            </p>
+            <LeagueDeleteDialog leagueId={id} name={league.name} />
+          </LeagueSection>
         </div>
       )}
       {tab === "standings" && (

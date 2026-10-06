@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test";
 import { randomUUID } from "node:crypto";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import schema from "../convex/schema";
 import { api } from "../convex/_generated/api";
 import { getRoster, newTeam } from "../src/domain/catalog";
@@ -177,6 +177,39 @@ describe("shared event reports", () => {
         .first(),
     );
     expect(record?.after.playEvents).toHaveLength(3);
+  });
+  it("removes a finalized report and its history when the league is deleted", async () => {
+    const s = await eventReport();
+    const view = await s.ready();
+    for (const actor of [s.home, s.away])
+      await actor.mutation(api.leagues.confirmMatch, {
+        matchId: s.match._id,
+        expectedRevision: view.match.revision,
+      });
+    const before = await s.t.run((ctx) =>
+      ctx.db
+        .query("leagueMatchEvents")
+        .withIndex("by_matchId", (q) => q.eq("matchId", s.match._id))
+        .first(),
+    );
+    expect(before).not.toBeNull();
+    await s.coaches[0].mutation(api.leagues.deleteLeague, {
+      leagueId: s.leagueId,
+      confirmationName: "Season 1",
+    });
+    vi.useFakeTimers();
+    try {
+      await s.t.finishAllScheduledFunctions(() => vi.runAllTimers(), 150);
+    } finally {
+      vi.useRealTimers();
+    }
+    const after = await s.t.run((ctx) =>
+      ctx.db
+        .query("leagueMatchEvents")
+        .withIndex("by_matchId", (q) => q.eq("matchId", s.match._id))
+        .first(),
+    );
+    expect(after).toBeNull();
   });
   it("keeps SPP after recovery and atomically corrects the timeline and official career", async () => {
     const s = await eventReport();
@@ -354,6 +387,146 @@ async function setup(count = 2) {
   const match = detail.matches.find((m) => m.status === "scheduled")!;
   return { t, ids, coaches, admin, leagueId, entries, teams, match };
 }
+
+describe("league deletion", () => {
+  it("requires the commissioner and an exact name, then clears the league without deleting saved teams", async () => {
+    const s = await setup();
+    await s.coaches[0].mutation(api.leagues.startMatch, {
+      matchId: s.match._id,
+    });
+    const report = await s.t.query(api.leagues.getMatch, {
+      matchId: s.match._id,
+    });
+    await s.coaches[0].mutation(api.leagues.updateMatchDetails, {
+      matchId: s.match._id,
+      weather: 4,
+      homeFanRoll: 1,
+      awayFanRoll: 1,
+    });
+    await s.coaches[0].mutation(api.leagues.savePlayEvent, {
+      matchId: s.match._id,
+      event: {
+        ...newMatchEvent(report.players[0].playerId),
+        id: randomUUID(),
+        playerId: report.players[0].playerId,
+        targetId: null,
+        kind: "mvp",
+      },
+      expectedVersion: 0,
+    });
+    const draft = rookie("League draft");
+    await s.coaches[0].mutation(api.teams.save, {
+      team: draft,
+      expectedRevision: 0,
+      leagueId: s.leagueId,
+    });
+    await s.t.run(async (ctx) => {
+      for (let i = 0; i < 20; i++)
+        await ctx.db.insert("leagueAudit", {
+          leagueId: s.leagueId,
+          actorId: s.ids.coaches[0],
+          actorName: "Coach 0",
+          kind: "test",
+          reason: "",
+          details: "{}",
+        });
+    });
+    for (const actor of [s.coaches[1], s.admin])
+      await expect(
+        actor.mutation(api.leagues.deleteLeague, {
+          leagueId: s.leagueId,
+          confirmationName: "Season 1",
+        }),
+      ).rejects.toThrow("FORBIDDEN");
+    await expect(
+      s.t.mutation(api.leagues.deleteLeague, {
+        leagueId: s.leagueId,
+        confirmationName: "Season 1",
+      }),
+    ).rejects.toThrow("UNAUTHENTICATED");
+    await expect(
+      s.coaches[0].mutation(api.leagues.deleteLeague, {
+        leagueId: s.leagueId,
+        confirmationName: "season 1",
+      }),
+    ).rejects.toThrow("LEAGUE_NAME_MISMATCH");
+    expect(
+      await s.t.run((ctx) => ctx.db.get("leagues", s.leagueId)),
+    ).not.toBeNull();
+
+    await s.coaches[0].mutation(api.leagues.deleteLeague, {
+      leagueId: s.leagueId,
+      confirmationName: "Season 1",
+    });
+    expect(
+      await s.t.run((ctx) => ctx.db.get("leagues", s.leagueId)),
+    ).toBeNull();
+    vi.useFakeTimers();
+    try {
+      await s.t.finishAllScheduledFunctions(() => vi.runAllTimers(), 150);
+    } finally {
+      vi.useRealTimers();
+    }
+    const remaining = await s.t.run(async (ctx) => {
+      const leagueRows = await Promise.all([
+        ctx.db
+          .query("leagueTeams")
+          .withIndex("by_leagueId", (q) => q.eq("leagueId", s.leagueId))
+          .take(1),
+        ctx.db
+          .query("leaguePlayers")
+          .withIndex("by_leagueId", (q) => q.eq("leagueId", s.leagueId))
+          .take(1),
+        ctx.db
+          .query("leagueRounds")
+          .withIndex("by_leagueId", (q) => q.eq("leagueId", s.leagueId))
+          .take(1),
+        ctx.db
+          .query("leagueMatches")
+          .withIndex("by_leagueId", (q) => q.eq("leagueId", s.leagueId))
+          .take(1),
+        ctx.db
+          .query("leagueAudit")
+          .withIndex("by_leagueId", (q) => q.eq("leagueId", s.leagueId))
+          .take(1),
+        ctx.db
+          .query("teams")
+          .withIndex("by_draftLeagueId", (q) =>
+            q.eq("draftLeagueId", s.leagueId),
+          )
+          .take(1),
+      ]);
+      const matchPlayers = await ctx.db
+        .query("leagueMatchPlayers")
+        .withIndex("by_matchId", (q) => q.eq("matchId", s.match._id))
+        .take(1);
+      const playEvents = await ctx.db
+        .query("leaguePlayEvents")
+        .withIndex("by_matchId", (q) => q.eq("matchId", s.match._id))
+        .take(1);
+      const matchEvents = await ctx.db
+        .query("leagueMatchEvents")
+        .withIndex("by_matchId", (q) => q.eq("matchId", s.match._id))
+        .take(1);
+      return [...leagueRows, matchPlayers, playEvents, matchEvents].map(
+        (rows) => rows.length,
+      );
+    });
+    expect(remaining).toEqual(Array(9).fill(0));
+    const savedDraft = await s.coaches[0].query(api.teams.getByUuid, {
+      uuid: draft.uuid,
+    });
+    expect(savedDraft).toMatchObject({ canEdit: true });
+    expect(savedDraft).not.toHaveProperty("draftLeagueId");
+    expect(
+      await s.coaches[0].query(api.teams.getByUuid, { uuid: s.teams[0].uuid }),
+    ).toMatchObject({
+      leagueExperienced: false,
+      leagueLocked: false,
+      canEdit: true,
+    });
+  });
+});
 
 it("links a commissioner only when a Telegram username is available", async () => {
   const s = await setup();
