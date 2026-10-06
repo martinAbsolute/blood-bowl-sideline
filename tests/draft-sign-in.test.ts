@@ -289,6 +289,13 @@ it("assigns one Sevens veteran using eligible player checkboxes and persists its
     skills: [],
   }));
   await act(async () => root.render(editor(team)));
+  const veteranHeading = Array.from(container.querySelectorAll("th")).find(
+    (heading) => heading.textContent === "sevensVeteranColumn",
+  );
+  expect(veteranHeading?.querySelector("button")?.className).toContain(
+    "underline",
+  );
+  expect(veteranHeading?.querySelector("svg")).toBeNull();
   const checkbox = (number: number) =>
     container.querySelector<HTMLElement>(
       `[role="checkbox"][aria-label="sevensVeteran · Player ${number}"]`,

@@ -72,7 +72,7 @@ import { Checkbox } from "./ui/checkbox";
 import { PlayerDialog } from "./player-dialog";
 import { positionLabel } from "./position-name";
 import { TeamSupport } from "./team-support";
-import { RuleInfo } from "./rule-help";
+import { RuleHelp } from "./rule-help";
 import type { api } from "../../convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
 import { LeagueEnrollment } from "./league-enrollment";
@@ -426,18 +426,18 @@ export function TeamEditor({
                         </TableHead>
                       )}
                       {isSevens(team) && (
-                        <TableHead className="w-20 text-center">
-                          <span className="inline-flex items-center gap-0.5">
-                            <RuleInfo
-                              className="size-5"
-                              title={t("sevensVeteran")}
-                              description={t("sevensVeteranHelp")}
-                              label={t("explainRule", {
-                                name: t("sevensVeteran"),
-                              })}
-                            />
-                            <span>{t("sevensVeteran")}</span>
-                          </span>
+                        <TableHead className="w-16 text-center">
+                          <RuleHelp
+                            title={t("sevensVeteran")}
+                            description={t("sevensVeteranHelp")}
+                            label={t("explainRule", {
+                              name: t("sevensVeteran"),
+                            })}
+                            fullDescription
+                            className="underline decoration-dotted underline-offset-4 hover:text-primary"
+                          >
+                            {t("sevensVeteranColumn")}
+                          </RuleHelp>
                         </TableHead>
                       )}
                       <TableHead className="w-16 pr-3 text-right">

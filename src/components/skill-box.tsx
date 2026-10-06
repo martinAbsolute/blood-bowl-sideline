@@ -105,7 +105,7 @@ export function TableSkills(
   const { label, ...skills } = props;
   return (
     <div
-      className="table-skills w-max px-0.5 py-1 md:w-full [&>div]:flex-nowrap md:[&>div]:flex-wrap [&_.skill-box]:shrink-0"
+      className="table-skills min-h-9 w-max px-0.5 py-1 md:w-full [&>div]:flex-nowrap md:[&>div]:flex-wrap [&_.skill-box]:shrink-0"
       role="group"
       aria-label={label}
     >
