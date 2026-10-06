@@ -43,7 +43,7 @@ export function TeamReference({ roster }: { roster: Roster }) {
     <div className="page-width space-y-5 py-6">
       <Link
         href="/rosters"
-        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:underline"
+        className="inline-flex min-h-11 items-center gap-1.5 text-xs text-muted-foreground hover:underline sm:min-h-0"
       >
         <ArrowLeft className="size-3.5" />
         {t("allRosters")}
@@ -56,7 +56,11 @@ export function TeamReference({ roster }: { roster: Roster }) {
             <h1 className="display-font text-3xl">{roster.name}</h1>
           </div>
         </div>
-        <CreateTeamButton size="sm" rosterId={roster.id} />
+        <CreateTeamButton
+          size="sm"
+          rosterId={roster.id}
+          className="h-11 sm:h-9"
+        />
       </div>
       <section className="overflow-hidden rounded-lg border bg-card">
         <RosterTable roster={roster} />

@@ -138,7 +138,7 @@ export function TeamLibrary() {
         description={t(
           isAuthenticated ? "libraryCloudHint" : "libraryGuestHint",
         )}
-        action={<CreateTeamButton />}
+        action={<CreateTeamButton size="sm" className="h-11 sm:h-9" />}
       />
       {!isLoading && !isAuthenticated && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-secondary/30 px-5 py-4">

@@ -36,12 +36,12 @@ export function RosterExplorer() {
             placeholder={t("searchRosters")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-9 bg-card pl-9"
+            className="h-11 bg-card pl-9 lg:h-9"
           />
         </div>
         <nav
           aria-label={t("rosters")}
-          className="mt-3 flex gap-1 overflow-auto lg:max-h-[calc(100vh-230px)] lg:flex-col"
+          className="scroll-fade-x mt-3 flex gap-1 overflow-x-auto lg:max-h-[calc(100dvh-var(--site-content-top)-9.25rem)] lg:flex-col lg:overflow-y-auto lg:scroll-fade-none"
         >
           {list.map((r) => (
             <a
@@ -50,7 +50,7 @@ export function RosterExplorer() {
               onClick={() =>
                 setExpanded((current) => new Set([...current, r.id]))
               }
-              className="inline-flex shrink-0 items-center gap-1.5 rounded px-2 py-1.5 text-xs hover:bg-secondary"
+              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded px-2 py-1.5 text-xs hover:bg-secondary focus-visible:outline-2 focus-visible:outline-ring lg:min-h-0 lg:py-1"
             >
               <RosterIcon rosterId={r.id} className="size-4" />
               <span>{r.name}</span>
@@ -65,58 +65,53 @@ export function RosterExplorer() {
             key={r.id}
             className="scroll-mt-4 overflow-hidden rounded-lg border bg-card"
           >
-            <div className="flex items-center gap-1 border-b bg-secondary/40 px-2 py-2 md:gap-2 md:px-3">
-              <h2 className="min-w-0 flex-1">
-                <span className="flex min-w-0 items-center gap-1 text-xs font-semibold md:hidden">
-                  <RosterIcon
-                    rosterId={r.id}
-                    className="size-4 shrink-0 min-[360px]:size-6"
-                  />
+            <div className="relative border-b bg-secondary/40 p-2 md:flex md:items-center md:gap-2 md:px-3 md:py-2">
+              <button
+                type="button"
+                aria-label={r.name}
+                aria-expanded={expanded.has(r.id)}
+                aria-controls={`roster-content-${r.id}`}
+                onClick={() => toggleRoster(r.id)}
+                className="absolute inset-0 rounded-t-lg focus-visible:outline-2 focus-visible:outline-ring md:hidden"
+              />
+              <h2 className="pointer-events-none relative flex min-h-11 min-w-0 items-center justify-between gap-2 font-semibold md:pointer-events-auto md:min-h-0 md:flex-1">
+                <span className="flex min-w-0 items-center gap-2 text-sm md:hidden">
+                  <RosterIcon rosterId={r.id} className="size-6 shrink-0" />
                   <span className="truncate" title={r.name}>
                     {r.name}
                   </span>
                 </span>
+                <ChevronDown
+                  aria-hidden="true"
+                  className={`size-5 shrink-0 text-primary transition-transform md:hidden ${expanded.has(r.id) ? "rotate-180" : ""}`}
+                />
                 <Link
                   href={`/rosters/${r.id}`}
-                  className="hidden items-center gap-2 font-semibold hover:underline md:flex"
+                  className="hidden items-center gap-2 hover:underline md:flex"
                 >
                   <RosterIcon rosterId={r.id} className="size-8" />
                   {r.name}
                 </Link>
               </h2>
-              <div className="ml-auto flex shrink-0 gap-1 md:gap-2">
+              <div className="pointer-events-none relative mt-1 grid grid-cols-2 gap-2 [&>*]:pointer-events-auto md:ml-auto md:mt-0 md:flex md:shrink-0">
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="gap-0.5 px-1 text-[10px] has-[>svg]:px-1 min-[360px]:gap-1 min-[360px]:px-1.5 min-[360px]:text-xs min-[360px]:has-[>svg]:px-1.5 md:gap-1.5 md:px-3 md:text-sm md:has-[>svg]:px-2.5"
+                  className="h-11 min-w-0 px-2 text-xs md:h-7 md:gap-1.5 md:px-3 md:text-sm"
                   nativeButton={false}
                   render={<Link href={`/rosters/${r.id}`} />}
                 >
                   <span className="md:hidden">{t("teamDetailsShort")}</span>
                   <span className="hidden md:inline">{t("teamDetails")}</span>
-                  <ArrowUpRight className="size-3 min-[360px]:size-3.5" />
+                  <ArrowUpRight className="size-4" />
                 </Button>
                 <CreateTeamButton
                   size="sm"
                   rosterId={r.id}
-                  className="gap-1 px-1.5 text-[10px] has-[>svg]:px-1.5 min-[360px]:px-2 min-[360px]:text-xs min-[360px]:has-[>svg]:px-2 md:gap-1.5 md:px-3 md:text-sm md:has-[>svg]:px-2.5"
-                  iconClassName="hidden size-3.5 md:block"
+                  className="h-11 min-w-0 px-2 text-xs md:h-7 md:gap-1.5 md:px-3 md:text-sm"
+                  iconClassName="hidden size-4 md:block"
                 />
               </div>
-              <Button
-                size="icon-sm"
-                variant="ghost"
-                aria-label={r.name}
-                aria-expanded={expanded.has(r.id)}
-                aria-controls={`roster-content-${r.id}`}
-                onClick={() => toggleRoster(r.id)}
-                className="h-7 w-5 shrink-0 min-[360px]:w-7 md:hidden"
-              >
-                <ChevronDown
-                  aria-hidden="true"
-                  className={`size-4 text-primary transition-transform ${expanded.has(r.id) ? "rotate-180" : ""}`}
-                />
-              </Button>
             </div>
             <div
               id={`roster-content-${r.id}`}
