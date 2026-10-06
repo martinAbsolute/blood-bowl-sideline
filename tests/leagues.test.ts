@@ -355,6 +355,21 @@ async function setup(count = 2) {
   return { t, ids, coaches, admin, leagueId, entries, teams, match };
 }
 
+it("links a commissioner only when a Telegram username is available", async () => {
+  const s = await setup();
+  expect(
+    (await s.t.query(api.leagues.get, { leagueId: s.leagueId }))
+      .commissionerUsername,
+  ).toBeNull();
+  await s.t.run((ctx) =>
+    ctx.db.patch("users", s.ids.coaches[0], { telegramUsername: "coach_one" }),
+  );
+  expect(
+    (await s.t.query(api.leagues.get, { leagueId: s.leagueId }))
+      .commissionerUsername,
+  ).toBe("coach_one");
+});
+
 describe("league team renames", () => {
   it("publishes a commissioner's rename to the team page, library and league career together", async () => {
     const s = await setup();

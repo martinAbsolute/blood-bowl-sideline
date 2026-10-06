@@ -21,6 +21,7 @@ import {
   LayoutDashboard,
   Settings2,
   ShieldCheck,
+  Send,
   Trophy,
   Users,
 } from "lucide-react";
@@ -221,10 +222,28 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
               <h1 className="page-heading break-words">{league.name}</h1>
               <LeagueStatus status={league.status} />
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {league.commissionerName} ·{" "}
-              {t("leagueUx.roundDuration", { days: league.roundDays })}
-            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">
+                {t("leagueUi.commissioner")}:
+              </span>
+              {data.commissionerUsername ? (
+                <a
+                  href={`https://t.me/${data.commissionerUsername}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-primary underline-offset-4 hover:underline"
+                >
+                  {league.commissionerName}
+                  <Send className="size-3.5" aria-hidden="true" />
+                </a>
+              ) : (
+                <span>{league.commissionerName}</span>
+              )}
+              <span aria-hidden="true">·</span>
+              <span>
+                {t("leagueUx.roundDuration", { days: league.roundDays })}
+              </span>
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <ShareButton

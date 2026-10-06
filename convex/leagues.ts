@@ -426,6 +426,7 @@ export const get = query({
   args: { leagueId: v.id("leagues") },
   returns: v.object({
     league: schema.doc("leagues"),
+    commissionerUsername: v.union(v.string(), v.null()),
     entries: v.array(schema.doc("leagueTeams")),
     rounds: v.array(schema.doc("leagueRounds")),
     matches: v.array(schema.doc("leagueMatches")),
@@ -437,6 +438,7 @@ export const get = query({
   }),
   handler: async (ctx, { leagueId }) => {
     const league = await leagueDoc(ctx, leagueId);
+    const owner = await ctx.db.get("users", league.ownerId);
     const user = await currentUser(ctx);
     const entries = await leagueEntries(ctx, leagueId);
     const rounds = await ctx.db
@@ -512,6 +514,7 @@ export const get = query({
       );
     return {
       league,
+      commissionerUsername: owner?.telegramUsername ?? null,
       entries,
       rounds,
       matches,

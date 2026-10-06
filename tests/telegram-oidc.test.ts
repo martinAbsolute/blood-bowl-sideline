@@ -23,7 +23,7 @@ function sign(issuer = TELEGRAM_ISSUER, audience = clientId, expiry = "5m") {
   return new SignJWT({
     name: "Test coach",
     phone_number: "never-retain-this",
-    preferred_username: "test",
+    preferred_username: "test_coach",
   })
     .setProtectedHeader({ alg: "RS256", kid: "test" })
     .setSubject("opaque-telegram-subject")
@@ -37,6 +37,7 @@ it("verifies signed Telegram identity and projects only needed user fields", asy
   expect(await verifyTelegramIdToken(await sign(), clientId, keys)).toEqual({
     id: "opaque-telegram-subject",
     name: "Test coach",
+    telegramUsername: "test_coach",
   });
 });
 it("rejects an issuer or audience from a different service or bot", async () => {

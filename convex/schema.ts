@@ -25,6 +25,7 @@ export default defineSchema({
   users: defineTable({
     ...authTables.users.validator.fields,
     role: v.optional(roleValidator),
+    telegramUsername: v.optional(v.string()),
   })
     .index("email", ["email"])
     .index("phone", ["phone"]),

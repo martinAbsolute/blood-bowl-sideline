@@ -8,6 +8,7 @@ const telegramKeys = createRemoteJWKSet(
 const profileSchema = z.object({
   sub: z.string().min(1).max(200),
   name: z.string().max(200).optional(),
+  preferred_username: z.string().optional(),
   picture: z.url().optional(),
 });
 export async function verifyTelegramIdToken(
@@ -23,9 +24,13 @@ export async function verifyTelegramIdToken(
     clockTolerance: 5,
   });
   const p = profileSchema.parse(payload);
+  const username = p.preferred_username;
   return {
     id: p.sub,
     name: p.name ?? "Telegram coach",
+    ...(username && /^[A-Za-z0-9_]{1,32}$/.test(username)
+      ? { telegramUsername: username }
+      : {}),
     ...(p.picture ? { image: p.picture } : {}),
   };
 }

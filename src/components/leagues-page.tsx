@@ -14,6 +14,7 @@ import {
   Coins,
   Clock3,
   Search,
+  Pencil,
 } from "lucide-react";
 import { LibraryHeader } from "./library-header";
 import { LeagueDatePicker } from "./league-date-picker";
@@ -62,12 +63,15 @@ export function LeaguesPage() {
   const [roundDays, setRoundDays] = useState(14);
   const action = useLeagueAction();
   const busy = action.busy;
+  const treasuryValid =
+    treasury >= 100_000 && treasury <= 10_000_000 && treasury % 5_000 === 0;
   const dateFormat = new Intl.DateTimeFormat(
     locale === "uk" ? "uk-UA" : "en-GB",
     { dateStyle: "medium" },
   );
   async function createLeague(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!name.trim() || !treasuryValid) return;
     await action.run(async () => {
       const leagueId = await create({
         name: name.trim(),
@@ -103,34 +107,44 @@ export function LeaguesPage() {
         }}
       >
         <DialogContent
-          className="max-h-[90svh] overflow-y-auto p-5 sm:max-w-xl sm:p-6"
+          className="w-[min(36rem,calc(100%-2rem))] max-h-[90svh] overflow-y-auto p-5 sm:max-w-none sm:p-6"
           showCloseButton={!busy}
         >
-          <DialogHeader>
-            <div className="mb-2 flex size-11 items-center justify-center rounded-xl bg-secondary text-primary">
-              <Trophy className="size-5" aria-hidden="true" />
-            </div>
-            <DialogTitle className="text-xl font-semibold">
-              {t("leagueCreate")}
-            </DialogTitle>
-            <DialogDescription>{t("leagueUx.createIntro")}</DialogDescription>
-          </DialogHeader>
-          <form onSubmit={createLeague} className="space-y-5">
+          <form onSubmit={createLeague} className="space-y-4">
+            <DialogHeader className="border-b pb-4 pr-8">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-lg border bg-secondary text-primary">
+                  <Trophy className="size-5" aria-hidden="true" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <DialogDescription className="text-xs">
+                    {t("leagueCreate")}
+                  </DialogDescription>
+                  <DialogTitle className="flex min-w-0 items-center gap-2 text-xl font-semibold leading-tight">
+                    <span className="sr-only">{t("leagueName")}</span>
+                    <Input
+                      required
+                      disabled={busy}
+                      maxLength={100}
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                      autoComplete="off"
+                      spellCheck={false}
+                      aria-label={t("leagueName")}
+                      placeholder={t("leagueUx.namePlaceholder")}
+                      className="h-auto min-w-0 flex-1 rounded-none border-0 bg-transparent p-0 text-xl font-semibold shadow-none focus-visible:ring-0"
+                    />
+                    <Pencil
+                      className="size-3.5 shrink-0 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                  </DialogTitle>
+                </div>
+              </div>
+            </DialogHeader>
             <LeagueError message={action.error} />
-            <fieldset disabled={busy} className="space-y-5">
-              <LeagueField>
-                <span>{t("leagueName")}</span>
-                <Input
-                  required
-                  maxLength={100}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  autoComplete="off"
-                  placeholder={t("leagueUx.namePlaceholder")}
-                  className="h-11"
-                />
-              </LeagueField>
-              <div className="grid gap-4 sm:grid-cols-2">
+            <fieldset disabled={busy} className="space-y-4">
+              <div className="grid items-end gap-4 sm:grid-cols-2">
                 <LeagueDatePicker
                   value={startDate}
                   onChange={setStartDate}
@@ -148,14 +162,33 @@ export function LeaguesPage() {
               <LeagueField>
                 <span>{t("leagueUx.startingTreasury")}</span>
                 <Input
-                  type="number"
-                  min={100000}
-                  max={10000000}
-                  step={5000}
+                  type="text"
+                  inputMode="numeric"
                   required
-                  value={treasury || ""}
-                  onChange={(event) => setTreasury(Number(event.target.value))}
-                  className="h-11"
+                  value={treasury ? treasury.toLocaleString("uk-UA") : ""}
+                  onChange={(event) => {
+                    const input = event.currentTarget;
+                    const digitsBeforeCursor = input.value
+                      .slice(0, input.selectionStart ?? input.value.length)
+                      .replace(/\D/g, "").length;
+                    const digits = input.value.replace(/\D/g, "").slice(0, 8);
+                    setTreasury(digits ? Number(digits) : 0);
+                    requestAnimationFrame(() => {
+                      const formatted = input.value;
+                      let cursor = 0;
+                      let seen = 0;
+                      while (
+                        cursor < formatted.length &&
+                        seen < digitsBeforeCursor
+                      ) {
+                        if (/\d/.test(formatted[cursor])) seen++;
+                        cursor++;
+                      }
+                      input.setSelectionRange(cursor, cursor);
+                    });
+                  }}
+                  aria-invalid={!treasuryValid || undefined}
+                  className="h-11 font-mono tabular-nums"
                   aria-describedby="treasury-hint"
                 />
               </LeagueField>
@@ -165,11 +198,8 @@ export function LeaguesPage() {
               >
                 {t("leagueUx.treasuryHint")}
               </p>
-              <div className="rounded-lg bg-secondary/40 px-4 py-3 text-xs leading-relaxed text-muted-foreground">
-                {t("leagueUx.creationRules")}
-              </div>
             </fieldset>
-            <div className="flex justify-end gap-3 border-t pt-5">
+            <div className="flex justify-end gap-3 border-t pt-4">
               <Button
                 type="button"
                 variant="outline"
@@ -178,7 +208,10 @@ export function LeaguesPage() {
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={busy || !name.trim()}>
+              <Button
+                type="submit"
+                disabled={busy || !name.trim() || !treasuryValid}
+              >
                 {busy ? (
                   <LoaderCircle className="size-4 animate-spin" />
                 ) : (

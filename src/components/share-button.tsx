@@ -5,6 +5,7 @@ import { Share2 } from "lucide-react";
 import { shareTeamLink } from "@/lib/share-team";
 import { ActionButton } from "./action-button";
 import type { ComponentProps } from "react";
+import { toast } from "./ui/toast";
 
 export function ShareButton({
   path,
@@ -24,6 +25,12 @@ export function ShareButton({
       onClick={async () => {
         const result = await shareTeamLink(`${window.location.origin}${path}`);
         if (result === "cancelled") return false;
+        toast.add({
+          type: "success",
+          title: t(
+            result === "copied" ? "leagueUx.linkCopied" : "shareSucceeded",
+          ),
+        });
         onShared?.();
       }}
     >

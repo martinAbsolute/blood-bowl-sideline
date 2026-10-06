@@ -20,10 +20,10 @@ export function LeagueDatePicker({
   const t = useTranslations();
   const [open, setOpen] = useState(false);
   return (
-    <div className="space-y-2">
+    <div className="min-w-0 space-y-2">
       <span
         id="league-start-label"
-        className="text-xs font-medium text-muted-foreground"
+        className="block text-xs font-medium text-muted-foreground"
       >
         {t("leagueUx.plannedStart")}
       </span>
@@ -50,7 +50,10 @@ export function LeagueDatePicker({
               .replaceAll("/", ".")}
           </span>
         </PopoverTrigger>
-        <PopoverContent align="start" className="w-auto p-2">
+        <PopoverContent
+          align="start"
+          className="w-auto max-w-[calc(100vw-2rem)] p-2"
+        >
           <Calendar
             mode="single"
             required

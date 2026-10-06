@@ -85,7 +85,7 @@ export function LeagueTeamPicker({
           <ChevronDown className="size-4 shrink-0" />
         )}
       </DialogTrigger>
-      <DialogContent className="max-h-[90svh] gap-4 overflow-y-auto p-5 sm:max-w-xl sm:p-6">
+      <DialogContent className="flex h-[min(90svh,42rem)] flex-col gap-4 overflow-hidden p-5 sm:max-w-xl sm:p-6">
         <DialogHeader>
           <DialogTitle>{t("leagueUi.chooseTeam")}</DialogTitle>
           <DialogDescription>
@@ -104,94 +104,98 @@ export function LeagueTeamPicker({
             className="h-10 pl-9"
           />
         </div>
-        {status === "LoadingFirstPage" ? (
-          <div role="status" aria-label={t("loading")} className="space-y-3">
-            {[0, 1, 2].map((i) => (
-              <Skeleton key={i} className="h-20 w-full" />
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {visible.map((row) => {
-              const { team, leagueExperienced } = row;
-              const ready = canEnrollTeam(row, startingTreasury);
-              return (
-                <div
-                  key={team.uuid}
-                  className={`overflow-hidden rounded-xl border ${value === team.uuid && ready ? "border-primary bg-primary/5" : "bg-card"}`}
-                >
-                  <button
-                    type="button"
-                    aria-label={team.name}
-                    aria-pressed={ready && value === team.uuid}
-                    disabled={!ready || disabled}
-                    onClick={() => {
-                      onChange(team.uuid);
-                      setOpen(false);
-                    }}
-                    className="flex w-full items-center gap-3 p-4 text-left transition-colors enabled:hover:bg-secondary/50 disabled:cursor-not-allowed disabled:opacity-60"
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
+          {status === "LoadingFirstPage" ? (
+            <div role="status" aria-label={t("loading")} className="space-y-3">
+              {[0, 1, 2].map((i) => (
+                <Skeleton key={i} className="h-20 w-full" />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {visible.map((row) => {
+                const { team, leagueExperienced } = row;
+                const ready = canEnrollTeam(row, startingTreasury);
+                return (
+                  <div
+                    key={team.uuid}
+                    className={`overflow-hidden rounded-xl border shadow-sm ${value === team.uuid && ready ? "border-primary ring-2 ring-primary/30" : "border-border"}`}
                   >
-                    <RosterIcon
-                      rosterId={team.rosterId}
-                      className="size-10 shrink-0"
-                    />
-                    <span className="min-w-0 flex-1">
-                      <span className="block break-words font-semibold">
-                        {team.name}
+                    <button
+                      type="button"
+                      aria-label={team.name}
+                      aria-pressed={ready && value === team.uuid}
+                      disabled={!ready || disabled}
+                      onClick={() => {
+                        onChange(team.uuid);
+                        setOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 bg-primary px-3 py-3 text-left text-primary-foreground transition-colors enabled:hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-white/90">
+                        <RosterIcon
+                          rosterId={team.rosterId}
+                          className="size-9"
+                        />
                       </span>
-                      <span className="mt-1 block text-xs text-muted-foreground">
-                        {getRoster(team.rosterId)?.name} · {team.players.length}{" "}
-                        {t("players")} ·{" "}
-                        {(summarize(team).teamGold / 1000).toLocaleString(
-                          "uk-UA",
-                        )}
-                        k
+                      <span className="min-w-0 flex-1">
+                        <span className="display-font block truncate text-lg leading-6">
+                          {team.name}
+                        </span>
+                        <span className="mt-0.5 block truncate text-xs text-primary-foreground/75">
+                          {getRoster(team.rosterId)?.name} ·{" "}
+                          {team.players.length} {t("players")} ·{" "}
+                          {(summarize(team).teamGold / 1000).toLocaleString(
+                            "uk-UA",
+                          )}
+                          k
+                        </span>
                       </span>
-                    </span>
-                    {ready && (
-                      <span
-                        className={`flex size-6 shrink-0 items-center justify-center rounded-full border ${value === team.uuid ? "border-primary bg-primary text-primary-foreground" : "text-muted-foreground"}`}
-                      >
-                        <Check className="size-3.5" />
-                      </span>
+                      {ready && (
+                        <span
+                          className={`flex size-6 shrink-0 items-center justify-center rounded-full border ${value === team.uuid ? "border-lime-200 bg-lime-200 text-primary" : "border-white/40 text-white"}`}
+                        >
+                          <Check className="size-3.5" />
+                        </span>
+                      )}
+                    </button>
+                    {!ready && (
+                      <div className="space-y-2 border-t bg-secondary/20 px-4 py-3">
+                        <LeagueTeamIssues
+                          team={team}
+                          leagueExperienced={leagueExperienced}
+                          startingTreasury={startingTreasury}
+                        />
+                        <Link
+                          href={`/teams/${team.uuid}${leagueId ? `?league=${encodeURIComponent(leagueId)}` : ""}`}
+                          className="inline-flex min-h-8 items-center text-xs font-medium text-primary hover:underline"
+                        >
+                          {t("openTeam")}
+                        </Link>
+                      </div>
                     )}
-                  </button>
-                  {!ready && (
-                    <div className="space-y-2 border-t bg-secondary/20 px-4 py-3">
-                      <LeagueTeamIssues
-                        team={team}
-                        leagueExperienced={leagueExperienced}
-                        startingTreasury={startingTreasury}
-                      />
-                      <Link
-                        href={`/teams/${team.uuid}${leagueId ? `?league=${encodeURIComponent(leagueId)}` : ""}`}
-                        className="inline-flex min-h-8 items-center text-xs font-medium text-primary hover:underline"
-                      >
-                        {t("openTeam")}
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-            {!visible.length && (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                {t(search ? "noMatchingTeams" : "noTeams")}
-              </p>
-            )}
-          </div>
-        )}
-        {(status === "CanLoadMore" || status === "LoadingMore") && (
-          <Button
-            variant="outline"
-            disabled={status === "LoadingMore"}
-            onClick={loadMore}
-          >
-            {t(status === "LoadingMore" ? "loading" : "loadMore")}
-          </Button>
-        )}
+                  </div>
+                );
+              })}
+              {!visible.length && (
+                <p className="py-8 text-center text-sm text-muted-foreground">
+                  {t(search ? "noMatchingTeams" : "noTeams")}
+                </p>
+              )}
+            </div>
+          )}
+          {(status === "CanLoadMore" || status === "LoadingMore") && (
+            <Button
+              variant="outline"
+              disabled={status === "LoadingMore"}
+              onClick={loadMore}
+            >
+              {t(status === "LoadingMore" ? "loading" : "loadMore")}
+            </Button>
+          )}
+        </div>
         {leagueId && (
-          <div className="space-y-3 border-t pt-4">
+          <div className="shrink-0 space-y-3 border-t bg-popover pt-4">
             {creating ? (
               <>
                 <label
