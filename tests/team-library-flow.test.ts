@@ -744,6 +744,22 @@ it("loads the archive only when expanded and provides restore and confirmed perm
   );
   const archive = container.querySelector("#team-archive")!;
   expect(archive.querySelector("article a")).toBeNull();
+  expect(
+    archive.querySelector("article footer [role='status']")?.textContent,
+  ).toBe("archived");
+  expect(archive.querySelector("article span.rounded-full")?.textContent).toBe(
+    "draft",
+  );
+  expect(
+    archive
+      .querySelector("article footer .ml-auto")
+      ?.querySelectorAll("button"),
+  ).toHaveLength(2);
+  expect(
+    Array.from(archive.querySelectorAll("article footer button")).map(
+      (button) => button.getAttribute("aria-label"),
+    ),
+  ).toEqual(["restore Archived team", "deletePermanently Archived team"]);
   await act(async () =>
     archive
       .querySelector<HTMLButtonElement>('[aria-label="restore Archived team"]')!

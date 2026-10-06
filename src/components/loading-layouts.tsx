@@ -17,6 +17,7 @@ import { Card } from "./ui/card";
 import type { ReactNode } from "react";
 import { LeagueCardsLoading, UsersLoading } from "./list-loading";
 import { LeagueContentLoading } from "./league-content-loading";
+import { rosterChoices } from "@/lib/roster-ruleset";
 
 export type LoadingVariant =
   | "library"
@@ -195,6 +196,11 @@ export function LoadingLayout({
         ).length,
       ]
     : [5, 6];
+  const catalogChoices =
+    variant === "catalog" ? rosterChoices("bb2025-default") : [];
+  const catalogTiers = [
+    ...new Set(catalogChoices.map(({ tier }) => tier)),
+  ].filter((tier) => tier > 0);
   if (variant === "reference")
     return (
       <div
@@ -502,7 +508,7 @@ export function LoadingLayout({
     <div className="page-width py-8 sm:py-10" data-loading-layout={variant}>
       <div
         aria-hidden="true"
-        className="mb-7 flex flex-wrap items-start justify-between gap-5"
+        className={`${variant === "catalog" ? "mb-5 gap-4" : "mb-7 gap-5"} flex flex-wrap items-start justify-between`}
       >
         <div className="space-y-2">
           <Skeleton className="h-[30px] w-40 sm:h-[37.5px]" />
@@ -510,8 +516,24 @@ export function LoadingLayout({
             <Skeleton className="h-5 w-80 max-w-full" />
           )}
         </div>
-        {(variant === "leagues" || variant === "library") && (
-          <Skeleton className="h-11 w-36 sm:h-9" />
+        {variant === "catalog" ? (
+          <div className="flex max-w-full flex-wrap items-end gap-x-4 gap-y-2">
+            <div className="flex flex-wrap items-center gap-1 pb-1">
+              {catalogTiers.map((tier) => (
+                <Skeleton key={tier} className="h-[26px] w-14 rounded-full" />
+              ))}
+            </div>
+            <div className="flex w-full flex-col gap-1 text-xs sm:max-w-80">
+              <Skeleton className="h-4 w-14" />
+              <div className="relative mt-1 block min-w-0">
+                <Skeleton className="h-11 w-full sm:h-9" />
+              </div>
+            </div>
+          </div>
+        ) : (
+          (variant === "leagues" || variant === "library") && (
+            <Skeleton className="h-11 w-36 sm:h-9" />
+          )
         )}
       </div>
       {variant === "catalog" ? (
@@ -521,16 +543,25 @@ export function LoadingLayout({
             <div className="flex min-h-11 items-center lg:min-h-9">
               <Skeleton className="h-9 w-full" />
             </div>
-            <div className="scroll-fade-x mt-3 flex gap-1 overflow-hidden lg:flex-col lg:scroll-fade-none">
-              {Array.from({ length: 8 }, (_, index) => (
-                <Skeleton key={index} className="h-11 w-28 shrink-0 lg:h-7" />
+            <div className="scroll-fade-x mt-3 flex gap-1 overflow-hidden lg:max-h-[calc(100dvh-var(--site-content-top)-9.25rem)] lg:flex-col lg:overflow-y-auto lg:scroll-fade-none">
+              {catalogChoices.map(({ roster }) => (
+                <div
+                  key={roster.id}
+                  className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded px-2 py-1.5 lg:min-h-0 lg:py-1"
+                >
+                  <Skeleton className="size-4 shrink-0" />
+                  <Skeleton
+                    className="h-4"
+                    style={{ width: Math.min(150, roster.name.length * 6) }}
+                  />
+                </div>
               ))}
             </div>
           </aside>
           <div aria-hidden="true" className="min-w-0 space-y-5">
-            {[0, 1, 2].map((index) => (
+            {catalogChoices.slice(0, 3).map(({ roster }) => (
               <div
-                key={index}
+                key={roster.id}
                 className="overflow-hidden rounded-lg border bg-card"
               >
                 <div className="flex items-center gap-1 border-b bg-secondary/40 px-2 py-2 md:gap-2 md:px-3">
@@ -543,7 +574,11 @@ export function LoadingLayout({
                   </span>
                 </div>
                 <div className="hidden md:block">
-                  <TableLoading rows={4} title={false} framed={false} />
+                  <TableLoading
+                    rows={roster.players.length}
+                    title={false}
+                    framed={false}
+                  />
                 </div>
               </div>
             ))}

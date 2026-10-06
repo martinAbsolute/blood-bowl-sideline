@@ -1,7 +1,5 @@
 import { BuilderStart } from "@/components/builder-start";
 import { TeamCatalog } from "@/components/team-catalog";
-import { Suspense } from "react";
-import { WorkspaceLoading } from "@/components/workspace-loading";
 import { pageMetadata } from "@/lib/site-metadata";
 import { rosterRuleset } from "@/lib/roster-ruleset";
 export const metadata = pageMetadata(
@@ -9,21 +7,7 @@ export const metadata = pageMetadata(
   "/rosters",
   "Explore all 31 Blood Bowl rosters: player stats, skills, star players and team costs. Choose your roster and build a team for your next game.",
 );
-export default function Page(props: {
-  searchParams: Promise<{
-    roster?: string;
-    draft?: string;
-    new?: string;
-    ruleset?: string | string[];
-  }>;
-}) {
-  return (
-    <Suspense fallback={<WorkspaceLoading variant="catalog" />}>
-      <RosterPage {...props} />
-    </Suspense>
-  );
-}
-async function RosterPage({
+export default async function Page({
   searchParams,
 }: {
   searchParams: Promise<{

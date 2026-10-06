@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "gt-next";
 import {
   ArrowUpRight,
+  Archive,
   Check,
   CloudCheck,
   CloudOff,
@@ -23,7 +24,6 @@ export function TeamCard({
   team,
   href,
   action,
-  primaryAction,
   archived,
   saveState,
   selection,
@@ -34,7 +34,6 @@ export function TeamCard({
   team: Team;
   href?: string;
   action?: ReactNode;
-  primaryAction?: ReactNode;
   archived?: boolean;
   saveState?: "cloud" | "device" | "pending" | "error";
   selection?: { disabled: boolean; selected: boolean; onSelect: () => void };
@@ -58,20 +57,18 @@ export function TeamCard({
           </span>
           <div className="flex shrink-0 items-center gap-3">
             <span
-              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${legal && !archived ? "bg-lime-200 text-primary" : "bg-white/15 text-white"}`}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${legal ? "bg-lime-200 text-primary" : "bg-white/15 text-white"}`}
             >
               {t(
                 leagueLocked
                   ? "leagueUi.teamLocked"
                   : leagueExperienced
                     ? "leagueUi.experiencedTeam"
-                    : archived
-                      ? "archived"
-                      : selection?.disabled
-                        ? "leagueUi.ineligibleTeam"
-                        : legal
-                          ? "ready"
-                          : "draft",
+                    : selection?.disabled
+                      ? "leagueUi.ineligibleTeam"
+                      : legal
+                        ? "ready"
+                        : "draft",
               )}
             </span>
             {href && !selection && (
@@ -148,8 +145,9 @@ export function TeamCard({
       </div>
     </>
   );
-  const SaveIcon =
-    saveState === "cloud"
+  const SaveIcon = archived
+    ? Archive
+    : saveState === "cloud"
       ? CloudCheck
       : saveState === "device"
         ? FileText
@@ -192,8 +190,8 @@ export function TeamCard({
             {footer}
           </footer>
         ) : saveState ? (
-          <footer className="flex min-h-14 items-center border-t bg-secondary/15 px-5 py-2 [&>div]:w-full [&>div>button]:ml-auto">
-            <div className="flex items-center gap-2">
+          <footer className="flex min-h-14 items-center border-t bg-secondary/15 px-5 py-2">
+            <div className="flex w-full items-center gap-2">
               <span
                 role="status"
                 className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
@@ -202,19 +200,20 @@ export function TeamCard({
                   className={`size-3.5 ${saveState === "pending" ? "animate-spin" : ""}`}
                 />
                 {t(
-                  saveState === "cloud"
-                    ? "savedCloud"
-                    : saveState === "device"
-                      ? "savedInDrafts"
-                      : saveState === "pending"
-                        ? "saving"
-                        : "saveStatusError",
+                  archived
+                    ? "archived"
+                    : saveState === "cloud"
+                      ? "savedCloud"
+                      : saveState === "device"
+                        ? "savedInDrafts"
+                        : saveState === "pending"
+                          ? "saving"
+                          : "saveStatusError",
                 )}
               </span>
-              {primaryAction && (
-                <span className="ml-auto">{primaryAction}</span>
+              {action && (
+                <div className="ml-auto flex items-center gap-2">{action}</div>
               )}
-              {action}
             </div>
           </footer>
         ) : null}

@@ -51,6 +51,21 @@ describe("provider-free loading boundaries", () => {
     expect(shell).toContain('data-loading-layout="library"');
   });
 
+  it("aligns the catalog loading header and shows its static filters", () => {
+    const html = renderToStaticMarkup(
+      createElement(LoadingLayout, {
+        variant: "catalog",
+        label: "Loading…",
+      }),
+    );
+    expect(html).toContain("mb-5 gap-4");
+    expect(html).toContain("catalog-layout");
+    expect(html).toContain(
+      "flex max-w-full flex-wrap items-end gap-x-4 gap-y-2",
+    );
+    expect(html).toContain("sm:h-9");
+  });
+
   it("renders recovered draft geometry without mounting editor controls or providers", () => {
     const team = { ...newTeam("local-draft", "human"), name: "Recovered team" };
     const html = renderToStaticMarkup(

@@ -44,7 +44,7 @@ function Catalog({ rulesetId }: { rulesetId: RulesetId }) {
   }, []);
   return (
     <div className="page-width py-8 sm:py-10">
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <h1 className="page-heading">
           {t("rosters")}
           <BrandPeriod />

@@ -565,51 +565,53 @@ function ArchivedTeams({
         </p>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {visibleResults.map(({ team }) => (
+          {visibleResults.map(({ team, leagueLocked, leagueExperienced }) => (
             <TeamCard
               key={team.uuid}
               team={team}
               archived
               saveState="cloud"
-              primaryAction={
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        disabled={busy !== null}
-                        aria-label={`${t("restore")} ${team.name}`}
-                        onClick={() => onRestore(team)}
-                      />
-                    }
-                  >
-                    {busy === team.uuid ? (
-                      <LoaderCircle className="size-4 animate-spin" />
-                    ) : (
-                      <Undo2 className="size-4" />
-                    )}
-                  </TooltipTrigger>
-                  <TooltipContent>{t("restoreLabel")}</TooltipContent>
-                </Tooltip>
-              }
+              leagueLocked={leagueLocked}
+              leagueExperienced={leagueExperienced}
               action={
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        disabled={busy !== null}
-                        aria-label={`${t("deletePermanently")} ${team.name}`}
-                        onClick={() => onDelete(team)}
-                      />
-                    }
-                  >
-                    <Trash2 className="size-4" />
-                  </TooltipTrigger>
-                  <TooltipContent>{t("deleteLabel")}</TooltipContent>
-                </Tooltip>
+                <>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={busy !== null}
+                          aria-label={`${t("restore")} ${team.name}`}
+                          onClick={() => onRestore(team)}
+                        />
+                      }
+                    >
+                      {busy === team.uuid ? (
+                        <LoaderCircle className="size-4 animate-spin" />
+                      ) : (
+                        <Undo2 className="size-4" />
+                      )}
+                    </TooltipTrigger>
+                    <TooltipContent>{t("restoreLabel")}</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={busy !== null}
+                          aria-label={`${t("deletePermanently")} ${team.name}`}
+                          onClick={() => onDelete(team)}
+                        />
+                      }
+                    >
+                      <Trash2 className="size-4" />
+                    </TooltipTrigger>
+                    <TooltipContent>{t("deleteLabel")}</TooltipContent>
+                  </Tooltip>
+                </>
               }
             />
           ))}
