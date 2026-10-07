@@ -9,10 +9,12 @@ export function LeagueNavigation<T extends string>({
   value,
   onChange,
   items,
+  vertical = false,
 }: {
   label: string;
   value: T;
   onChange: (value: T) => void;
+  vertical?: boolean;
   items: {
     value: T;
     label: string;
@@ -26,8 +28,8 @@ export function LeagueNavigation<T extends string>({
         aria-label={label}
         value={value}
         onChange={(event) => onChange(event.target.value as T)}
-        wrapperClassName="md:hidden"
-        className="h-12 bg-card font-semibold"
+        wrapperClassName={vertical ? "lg:hidden" : "md:hidden"}
+        className="h-11 bg-card font-medium"
       >
         {items.map((item) => (
           <option key={item.value} value={item.value}>
@@ -36,19 +38,25 @@ export function LeagueNavigation<T extends string>({
           </option>
         ))}
       </LeagueSelect>
-      <div className="hidden flex-wrap gap-1 rounded-xl border bg-card p-1 md:flex">
+      <div
+        className={
+          vertical
+            ? "hidden flex-col gap-1 lg:flex"
+            : "hidden flex-wrap gap-1 border-b pb-2 md:flex"
+        }
+      >
         {items.map(({ value: key, label: text, icon: Icon, badge }) => (
           <button
             key={key}
             type="button"
             aria-current={value === key ? "page" : undefined}
             onClick={() => onChange(key)}
-            className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-ring ${value === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
+            className={`inline-flex min-h-11 items-center gap-2 rounded-md border px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-ring ${value === key ? "border-border bg-secondary text-primary" : "border-transparent text-muted-foreground hover:bg-secondary/50 hover:text-foreground"}`}
           >
-            {Icon && <Icon className="size-4" />}
-            {text}
+            {Icon && <Icon className="size-4 shrink-0" />}
+            <span className="min-w-0 flex-1">{text}</span>
             {!!badge && (
-              <span className="rounded bg-current/10 px-1.5 text-xs tabular-nums">
+              <span className="rounded border border-current/10 bg-card px-1.5 text-xs tabular-nums">
                 {badge}
               </span>
             )}

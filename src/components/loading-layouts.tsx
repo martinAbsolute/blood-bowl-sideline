@@ -15,8 +15,11 @@ import { ArrowLeft, Copy, Printer, ChevronDown, Ellipsis } from "lucide-react";
 import { BookOpen, Flag, Shield, Trophy } from "lucide-react";
 import { Card } from "./ui/card";
 import type { ReactNode } from "react";
-import { LeagueCardsLoading, UsersLoading } from "./list-loading";
-import { LeagueContentLoading } from "./league-content-loading";
+import { UsersLoading } from "./list-loading";
+import {
+  LeagueContentLoading,
+  LeagueDirectoryLoading,
+} from "./league-content-loading";
 import { rosterChoices } from "@/lib/roster-ruleset";
 
 export type LoadingVariant =
@@ -26,6 +29,7 @@ export type LoadingVariant =
   | "reference"
   | "leagues"
   | "league"
+  | "league-reference"
   | "league-match"
   | "league-career"
   | "users";
@@ -446,61 +450,17 @@ export function LoadingLayout({
         </div>
       </div>
     );
-  if (variant === "league")
+  if (
+    variant === "leagues" ||
+    variant === "league" ||
+    variant === "league-reference"
+  )
     return (
-      <div
-        className="page-width space-y-4 py-5 sm:py-6"
-        role="status"
-        data-loading-layout={variant}
-      >
-        <span className="sr-only">{label}</span>
-        <div aria-hidden="true" className="mb-3 flex min-h-8 items-center">
-          <ArrowLeft className="mr-2 size-4 text-muted-foreground" />
-          <Skeleton className="h-4 w-24" />
-        </div>
-        <div
-          aria-hidden="true"
-          className="overflow-hidden rounded-xl border bg-card"
-        >
-          <div className="flex flex-wrap items-start justify-between gap-4 p-5 sm:p-6">
-            <div className="min-w-0 flex-1 basis-64">
-              <div className="flex flex-wrap items-center gap-3">
-                <Skeleton className="h-[30px] w-72 max-w-full sm:h-[37.5px]" />
-                <Skeleton className="h-6 w-24" />
-              </div>
-              <Skeleton className="mt-2 h-5 w-56 max-w-full" />
-            </div>
-            <Skeleton className="h-10 w-24" />
-          </div>
-          <div className="flex gap-5 border-t bg-secondary/25 px-5 py-3">
-            <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-4 w-28" />
-          </div>
-        </div>
-        <div aria-hidden="true">
-          <Skeleton className="h-12 w-full md:hidden" />
-          <div className="hidden flex-wrap gap-1 rounded-xl border bg-card p-1 md:flex">
-            {[0, 1, 2, 3].map((index) => (
-              <Skeleton key={index} className="h-11 w-28" />
-            ))}
-          </div>
-        </div>
-        <div
-          aria-hidden="true"
-          className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]"
-        >
-          <div className="space-y-4 rounded-xl border bg-card p-5">
-            <Skeleton className="h-6 w-40" />
-            {[0, 1, 2, 3].map((index) => (
-              <Skeleton key={index} className="h-12 w-full" />
-            ))}
-          </div>
-          <div className="space-y-4 rounded-xl border bg-card p-5">
-            <Skeleton className="h-5 w-32" />
-            <Skeleton className="h-16 w-full" />
-          </div>
-        </div>
-      </div>
+      <LeagueDirectoryLoading
+        label={label}
+        workspace={variant === "league"}
+        reference={variant === "league-reference"}
+      />
     );
   // The locale is still resolving here, so translated headings are placeholders.
   // Once providers resolve, the page keeps its real headings and static controls.
@@ -531,9 +491,7 @@ export function LoadingLayout({
             </div>
           </div>
         ) : (
-          (variant === "leagues" || variant === "library") && (
-            <Skeleton className="h-11 w-36 sm:h-9" />
-          )
+          variant === "library" && <Skeleton className="h-11 w-36 sm:h-9" />
         )}
       </div>
       {variant === "catalog" ? (
@@ -590,29 +548,13 @@ export function LoadingLayout({
         <>
           <div
             aria-hidden="true"
-            className={
-              variant === "leagues"
-                ? "mb-7 flex flex-wrap items-center gap-3"
-                : "mb-7 grid grid-cols-2 gap-3 lg:grid-cols-[minmax(200px,1fr)_180px_210px]"
-            }
+            className="mb-7 grid grid-cols-2 gap-3 lg:grid-cols-[minmax(200px,1fr)_180px_210px]"
           >
-            <Skeleton
-              className={
-                variant === "leagues"
-                  ? "h-10 min-w-48 flex-1"
-                  : "col-span-2 h-10 lg:col-span-1"
-              }
-            />
-            <Skeleton
-              className={variant === "leagues" ? "h-10 w-40" : "h-10"}
-            />
-            {variant !== "leagues" && <Skeleton className="h-10" />}
+            <Skeleton className="col-span-2 h-10 lg:col-span-1" />
+            <Skeleton className="h-10" />
+            <Skeleton className="h-10" />
           </div>
-          {variant === "leagues" ? (
-            <LeagueCardsLoading label={label} />
-          ) : (
-            <LibraryCardsLoading label={label} />
-          )}
+          <LibraryCardsLoading label={label} />
         </>
       )}
     </div>

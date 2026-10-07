@@ -1,5 +1,6 @@
 "use client";
 import { useContentTitle } from "@/lib/use-content-title";
+import { LeagueEmptyState, LeaguePageHeader } from "./league-layout";
 
 import { useRef, useState } from "react";
 import { LeagueEvents } from "./league-events";
@@ -213,7 +214,11 @@ export function LeagueMatch({
     return (
       <div className="page-width py-8">
         <LeagueBack />
-        <p>{t("leagueUi.notFound")}</p>
+        <LeagueEmptyState
+          icon={<LockKeyhole className="size-6" />}
+          title={t("leagueUi.notFound")}
+          description={t("leagueUx.notFoundHint")}
+        />
       </div>
     );
 
@@ -285,23 +290,26 @@ export function LeagueMatch({
   ];
   const ready = checks.every((check) => check.ready);
   return (
-    <div className="page-width space-y-4 py-5 sm:py-6">
-      <header>
-        <LeagueBack href={base}>{league.name}</LeagueBack>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="page-heading">{t("leagueUi.matchReport")}</h1>
-          <LeagueStatus status={match.status} />
-        </div>
-        {(match.administrativeResult || locked) && (
-          <p className="mt-2 text-xs text-muted-foreground">
+    <div className="page-width space-y-5 py-6 sm:py-8">
+      <LeagueBack href={base}>{league.name}</LeagueBack>
+      <LeaguePageHeader
+        title={t("leagueUi.matchReport")}
+        eyebrow={league.name}
+        status={<LeagueStatus status={match.status} />}
+        description={
+          <p>
             {t(
               match.administrativeResult
                 ? "leagueUi.administrativeHint"
-                : "leagueUi.lockedHint",
+                : locked
+                  ? "leagueUi.lockedHint"
+                  : data.canEdit
+                    ? "leagueUx.reportCoachHint"
+                    : "leagueUx.reportSpectatorHint",
             )}
           </p>
-        )}
-      </header>
+        }
+      />
       <LeagueError message={action.error || syncError} />
       {syncError && (
         <Button
@@ -314,7 +322,7 @@ export function LeagueMatch({
           {t("leagueUx.reportRetry")}
         </Button>
       )}
-      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 rounded-lg border bg-card p-3 sm:gap-4 sm:p-4">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 rounded-lg border bg-secondary/35 p-4 sm:gap-5 sm:p-6">
         {[home, away].map(
           (entry, index) =>
             entry && (
@@ -324,9 +332,9 @@ export function LeagueMatch({
               >
                 <RosterIcon
                   rosterId={entry.team.rosterId}
-                  className={`mb-1 size-6 ${index ? "ml-auto" : ""}`}
+                  className={`mb-2 size-9 sm:size-11 ${index ? "ml-auto" : ""}`}
                 />
-                <p className="sr-only">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
                   {t(index ? "leagueUi.away" : "leagueUi.home")}
                 </p>
                 <Link
@@ -353,12 +361,19 @@ export function LeagueMatch({
               </div>
             ),
         )}
-        <div className="col-start-2 row-start-1 text-center font-mono text-2xl font-semibold tabular-nums sm:text-4xl">
+        {!away && (
+          <p className="col-start-3 row-start-1 text-right text-sm text-muted-foreground">
+            {t("leagueUi.bye")}
+          </p>
+        )}
+        <div className="col-start-2 row-start-1 rounded-lg border bg-card px-3 py-2 text-center font-mono text-xl font-semibold tabular-nums sm:px-5 sm:py-3 sm:text-4xl">
           {match.administrativeResult ? (
             <span className="text-sm">
               {t("leagueUi." + match.administrativeResult)}
             </span>
-          ) : match.status === "scheduled" ? (
+          ) : match.status === "bye" ? (
+            "—"
+          ) : match.status === "scheduled" || match.status === "void" ? (
             "— : —"
           ) : (
             `${match.scoreHome} : ${match.scoreAway}`
@@ -387,11 +402,12 @@ export function LeagueMatch({
         )}
       {match.status !== "scheduled" &&
         match.status !== "void" &&
+        match.status !== "bye" &&
         !match.administrativeResult && (
           <>
             <nav
               aria-label={t("leagueUi.matchReport")}
-              className="grid grid-cols-3 gap-1 rounded-xl border bg-card p-1"
+              className="grid grid-cols-3 gap-1 border-b pb-2"
             >
               {steps.map((value, index) => (
                 <button
@@ -401,7 +417,7 @@ export function LeagueMatch({
                   aria-controls={`report-${value}`}
                   disabled={value !== "pre-game" && !canProceed}
                   onClick={() => setStep(value)}
-                  className={`flex min-h-10 items-center justify-center gap-1 rounded-lg px-2 text-xs font-medium focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-45 sm:gap-2 sm:text-sm ${step === value ? "bg-primary text-primary-foreground" : "text-muted-foreground enabled:hover:bg-secondary enabled:hover:text-foreground"}`}
+                  className={`flex min-h-11 items-center justify-center gap-1 rounded-md border px-2 text-xs font-medium focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-45 sm:gap-2 sm:text-sm ${step === value ? "border-border bg-secondary text-primary" : "border-transparent text-muted-foreground enabled:hover:bg-secondary/50 enabled:hover:text-foreground"}`}
                 >
                   <span className="hidden size-6 shrink-0 items-center justify-center rounded-full border border-current/30 text-xs sm:flex">
                     {index + 1}

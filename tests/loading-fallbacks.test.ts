@@ -14,7 +14,7 @@ describe("provider-free loading boundaries", () => {
     ["/rosters", "catalog"],
     ["/rosters/human", "reference"],
     ["/leagues", "leagues"],
-    ["/leagues/old-world-classic", "reference"],
+    ["/leagues/old-world-classic", "league-reference"],
     ["/leagues/manage/season", "league"],
     ["/leagues/manage/season/matches/match", "league-match"],
     ["/leagues/manage/season/teams/team", "league-career"],

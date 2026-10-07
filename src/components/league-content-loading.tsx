@@ -1,14 +1,93 @@
 import { Skeleton } from "./ui/skeleton";
+import { LeagueCardsLoading } from "./list-loading";
+
+export function LeagueDirectoryLoading({
+  label,
+  workspace = false,
+  reference = false,
+}: {
+  label: string;
+  workspace?: boolean;
+  reference?: boolean;
+}) {
+  const detail = workspace || reference;
+  return (
+    <div
+      className={`page-width space-y-5 ${detail ? "py-6 sm:py-8" : "py-8 sm:py-10"}`}
+      role="status"
+      aria-label={label}
+      data-loading-layout={
+        reference ? "league-reference" : workspace ? "league" : "leagues"
+      }
+    >
+      <span className="sr-only">{label}</span>
+      <div aria-hidden="true">
+        {detail && <BackLoading />}
+        <div
+          className={
+            detail
+              ? "rounded-lg border bg-primary p-5 [&_[data-slot=skeleton]]:bg-white/15"
+              : "mb-7"
+          }
+        >
+          <div className="flex items-start gap-3">
+            {detail && <Skeleton className="size-12 shrink-0" />}
+            <div className="min-w-0 flex-1 space-y-2">
+              <Skeleton className="h-8 w-60 max-w-full" />
+              <Skeleton className="h-4 w-80 max-w-full" />
+            </div>
+            <Skeleton className="h-9 w-24 shrink-0" />
+          </div>
+          {detail && <Skeleton className="mt-5 h-4 w-2/3" />}
+        </div>
+      </div>
+      <div className="catalog-layout">
+        <aside aria-hidden="true" className="space-y-3">
+          <Skeleton className="h-11 w-full" />
+          <div className="hidden space-y-2 lg:block">
+            {[0, 1, 2, 3].map((index) => (
+              <Skeleton key={index} className="h-10 w-full" />
+            ))}
+          </div>
+        </aside>
+        <div className="min-w-0 space-y-3">
+          <Skeleton aria-hidden="true" className="h-5 w-36" />
+          {detail ? (
+            <div aria-hidden="true" className="space-y-4">
+              {[0, 1].map((index) => (
+                <div
+                  key={index}
+                  className="overflow-hidden rounded-lg border bg-card"
+                >
+                  <div className="border-b bg-secondary/35 p-4">
+                    <Skeleton className="h-5 w-40" />
+                  </div>
+                  <div className="space-y-3 p-4">
+                    <Skeleton className="h-5 w-2/3" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-10 w-32" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <LeagueCardsLoading label={label} />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function BackLoading() {
-  return <Skeleton className="mb-3 h-8 w-36" />;
+  return <Skeleton className="mb-5 h-8 w-36" />;
 }
 
 function NavigationLoading() {
   return (
     <div>
-      <Skeleton className="h-12 w-full md:hidden" />
-      <div className="hidden flex-wrap gap-1 rounded-xl border bg-card p-1 md:flex">
+      <Skeleton className="h-11 w-full md:hidden" />
+      <div className="hidden flex-wrap gap-1 border-b pb-2 md:flex">
         {[0, 1, 2].map((index) => (
           <Skeleton key={index} className="h-11 w-28" />
         ))}
@@ -28,7 +107,7 @@ export function LeagueContentLoading({
   const match = variant === "league-match";
   return (
     <div
-      className="page-width space-y-4 py-5 sm:py-6"
+      className="page-width space-y-5 py-6 sm:py-8"
       role="status"
       aria-label={label}
       data-loading-layout={variant}
@@ -39,12 +118,12 @@ export function LeagueContentLoading({
           <>
             <header>
               <BackLoading />
-              <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-primary p-5 [&_[data-slot=skeleton]]:bg-white/15">
                 <Skeleton className="h-[30px] w-60 max-w-full sm:h-[37.5px]" />
                 <Skeleton className="h-6 w-24" />
               </div>
             </header>
-            <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 rounded-lg border bg-card p-3 sm:gap-4 sm:p-4">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 rounded-lg border bg-secondary/35 p-4 sm:gap-5 sm:p-6">
               {[0, 1, 2].map((index) =>
                 index === 1 ? (
                   <Skeleton key={index} className="h-8 w-20 sm:h-10" />
@@ -53,14 +132,14 @@ export function LeagueContentLoading({
                     key={index}
                     className={`min-w-0 space-y-2 ${index === 2 ? "flex flex-col items-end" : ""}`}
                   >
-                    <Skeleton className="size-6" />
+                    <Skeleton className="size-9 sm:size-11" />
                     <Skeleton className="h-5 w-40 max-w-full sm:h-7" />
                     <Skeleton className="h-4 w-32 max-w-full" />
                   </div>
                 ),
               )}
             </div>
-            <div className="grid grid-cols-3 gap-1 rounded-xl border bg-card p-1">
+            <div className="grid grid-cols-3 gap-1 border-b pb-2">
               {[0, 1, 2].map((index) => (
                 <Skeleton key={index} className="h-10 w-full" />
               ))}
@@ -91,8 +170,8 @@ export function LeagueContentLoading({
           </>
         ) : (
           <>
-            <header className="rounded-lg border bg-card p-3 sm:p-4">
-              <BackLoading />
+            <BackLoading />
+            <header className="rounded-lg border bg-primary p-4 sm:p-5 [&_[data-slot=skeleton]]:bg-white/15">
               <div className="flex items-start gap-4">
                 <Skeleton className="size-11 shrink-0" />
                 <div className="min-w-0 flex-1">

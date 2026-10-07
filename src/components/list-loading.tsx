@@ -21,29 +21,27 @@ export function HistoryLoading({ label }: { label: string }) {
 
 export function LeagueCardsLoading({ label }: { label: string }) {
   return (
-    <div role="status" className="grid gap-5">
+    <div role="status" className="grid gap-4 xl:grid-cols-2">
       <span className="sr-only">{label}</span>
       {[0, 1, 2].map((index) => (
         <Card
           key={index}
           aria-hidden="true"
-          className="grid gap-5 rounded-2xl p-5 shadow-sm sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-6"
+          className="gap-0 overflow-hidden rounded-lg py-0 shadow-none"
         >
-          <div className="flex items-center gap-4">
-            <Skeleton className="size-14 shrink-0 rounded-2xl" />
+          <div className="flex items-start gap-3 bg-primary p-4 [&_[data-slot=skeleton]]:bg-white/15">
+            <Skeleton className="size-10 shrink-0 rounded-lg" />
             <div className="min-w-0 flex-1 space-y-2">
-              <Skeleton className="h-6 w-48 max-w-full" />
-              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-5 w-48 max-w-full" />
+              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-5 w-24" />
             </div>
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <Skeleton className="h-6 w-24 rounded-full" />
             <Skeleton className="size-4" />
           </div>
-          <div className="flex flex-wrap gap-x-8 gap-y-3 border-t pt-4 sm:col-span-2">
-            <Skeleton className="h-5 w-28" />
-            <Skeleton className="h-5 w-32" />
-            <Skeleton className="h-5 w-40" />
+          <div className="flex flex-wrap gap-x-5 gap-y-2 border-t bg-secondary/25 px-4 py-2.5">
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-40" />
           </div>
         </Card>
       ))}

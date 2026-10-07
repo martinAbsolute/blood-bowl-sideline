@@ -38,6 +38,7 @@ import { Input } from "./ui/input";
 import { LeagueField, LeagueSelect } from "./league-field";
 import { LeagueTeamPicker } from "./league-team-picker";
 import { LeagueNavigation } from "./league-navigation";
+import { LeagueEmptyState, LeaguePageHeader } from "./league-layout";
 import { PlayerIcon, RosterIcon } from "./player-icon";
 import { SkillList, TableSkills } from "./skill-box";
 import { LeagueHelp } from "./league-help";
@@ -317,7 +318,11 @@ export function LeagueCareer({
     return (
       <div className="page-width py-8">
         <LeagueBack />
-        <p>{t("leagueUi.notFound")}</p>
+        <LeagueEmptyState
+          icon={<Users className="size-6" />}
+          title={t("leagueUi.notFound")}
+          description={t("leagueUx.notFoundHint")}
+        />
       </div>
     );
   const { entry, league, players } = data;
@@ -353,45 +358,45 @@ export function LeagueCareer({
         .includes(playerSearch.trim().toLocaleLowerCase()),
   );
   return (
-    <div className="page-width space-y-4 py-5 sm:py-6">
-      <header className="rounded-lg border bg-card p-3 sm:p-4">
-        <LeagueBack href={`/leagues/manage/${leagueId}`}>
-          {league.name}
-        </LeagueBack>
-        <div className="flex items-start gap-4">
-          <RosterIcon
-            rosterId={entry.team.rosterId}
-            className="size-11 shrink-0"
-          />
-          <div className="min-w-0">
-            <h1 className="page-heading break-words">{entry.team.name}</h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {entry.coachName} · {roster?.name}
-            </p>
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-              <span className="inline-flex items-center gap-2">
-                <Coins className="size-4" />
-                {t("leagueUi.treasury")}:{" "}
-                {(entry.treasury / 1000).toLocaleString()}k GP
-              </span>
-              <span>
-                {active.length} / 16 {t("players")}
-              </span>
-              {data.canCommission && (
-                <span className="inline-flex items-center gap-2 text-primary">
-                  <ShieldCheck className="size-4" />
-                  {t("leagueUi.commissioner")}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="page-width space-y-5 py-6 sm:py-8">
+      <LeagueBack href={`/leagues/manage/${leagueId}`}>
+        {league.name}
+      </LeagueBack>
+      <LeaguePageHeader
+        title={entry.team.name}
+        eyebrow={t("leagueUx.officialCareer")}
+        status={
+          entry.withdrawn ? <LeagueStatus status="withdrawn" /> : undefined
+        }
+        icon={<RosterIcon rosterId={entry.team.rosterId} className="size-9" />}
+        description={
+          <p>
+            {entry.coachName} · {roster?.name}
+          </p>
+        }
+      >
+        <span className="inline-flex items-center gap-2">
+          <Coins className="size-4" />
+          {t("leagueUi.treasury")}: {(entry.treasury / 1000).toLocaleString()}k
+          GP
+        </span>
+        <span>
+          {active.length} / 16 {t("players")}
+        </span>
+        {data.canCommission && (
+          <span className="inline-flex items-center gap-2 text-primary">
+            <ShieldCheck className="size-4" />
+            {t("leagueUi.commissioner")}
+          </span>
+        )}
+        {!data.canManage && !data.canCommission && (
+          <span>{t("leagueUx.readOnlyCareer")}</span>
+        )}
+      </LeaguePageHeader>
       <LeagueError message={action.error} />
-      {entry.withdrawn && <LeagueStatus status="withdrawn" />}
       {data.canManage && entry.postGamePending && (
         <section
-          className="rounded-xl border border-primary/25 bg-primary/5 p-5"
+          className="rounded-lg border border-primary/20 bg-secondary/40 p-4"
           aria-label={t("leagueUx.careerPostgameTitle")}
         >
           <div className="flex flex-wrap items-center justify-between gap-4">

@@ -48,7 +48,7 @@ vi.mock("convex/react", () => ({
     return {
       league: { _id: "league", name: "League" },
       home,
-      away,
+      away: state.status === "bye" ? null : away,
       viewerId: state.viewerId,
       canEdit: true,
       canCommission: true,
@@ -232,6 +232,25 @@ async function input(
 async function click(element: HTMLElement) {
   await act(async () => element.click());
 }
+
+it("shows a bye without match-report steps or editable game fields", async () => {
+  state.status = "bye";
+  const view = await setup();
+  try {
+    expect(view.container.textContent).toContain("Home Team");
+    expect(view.container.textContent).toContain("leagueUi.bye");
+    expect(view.container.textContent).not.toContain("Away Team");
+    expect(
+      view.container.querySelector('[aria-label="leagueUi.matchReport"]'),
+    ).toBeNull();
+    expect(view.container.querySelector("#report-pre-game")).toBeNull();
+    expect(view.container.querySelector("#report-game")).toBeNull();
+    expect(view.container.querySelector("#report-post-game")).toBeNull();
+    expect(state.calls).toHaveLength(0);
+  } finally {
+    await view.close();
+  }
+});
 
 it("records an event instead of editing counters and shows the review timeline", async () => {
   const view = await setup();

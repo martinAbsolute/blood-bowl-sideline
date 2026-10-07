@@ -10,7 +10,7 @@ export function loadingVariantForPath(pathname: string): LoadingVariant {
   if (/^\/leagues\/manage\/[^/]+\/teams\//.test(pathname))
     return "league-career";
   if (pathname.startsWith("/leagues/manage/")) return "league";
-  if (/^\/leagues\/[^/]+/.test(pathname)) return "reference";
+  if (/^\/leagues\/[^/]+/.test(pathname)) return "league-reference";
   if (pathname.startsWith("/leagues")) return "leagues";
   if (pathname === "/users") return "users";
   if (/^\/rosters\/[^/]+/.test(pathname)) return "reference";

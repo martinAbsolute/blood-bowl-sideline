@@ -15,15 +15,21 @@ import {
   Clock3,
   Search,
   Pencil,
+  Flag,
+  Archive,
+  LayoutList,
+  BookOpen,
 } from "lucide-react";
 import { LibraryHeader } from "./library-header";
 import { LeagueDatePicker } from "./league-date-picker";
 import { DEFAULT_LEAGUE_TREASURY } from "@/domain/league-rules";
-import { Card } from "./ui/card";
+import { leagues, leagueSlug } from "@/domain/team-reference";
+import { LeagueEmptyState } from "./league-layout";
+import { LeagueNavigation } from "./league-navigation";
 import { api } from "../../convex/_generated/api";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { LeagueField, LeagueSelect } from "./league-field";
+import { LeagueField } from "./league-field";
 import { LeagueCardsLoading } from "./list-loading";
 import { LeagueNumber } from "./league-number";
 import { LoginButton } from "./site-shell";
@@ -144,6 +150,9 @@ export function LeaguesPage() {
                 </div>
               </div>
             </DialogHeader>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {t("leagueUx.createNext")}
+            </p>
             <LeagueError message={action.error} />
             <fieldset disabled={busy} className="space-y-4">
               <div className="grid items-end gap-4 sm:grid-cols-2">
@@ -225,12 +234,9 @@ export function LeaguesPage() {
           </form>
         </DialogContent>
       </Dialog>
-      <section aria-labelledby="league-directory-title">
-        <div className="mb-7 flex flex-wrap items-center gap-3">
-          <h2 id="league-directory-title" className="sr-only">
-            {t("leagueUx.directoryTitle")}
-          </h2>
-          <label className="relative min-w-48 flex-1">
+      <div className="catalog-layout">
+        <aside className="catalog-index min-w-0 space-y-4">
+          <label className="relative block">
             <Search
               className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground"
               aria-hidden="true"
@@ -240,135 +246,229 @@ export function LeaguesPage() {
               onChange={(event) => setSearch(event.target.value)}
               aria-label={t("leagueUx.searchLeagues")}
               placeholder={t("leagueUx.searchLeagues")}
-              className="h-10 pl-9"
+              className="h-10 bg-card pl-9"
             />
           </label>
-          <LeagueSelect
-            className="h-10 w-auto"
-            aria-label={t("leagueUx.filterSeason")}
+          <LeagueNavigation
+            vertical
+            label={t("leagueUx.filterSeason")}
             value={filter}
-            onChange={(event) => setFilter(event.target.value)}
-          >
-            {["all", "registration", "active", "completed"].map((value) => (
-              <option key={value} value={value}>
-                {t(
-                  value === "all"
-                    ? "leagueUx.allSeasons"
-                    : `leagueStatus.${value}`,
-                )}
-              </option>
-            ))}
-          </LeagueSelect>
-        </div>
-        {status === "LoadingFirstPage" ? (
-          <LeagueCardsLoading label={t("loading")} />
-        ) : results.length === 0 ? (
-          <div className="rounded-2xl border bg-card px-6 py-16 text-center">
-            <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-2xl bg-secondary">
-              <Trophy aria-hidden="true" className="size-7 text-primary" />
-            </div>
-            <h3 className="text-xl font-semibold">
-              {t("leagueUx.emptyDirectory")}
-            </h3>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-              {t("leagueUx.emptyDirectoryHint")}
+            onChange={setFilter}
+            items={[
+              {
+                value: "all",
+                label: t("leagueUx.allSeasons"),
+                icon: LayoutList,
+              },
+              {
+                value: "registration",
+                label: t("leagueStatus.registration"),
+                icon: Flag,
+              },
+              {
+                value: "active",
+                label: t("leagueStatus.active"),
+                icon: Trophy,
+              },
+              {
+                value: "completed",
+                label: t("leagueStatus.completed"),
+                icon: Archive,
+              },
+            ]}
+          />
+          <div className="hidden border-t pt-4 lg:block">
+            <p className="text-xs font-medium">
+              {t("leagueUx.gettingStarted")}
             </p>
-            {isAuthenticated ? (
-              <Button className="mt-6" onClick={() => setCreating(true)}>
-                <Plus className="size-4" />
-                {t("leagueCreate")}
-              </Button>
-            ) : null}
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+              {t(
+                isAuthenticated
+                  ? "leagueUx.directoryHint"
+                  : "leagueUx.directorySignIn",
+              )}
+            </p>
           </div>
-        ) : (
-          <div className="grid gap-5">
-            {visible.map((league) => (
-              <Card
-                key={league._id}
-                className="gap-0 rounded-2xl py-0 shadow-sm"
-              >
+          <details className="border-t pt-4">
+            <summary className="cursor-pointer text-xs font-medium">
+              {t("leagueUx.affiliations")}
+            </summary>
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+              {t("leagueUx.affiliationsHint")}
+            </p>
+            <nav
+              aria-label={t("leagueUx.affiliations")}
+              className="mt-2 flex flex-col gap-1"
+            >
+              {leagues.map((league) => (
                 <Link
-                  href={`/leagues/manage/${league._id}`}
-                  className="group grid min-w-0 gap-5 p-5 transition-colors hover:bg-secondary/20 focus-visible:outline-2 focus-visible:outline-ring sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-6"
+                  key={league}
+                  href={`/leagues/${leagueSlug(league)}`}
+                  className="flex min-h-9 items-center gap-2 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-secondary hover:text-primary focus-visible:outline-2 focus-visible:outline-ring"
                 >
-                  <div className="flex min-w-0 items-center gap-4">
-                    <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10">
-                      <Trophy
-                        className="size-6 text-primary"
-                        aria-hidden="true"
-                      />
-                    </span>
-                    <div className="min-w-0">
-                      <h3 className="break-words text-lg font-semibold group-hover:text-primary">
-                        {league.name}
-                      </h3>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {league.commissionerName}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between gap-4">
-                    <LeagueStatus status={league.status} />
-                    <ArrowRight
-                      className="size-4 text-primary transition-transform group-hover:translate-x-1"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <dl className="flex flex-wrap gap-x-8 gap-y-3 border-t pt-4 text-sm sm:col-span-2">
-                    <div className="flex items-center gap-2">
-                      <CalendarDays className="size-4 text-muted-foreground" />
-                      <dt className="sr-only">{t("leagueUx.plannedStart")}</dt>
-                      <dd>{dateFormat.format(league.startAt)}</dd>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock3 className="size-4 text-muted-foreground" />
-                      <dt className="sr-only">{t("leagueRoundDays")}</dt>
-                      <dd>
-                        {t("leagueUx.roundDuration", {
-                          days: league.roundDays,
-                        })}
-                      </dd>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Coins className="size-4 text-muted-foreground" />
-                      <dt className="text-muted-foreground">
-                        {t("leagueUi.treasury")}
-                      </dt>
-                      <dd>
-                        {(
-                          league.startingTreasury ?? DEFAULT_LEAGUE_TREASURY
-                        ).toLocaleString("uk-UA")}{" "}
-                        {t("leagueUx.goldUnit")}
-                      </dd>
-                    </div>
-                  </dl>
+                  <BookOpen className="size-3.5 shrink-0" aria-hidden="true" />
+                  {league}
                 </Link>
-              </Card>
-            ))}
-            {!visible.length && (
-              <p className="p-8 text-center text-sm text-muted-foreground">
-                {t("leagueUx.noSearchResults")}
-              </p>
+              ))}
+            </nav>
+          </details>
+        </aside>
+        <section aria-labelledby="league-directory-title" className="min-w-0">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 id="league-directory-title" className="text-sm font-semibold">
+              {t(
+                filter === "all"
+                  ? "leagueUx.directoryTitle"
+                  : `leagueStatus.${filter}`,
+              )}
+            </h2>
+            {status !== "LoadingFirstPage" && (
+              <span
+                role="status"
+                className="text-xs tabular-nums text-muted-foreground"
+              >
+                {t("leagueUx.leaguesShown", { count: visible.length })}
+              </span>
             )}
           </div>
-        )}
-        {(search || filter !== "all") && status !== "Exhausted" && (
-          <p className="mt-3 text-xs text-muted-foreground">
-            {t("leagueUx.loadedSeasonsHint")}
-          </p>
-        )}
-        {status === "CanLoadMore" || status === "LoadingMore" ? (
-          <div className="mt-6 text-center">
-            <Button
-              variant="outline"
-              disabled={status === "LoadingMore"}
-              onClick={() => loadMore(12)}
-            >
-              {t("leagueUi.loadMore")}
-            </Button>
-          </div>
-        ) : null}
-      </section>
+          {status === "LoadingFirstPage" ? (
+            <LeagueCardsLoading label={t("loading")} />
+          ) : results.length === 0 ? (
+            <LeagueEmptyState
+              icon={<Trophy aria-hidden="true" className="size-6" />}
+              title={t("leagueUx.emptyDirectory")}
+              description={t("leagueUx.emptyDirectoryHint")}
+              action={
+                isAuthenticated ? (
+                  <Button onClick={() => setCreating(true)}>
+                    <Plus className="size-4" />
+                    {t("leagueCreate")}
+                  </Button>
+                ) : !isLoading ? (
+                  <LoginButton />
+                ) : null
+              }
+            />
+          ) : (
+            <div className="grid gap-4 xl:grid-cols-2">
+              {visible.map((league) => (
+                <article
+                  key={league._id}
+                  className="overflow-hidden rounded-lg border bg-card"
+                >
+                  <Link
+                    href={`/leagues/manage/${league._id}`}
+                    className="group block min-w-0 transition-colors hover:bg-secondary/20 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+                  >
+                    <div className="relative flex min-w-0 items-start gap-3 overflow-hidden bg-primary p-4 text-primary-foreground">
+                      <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute -right-5 -top-8 size-32 rounded-full border-[18px] border-white/5"
+                      />
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white/15">
+                        <Trophy className="size-5" aria-hidden="true" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="display-font break-words text-xl leading-tight">
+                          {league.name}
+                        </h3>
+                        <p className="mt-1 text-xs text-white/75">
+                          {t("leagueUx.organizedBy", {
+                            name: league.commissionerName,
+                          })}
+                        </p>
+                        <div className="mt-3 w-fit rounded-md bg-card">
+                          <LeagueStatus status={league.status} />
+                        </div>
+                      </div>
+                      <ArrowRight
+                        className="relative mt-1 size-4 shrink-0 text-white/75 transition-transform group-hover:translate-x-1 motion-reduce:transform-none"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <dl className="flex flex-wrap gap-x-5 gap-y-2 border-t bg-secondary/25 px-4 py-2.5 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <CalendarDays className="size-4 text-muted-foreground" />
+                        <dt className="sr-only">
+                          {t("leagueUx.plannedStart")}
+                        </dt>
+                        <dd>{dateFormat.format(league.startAt)}</dd>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock3 className="size-4 text-muted-foreground" />
+                        <dt className="sr-only">{t("leagueRoundDays")}</dt>
+                        <dd>
+                          {t("leagueUx.roundDuration", {
+                            days: league.roundDays,
+                          })}
+                        </dd>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Coins className="size-4 text-muted-foreground" />
+                        <dt className="text-muted-foreground">
+                          {t("leagueUi.treasury")}
+                        </dt>
+                        <dd>
+                          {(
+                            league.startingTreasury ?? DEFAULT_LEAGUE_TREASURY
+                          ).toLocaleString("uk-UA")}{" "}
+                          {t("leagueUx.goldUnit")}
+                        </dd>
+                      </div>
+                    </dl>
+                  </Link>
+                </article>
+              ))}
+              {!visible.length && (
+                <div className="xl:col-span-2">
+                  <LeagueEmptyState
+                    icon={<Search className="size-6" />}
+                    title={t("leagueUx.noSearchResults")}
+                    description={
+                      status !== "Exhausted"
+                        ? t("leagueUx.loadedSeasonsHint")
+                        : undefined
+                    }
+                    action={
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setSearch("");
+                          setFilter("all");
+                        }}
+                      >
+                        {t("leagueUx.clearFilters")}
+                      </Button>
+                    }
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          {(search || filter !== "all") && status !== "Exhausted" && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              {t("leagueUx.loadedSeasonsHint")}
+            </p>
+          )}
+          {status === "CanLoadMore" || status === "LoadingMore" ? (
+            <div className="mt-6 text-center">
+              <Button
+                variant="outline"
+                disabled={status === "LoadingMore"}
+                onClick={() => loadMore(12)}
+              >
+                {status === "LoadingMore" && (
+                  <LoaderCircle
+                    className="size-4 animate-spin"
+                    aria-hidden="true"
+                  />
+                )}
+                {t(status === "LoadingMore" ? "loading" : "leagueUi.loadMore")}
+              </Button>
+            </div>
+          ) : null}
+        </section>
+      </div>
     </div>
   );
 }

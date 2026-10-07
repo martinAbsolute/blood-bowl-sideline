@@ -12,6 +12,7 @@ import { ButtonGroup } from "./ui/button-group";
 import { Input } from "./ui/input";
 import { LeagueHelp } from "./league-help";
 import { InitialLoading } from "./initial-loading";
+import { LeagueEmptyState } from "./league-layout";
 
 export function useLeagueAction() {
   const t = useTranslations();
@@ -127,16 +128,15 @@ export function LeagueGate({
   const t = useTranslations();
   if (loading) return <InitialLoading label={t("loading")} />;
   return (
-    <div className="page-width py-12">
-      <div className="mx-auto max-w-lg rounded-lg border bg-card p-6 text-center">
-        <Trophy
-          aria-hidden="true"
-          className="mx-auto mb-3 size-7 text-primary"
-        />
-        <h1 className="mb-2 text-lg font-semibold">{t("leagues")}</h1>
-        <p className="mb-5">{t("leagueUi.signIn")}</p>
-        {!authenticated && <LoginButton />}
-      </div>
+    <div className="page-width py-8 sm:py-10">
+      <LeagueBack />
+      <h1 className="sr-only">{t("leagues")}</h1>
+      <LeagueEmptyState
+        icon={<Trophy className="size-6" aria-hidden="true" />}
+        title={t("leagueUx.signInTitle")}
+        description={t("leagueUi.signIn")}
+        action={!authenticated && <LoginButton />}
+      />
     </div>
   );
 }
@@ -152,7 +152,7 @@ export function LeagueBack({
   return (
     <Link
       href={href}
-      className="mb-3 inline-flex min-h-8 items-center gap-2 text-sm text-muted-foreground hover:text-primary"
+      className="inline-flex min-h-11 items-center gap-2 rounded text-xs text-muted-foreground hover:text-primary focus-visible:outline-2 focus-visible:outline-ring sm:min-h-8"
     >
       <ArrowLeft className="size-4" />
       {children ?? t("leagues")}
@@ -185,12 +185,12 @@ export function LeagueSection({
   action?: ReactNode;
 }) {
   return (
-    <section className="min-w-0 rounded-lg border bg-card p-3 sm:p-4">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+    <section className="min-w-0 rounded-lg border bg-card">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-t-lg border-b bg-secondary/40 px-4 py-3">
         <h2 className="text-sm font-semibold tracking-tight">{title}</h2>
         {action}
       </div>
-      {children}
+      <div className="p-4">{children}</div>
     </section>
   );
 }

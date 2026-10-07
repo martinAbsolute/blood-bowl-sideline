@@ -10,6 +10,7 @@ const state = vi.hoisted(() => ({
   postgame: false,
   withdrawn: false,
   view: "overview",
+  seasonStatus: "" as string,
 }));
 vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
 vi.mock("next/navigation", () => ({
@@ -27,11 +28,14 @@ vi.mock("convex/react", () => ({
   useQuery: () => ({
     viewerId: "viewer",
     canCommission: state.commissioner,
-    canRegister: !state.participant,
+    canRegister:
+      !state.participant &&
+      (!state.seasonStatus || state.seasonStatus === "registration"),
     league: {
       _id: "league",
       name: "Autumn League",
-      status: state.participant ? "active" : "registration",
+      status:
+        state.seasonStatus || (state.participant ? "active" : "registration"),
       startAt: 1,
       roundDays: 14,
     },
@@ -103,6 +107,7 @@ afterEach(() => {
     postgame: false,
     withdrawn: false,
     view: "overview",
+    seasonStatus: "",
   });
 });
 
@@ -177,5 +182,41 @@ it("does not expose commissioner controls through a manually selected view", asy
     expect(container.textContent).toContain("leagueUi.registerTeam");
     expect(container.textContent).not.toContain("leagueUx.commissionerDesk");
     expect(container.textContent).not.toContain("leagueUi.launchPhase");
+  });
+});
+
+it("explains the spectator view once registration closes", async () => {
+  state.seasonStatus = "active";
+  await render((container) => {
+    expect(container.textContent).toContain("leagueUx.spectatorView");
+    expect(container.textContent).toContain("leagueUx.followSeasonHint");
+    expect(container.textContent).not.toContain("leagueUi.registerTeam");
+    expect(container.textContent).not.toContain("leagueUx.commissionerDesk");
+  });
+});
+
+it("offers final standings and career history after a completed season", async () => {
+  Object.assign(state, { participant: true, seasonStatus: "completed" });
+  await render((container) => {
+    expect(container.textContent).toContain("leagueUx.seasonComplete");
+    expect(container.textContent).toContain("leagueUx.finalStandings");
+    expect(
+      container.querySelector('a[href$="/teams/mine"]')?.textContent,
+    ).toContain("leagueUx.viewCareer");
+    expect(container.textContent).not.toContain("leagueUx.continueReport");
+  });
+});
+
+it("keeps unfinished postgame reachable after the final match", async () => {
+  Object.assign(state, {
+    participant: true,
+    postgame: true,
+    seasonStatus: "completed",
+  });
+  await render((container) => {
+    expect(
+      container.querySelector('a[href$="/teams/mine"]')?.textContent,
+    ).toContain("leagueUx.finishPostgame");
+    expect(container.textContent).not.toContain("leagueUx.continueReport");
   });
 });
