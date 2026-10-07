@@ -14,7 +14,6 @@ import {
   Coins,
   Clock3,
   Search,
-  Pencil,
   Flag,
   Archive,
   LayoutList,
@@ -34,13 +33,14 @@ import { LeagueCardsLoading } from "./list-loading";
 import { LeagueNumber } from "./league-number";
 import { LoginButton } from "./site-shell";
 import { LeagueError, LeagueStatus, useLeagueAction } from "./league-ui";
+import { Dialog } from "./dialog";
+
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "./dialog";
+  LeagueDialogBody,
+  LeagueDialogContent,
+  LeagueDialogFooter,
+  LeagueDialogHeader,
+} from "./league-dialog";
 
 export function LeaguesPage() {
   const t = useTranslations();
@@ -114,103 +114,89 @@ export function LeaguesPage() {
           }
         }}
       >
-        <DialogContent
-          className="w-[min(36rem,calc(100%-2rem))] max-h-[90svh] overflow-y-auto p-5 sm:max-w-none sm:p-6"
-          showCloseButton={!busy}
-        >
-          <form onSubmit={createLeague} className="space-y-4">
-            <DialogHeader className="border-b pb-4 pr-8">
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="flex size-11 shrink-0 items-center justify-center rounded-lg border bg-secondary text-primary">
-                  <Trophy className="size-5" aria-hidden="true" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <DialogDescription className="text-xs">
-                    {t("leagueCreate")}
-                  </DialogDescription>
-                  <DialogTitle className="flex min-w-0 items-center gap-2 text-xl font-semibold leading-tight">
-                    <span className="sr-only">{t("leagueName")}</span>
-                    <Input
-                      required
-                      disabled={busy}
-                      maxLength={100}
-                      value={name}
-                      onChange={(event) => setName(event.target.value)}
-                      autoComplete="off"
-                      spellCheck={false}
-                      aria-label={t("leagueName")}
-                      placeholder={t("leagueUx.namePlaceholder")}
-                      className="h-auto min-w-0 flex-1 rounded-none border-0 bg-transparent p-0 text-xl font-semibold shadow-none focus-visible:ring-0"
-                    />
-                    <Pencil
-                      className="size-3.5 shrink-0 text-muted-foreground"
-                      aria-hidden="true"
-                    />
-                  </DialogTitle>
-                </div>
-              </div>
-            </DialogHeader>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {t("leagueUx.createNext")}
-            </p>
-            <LeagueError message={action.error} />
-            <fieldset disabled={busy} className="space-y-4">
-              <div className="grid items-end gap-4 sm:grid-cols-2">
-                <LeagueDatePicker
-                  value={startDate}
-                  onChange={setStartDate}
-                  disabled={busy}
-                />
-                <LeagueNumber
-                  label={t("leagueRoundDays")}
-                  min={1}
-                  max={60}
-                  value={roundDays}
-                  onChange={setRoundDays}
-                  disabled={busy}
-                />
-              </div>
+        <LeagueDialogContent showCloseButton={!busy}>
+          <LeagueDialogHeader
+            title={t("leagueCreate")}
+            description={t("leagueUx.createNext")}
+            icon={<Trophy className="size-5" />}
+          />
+          <form
+            onSubmit={createLeague}
+            className="flex min-h-0 flex-1 flex-col"
+          >
+            <LeagueDialogBody>
               <LeagueField>
-                <span>{t("leagueUx.startingTreasury")}</span>
+                {t("leagueName")}
                 <Input
-                  type="text"
-                  inputMode="numeric"
                   required
-                  value={treasury ? treasury.toLocaleString("uk-UA") : ""}
-                  onChange={(event) => {
-                    const input = event.currentTarget;
-                    const digitsBeforeCursor = input.value
-                      .slice(0, input.selectionStart ?? input.value.length)
-                      .replace(/\D/g, "").length;
-                    const digits = input.value.replace(/\D/g, "").slice(0, 8);
-                    setTreasury(digits ? Number(digits) : 0);
-                    requestAnimationFrame(() => {
-                      const formatted = input.value;
-                      let cursor = 0;
-                      let seen = 0;
-                      while (
-                        cursor < formatted.length &&
-                        seen < digitsBeforeCursor
-                      ) {
-                        if (/\d/.test(formatted[cursor])) seen++;
-                        cursor++;
-                      }
-                      input.setSelectionRange(cursor, cursor);
-                    });
-                  }}
-                  aria-invalid={!treasuryValid || undefined}
-                  className="h-11 font-mono tabular-nums"
-                  aria-describedby="treasury-hint"
+                  disabled={busy}
+                  maxLength={100}
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  autoComplete="off"
+                  placeholder={t("leagueUx.namePlaceholder")}
+                  className="h-11"
                 />
               </LeagueField>
-              <p
-                id="treasury-hint"
-                className="-mt-3 text-xs leading-relaxed text-muted-foreground"
-              >
-                {t("leagueUx.treasuryHint")}
-              </p>
-            </fieldset>
-            <div className="flex justify-end gap-3 border-t pt-4">
+              <LeagueError message={action.error} />
+              <fieldset disabled={busy} className="space-y-4">
+                <div className="grid items-end gap-4 sm:grid-cols-2">
+                  <LeagueDatePicker
+                    value={startDate}
+                    onChange={setStartDate}
+                    disabled={busy}
+                  />
+                  <LeagueNumber
+                    label={t("leagueRoundDays")}
+                    min={1}
+                    max={60}
+                    value={roundDays}
+                    onChange={setRoundDays}
+                    disabled={busy}
+                  />
+                </div>
+                <LeagueField>
+                  <span>{t("leagueUx.startingTreasury")}</span>
+                  <Input
+                    type="text"
+                    inputMode="numeric"
+                    required
+                    value={treasury ? treasury.toLocaleString("uk-UA") : ""}
+                    onChange={(event) => {
+                      const input = event.currentTarget;
+                      const digitsBeforeCursor = input.value
+                        .slice(0, input.selectionStart ?? input.value.length)
+                        .replace(/\D/g, "").length;
+                      const digits = input.value.replace(/\D/g, "").slice(0, 8);
+                      setTreasury(digits ? Number(digits) : 0);
+                      requestAnimationFrame(() => {
+                        const formatted = input.value;
+                        let cursor = 0;
+                        let seen = 0;
+                        while (
+                          cursor < formatted.length &&
+                          seen < digitsBeforeCursor
+                        ) {
+                          if (/\d/.test(formatted[cursor])) seen++;
+                          cursor++;
+                        }
+                        input.setSelectionRange(cursor, cursor);
+                      });
+                    }}
+                    aria-invalid={!treasuryValid || undefined}
+                    className="h-11 font-mono tabular-nums"
+                    aria-describedby="treasury-hint"
+                  />
+                </LeagueField>
+                <p
+                  id="treasury-hint"
+                  className="-mt-3 text-xs leading-relaxed text-muted-foreground"
+                >
+                  {t("leagueUx.treasuryHint")}
+                </p>
+              </fieldset>
+            </LeagueDialogBody>
+            <LeagueDialogFooter>
               <Button
                 type="button"
                 variant="outline"
@@ -230,9 +216,9 @@ export function LeaguesPage() {
                 )}
                 {t("leagueCreate")}
               </Button>
-            </div>
+            </LeagueDialogFooter>
           </form>
-        </DialogContent>
+        </LeagueDialogContent>
       </Dialog>
       <div className="catalog-layout">
         <aside className="catalog-index min-w-0 space-y-4">

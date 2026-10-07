@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "gt-next";
-import { Check, ChevronDown, Search } from "lucide-react";
+import { Check, ChevronDown, Search, Users } from "lucide-react";
 import type { Team } from "@/domain/types";
 import { getRoster, rosters } from "@/domain/catalog";
 import { DEFAULT_LEAGUE_TREASURY } from "@/domain/league-rules";
@@ -16,14 +16,14 @@ import { RosterIcon } from "./player-icon";
 import { LeagueTeamIssues } from "./league-team-issues";
 import { LeagueSelect } from "./league-field";
 import { CreateTeamButton } from "./create-team-button";
+import { Dialog, DialogTrigger } from "./dialog";
+
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./dialog";
+  LeagueDialogBody,
+  LeagueDialogContent,
+  LeagueDialogFooter,
+  LeagueDialogHeader,
+} from "./league-dialog";
 
 export function LeagueTeamPicker({
   teams,
@@ -93,26 +93,27 @@ export function LeagueTeamPicker({
           <ChevronDown className="size-4 shrink-0" />
         )}
       </DialogTrigger>
-      <DialogContent className="flex h-[min(90svh,42rem)] flex-col gap-4 overflow-hidden p-5 sm:max-w-xl sm:p-6">
-        <DialogHeader>
-          <DialogTitle>{t("leagueUi.chooseTeam")}</DialogTitle>
-          <DialogDescription>
-            {t("leagueUx.pickerHint", {
-              amount: startingTreasury.toLocaleString("uk-UA"),
-            })}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground" />
-          <Input
-            aria-label={t("searchMyTeams")}
-            placeholder={t("searchMyTeams")}
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            className="h-10 pl-9"
-          />
+      <LeagueDialogContent className="h-[min(90dvh,44rem)]">
+        <LeagueDialogHeader
+          title={t("leagueUi.chooseTeam")}
+          description={t("leagueUx.pickerHint", {
+            amount: startingTreasury.toLocaleString("uk-UA"),
+          })}
+          icon={<Users className="size-5" />}
+        />
+        <div className="shrink-0 px-5 pt-4">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground" />
+            <Input
+              aria-label={t("searchMyTeams")}
+              placeholder={t("searchMyTeams")}
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              className="h-10 pl-9"
+            />
+          </div>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
+        <LeagueDialogBody className="space-y-3 pt-3">
           {status === "LoadingFirstPage" ? (
             <div role="status" aria-label={t("loading")} className="space-y-3">
               {[0, 1, 2].map((i) => (
@@ -127,7 +128,7 @@ export function LeagueTeamPicker({
                 return (
                   <div
                     key={team.uuid}
-                    className={`overflow-hidden rounded-xl border shadow-sm ${value === team.uuid && ready ? "border-primary ring-2 ring-primary/30" : "border-border"}`}
+                    className={`overflow-hidden rounded-lg border ${value === team.uuid && ready ? "border-primary ring-2 ring-primary/30" : "border-border"}`}
                   >
                     <button
                       type="button"
@@ -141,7 +142,7 @@ export function LeagueTeamPicker({
                       }}
                       className="flex w-full items-center gap-3 bg-primary px-3 py-3 text-left text-primary-foreground transition-colors enabled:hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-white/15">
+                      <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-white/90">
                         <RosterIcon
                           rosterId={team.rosterId}
                           className="size-9"
@@ -202,9 +203,9 @@ export function LeagueTeamPicker({
               {t(status === "LoadingMore" ? "loading" : "loadMore")}
             </Button>
           )}
-        </div>
+        </LeagueDialogBody>
         {leagueId && (
-          <div className="shrink-0 space-y-3 border-t bg-popover pt-4">
+          <LeagueDialogFooter className="block space-y-3">
             {creating ? (
               <>
                 <label
@@ -241,9 +242,9 @@ export function LeagueTeamPicker({
                 {t("leagueUx.createForLeague")}
               </Button>
             )}
-          </div>
+          </LeagueDialogFooter>
         )}
-      </DialogContent>
+      </LeagueDialogContent>
     </Dialog>
   );
 }

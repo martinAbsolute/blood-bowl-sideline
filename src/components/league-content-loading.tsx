@@ -185,9 +185,12 @@ export function LeagueContentLoading({
               </div>
             </header>
             <NavigationLoading />
-            <div className="grid grid-cols-3 divide-x overflow-hidden rounded-lg border bg-card">
-              {[0, 1, 2].map((index) => (
-                <div key={index} className="min-w-0 space-y-1 px-3 py-2">
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              {[0, 1, 2, 3].map((index) => (
+                <div
+                  key={index}
+                  className="min-w-0 space-y-2 rounded-lg border bg-card p-4"
+                >
                   <Skeleton className="h-4 w-24 max-w-full" />
                   <Skeleton className="h-6 w-16 max-w-full" />
                 </div>

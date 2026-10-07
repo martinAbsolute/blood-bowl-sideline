@@ -1200,5 +1200,36 @@
       "throw-team-mate": "{actor} threw {target}, who landed safely",
       "mvp": "{actor} was awarded MVP"
     }
+  },
+  "leagueDesk": {
+    "resultsCount": "Showing {shown} of {total}",
+    "ascending": "Ascending order",
+    "descending": "Descending order",
+    "searchHistory": "Search activity or coach…",
+    "historyAction": "Activity type",
+    "allActivity": "All activity",
+    "historyLoaded": "{shown} of {total} loaded entries",
+    "treasuryHint": "Adjust the official team treasury. Review the new balance and record why it changed.",
+    "auditedChange": "This change is recorded in league history with your name and reason.",
+    "rosterFull": "The roster is full",
+    "positionBlocked": "Unavailable this post-game",
+    "positionFull": "Position limit reached",
+    "notEnoughGold": "Not enough treasury",
+    "recruitHint": "Choose a position, review the player, and check the remaining treasury before hiring.",
+    "afterHire": "Treasury after hiring",
+    "readyToAdvance": "Ready to advance",
+    "rosterFilter": "Filter roster",
+    "allPlayers": "All players",
+    "unavailable": "Unavailable players",
+    "searchSkills": "Find an advancement…",
+    "afterAdvancement": "SPP remaining",
+    "playerHint": "Player profile, career development, and roster actions.",
+    "openReports": "Unfinished reports",
+    "postgameTasks": "Post-game tasks",
+    "completedFixtures": "Resolved fixtures",
+    "roundComplete": "This round is complete. Results and reports remain available in Fixtures.",
+    "stockLimit": "Maximum already hired",
+    "staffOwned": "On the team",
+    "availablePlayers": "Available players"
   }
 }

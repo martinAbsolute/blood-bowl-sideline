@@ -39,6 +39,12 @@ import {
   DialogTitle,
   DialogDescription,
 } from "./dialog";
+import {
+  LeagueDialogBody,
+  LeagueDialogContent,
+  LeagueDialogFooter,
+  LeagueDialogHeader,
+} from "./league-dialog";
 import { LeagueField, LeagueSelect } from "./league-field";
 import { PlayerIcon } from "./player-icon";
 import { TableSkills, SkillList } from "./skill-box";
@@ -160,7 +166,7 @@ export function LeagueEvents({
       className="overflow-hidden rounded-lg border bg-card"
       aria-label={t("matchEvents.timeline")}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b bg-secondary/35 px-4 py-3">
         {review ? (
           <h2 className="text-sm font-semibold">{t("matchEvents.review")}</h2>
         ) : (
@@ -244,7 +250,7 @@ export function LeagueEvents({
               )}
             </div>
           ) : (
-            <ol className="divide-y">
+            <ol className="space-y-3 p-3 sm:p-4">
               {events.map((event, index) => {
                 const row = ledger.find((row) => row.event.id === event.id)!;
                 const player = data.players.find(
@@ -270,10 +276,10 @@ export function LeagueEvents({
                 return (
                   <li
                     key={event.id}
-                    className="flex items-start gap-2 px-3 py-3 sm:gap-3"
+                    className="flex items-start gap-3 rounded-lg border bg-secondary/10 p-3"
                   >
                     <span
-                      className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-secondary font-mono text-[10px] text-muted-foreground"
+                      className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md border bg-card font-mono text-[10px] text-muted-foreground"
                       title={t("matchEvents.order")}
                     >
                       {index + 1}
@@ -921,282 +927,285 @@ function EventEditor({
     );
   };
   return (
-    <DialogContent
-      className="max-h-[90dvh] overflow-y-auto p-4 sm:max-w-xl sm:p-5"
-      showCloseButton={!busy}
-    >
-      <DialogHeader>
-        <DialogTitle>
-          {t(version ? "matchEvents.edit" : "matchEvents.add")}
-        </DialogTitle>
-        <DialogDescription>{t("matchEvents.editorHint")}</DialogDescription>
-      </DialogHeader>
+    <LeagueDialogContent className="sm:max-w-2xl" showCloseButton={!busy}>
+      <LeagueDialogHeader
+        title={t(version ? "matchEvents.edit" : "matchEvents.add")}
+        description={t("matchEvents.editorHint")}
+        icon={<ListOrdered className="size-5" />}
+      />
       <form
+        className="flex min-h-0 flex-1 flex-col"
         onSubmit={(e) => {
           e.preventDefault();
           if (!validation && !stale && !busy) void save();
         }}
       >
-        <fieldset disabled={busy} className="space-y-4">
-          <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
-            {matchEventKinds.map((kind) => (
-              <button
-                type="button"
-                key={kind}
-                aria-pressed={event.kind === kind}
-                className={`flex min-h-11 items-center justify-center rounded-md border px-2 py-2 text-xs font-medium focus-visible:outline-2 focus-visible:outline-ring ${event.kind === kind ? "border-primary bg-primary/10 text-primary" : "hover:bg-secondary"}`}
-                onClick={() =>
-                  setEvent({
-                    ...newMatchEvent(event.playerId),
-                    id: event.id,
-                    kind,
-                    half: event.half,
-                    turn: event.turn,
-                    notes: event.notes,
-                  })
-                }
-              >
-                {t(`matchEvents.kinds.${kind}`)}
-              </button>
-            ))}
-          </div>
-          {event.kind === "casualty" && (
-            <LeagueField>
-              {t("matchEvents.cause")}
-              <LeagueSelect
-                value={event.cause}
-                onChange={(e) =>
-                  change({
-                    cause: e.target.value as MatchEvent["cause"],
-                    targetId: null,
-                  })
-                }
-              >
-                {casualtyCauses.map((cause) => (
-                  <option key={cause} value={cause}>
-                    {t(`matchEvents.causes.${cause}`)}
-                  </option>
-                ))}
-              </LeagueSelect>
-            </LeagueField>
-          )}
-          <div className={`grid gap-3 ${linked ? "sm:grid-cols-2" : ""}`}>
-            {playerSelect(false)}
-            {linked && playerSelect(true)}
-          </div>
-          {event.kind === "casualty" && (
-            <div className="space-y-3 rounded-md border bg-secondary/10 p-3">
-              <h3 className="flex items-center gap-2 text-xs font-semibold">
-                <HeartPulse className="size-4" />
-                {t("matchEvents.injuryResolution")}
-              </h3>
-              {rollFields(false)}
-              <label className="flex min-h-8 items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={event.apothecary}
-                  onChange={(e) =>
-                    change({
-                      apothecary: e.target.checked,
-                      apothecaryRoll: null,
-                      apothecaryLastingRoll: null,
-                      keepOriginal: false,
-                    })
-                  }
-                />
-                {t("matchEvents.usedApothecary")}
-              </label>
-              {event.apothecary && (
-                <>
-                  {rollFields(true)}
-                  <LeagueField>
-                    {t("matchEvents.keepResult")}
-                    <LeagueSelect
-                      value={event.keepOriginal ? "original" : "reroll"}
-                      onChange={(e) =>
-                        change({ keepOriginal: e.target.value === "original" })
-                      }
-                    >
-                      <option value="reroll">
-                        {t("matchEvents.usedReroll")}
-                      </option>
-                      <option value="original">
-                        {t("matchEvents.keptOriginal")}
-                      </option>
-                    </LeagueSelect>
-                  </LeagueField>
-                </>
-              )}
-              <LeagueField>
-                {t("matchEvents.regenerationLabel")}
-                <LeagueSelect
-                  value={event.regeneration}
-                  onChange={(e) =>
-                    change({
-                      regeneration: e.target
-                        .value as MatchEvent["regeneration"],
+        <LeagueDialogBody>
+          <fieldset disabled={busy} className="space-y-5">
+            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+              {matchEventKinds.map((kind) => (
+                <button
+                  type="button"
+                  key={kind}
+                  aria-pressed={event.kind === kind}
+                  className={`flex min-h-11 items-center justify-center rounded-md border px-2 py-2 text-xs font-medium focus-visible:outline-2 focus-visible:outline-ring ${event.kind === kind ? "border-primary bg-primary/10 text-primary" : "hover:bg-secondary"}`}
+                  onClick={() =>
+                    setEvent({
+                      ...newMatchEvent(event.playerId),
+                      id: event.id,
+                      kind,
+                      half: event.half,
+                      turn: event.turn,
+                      notes: event.notes,
                     })
                   }
                 >
-                  {(["not-used", "failed", "succeeded"] as const).map(
-                    (value) => (
-                      <option key={value} value={value}>
-                        {t(`matchEvents.regeneration.${value}`)}
-                      </option>
-                    ),
-                  )}
-                </LeagueSelect>
-              </LeagueField>
-              <p className="text-xs text-muted-foreground">
-                {t(
-                  event.cause === "block"
-                    ? "matchEvents.blockSppHint"
-                    : "matchEvents.noSppHint",
-                )}
-              </p>
+                  {t(`matchEvents.kinds.${kind}`)}
+                </button>
+              ))}
             </div>
-          )}
-          {event.kind === "knockout" && (
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={event.apothecary}
-                onChange={(e) => change({ apothecary: e.target.checked })}
-              />
-              {t("matchEvents.koApothecary")}
-            </label>
-          )}
-          {event.kind === "throw-team-mate" && (
-            <div className="space-y-2 rounded-md border p-3">
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={event.superb}
-                  onChange={(e) => change({ superb: e.target.checked })}
-                />
-                {t("matchEvents.superb")}
-              </label>
-              <p className="text-xs text-muted-foreground">
-                {t("matchEvents.throwHint")}
-              </p>
-            </div>
-          )}
-          {event.kind !== "mvp" && (
-            <div className="grid grid-cols-2 gap-3">
+            {event.kind === "casualty" && (
               <LeagueField>
-                {t("matchEvents.halfOptional")}
+                {t("matchEvents.cause")}
                 <LeagueSelect
-                  value={event.half ?? ""}
+                  value={event.cause}
                   onChange={(e) =>
                     change({
-                      half: e.target.value ? Number(e.target.value) : null,
-                      turn: null,
+                      cause: e.target.value as MatchEvent["cause"],
+                      targetId: null,
                     })
                   }
                 >
-                  <option value="">{t("matchEvents.notRecorded")}</option>
-                  {[1, 2, 3].map((half) => (
-                    <option key={half} value={half}>
-                      {half === 3
-                        ? t("matchEvents.extraTime")
-                        : `${t("matchEvents.half")} ${half}`}
+                  {casualtyCauses.map((cause) => (
+                    <option key={cause} value={cause}>
+                      {t(`matchEvents.causes.${cause}`)}
                     </option>
                   ))}
                 </LeagueSelect>
               </LeagueField>
-              <LeagueField>
-                {t("matchEvents.turnOptional")}
-                <LeagueSelect
-                  disabled={event.half === null}
-                  value={event.turn ?? ""}
-                  onChange={(e) =>
-                    change({
-                      turn: e.target.value ? Number(e.target.value) : null,
-                    })
-                  }
-                >
-                  <option value="">{t("matchEvents.notRecorded")}</option>
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((turn) => (
-                    <option key={turn}>{turn}</option>
-                  ))}
-                </LeagueSelect>
-              </LeagueField>
-            </div>
-          )}
-          <LeagueField>
-            {t("matchEvents.notes")}
-            <Input
-              maxLength={500}
-              value={event.notes}
-              onChange={(e) => change({ notes: e.target.value })}
-            />
-          </LeagueField>
-          {error && (
-            <p role="alert" className="text-xs text-destructive">
-              {error}
-            </p>
-          )}
-          {(stale || validation) && (
-            <p role="status" className="text-xs text-muted-foreground">
-              {stale ? t("matchEvents.stale") : validation}
-            </p>
-          )}
-          <div className="flex flex-wrap items-center gap-2 border-t pt-3">
-            {version > 0 && (
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                className="text-destructive"
-                onClick={() => setRemove(!remove)}
-              >
-                <Trash2 className="size-3.5" />
-                {t("matchEvents.remove")}
-              </Button>
             )}
+            <div className={`grid gap-3 ${linked ? "sm:grid-cols-2" : ""}`}>
+              {playerSelect(false)}
+              {linked && playerSelect(true)}
+            </div>
+            {event.kind === "casualty" && (
+              <div className="space-y-3 rounded-md border bg-secondary/10 p-3">
+                <h3 className="flex items-center gap-2 text-xs font-semibold">
+                  <HeartPulse className="size-4" />
+                  {t("matchEvents.injuryResolution")}
+                </h3>
+                {rollFields(false)}
+                <label className="flex min-h-8 items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={event.apothecary}
+                    onChange={(e) =>
+                      change({
+                        apothecary: e.target.checked,
+                        apothecaryRoll: null,
+                        apothecaryLastingRoll: null,
+                        keepOriginal: false,
+                      })
+                    }
+                  />
+                  {t("matchEvents.usedApothecary")}
+                </label>
+                {event.apothecary && (
+                  <>
+                    {rollFields(true)}
+                    <LeagueField>
+                      {t("matchEvents.keepResult")}
+                      <LeagueSelect
+                        value={event.keepOriginal ? "original" : "reroll"}
+                        onChange={(e) =>
+                          change({
+                            keepOriginal: e.target.value === "original",
+                          })
+                        }
+                      >
+                        <option value="reroll">
+                          {t("matchEvents.usedReroll")}
+                        </option>
+                        <option value="original">
+                          {t("matchEvents.keptOriginal")}
+                        </option>
+                      </LeagueSelect>
+                    </LeagueField>
+                  </>
+                )}
+                <LeagueField>
+                  {t("matchEvents.regenerationLabel")}
+                  <LeagueSelect
+                    value={event.regeneration}
+                    onChange={(e) =>
+                      change({
+                        regeneration: e.target
+                          .value as MatchEvent["regeneration"],
+                      })
+                    }
+                  >
+                    {(["not-used", "failed", "succeeded"] as const).map(
+                      (value) => (
+                        <option key={value} value={value}>
+                          {t(`matchEvents.regeneration.${value}`)}
+                        </option>
+                      ),
+                    )}
+                  </LeagueSelect>
+                </LeagueField>
+                <p className="text-xs text-muted-foreground">
+                  {t(
+                    event.cause === "block"
+                      ? "matchEvents.blockSppHint"
+                      : "matchEvents.noSppHint",
+                  )}
+                </p>
+              </div>
+            )}
+            {event.kind === "knockout" && (
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={event.apothecary}
+                  onChange={(e) => change({ apothecary: e.target.checked })}
+                />
+                {t("matchEvents.koApothecary")}
+              </label>
+            )}
+            {event.kind === "throw-team-mate" && (
+              <div className="space-y-2 rounded-md border p-3">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={event.superb}
+                    onChange={(e) => change({ superb: e.target.checked })}
+                  />
+                  {t("matchEvents.superb")}
+                </label>
+                <p className="text-xs text-muted-foreground">
+                  {t("matchEvents.throwHint")}
+                </p>
+              </div>
+            )}
+            {event.kind !== "mvp" && (
+              <div className="grid grid-cols-2 gap-3">
+                <LeagueField>
+                  {t("matchEvents.halfOptional")}
+                  <LeagueSelect
+                    value={event.half ?? ""}
+                    onChange={(e) =>
+                      change({
+                        half: e.target.value ? Number(e.target.value) : null,
+                        turn: null,
+                      })
+                    }
+                  >
+                    <option value="">{t("matchEvents.notRecorded")}</option>
+                    {[1, 2, 3].map((half) => (
+                      <option key={half} value={half}>
+                        {half === 3
+                          ? t("matchEvents.extraTime")
+                          : `${t("matchEvents.half")} ${half}`}
+                      </option>
+                    ))}
+                  </LeagueSelect>
+                </LeagueField>
+                <LeagueField>
+                  {t("matchEvents.turnOptional")}
+                  <LeagueSelect
+                    disabled={event.half === null}
+                    value={event.turn ?? ""}
+                    onChange={(e) =>
+                      change({
+                        turn: e.target.value ? Number(e.target.value) : null,
+                      })
+                    }
+                  >
+                    <option value="">{t("matchEvents.notRecorded")}</option>
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((turn) => (
+                      <option key={turn}>{turn}</option>
+                    ))}
+                  </LeagueSelect>
+                </LeagueField>
+              </div>
+            )}
+            <LeagueField>
+              {t("matchEvents.notes")}
+              <Input
+                maxLength={500}
+                value={event.notes}
+                onChange={(e) => change({ notes: e.target.value })}
+              />
+            </LeagueField>
+            {error && (
+              <p role="alert" className="text-xs text-destructive">
+                {error}
+              </p>
+            )}
+            {(stale || validation) && (
+              <p role="status" className="text-xs text-muted-foreground">
+                {stale ? t("matchEvents.stale") : validation}
+              </p>
+            )}
+          </fieldset>
+        </LeagueDialogBody>
+        <LeagueDialogFooter>
+          {version > 0 && (
             <Button
               type="button"
               size="sm"
-              variant="outline"
-              className="ml-auto"
-              onClick={onClose}
+              variant="ghost"
+              className="text-destructive"
+              disabled={busy}
+              onClick={() => setRemove(!remove)}
             >
-              {t("cancel")}
+              <Trash2 className="size-3.5" />
+              {t("matchEvents.remove")}
+            </Button>
+          )}
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="ml-auto"
+            disabled={busy}
+            onClick={onClose}
+          >
+            {t("cancel")}
+          </Button>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={busy || stale || !!validation}
+          >
+            <Check className="size-4" />
+            {t(busy ? "matchEvents.saving" : "matchEvents.save")}
+          </Button>
+        </LeagueDialogFooter>
+        {remove && (
+          <div className="mx-5 mb-4 flex shrink-0 flex-wrap items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-xs">
+            <span className="flex-1">{t("matchEvents.removeHint")}</span>
+            <Button
+              type="button"
+              size="sm"
+              variant="destructive"
+              disabled={busy || stale}
+              onClick={() => void save(true)}
+            >
+              {t("matchEvents.remove")}
             </Button>
             <Button
-              type="submit"
-              size="sm"
-              disabled={busy || stale || !!validation}
+              type="button"
+              size="icon"
+              variant="ghost"
+              aria-label={t("cancel")}
+              onClick={() => setRemove(false)}
             >
-              <Check className="size-4" />
-              {t(busy ? "matchEvents.saving" : "matchEvents.save")}
+              <X className="size-3" />
             </Button>
           </div>
-          {remove && (
-            <div className="flex flex-wrap items-center gap-2 rounded-md border border-destructive/30 p-3 text-xs">
-              <span className="flex-1">{t("matchEvents.removeHint")}</span>
-              <Button
-                type="button"
-                size="sm"
-                variant="destructive"
-                disabled={busy || stale}
-                onClick={() => void save(true)}
-              >
-                {t("matchEvents.remove")}
-              </Button>
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                aria-label={t("cancel")}
-                onClick={() => setRemove(false)}
-              >
-                <X className="size-3" />
-              </Button>
-            </div>
-          )}
-        </fieldset>
+        )}
       </form>
-    </DialogContent>
+    </LeagueDialogContent>
   );
 }

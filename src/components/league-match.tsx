@@ -706,19 +706,29 @@ export function LeagueMatch({
           <summary className="cursor-pointer text-sm font-medium">
             {t("leagueUx.reportHistory")}
           </summary>
-          <ol className="mt-3 space-y-3 text-sm">
+          <ol className="mt-4 space-y-3 text-sm">
             {history?.map((event) => (
-              <li key={event.id} className="border-t pt-3">
+              <li
+                key={event.id}
+                className="rounded-lg border bg-secondary/15 p-4"
+              >
                 <p>
                   <strong>
                     {t(
                       `leagueUx.reportEvent${event.kind === "recorded" ? "Recorded" : event.kind === "corrected" ? "Corrected" : "Replayed"}`,
                     )}
                   </strong>{" "}
-                  · {event.scoreHome} : {event.scoreAway} · {event.actorName}
+                  <span className="ml-3 inline-flex rounded-md border bg-card px-2 py-1 font-mono font-semibold">
+                    {event.scoreHome} : {event.scoreAway}
+                  </span>
+                  <span className="mt-2 block text-xs text-muted-foreground">
+                    {event.actorName}
+                  </span>
                 </p>
                 {event.reason && (
-                  <p className="mt-1 text-muted-foreground">{event.reason}</p>
+                  <p className="mt-3 border-l-2 border-primary/25 pl-3 text-xs text-muted-foreground">
+                    {event.reason}
+                  </p>
                 )}
               </li>
             ))}

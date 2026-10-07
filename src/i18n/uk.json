@@ -1200,5 +1200,36 @@
       "throw-team-mate": "{actor} кинув {target}, що вдало приземлився",
       "mvp": "{actor} отримав нагороду MVP"
     }
+  },
+  "leagueDesk": {
+    "resultsCount": "Показано {shown} із {total}",
+    "ascending": "За зростанням",
+    "descending": "За спаданням",
+    "searchHistory": "Знайти подію або тренера…",
+    "historyAction": "Тип події",
+    "allActivity": "Усі події",
+    "historyLoaded": "{shown} із {total} завантажених записів",
+    "treasuryHint": "Скоригуйте скарбницю офіційної команди. Перевірте новий баланс і вкажіть причину зміни.",
+    "auditedChange": "Зміну буде записано в історії ліги з вашим ім’ям і причиною.",
+    "rosterFull": "Ростер заповнено",
+    "positionBlocked": "Недоступно після цього матчу",
+    "positionFull": "Досягнуто ліміту позиції",
+    "notEnoughGold": "Недостатньо коштів",
+    "recruitHint": "Оберіть позицію, перегляньте гравця та перевірте залишок скарбниці перед наймом.",
+    "afterHire": "Скарбниця після найму",
+    "readyToAdvance": "Готові до покращення",
+    "rosterFilter": "Фільтр ростера",
+    "allPlayers": "Усі гравці",
+    "unavailable": "Недоступні гравці",
+    "searchSkills": "Знайти покращення…",
+    "afterAdvancement": "Залишок SPP",
+    "playerHint": "Профіль гравця, розвиток кар’єри та дії з ростером.",
+    "openReports": "Незавершені звіти",
+    "postgameTasks": "Післяматчеві завдання",
+    "completedFixtures": "Завершені матчі",
+    "roundComplete": "Цей раунд завершено. Результати та звіти доступні в розділі матчів.",
+    "stockLimit": "Уже найнято максимум",
+    "staffOwned": "У команді",
+    "availablePlayers": "Доступні гравці"
   }
 }

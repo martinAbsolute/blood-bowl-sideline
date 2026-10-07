@@ -70,7 +70,7 @@ vi.mock("../src/components/league-ui", async () => {
   };
 });
 
-it("retains one treasury and one postgame form across career revisions with fresh treasury", async () => {
+it("keeps one open treasury dialog and refreshes its balance across career revisions", async () => {
   const warnings = vi.spyOn(console, "error").mockImplementation(() => {});
   const container = document.createElement("div");
   document.body.append(container);
@@ -92,7 +92,25 @@ it("retains one treasury and one postgame form across career revisions with fres
       expect(
         headings.filter((heading) => heading === "leagueUi.completePostgame"),
       ).toHaveLength(1);
-      const amount = container.querySelector<HTMLInputElement>(
+      if (revision === 1) {
+        await act(async () => {
+          [...container.querySelectorAll<HTMLButtonElement>("button")]
+            .find(
+              (button) =>
+                button.textContent === "leagueUx.careerTab.commissioner",
+            )!
+            .click();
+        });
+        await act(async () => {
+          [...container.querySelectorAll<HTMLButtonElement>("button")]
+            .find(
+              (button) => button.textContent === "leagueUi.correctTreasury",
+            )!
+            .click();
+        });
+      }
+      expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+      const amount = document.querySelector<HTMLInputElement>(
         'input[type="number"]',
       );
       expect(amount?.value).toBe(String(revision * 5000));

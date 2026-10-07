@@ -9,15 +9,15 @@ import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./dialog";
+import { Dialog, DialogTrigger } from "./dialog";
 import { LeagueError, useLeagueAction } from "./league-ui";
+
+import {
+  LeagueDialogBody,
+  LeagueDialogContent,
+  LeagueDialogFooter,
+  LeagueDialogHeader,
+} from "./league-dialog";
 
 export function LeagueDeleteDialog({
   leagueId,
@@ -58,30 +58,38 @@ export function LeagueDeleteDialog({
         <Trash2 className="size-4" aria-hidden="true" />
         {t("leagueUx.deleteLeague")}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md" showCloseButton={!action.busy}>
-        <DialogHeader className="pr-8">
-          <DialogTitle>{t("leagueUx.deleteLeague")}</DialogTitle>
-          <DialogDescription>
-            {t("leagueUx.deleteLeagueHint")}
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={submit} className="space-y-4">
-          <LeagueError message={action.error} />
-          <div className="space-y-2">
-            <label htmlFor={inputId} className="text-sm font-medium">
-              {t("leagueUx.confirmLeagueName", { name })}
-            </label>
-            <Input
-              id={inputId}
-              value={confirmation}
-              onChange={(event) => setConfirmation(event.target.value)}
-              autoComplete="off"
-              spellCheck={false}
-              disabled={action.busy}
-              className="h-10"
-            />
-          </div>
-          <div className="flex justify-end gap-2 border-t pt-4">
+      <LeagueDialogContent
+        className="sm:max-w-md"
+        showCloseButton={!action.busy}
+      >
+        <LeagueDialogHeader
+          title={t("leagueUx.deleteLeague")}
+          description={t("leagueUx.deleteLeagueHint")}
+          icon={<Trash2 className="size-5" />}
+          destructive
+        />
+        <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
+          <LeagueDialogBody>
+            <p className="break-words rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-sm font-semibold">
+              {name}
+            </p>
+            <LeagueError message={action.error} />
+            <div className="space-y-2">
+              <label htmlFor={inputId} className="text-sm font-medium">
+                {t("leagueUx.confirmLeagueName", { name })}
+              </label>
+              <Input
+                id={inputId}
+                value={confirmation}
+                onChange={(event) => setConfirmation(event.target.value)}
+                autoComplete="off"
+                spellCheck={false}
+                disabled={action.busy}
+                className="h-10"
+              />
+            </div>
+          </LeagueDialogBody>
+          <LeagueDialogFooter>
             <Button
               type="button"
               variant="outline"
@@ -101,9 +109,9 @@ export function LeagueDeleteDialog({
               <Trash2 className="size-4" aria-hidden="true" />
               {t("leagueUx.deleteLeague")}
             </Button>
-          </div>
+          </LeagueDialogFooter>
         </form>
-      </DialogContent>
+      </LeagueDialogContent>
     </Dialog>
   );
 }

@@ -9,6 +9,13 @@ import { LeagueEmptyState, LeaguePageHeader } from "./league-layout";
 import { LeagueBack } from "./league-ui";
 import { LeagueSelect } from "./league-field";
 import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import {
+  LeagueDialogBody,
+  LeagueDialogContent,
+  LeagueDialogFooter,
+  LeagueDialogHeader,
+} from "./league-dialog";
 import { rosters, stars, starPairs } from "@/domain/catalog";
 import {
   leagues,
@@ -19,13 +26,7 @@ import {
 import { RosterIcon, StarPlayerIcon } from "./player-icon";
 import { SkillList } from "./skill-box";
 import { LeagueLinks, SpecialRules } from "./team-affiliations";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "./dialog";
+import { Dialog } from "./dialog";
 import {
   Table,
   TableBody,
@@ -247,74 +248,79 @@ export function LeagueReference({ name }: { name: string }) {
           if (!open) setSelectedId(null);
         }}
       >
-        <DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-lg">
+        <LeagueDialogContent className="sm:max-w-lg">
           {selected && (
             <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-3">
-                  <StarPlayerIcon starId={selected.id} className="size-10" />
-                  {selected.name}
-                </DialogTitle>
-                <DialogDescription>
-                  {selected.playerType} · {selected.cost / 1000}k GP
-                </DialogDescription>
-              </DialogHeader>
-              <dl className="grid grid-cols-5 gap-2 rounded-lg border bg-secondary/30 p-3">
-                {["MA", "ST", "AG", "PA", "AV"].map((stat, i) => (
-                  <div key={stat} className="text-center">
-                    <dt className="text-xs text-muted-foreground">{stat}</dt>
-                    <dd className="mt-1 font-mono">
-                      {
-                        [
-                          selected.ma,
-                          selected.st,
-                          selected.ag,
-                          selected.pa,
-                          selected.av,
-                        ][i]
-                      }
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-              <div>
-                <p className="mb-2 text-xs text-muted-foreground">
-                  {t("builtInSkills")}
-                </p>
-                <SkillList ids={selected.skills} />
-              </div>
-              <div className="text-sm">
-                <p className="mb-2 text-xs text-muted-foreground">
-                  {t("playsFor")}
-                </p>
-                <LeagueLinks
-                  names={selected.playsFor.filter((name) =>
-                    leagues.includes(leagueName(name)),
-                  )}
-                />
-                <SpecialRules
-                  names={selected.playsFor.filter((name) =>
-                    name.startsWith("Favoured of"),
-                  )}
-                />
-                {selected.playsFor
-                  .filter(
-                    (name) =>
-                      !leagues.includes(leagueName(name)) &&
-                      !name.startsWith("Favoured of"),
-                  )
-                  .map((name) => (
-                    <p key={name}>{name}</p>
+              <LeagueDialogHeader
+                title={selected.name}
+                description={`${selected.playerType} · ${selected.cost / 1000}k GP`}
+                icon={
+                  <StarPlayerIcon starId={selected.id} className="size-9" />
+                }
+              />
+              <LeagueDialogBody>
+                <dl className="grid grid-cols-5 gap-2 rounded-lg border bg-secondary/30 p-3">
+                  {["MA", "ST", "AG", "PA", "AV"].map((stat, i) => (
+                    <div key={stat} className="text-center">
+                      <dt className="text-xs text-muted-foreground">{stat}</dt>
+                      <dd className="mt-1 font-mono">
+                        {
+                          [
+                            selected.ma,
+                            selected.st,
+                            selected.ag,
+                            selected.pa,
+                            selected.av,
+                          ][i]
+                        }
+                      </dd>
+                    </div>
                   ))}
-              </div>
-              {partner && (
-                <p className="rounded-lg border bg-secondary/30 p-3 text-sm">
-                  {t("pairedHire", { player: partner.name })}
-                </p>
-              )}
+                </dl>
+                <div>
+                  <p className="mb-2 text-xs text-muted-foreground">
+                    {t("builtInSkills")}
+                  </p>
+                  <SkillList ids={selected.skills} />
+                </div>
+                <div className="text-sm">
+                  <p className="mb-2 text-xs text-muted-foreground">
+                    {t("playsFor")}
+                  </p>
+                  <LeagueLinks
+                    names={selected.playsFor.filter((name) =>
+                      leagues.includes(leagueName(name)),
+                    )}
+                  />
+                  <SpecialRules
+                    names={selected.playsFor.filter((name) =>
+                      name.startsWith("Favoured of"),
+                    )}
+                  />
+                  {selected.playsFor
+                    .filter(
+                      (name) =>
+                        !leagues.includes(leagueName(name)) &&
+                        !name.startsWith("Favoured of"),
+                    )
+                    .map((name) => (
+                      <p key={name}>{name}</p>
+                    ))}
+                </div>
+                {partner && (
+                  <p className="rounded-lg border bg-secondary/30 p-3 text-sm">
+                    {t("pairedHire", { player: partner.name })}
+                  </p>
+                )}
+              </LeagueDialogBody>
+              <LeagueDialogFooter>
+                <Button variant="outline" onClick={() => setSelectedId(null)}>
+                  {t("close")}
+                </Button>
+              </LeagueDialogFooter>
             </>
           )}
-        </DialogContent>
+        </LeagueDialogContent>
       </Dialog>
     </div>
   );

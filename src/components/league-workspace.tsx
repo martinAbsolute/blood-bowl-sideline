@@ -836,112 +836,133 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
           )}
           {tab === "manage" && data.canCommission && (
             <div className="space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold">
-                  {t("leagueUx.commissionerDesk")}
-                </h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {t("leagueUx.manageHint")}
-                </p>
-              </div>
-              {league.status !== "registration" && (
-                <LeagueSection title={t("leagueUx.needsAttention")}>
-                  <div className="divide-y">
-                    {unresolved.map((match) => (
-                      <Link
-                        key={match._id}
-                        href={`${base}/matches/${match._id}`}
-                        className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm"
-                      >
-                        <span>
-                          {entryById.get(match.homeEntryId)?.team.name} ·{" "}
-                          {match.awayEntryId
-                            ? entryById.get(match.awayEntryId)?.team.name
-                            : t("leagueUi.bye")}
-                        </span>
-                        <span className="flex items-center gap-2">
-                          <LeagueStatus status={match.status} />
-                          <ArrowRight className="size-4" />
-                        </span>
-                      </Link>
-                    ))}
-                    {pendingPostgame.map((entry) => (
-                      <Link
-                        key={entry._id}
-                        href={`${base}/teams/${entry._id}`}
-                        className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm"
-                      >
-                        <span>{entry.team.name}</span>
-                        <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                          {t("leagueUx.finishPostgame")}
-                          <ArrowRight className="size-4" />
-                        </span>
-                      </Link>
-                    ))}
-                    {!unresolved.length && !pendingPostgame.length && (
-                      <p className="py-2 text-sm text-muted-foreground">
-                        {t(
-                          readyRound
-                            ? "leagueUx.readyForRound"
-                            : "leagueUx.noCommissionerTasks",
-                        )}
-                      </p>
-                    )}
-                  </div>
-                </LeagueSection>
-              )}
-              {rounds.length > 0 && (
-                <LeagueSection title={t("leagueUx.roundManagement")}>
-                  <LeagueField className="mb-5 max-w-sm">
-                    {t("leagueUi.round")}
-                    <LeagueSelect
-                      value={visibleRound?._id ?? ""}
-                      onChange={(event) => setSelectedRound(event.target.value)}
-                    >
-                      {rounds.map((round) => (
-                        <option key={round._id} value={round._id}>
-                          {t("leagueUi.round")} {round.number} ·{" "}
-                          {t(`leagueUi.status.${round.status}`)}
-                        </option>
-                      ))}
-                    </LeagueSelect>
-                  </LeagueField>
-                  {visibleRound && (
-                    <RoundControls
-                      key={visibleRound._id}
-                      round={visibleRound}
-                      busy={action.busy}
-                      onOpen={() =>
-                        action.run(() =>
-                          openRound({ roundId: visibleRound._id }),
-                        )
-                      }
-                      onDeadline={(deadlineAt) =>
-                        action.run(() =>
-                          extendRound({
-                            roundId: visibleRound._id,
-                            deadlineAt,
-                          }),
-                        )
-                      }
-                    />
-                  )}
-                </LeagueSection>
-              )}
-              <details className="rounded-lg border bg-card p-4">
-                <summary className="cursor-pointer text-sm font-semibold text-destructive">
-                  {t("leagueUi.withdrawEntry")}
-                </summary>
-                <div className="mt-5">
-                  <CommissionerWithdrawal entries={entries} />
+              <div className="flex items-start gap-3 rounded-lg border bg-secondary/35 p-4">
+                <ShieldCheck className="mt-1 size-6 shrink-0 text-primary" />
+                <div>
+                  <h2 className="display-font text-xl">
+                    {t("leagueUx.commissionerDesk")}
+                  </h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {t("leagueUx.manageHint")}
+                  </p>
                 </div>
-              </details>
-              <LeagueSection title={t("leagueUx.deleteLeague")}>
-                <p className="text-sm text-muted-foreground">
-                  {t("leagueUx.deleteLeagueHint")}
-                </p>
-                <LeagueDeleteDialog leagueId={id} name={league.name} />
-              </LeagueSection>
+              </div>
+              <dl className="grid grid-cols-3 gap-3">
+                {[
+                  [t("leagueDesk.openReports"), unresolved.length],
+                  [t("leagueDesk.postgameTasks"), pendingPostgame.length],
+                  [t("leagueDesk.completedFixtures"), finished],
+                ].map(([label, value]) => (
+                  <div
+                    key={String(label)}
+                    className="min-w-0 rounded-lg border bg-card p-3 sm:p-4"
+                  >
+                    <dt className="text-[11px] leading-4 text-muted-foreground">
+                      {label}
+                    </dt>
+                    <dd className="mt-2 font-mono text-2xl font-semibold text-primary">
+                      {value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              <div className="grid items-start gap-5 xl:grid-cols-2">
+                {league.status !== "registration" && (
+                  <LeagueSection title={t("leagueUx.needsAttention")}>
+                    <div className="space-y-2">
+                      {unresolved.map((match) => (
+                        <Link
+                          key={match._id}
+                          href={`${base}/matches/${match._id}`}
+                          className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-secondary/15 p-3 text-sm hover:bg-secondary/40"
+                        >
+                          <span>
+                            {entryById.get(match.homeEntryId)?.team.name} ·{" "}
+                            {match.awayEntryId
+                              ? entryById.get(match.awayEntryId)?.team.name
+                              : t("leagueUi.bye")}
+                          </span>
+                          <span className="flex items-center gap-2">
+                            <LeagueStatus status={match.status} />
+                            <ArrowRight className="size-4" />
+                          </span>
+                        </Link>
+                      ))}
+                      {pendingPostgame.map((entry) => (
+                        <Link
+                          key={entry._id}
+                          href={`${base}/teams/${entry._id}`}
+                          className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-secondary/15 p-3 text-sm hover:bg-secondary/40"
+                        >
+                          <span>{entry.team.name}</span>
+                          <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                            {t("leagueUx.finishPostgame")}
+                            <ArrowRight className="size-4" />
+                          </span>
+                        </Link>
+                      ))}
+                      {!unresolved.length && !pendingPostgame.length && (
+                        <p className="py-2 text-sm text-muted-foreground">
+                          {t(
+                            readyRound
+                              ? "leagueUx.readyForRound"
+                              : "leagueUx.noCommissionerTasks",
+                          )}
+                        </p>
+                      )}
+                    </div>
+                  </LeagueSection>
+                )}
+                {rounds.length > 0 && (
+                  <LeagueSection title={t("leagueUx.roundManagement")}>
+                    <LeagueField className="mb-5 max-w-sm">
+                      {t("leagueUi.round")}
+                      <LeagueSelect
+                        value={visibleRound?._id ?? ""}
+                        onChange={(event) =>
+                          setSelectedRound(event.target.value)
+                        }
+                      >
+                        {rounds.map((round) => (
+                          <option key={round._id} value={round._id}>
+                            {t("leagueUi.round")} {round.number} ·{" "}
+                            {t(`leagueUi.status.${round.status}`)}
+                          </option>
+                        ))}
+                      </LeagueSelect>
+                    </LeagueField>
+                    {visibleRound && (
+                      <RoundControls
+                        key={visibleRound._id}
+                        round={visibleRound}
+                        busy={action.busy}
+                        onOpen={() =>
+                          action.run(() =>
+                            openRound({ roundId: visibleRound._id }),
+                          )
+                        }
+                        onDeadline={(deadlineAt) =>
+                          action.run(() =>
+                            extendRound({
+                              roundId: visibleRound._id,
+                              deadlineAt,
+                            }),
+                          )
+                        }
+                      />
+                    )}
+                  </LeagueSection>
+                )}
+              </div>
+              <div className="grid items-start gap-5 xl:grid-cols-2">
+                <CommissionerWithdrawal entries={entries} />
+                <LeagueSection title={t("leagueUx.deleteLeague")}>
+                  <p className="text-sm text-muted-foreground">
+                    {t("leagueUx.deleteLeagueHint")}
+                  </p>
+                  <LeagueDeleteDialog leagueId={id} name={league.name} />
+                </LeagueSection>
+              </div>
             </div>
           )}
           {tab === "standings" && (
@@ -1113,17 +1134,26 @@ function RoundControls({
 }) {
   const t = useTranslations();
   const [deadline, setDeadline] = useState("");
+  if (round.status === "completed")
+    return (
+      <div className="rounded-lg border bg-secondary/25 p-4">
+        <LeagueStatus status={round.status} />
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+          {t("leagueDesk.roundComplete")}
+        </p>
+      </div>
+    );
   return (
-    <div className="mb-4 flex flex-wrap items-end gap-3 rounded-lg border bg-secondary/20 p-3">
+    <div className="space-y-4">
       {round.status === "pending" && (
         <Button className="h-10" disabled={busy} onClick={() => void onOpen()}>
           {t("leagueUi.openRound")}
         </Button>
       )}
-      <LeagueField className="min-w-48 flex-1">
+      <LeagueField className="min-w-0">
         {t("leagueUi.deadline")}
         <Input
-          className="mt-1 h-10"
+          className="mt-1 h-11 w-full"
           type="datetime-local"
           value={deadline || localDateInput(round.deadlineAt)}
           onChange={(event) => setDeadline(event.target.value)}
@@ -1135,7 +1165,11 @@ function RoundControls({
         disabled={
           busy || !deadline || !Number.isFinite(new Date(deadline).getTime())
         }
-        onClick={() => void onDeadline(new Date(deadline).getTime())}
+        onClick={() =>
+          void onDeadline(new Date(deadline).getTime()).then((saved) => {
+            if (saved) setDeadline("");
+          })
+        }
       >
         {t("leagueUi.changeDeadline")}
       </Button>
