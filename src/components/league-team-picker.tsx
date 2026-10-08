@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "gt-next";
-import { Check, ChevronDown, Search, Users } from "lucide-react";
+import { Check, ChevronDown, Search, Star, Users } from "lucide-react";
+import { favoritesFirst } from "@/lib/team-library";
 import type { Team } from "@/domain/types";
 import { getRoster, rosters } from "@/domain/catalog";
 import { DEFAULT_LEAGUE_TREASURY } from "@/domain/league-rules";
@@ -37,7 +38,7 @@ export function LeagueTeamPicker({
   leagueId,
   onOpenChange,
 }: {
-  teams: { team: Team; leagueExperienced?: boolean }[];
+  teams: { team: Team; leagueExperienced?: boolean; favorite?: boolean }[];
   value: string;
   onChange: (uuid: string) => void;
   status: string;
@@ -64,8 +65,9 @@ export function LeagueTeamPicker({
     )
     .sort(
       (a, b) =>
+        favoritesFirst(a, b) ||
         Number(canEnrollTeam(b, startingTreasury)) -
-        Number(canEnrollTeam(a, startingTreasury)),
+          Number(canEnrollTeam(a, startingTreasury)),
     );
   return (
     <Dialog
@@ -161,6 +163,12 @@ export function LeagueTeamPicker({
                           k
                         </span>
                       </span>
+                      {row.favorite && (
+                        <Star
+                          aria-label={t("favoriteTeam")}
+                          className="size-4 shrink-0 fill-current text-orange-400"
+                        />
+                      )}
                       {ready && (
                         <span
                           className={`flex size-6 shrink-0 items-center justify-center rounded-full border ${value === team.uuid ? "border-lime-200 bg-lime-200 text-primary" : "border-white/40 text-white"}`}

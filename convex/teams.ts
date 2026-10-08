@@ -27,6 +27,7 @@ export const getByUuid = query({
     const leagueState = await teamLeagueState(ctx, doc);
     return {
       team: doc.team,
+      favorite: viewer?._id === doc.ownerId ? doc.favorite : undefined,
       draftLeagueId: doc.draftLeagueId,
       revision: doc.revision,
       legal: doc.legal,
@@ -53,13 +54,14 @@ export const listMine = query({
     paginationOpts: paginationOptsValidator,
     archived: v.boolean(),
     search: v.optional(v.string()),
+    favoritesOnly: v.optional(v.boolean()),
     rosterId: v.optional(v.string()),
     rulesetId: v.optional(teamValidator.fields.rulesetId),
   },
   returns: paginationResultValidator(publicTeam),
   handler: async (
     ctx,
-    { paginationOpts, archived, search, rosterId, rulesetId },
+    { paginationOpts, archived, search, rosterId, rulesetId, favoritesOnly },
   ) => {
     const owner = await getAuthUserId(ctx);
     if (!owner) throw new ConvexError("UNAUTHENTICATED");
@@ -76,6 +78,7 @@ export const listMine = query({
     )
       throw new ConvexError("INVALID_INPUT");
     const text = search?.trim();
+    if (favoritesOnly && !text) throw new ConvexError("INVALID_INPUT");
     const table = ctx.db.query("teams");
     const source = text
       ? table.withSearchIndex("search_library", (q) => {
@@ -85,38 +88,45 @@ export const listMine = query({
             .eq("archived", archived);
           if (rosterId) filter = filter.eq("team.rosterId", rosterId);
           if (rulesetId) filter = filter.eq("team.rulesetId", rulesetId);
+          if (favoritesOnly) filter = filter.eq("favorite", true);
           return filter;
         })
       : rosterId && rulesetId
         ? table
-            .withIndex("by_owner_archive_roster_ruleset", (q) =>
-              q
-                .eq("ownerId", owner)
-                .eq("archived", archived)
-                .eq("team.rosterId", rosterId)
-                .eq("team.rulesetId", rulesetId),
+            .withIndex(
+              "by_ownerId_and_archived_and_roster_and_ruleset_and_favorite",
+              (q) =>
+                q
+                  .eq("ownerId", owner)
+                  .eq("archived", archived)
+                  .eq("team.rosterId", rosterId)
+                  .eq("team.rulesetId", rulesetId),
             )
             .order("desc")
         : rosterId
           ? table
-              .withIndex("by_owner_archive_roster", (q) =>
-                q
-                  .eq("ownerId", owner)
-                  .eq("archived", archived)
-                  .eq("team.rosterId", rosterId),
+              .withIndex(
+                "by_ownerId_and_archived_and_roster_and_favorite",
+                (q) =>
+                  q
+                    .eq("ownerId", owner)
+                    .eq("archived", archived)
+                    .eq("team.rosterId", rosterId),
               )
               .order("desc")
           : rulesetId
             ? table
-                .withIndex("by_owner_archive_ruleset", (q) =>
-                  q
-                    .eq("ownerId", owner)
-                    .eq("archived", archived)
-                    .eq("team.rulesetId", rulesetId),
+                .withIndex(
+                  "by_ownerId_and_archived_and_ruleset_and_favorite",
+                  (q) =>
+                    q
+                      .eq("ownerId", owner)
+                      .eq("archived", archived)
+                      .eq("team.rulesetId", rulesetId),
                 )
                 .order("desc")
             : table
-                .withIndex("by_ownerId_and_archived", (q) =>
+                .withIndex("by_ownerId_and_archived_and_favorite", (q) =>
                   q.eq("ownerId", owner).eq("archived", archived),
                 )
                 .order("desc");
@@ -138,6 +148,7 @@ export const listMine = query({
           const leagueState = await teamLeagueState(ctx, d);
           return {
             team: d.team,
+            favorite: d.favorite,
             draftLeagueId: d.draftLeagueId,
             revision: d.revision,
             legal: d.legal,
@@ -154,6 +165,8 @@ export const save = mutation({
   args: {
     team: teamValidator,
     expectedRevision: v.number(),
+    // Only used on initial upload. Roster saves must not overwrite preferences.
+    favorite: v.optional(v.boolean()),
     leagueId: v.optional(v.id("leagues")),
   },
   returns: publicTeam,
@@ -213,6 +226,7 @@ export const save = mutation({
       )
         return {
           team: existing.team,
+          favorite: existing.favorite,
           draftLeagueId: existing.draftLeagueId,
           revision: existing.revision,
           updatedAt: existing.updatedAt,
@@ -241,6 +255,7 @@ export const save = mutation({
       });
     else
       await ctx.db.insert("teams", {
+        favorite: args.favorite ? true : undefined,
         ownerId,
         uuid: team.uuid,
         team,
@@ -253,6 +268,8 @@ export const save = mutation({
       });
     return {
       team,
+      favorite:
+        existing?.favorite ?? (!existing && args.favorite ? true : undefined),
       draftLeagueId,
       revision,
       updatedAt,
@@ -278,12 +295,32 @@ export const setArchived = mutation({
       throw new ConvexError("FORBIDDEN");
     if (archived && (await teamLeagueState(ctx, doc)).leagueLocked)
       throw new ConvexError("TEAM_IN_LEAGUE");
+    if (archived && doc.favorite) throw new ConvexError("TEAM_FAVORITED");
     if (doc.archived === archived) return null;
     await ctx.db.patch(doc._id, {
       archived,
       updatedAt: Date.now(),
       revision: doc.revision + 1,
     });
+    return null;
+  },
+});
+
+export const setFavorite = mutation({
+  args: { uuid: v.string(), favorite: v.boolean() },
+  returns: v.null(),
+  handler: async (ctx, { uuid, favorite }) => {
+    const viewer = await requireUser(ctx);
+    if (!z.uuid().safeParse(uuid).success)
+      throw new ConvexError("INVALID_INPUT");
+    const doc = await ctx.db
+      .query("teams")
+      .withIndex("by_uuid", (q) => q.eq("uuid", uuid))
+      .unique();
+    if (!doc || doc.ownerId !== viewer._id) throw new ConvexError("FORBIDDEN");
+    if (doc.archived) throw new ConvexError("ARCHIVED");
+    // Preferences do not alter roster revisions or conflict with open editors.
+    await ctx.db.patch(doc._id, { favorite: favorite ? true : undefined });
     return null;
   },
 });

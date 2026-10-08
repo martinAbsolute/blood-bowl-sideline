@@ -16,6 +16,8 @@ import {
   draftSnapshot,
   parseDrafts,
   removeDraft,
+  readDraftFavorite,
+  setDraftFavorite,
   subscribeDrafts,
 } from "@/lib/drafts";
 import { Button } from "./ui/button";
@@ -31,15 +33,17 @@ import {
   Search,
   LoaderCircle,
   ChevronDown,
+  Star,
 } from "lucide-react";
 import { LoginButton } from "./site-shell";
 import { toast } from "@/components/ui/toast";
 import { LibraryHeader } from "./library-header";
 import { TeamCard } from "./team-card";
 import { useDraftSync } from "./draft-sync-provider";
-import { libraryMatches } from "@/lib/team-library";
+import { favoritesFirst, libraryMatches } from "@/lib/team-library";
 import { finishDraftSignIn } from "@/lib/draft-sign-in";
 import { waitForTeamSave } from "@/lib/cloud-save";
+import { withDraftPreferenceLock } from "@/lib/draft-lock";
 import { LibraryCardsLoading } from "./loading-layouts";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import {
@@ -84,6 +88,8 @@ export function TeamLibrary() {
       : "skip",
   );
   const confirmationLocked = !!confirmedTeam?.leagueLocked;
+  const confirmationFavorited =
+    confirmation?.action === "archive" && !!confirmedTeam?.favorite;
   const confirmationLoading =
     confirmationOpen &&
     !!confirmation &&
@@ -92,6 +98,7 @@ export function TeamLibrary() {
     confirmedTeam === undefined;
   const permanentlyDelete = useMutation(api.teams.deleteArchived);
   const archive = useMutation(api.teams.setArchived);
+  const setFavorite = useMutation(api.teams.setFavorite);
   const { results, status, loadMore } = usePaginatedQuery(
     api.teams.listMine,
     isAuthenticated
@@ -104,6 +111,27 @@ export function TeamLibrary() {
       : "skip",
     { initialNumItems: 18 },
   );
+  // Full-text search orders by relevance. Fetch its favorite partition first,
+  // so favorites beyond the regular first page are still pinned above it.
+  const searchingFavorites = isAuthenticated && !!deferredSearch.trim();
+  const favoriteSearch = usePaginatedQuery(
+    api.teams.listMine,
+    searchingFavorites
+      ? {
+          archived: false,
+          search: deferredSearch,
+          favoritesOnly: true,
+          rosterId: rosterId || undefined,
+          rulesetId: rulesetId || undefined,
+        }
+      : "skip",
+    { initialNumItems: 18 },
+  );
+  const favoritesPending =
+    searchingFavorites && favoriteSearch.status !== "Exhausted";
+  const listStatus = favoritesPending ? favoriteSearch.status : status;
+  const loadNext = () =>
+    favoritesPending ? favoriteSearch.loadMore(18) : loadMore(18);
   const [settledResults, setSettledResults] = useState<{
     account: string;
     results: typeof results;
@@ -127,7 +155,10 @@ export function TeamLibrary() {
     : [];
   const raw = useSyncExternalStore(subscribeDrafts, draftSnapshot, () => "[]");
   const leagueTeams = new Map(
-    visibleResults.map((row) => [row.team.uuid, row]),
+    [
+      ...visibleResults,
+      ...(searchingFavorites ? favoriteSearch.results : []),
+    ].map((row) => [row.team.uuid, row]),
   );
   const locals = parseDrafts(raw).filter((team) => {
     const owner = draftAccount(team.uuid);
@@ -157,19 +188,51 @@ export function TeamLibrary() {
       )
       .map((team) => ({
         team,
+        favorite: leagueTeams.has(team.uuid)
+          ? !!leagueTeams.get(team.uuid)?.favorite
+          : readDraftFavorite(team.uuid),
         local: true,
         leagueLocked: false,
         leagueExperienced: leagueTeams.get(team.uuid)?.leagueExperienced,
       })),
-    ...visibleResults
+    ...Array.from(leagueTeams.values())
+      .filter((row) => !favoritesPending || row.favorite)
       .filter(
         ({ team, leagueLocked }) => leagueLocked || !pending.has(team.uuid),
       )
       .map((row) => ({ ...row, local: false })),
-  ];
+  ].sort(favoritesFirst);
   const filtered = !!(search || rosterId || rulesetId);
+  async function toggleFavorite(team: Team, favorite: boolean) {
+    if (busy || isLoading) return;
+    setBusy(team.uuid);
+    const release = sync.editing(team.uuid);
+    try {
+      // An upload may finish between rendering the draft and clicking its star.
+      await waitForTeamSave(team.uuid);
+      await withDraftPreferenceLock(team.uuid, async () => {
+        const saved = isAuthenticated
+          ? await convex.query(api.teams.getByUuid, { uuid: team.uuid })
+          : null;
+        if (saved) await setFavorite({ uuid: team.uuid, favorite });
+        const updatedDraft = setDraftFavorite(team.uuid, favorite);
+        if (!saved && !updatedDraft)
+          throw new Error("Team no longer available");
+      });
+    } catch {
+      toast.add({ type: "error", title: t("saveFailed") });
+    } finally {
+      release();
+      setBusy(null);
+    }
+  }
   async function toggleArchive(team: Team, nextArchived: boolean) {
-    if (busy || (nextArchived && leagueTeams.get(team.uuid)?.leagueLocked))
+    if (
+      busy ||
+      (nextArchived &&
+        (leagueTeams.get(team.uuid)?.leagueLocked ||
+          leagueTeams.get(team.uuid)?.favorite))
+    )
       return;
     setBusy(team.uuid);
     const release = sync.editing(team.uuid);
@@ -306,14 +369,16 @@ export function TeamLibrary() {
         aria-label={t("myTeams")}
         aria-busy={
           search !== deferredSearch ||
-          (isAuthenticated && status === "LoadingFirstPage")
+          (isAuthenticated && listStatus === "LoadingFirstPage")
         }
       >
         {cards.length === 0 &&
         (!sync.ready ||
           isLoading ||
+          (searchingFavorites &&
+            favoriteSearch.status === "LoadingFirstPage") ||
           (isAuthenticated &&
-            status === "LoadingFirstPage" &&
+            listStatus === "LoadingFirstPage" &&
             !cachedResults)) ? (
           <LibraryCardsLoading label={t("loading")} text={(key) => t(key)} />
         ) : cards.length === 0 ? (
@@ -343,72 +408,116 @@ export function TeamLibrary() {
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {cards.map(({ team, local, leagueLocked, leagueExperienced }) => (
-              <TeamCard
-                key={team.uuid}
-                team={team}
-                leagueLocked={leagueLocked}
-                leagueExperienced={leagueExperienced}
-                href={`/teams/${team.uuid}`}
-                saveState={
-                  local
-                    ? isAuthenticated
-                      ? sync.failed.has(team.uuid) || !team.name.trim()
-                        ? "error"
-                        : "pending"
-                      : "device"
-                    : "cloud"
-                }
-                action={
-                  local ? (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={leagueLocked || busy !== null || isLoading}
-                      aria-label={`${t(isAuthenticated ? "discardDraft" : "remove")} ${team.name}`}
-                      onClick={() =>
-                        requestConfirmation({ team, action: "delete" })
-                      }
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
-                  ) : (
-                    <Tooltip>
-                      <TooltipTrigger
-                        render={
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            disabled={leagueLocked || busy !== null}
-                            aria-label={`${t("archive")} ${team.name}`}
-                            onClick={() =>
-                              requestConfirmation({ team, action: "archive" })
-                            }
+            {cards.map(
+              ({ team, local, leagueLocked, leagueExperienced, favorite }) => (
+                <TeamCard
+                  key={team.uuid}
+                  team={team}
+                  leagueLocked={leagueLocked}
+                  leagueExperienced={leagueExperienced}
+                  href={`/teams/${team.uuid}`}
+                  saveState={
+                    local
+                      ? isAuthenticated
+                        ? sync.failed.has(team.uuid) || !team.name.trim()
+                          ? "error"
+                          : "pending"
+                        : "device"
+                      : "cloud"
+                  }
+                  action={
+                    <>
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-orange-600 hover:bg-orange-500/10 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-400"
+                              disabled={busy !== null || isLoading}
+                              aria-label={`${t(favorite ? "removeFavorite" : "addFavorite")} ${team.name}`}
+                              aria-pressed={!!favorite}
+                              onClick={() =>
+                                void toggleFavorite(team, !favorite)
+                              }
+                            />
+                          }
+                        >
+                          <Star
+                            aria-hidden="true"
+                            className={`size-4 ${favorite ? "fill-current" : "fill-none"}`}
                           />
-                        }
-                      >
-                        {busy === team.uuid ? (
-                          <LoaderCircle className="size-4 animate-spin" />
-                        ) : (
-                          <Archive className="size-4" />
-                        )}
-                      </TooltipTrigger>
-                      <TooltipContent>{t("archiveLabel")}</TooltipContent>
-                    </Tooltip>
-                  )
-                }
-              />
-            ))}
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {t(favorite ? "removeFavorite" : "addFavorite")}
+                        </TooltipContent>
+                      </Tooltip>
+                      {local ? (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={leagueLocked || busy !== null || isLoading}
+                          aria-label={`${t(isAuthenticated ? "discardDraft" : "remove")} ${team.name}`}
+                          onClick={() =>
+                            requestConfirmation({ team, action: "delete" })
+                          }
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      ) : (
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                disabled={
+                                  leagueLocked || !!favorite || busy !== null
+                                }
+                                focusableWhenDisabled={!!favorite}
+                                className="aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+                                aria-label={`${t("archive")} ${team.name}`}
+                                onClick={() =>
+                                  requestConfirmation({
+                                    team,
+                                    action: "archive",
+                                  })
+                                }
+                              />
+                            }
+                          >
+                            {busy === team.uuid ? (
+                              <LoaderCircle className="size-4 animate-spin" />
+                            ) : (
+                              <Archive className="size-4" />
+                            )}
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {t(
+                              favorite
+                                ? "unfavoriteBeforeArchive"
+                                : leagueLocked
+                                  ? "teamRemovalLocked"
+                                  : "archiveLabel",
+                            )}
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </>
+                  }
+                />
+              ),
+            )}
           </div>
         )}
-        {isAuthenticated && status === "CanLoadMore" && (
+        {isAuthenticated && listStatus === "CanLoadMore" && (
           <div className="mt-7 text-center">
-            <Button variant="outline" onClick={() => loadMore(18)}>
+            <Button variant="outline" onClick={loadNext}>
               {t("loadMore")}
             </Button>
           </div>
         )}
-        {isAuthenticated && status === "LoadingMore" && (
+        {isAuthenticated && listStatus === "LoadingMore" && (
           <p
             role="status"
             className="mt-7 text-center text-sm text-muted-foreground"
@@ -466,13 +575,15 @@ export function TeamLibrary() {
             </AlertDialogTitle>
             <AlertDialogDescription>
               {t(
-                confirmationLocked
-                  ? "teamRemovalLocked"
-                  : confirmation?.action === "archive"
-                    ? "confirmArchiveTeamHint"
-                    : confirmation?.action === "permanent-delete"
-                      ? "confirmPermanentDeleteTeamHint"
-                      : "confirmDeleteTeamHint",
+                confirmationFavorited
+                  ? "unfavoriteBeforeArchive"
+                  : confirmationLocked
+                    ? "teamRemovalLocked"
+                    : confirmation?.action === "archive"
+                      ? "confirmArchiveTeamHint"
+                      : confirmation?.action === "permanent-delete"
+                        ? "confirmPermanentDeleteTeamHint"
+                        : "confirmDeleteTeamHint",
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -483,10 +594,18 @@ export function TeamLibrary() {
             <AlertDialogAction
               variant="destructive"
               disabled={
-                busy !== null || confirmationLocked || confirmationLoading
+                busy !== null ||
+                confirmationLocked ||
+                confirmationFavorited ||
+                confirmationLoading
               }
               onClick={() => {
-                if (!confirmation || confirmationLocked || confirmationLoading)
+                if (
+                  !confirmation ||
+                  confirmationLocked ||
+                  confirmationFavorited ||
+                  confirmationLoading
+                )
                   return;
                 if (confirmation.action === "archive")
                   void toggleArchive(confirmation.team, true);

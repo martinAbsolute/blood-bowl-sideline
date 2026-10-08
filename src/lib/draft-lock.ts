@@ -3,6 +3,16 @@
 export const DRAFT_EDITOR_RELEASED = "bbsideline:editor-released";
 const lockName = (uuid: string) => `bbsideline:editor:${uuid}`;
 
+// Wait for another tab's background upload before changing draft metadata.
+// A shared editor lock then prevents it from deleting that metadata mid-change.
+export async function withDraftPreferenceLock(
+  uuid: string,
+  update: () => Promise<void>,
+) {
+  if (!navigator.locks) return update();
+  return navigator.locks.request(lockName(uuid), { mode: "shared" }, update);
+}
+
 export function holdDraftEditor(uuid: string) {
   let release = () => {};
   const held = new Promise<void>((resolve) => {

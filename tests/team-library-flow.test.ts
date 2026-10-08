@@ -13,6 +13,8 @@ import {
   normalizeStoredDrafts,
   readDraftRevision,
   DRAFTS_KEY,
+  readDraftFavorite,
+  setDraftFavorite,
 } from "../src/lib/drafts";
 import { saveCloudDraft } from "../src/lib/cloud-save";
 import { DRAFT_EDITOR_RELEASED } from "../src/lib/draft-lock";
@@ -39,11 +41,22 @@ const mocks = vi.hoisted(() => ({
   push: vi.fn(),
   query: vi.fn(),
   selectedTeam: null as { leagueLocked: boolean } | null | undefined,
-  results: [] as { team: ReturnType<typeof newTeam>; leagueLocked?: boolean }[],
+  results: [] as {
+    team: ReturnType<typeof newTeam>;
+    leagueLocked?: boolean;
+    favorite?: boolean;
+  }[],
   archivedResults: [] as { team: ReturnType<typeof newTeam> }[],
   activeStatus: "Exhausted" as "Exhausted" | "LoadingFirstPage",
   archivedStatus: "Exhausted" as "Exhausted" | "LoadingFirstPage",
   libraryQueries: vi.fn(),
+  favoriteResults: [] as {
+    team: ReturnType<typeof newTeam>;
+    favorite?: boolean;
+  }[],
+  favoriteStatus: "Exhausted" as
+    "Exhausted" | "CanLoadMore" | "LoadingFirstPage",
+  loadFavorites: vi.fn(),
 }));
 vi.mock("convex/react", () => ({
   useConvexAuth: () => ({
@@ -59,15 +72,25 @@ vi.mock("convex/react", () => ({
         : null,
   useMutation: () =>
     Object.assign(mocks.save, { withOptimisticUpdate: () => mocks.save }),
-  usePaginatedQuery: (_ref: unknown, args: { archived: boolean } | "skip") => ({
+  usePaginatedQuery: (
+    _ref: unknown,
+    args: { archived: boolean; favoritesOnly?: boolean } | "skip",
+  ) => ({
     results:
       (mocks.libraryQueries(args),
-      args !== "skip" && args.archived ? mocks.archivedResults : mocks.results),
+      args !== "skip" && args.favoritesOnly
+        ? mocks.favoriteResults
+        : args !== "skip" && args.archived
+          ? mocks.archivedResults
+          : mocks.results),
     status:
-      args !== "skip" && args.archived
-        ? mocks.archivedStatus
-        : mocks.activeStatus,
-    loadMore: vi.fn(),
+      args !== "skip" && args.favoritesOnly
+        ? mocks.favoriteStatus
+        : args !== "skip" && args.archived
+          ? mocks.archivedStatus
+          : mocks.activeStatus,
+    loadMore:
+      args !== "skip" && args.favoritesOnly ? mocks.loadFavorites : vi.fn(),
   }),
 }));
 vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
@@ -101,6 +124,9 @@ beforeEach(() => {
   mocks.activeStatus = "Exhausted";
   mocks.archivedStatus = "Exhausted";
   mocks.libraryQueries.mockClear();
+  mocks.favoriteResults = [];
+  mocks.favoriteStatus = "Exhausted";
+  mocks.loadFavorites.mockClear();
   mocks.selectedTeam = null;
   mocks.query.mockReset().mockResolvedValue(null);
   mocks.push.mockReset();
@@ -130,6 +156,231 @@ function renderSync() {
     createElement(DraftSyncProvider, null, createElement(Status)),
   );
 }
+it("toggles draft stars without navigation, reorders cards, and preserves the preference through edits and upload", async () => {
+  const first = { ...newTeam(randomUUID()), name: "First" };
+  const favorite = { ...newTeam(randomUUID()), name: "Favorite" };
+  storeDraft(favorite);
+  storeDraft(first);
+  const view = () =>
+    createElement(DraftSyncProvider, null, createElement(TeamLibrary));
+  await act(async () => root.render(view()));
+  const star = container.querySelector<HTMLButtonElement>(
+    'button[aria-label="addFavorite Favorite"]',
+  )!;
+  expect(star.getAttribute("aria-pressed")).toBe("false");
+  expect(star.querySelector("svg")?.classList.contains("fill-none")).toBe(true);
+  await act(async () => star.click());
+  expect(mocks.push).not.toHaveBeenCalled();
+  expect(container.querySelector("article h2")?.textContent).toBe("Favorite");
+  expect(readDraftFavorite(favorite.uuid)).toBe(true);
+  await act(async () => {
+    storeDraft({ ...favorite, name: "Edited favorite" });
+    normalizeStoredDrafts();
+  });
+  expect(readDraftFavorite(favorite.uuid)).toBe(true);
+  expect(
+    container
+      .querySelector('button[aria-label="removeFavorite Edited favorite"]')
+      ?.getAttribute("aria-pressed"),
+  ).toBe("true");
+  const backend = convexTest(schema, import.meta.glob("../convex/**/*.ts"));
+  const id = await backend.run((ctx) =>
+    ctx.db.insert("users", { name: "Coach" }),
+  );
+  const owner = backend.withIdentity({ subject: id });
+  mocks.save.mockImplementation((args) => owner.mutation(api.teams.save, args));
+  mocks.authenticated = true;
+  mocks.account = id;
+  await act(async () => root.render(view()));
+  await tick();
+  await act(async () => {
+    await mocks.save.mock.results[0].value;
+  });
+  await tick();
+  await act(async () => {
+    await mocks.save.mock.results[1].value;
+  });
+  expect(readDrafts()).toEqual([]);
+  expect(
+    (await owner.query(api.teams.getByUuid, { uuid: favorite.uuid }))?.favorite,
+  ).toBe(true);
+  mocks.results = (
+    await owner.query(api.teams.listMine, {
+      archived: false,
+      paginationOpts: { cursor: null, numItems: 18 },
+    })
+  ).page;
+  await act(async () => root.render(view()));
+  expect(container.querySelector("article h2")?.textContent).toBe(
+    "Edited favorite",
+  );
+  expect(
+    container
+      .querySelector('button[aria-label="removeFavorite Edited favorite"]')
+      ?.getAttribute("aria-pressed"),
+  ).toBe("true");
+});
+
+it("blocks archive for a favorite with a focusable explanation, while keeping favorite controls off archived cards", async () => {
+  const team = { ...newTeam(randomUUID()), name: "Pinned" };
+  mocks.authenticated = true;
+  mocks.results = [{ team, favorite: true }];
+  mocks.archivedResults = [
+    { team: { ...team, uuid: randomUUID(), name: "Archived" } },
+  ];
+  mocks.query.mockResolvedValue({ team, favorite: true });
+  await act(async () => root.render(createElement(TeamLibrary)));
+  const archive = container.querySelector<HTMLButtonElement>(
+    'button[aria-label="archive Pinned"]',
+  )!;
+  expect(archive.getAttribute("aria-disabled")).toBe("true");
+  await act(async () => archive.click());
+  expect(document.querySelector('[role="alertdialog"]')).toBeNull();
+  await act(async () => {
+    archive.focus();
+    await vi.advanceTimersByTimeAsync(700);
+  });
+  expect(document.body.textContent).toContain("unfavoriteBeforeArchive");
+  await act(async () =>
+    container
+      .querySelector<HTMLButtonElement>(
+        'button[aria-label="removeFavorite Pinned"]',
+      )!
+      .click(),
+  );
+  expect(mocks.save).toHaveBeenCalledWith({ uuid: team.uuid, favorite: false });
+  mocks.results = [{ team, favorite: false }];
+  await act(async () => root.render(createElement(TeamLibrary)));
+  expect(archive.getAttribute("aria-disabled")).not.toBe("true");
+  await act(async () =>
+    container
+      .querySelector<HTMLButtonElement>('[aria-controls="team-archive"]')!
+      .click(),
+  );
+  expect(
+    container.querySelector("#team-archive button[aria-pressed]"),
+  ).toBeNull();
+});
+
+it("waits for an in-flight upload before applying a draft favorite to the saved team", async () => {
+  const team = { ...newTeam(randomUUID()), name: "Uploading" };
+  storeDraft(team);
+  mocks.authenticated = true;
+  let complete!: (result: { revision: number }) => void;
+  const upload = saveCloudDraft(
+    team,
+    0,
+    () =>
+      new Promise((resolve) => {
+        complete = resolve;
+      }),
+  );
+  mocks.query.mockResolvedValue({ team });
+  await act(async () => root.render(createElement(TeamLibrary)));
+  await act(async () =>
+    container
+      .querySelector<HTMLButtonElement>(
+        'button[aria-label="addFavorite Uploading"]',
+      )!
+      .click(),
+  );
+  expect(mocks.save).not.toHaveBeenCalled();
+  await act(async () => {
+    complete({ revision: 1 });
+    await upload;
+  });
+  expect(mocks.save).toHaveBeenCalledWith({ uuid: team.uuid, favorite: true });
+  expect(readDrafts()).toEqual([]);
+});
+
+it("unfavorites a guest draft and retains its preference across normalization", async () => {
+  const team = newTeam(randomUUID());
+  storeDraft(team);
+  setDraftFavorite(team.uuid, true);
+  await act(async () => root.render(createElement(TeamLibrary)));
+  await act(async () =>
+    container
+      .querySelector<HTMLButtonElement>(
+        'button[aria-label^="removeFavorite "]',
+      )!
+      .click(),
+  );
+  normalizeStoredDrafts();
+  expect(readDraftFavorite(team.uuid)).toBe(false);
+});
+
+it("loads matching favorites before regular search pages and deduplicates overlapping results", async () => {
+  const regular = { ...newTeam(randomUUID()), name: "Regular Humans" };
+  const favorite = { ...newTeam(randomUUID()), name: "Favorite Humans" };
+  const older = { ...newTeam(randomUUID()), name: "Older Humans" };
+  mocks.authenticated = true;
+  mocks.results = [{ team: regular }, { team: favorite, favorite: true }];
+  mocks.favoriteResults = [
+    { team: older, favorite: true },
+    { team: favorite, favorite: true },
+  ];
+  mocks.favoriteStatus = "CanLoadMore";
+  await act(async () => root.render(createElement(TeamLibrary)));
+  const search = container.querySelector<HTMLInputElement>(
+    'input[aria-label="searchMyTeams"]',
+  )!;
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(
+      HTMLInputElement.prototype,
+      "value",
+    )!.set!.call(search, "Humans");
+    search.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  expect(container.querySelectorAll("article")).toHaveLength(2);
+  expect(container.textContent).not.toContain("Regular Humans");
+  await act(async () =>
+    Array.from(container.querySelectorAll("button"))
+      .find((button) => button.textContent === "loadMore")!
+      .click(),
+  );
+  expect(mocks.loadFavorites).toHaveBeenCalledWith(18);
+  mocks.favoriteStatus = "Exhausted";
+  await act(async () => root.render(createElement(TeamLibrary)));
+  const names = Array.from(container.querySelectorAll("article h2")).map(
+    (node) => node.textContent,
+  );
+  expect(names).toHaveLength(3);
+  expect(names[2]).toBe("Regular Humans");
+});
+
+it("waits for an upload in another tab before resolving whether a favorite belongs to the draft or cloud", async () => {
+  const team = { ...newTeam(randomUUID()), name: "Other tab upload" };
+  storeDraft(team);
+  mocks.authenticated = true;
+  let grant!: () => Promise<void>;
+  vi.stubGlobal("navigator", {
+    locks: {
+      request: vi.fn(
+        (_name, _options, callback) =>
+          new Promise<void>((resolve) => {
+            grant = async () => {
+              await callback();
+              resolve();
+            };
+          }),
+      ),
+    },
+  });
+  await act(async () => root.render(createElement(TeamLibrary)));
+  await act(async () =>
+    container
+      .querySelector<HTMLButtonElement>('button[aria-label^="addFavorite"]')!
+      .click(),
+  );
+  expect(mocks.query).not.toHaveBeenCalled();
+  await act(async () => {
+    await saveCloudDraft(team, 0, async () => ({ revision: 1 }));
+    mocks.query.mockResolvedValue({ team });
+    await grant();
+  });
+  expect(mocks.save).toHaveBeenCalledWith({ uuid: team.uuid, favorite: true });
+  expect(readDrafts()).toEqual([]);
+});
 async function tick() {
   await act(async () => vi.advanceTimersByTimeAsync(60));
 }

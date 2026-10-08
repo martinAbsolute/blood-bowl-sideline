@@ -215,6 +215,8 @@ export default defineSchema({
     .index("by_entryId", ["entryId"])
     .index("by_matchId", ["matchId"]),
   teams: defineTable({
+    // Missing means not favorited, including teams saved before favorites existed.
+    favorite: v.optional(v.literal(true)),
     draftLeagueId: v.optional(v.id("leagues")),
     leagueExperienced: v.optional(v.boolean()),
     ownerId: v.id("users"),
@@ -241,8 +243,38 @@ export default defineSchema({
       "team.rosterId",
       "team.rulesetId",
     ])
+    .index("by_ownerId_and_archived_and_favorite", [
+      "ownerId",
+      "archived",
+      "favorite",
+    ])
+    .index("by_ownerId_and_archived_and_roster_and_favorite", [
+      "ownerId",
+      "archived",
+      "team.rosterId",
+      "favorite",
+    ])
+    .index("by_ownerId_and_archived_and_ruleset_and_favorite", [
+      "ownerId",
+      "archived",
+      "team.rulesetId",
+      "favorite",
+    ])
+    .index("by_ownerId_and_archived_and_roster_and_ruleset_and_favorite", [
+      "ownerId",
+      "archived",
+      "team.rosterId",
+      "team.rulesetId",
+      "favorite",
+    ])
     .searchIndex("search_library", {
       searchField: "searchText",
-      filterFields: ["ownerId", "archived", "team.rosterId", "team.rulesetId"],
+      filterFields: [
+        "ownerId",
+        "archived",
+        "team.rosterId",
+        "team.rulesetId",
+        "favorite",
+      ],
     }),
 });

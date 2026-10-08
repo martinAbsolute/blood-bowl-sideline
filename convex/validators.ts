@@ -48,6 +48,7 @@ export const teamValidator = v.object({
   veteranId: v.optional(v.string()),
 });
 export const publicTeam = v.object({
+  favorite: v.optional(v.boolean()),
   draftLeagueId: v.optional(v.id("leagues")),
   team: teamValidator,
   revision: v.number(),

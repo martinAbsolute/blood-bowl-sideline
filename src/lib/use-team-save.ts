@@ -29,7 +29,7 @@ export function useTeamSave(leagueId?: string) {
     optimisticallySaveTeam,
   );
   return useCallback(
-    (args: { team: Team; expectedRevision: number }) =>
+    (args: { team: Team; expectedRevision: number; favorite?: boolean }) =>
       save(leagueId ? { ...args, leagueId: leagueId as Id<"leagues"> } : args),
     [save, leagueId],
   );

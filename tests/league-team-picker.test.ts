@@ -40,6 +40,45 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 
+it("puts favorites first while preserving enrollment eligibility and never offers a favorite action", async () => {
+  const regular = rookie("Regular");
+  const favorite = rookie("Favorite");
+  const ineligible = newTeam(randomUUID());
+  ineligible.name = "Favorite draft";
+  await act(async () =>
+    root.render(
+      createElement(LeagueTeamPicker, {
+        teams: [
+          { team: regular },
+          { team: ineligible, favorite: true },
+          { team: favorite, favorite: true },
+        ],
+        value: "",
+        onChange: vi.fn(),
+        status: "Exhausted",
+        loadMore: vi.fn(),
+      }),
+    ),
+  );
+  await act(async () =>
+    container.querySelector<HTMLButtonElement>("button")!.click(),
+  );
+  const dialog = document.querySelector('[role="dialog"]')!;
+  const choices = Array.from(
+    dialog.querySelectorAll<HTMLButtonElement>("button[aria-pressed]"),
+  );
+  expect(choices.map((button) => button.getAttribute("aria-label"))).toEqual([
+    "Favorite",
+    "Favorite draft",
+    "Regular",
+  ]);
+  expect(choices[1].disabled).toBe(true);
+  expect(dialog.querySelector('button[aria-label^="addFavorite"]')).toBeNull();
+  expect(
+    dialog.querySelector('button[aria-label^="removeFavorite"]'),
+  ).toBeNull();
+});
+
 it("shows illegal teams with reasons and selects only a legal rookie", async () => {
   const eligible = rookie("Ready Humans");
   const excessiveFans = rookie("League Orcs Of Hell");

@@ -1,8 +1,12 @@
 import type { Team } from "@/domain/types";
-import { acknowledgeDraft } from "./drafts";
+import { acknowledgeDraft, readDraftFavorite } from "./drafts";
 
 type Result = { revision: number };
-type Save = (args: { team: Team; expectedRevision: number }) => Promise<Result>;
+type Save = (args: {
+  team: Team;
+  expectedRevision: number;
+  favorite?: boolean;
+}) => Promise<Result>;
 const pending = new Map<
   string,
   { snapshot: string; promise: Promise<Result> }
@@ -27,6 +31,9 @@ export function saveCloudDraft(
       : null;
     const result = await save({
       team,
+      ...(readDraftFavorite(team.uuid) === undefined
+        ? {}
+        : { favorite: readDraftFavorite(team.uuid) }),
       expectedRevision: Math.max(expectedRevision, acknowledged?.revision ?? 0),
     });
     // Cleanup is best effort. A quota/privacy error after the server commits

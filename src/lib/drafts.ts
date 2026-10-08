@@ -17,6 +17,7 @@ export const DRAFTS_KEY = "bbsideline:drafts:v1";
 const KEY = DRAFTS_KEY;
 const accountKey = (uuid: string) => `bbsideline:draft-account:${uuid}`;
 const storedDraftSchema = localDraftSchema.extend({
+  favorite: z.boolean().optional(),
   baseRevision: z.number().int().nonnegative().optional(),
   draftOwner: z.string().nullable().optional(),
 });
@@ -80,6 +81,7 @@ export function normalizeStoredDrafts() {
       ...team,
       baseRevision: readDraftRevision(team.uuid),
       draftOwner: draftAccount(team.uuid),
+      favorite: readDraftFavorite(team.uuid),
     })),
   );
   if (raw !== normalized) {
@@ -123,6 +125,18 @@ export function readDrafts(): Team[] {
     return [];
   }
 }
+export function readDraftFavorite(uuid: string): boolean | undefined {
+  return storedDrafts().find((draft) => draft.uuid === uuid)?.favorite;
+}
+export function setDraftFavorite(uuid: string, favorite: boolean) {
+  const all = storedDrafts();
+  const draft = all.find((entry) => entry.uuid === uuid);
+  if (!draft) return false;
+  draft.favorite = favorite;
+  localStorage.setItem(KEY, JSON.stringify(all));
+  window.dispatchEvent(new Event("bbs-drafts-changed"));
+  return true;
+}
 export function storeDraft(
   team: Team,
   account?: string | null,
@@ -135,6 +149,7 @@ export function storeDraft(
     ...team,
     baseRevision: revision,
     draftOwner: account ?? draftAccount(team.uuid),
+    favorite: index < 0 ? undefined : all[index].favorite,
   };
   if (index < 0) all.unshift(snapshot);
   else all[index] = snapshot;

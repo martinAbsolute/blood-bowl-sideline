@@ -1,6 +1,13 @@
 import { getRoster, getRuleset } from "@/domain/catalog";
 import type { Team } from "@/domain/types";
 
+export function favoritesFirst(
+  a: { favorite?: boolean },
+  b: { favorite?: boolean },
+) {
+  return Number(!!b.favorite) - Number(!!a.favorite);
+}
+
 export function libraryMatches(
   team: Team,
   filter: { search: string; rosterId: string; rulesetId: string },
