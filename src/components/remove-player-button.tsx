@@ -12,25 +12,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./dialog";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { SkillList } from "./skill-box";
 import { positionLabel } from "./position-name";
 
-/** Shared by the player editor and desktop table; base skills aren't customisation. */
+/** Player removal preserves a confirmation for customisation, not base skills. */
 export function RemovePlayerButton({
   team,
   selected,
   onChange,
   onRemoved,
   dirty = false,
-  compact = false,
 }: {
   team: Team;
   selected: string;
   onChange: (team: Team) => void;
   onRemoved?: () => void;
   dirty?: boolean;
-  compact?: boolean;
 }) {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
@@ -77,15 +74,9 @@ export function RemovePlayerButton({
       ref={triggerRef}
       type="button"
       variant="ghost"
-      size={compact ? "icon" : "default"}
-      className={
-        compact
-          ? "size-8 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 hover:bg-destructive/10 hover:text-destructive"
-          : "h-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:h-8"
-      }
-      aria-label={
-        compact ? `${t("removePlayer")} · ${name}` : t("removePlayer")
-      }
+      size="default"
+      className="h-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:h-8"
+      aria-label={t("removePlayer")}
       onClick={(event) => {
         event.stopPropagation();
         if (savedCustomisation || dirty || removedStars.length > 1)
@@ -93,25 +84,14 @@ export function RemovePlayerButton({
         else remove();
       }}
     >
-      <Trash2 aria-hidden="true" className={compact ? "size-3.5" : "size-4"} />
-      {!compact && (
-        <>
-          <span className="sm:hidden">{t("remove")}</span>
-          <span className="hidden sm:inline">{t("removePlayer")}</span>
-        </>
-      )}
+      <Trash2 aria-hidden="true" className="size-4" />
+      <span className="sm:hidden">{t("remove")}</span>
+      <span className="hidden sm:inline">{t("removePlayer")}</span>
     </Button>
   );
   return (
     <>
-      {compact ? (
-        <Tooltip>
-          <TooltipTrigger render={button} />
-          <TooltipContent>{t("removePlayer")}</TooltipContent>
-        </Tooltip>
-      ) : (
-        button
-      )}
+      {button}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           initialFocus={cancelRef}

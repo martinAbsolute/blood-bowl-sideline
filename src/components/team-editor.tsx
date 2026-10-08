@@ -70,7 +70,6 @@ import { TableSkills } from "./skill-box";
 import { TeamAffiliations, SpecialRules } from "./team-affiliations";
 import { Checkbox } from "./ui/checkbox";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
-import { RemovePlayerButton } from "./remove-player-button";
 import { PlayerDialog } from "./player-dialog";
 import { positionLabel } from "./position-name";
 import { TeamSupport } from "./team-support";
@@ -83,6 +82,7 @@ import { ShareButton } from "./share-button";
 import { hasTeamProgress, resetTeamRoster } from "@/lib/builder";
 import {
   ArrowLeft,
+  ChevronRight,
   Copy,
   Ellipsis,
   ChevronDown,
@@ -409,7 +409,7 @@ export function TeamEditor({
                 >
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-10 pl-3">#</TableHead>
+                      <TableHead className="w-10 px-2 text-center">#</TableHead>
                       <TableHead className="w-48">{t("player")}</TableHead>
                       {["MA", "ST", "AG", "PA", "AV"].map((x) => (
                         <TableHead
@@ -434,20 +434,20 @@ export function TeamEditor({
                               name: t("sevensVeteran"),
                             })}
                             fullDescription
-                            className="underline decoration-dotted underline-offset-4 hover:text-primary"
+                            className="inline-flex items-center justify-center hover:text-primary"
                           >
-                            {t("sevensVeteranColumn")}
+                            <span className="border-b border-dotted border-current pb-0.5 leading-none">
+                              {t("sevensVeteranColumn")}
+                            </span>
                           </RuleHelp>
                         </TableHead>
                       )}
                       <TableHead className="w-16 pr-3 text-right">
                         {t("cost")}
                       </TableHead>
-                      {!readOnly && (
-                        <TableHead className="no-print hidden w-11 lg:table-cell">
-                          <span className="sr-only">{t("removePlayer")}</span>
-                        </TableHead>
-                      )}
+                      <TableHead className="no-print w-6 px-1">
+                        <span className="sr-only">{t("managePlayer")}</span>
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -481,7 +481,7 @@ export function TeamEditor({
                             }
                           }}
                         >
-                          <TableCell className="pl-5 font-mono text-xs text-muted-foreground">
+                          <TableCell className="px-2 text-center font-mono text-xs text-muted-foreground">
                             {String(index + 1).padStart(2, "0")}
                           </TableCell>
                           <TableCell>
@@ -546,7 +546,7 @@ export function TeamEditor({
                             />
                           </TableCell>
                           {requiresCaptain && (
-                            <TableCell className="text-center">
+                            <TableCell className="text-center [&:has([role=checkbox])]:pr-2">
                               {!pos.position.includes("Big Guy") &&
                                 !(
                                   team.rulesetId === "kyiv-seven-sins-sevens" &&
@@ -606,7 +606,7 @@ export function TeamEditor({
                             </TableCell>
                           )}
                           {isSevens(team) && (
-                            <TableCell className="text-center">
+                            <TableCell className="text-center [&:has([role=checkbox])]:pr-2">
                               {isLineman(pos) && (
                                 <label
                                   className="inline-flex size-8 items-center justify-center"
@@ -635,16 +635,12 @@ export function TeamEditor({
                                   : 0),
                             )}
                           </TableCell>
-                          {!readOnly && (
-                            <TableCell className="no-print hidden px-1 pr-2 lg:table-cell">
-                              <RemovePlayerButton
-                                team={team}
-                                selected={p.id}
-                                onChange={change}
-                                compact
-                              />
-                            </TableCell>
-                          )}
+                          <TableCell className="no-print px-1">
+                            <ChevronRight
+                              aria-hidden="true"
+                              className="mx-auto size-3.5 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
+                            />
+                          </TableCell>
                         </TableRow>
                       );
                     })}
@@ -675,8 +671,8 @@ export function TeamEditor({
                               }
                             }}
                           >
-                            <TableCell className="pl-5 text-amber-700">
-                              <Star className="size-3" />
+                            <TableCell className="px-2 text-center text-amber-700">
+                              <Star className="mx-auto size-3" />
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
@@ -711,16 +707,12 @@ export function TeamEditor({
                             <TableCell className="pr-5 text-right font-mono text-xs">
                               {gold(s.cost)}
                             </TableCell>
-                            {!readOnly && (
-                              <TableCell className="no-print hidden px-1 pr-2 lg:table-cell">
-                                <RemovePlayerButton
-                                  team={team}
-                                  selected={id}
-                                  onChange={change}
-                                  compact
-                                />
-                              </TableCell>
-                            )}
+                            <TableCell className="no-print px-1">
+                              <ChevronRight
+                                aria-hidden="true"
+                                className="mx-auto size-3.5 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
+                              />
+                            </TableCell>
                           </TableRow>
                         )
                       );
