@@ -178,18 +178,16 @@ export function PlayerRecruitment({
                       <TableCell className="text-right font-mono text-xs">
                         {p.cost / 1000}k
                       </TableCell>
-                      <TableCell
-                        className="sticky right-0 bg-card pr-3"
-                        title={
-                          sevens && !isLineman(p) && specialists >= 4
-                            ? t("sevensSpecialistsFull")
-                            : undefined
-                        }
-                      >
+                      <TableCell className="sticky right-0 bg-card pr-3">
                         <QuantityStepper
                           label={positionLabel(p.position)}
                           value={matching.length}
                           max={max}
+                          increaseHint={
+                            sevens && !isLineman(p) && specialists >= 4
+                              ? t("sevensSpecialistsFull")
+                              : undefined
+                          }
                           increaseDisabled={
                             playerCount >= rules.maxPlayers ||
                             (sevens && !isLineman(p) && specialists >= 4)

@@ -122,15 +122,19 @@ it("blocks a fifth Sevens specialist while leaving Linemen available and reopens
   const specialistRow = rows()[2];
   expect(
     specialistRow.querySelector('[title="sevensSpecialistsFull"]'),
-  ).not.toBeNull();
+  ).toBeNull();
+  const hint = specialistRow.querySelector<HTMLElement>(
+    '[data-slot="tooltip-trigger"]',
+  )!;
+  expect(hint.tabIndex).toBe(0);
   expect(
     specialistRow.querySelector<HTMLButtonElement>(
-      '[aria-label="increaseQuantity"]',
+      'button[aria-label="increaseQuantity"]',
     )!.disabled,
   ).toBe(true);
   expect(
     linemanRow.querySelector<HTMLButtonElement>(
-      '[aria-label="increaseQuantity"]',
+      'button[aria-label="increaseQuantity"]',
     )!.disabled,
   ).toBe(false);
   await act(async () =>
@@ -140,7 +144,7 @@ it("blocks a fifth Sevens specialist while leaving Linemen available and reopens
   );
   expect(
     rows()[2].querySelector<HTMLButtonElement>(
-      '[aria-label="increaseQuantity"]',
+      'button[aria-label="increaseQuantity"]',
     )!.disabled,
   ).toBe(false);
 });
@@ -153,7 +157,7 @@ it("caps Sevens recruitment at eleven and does not apply specialist limits to or
   const increases = () =>
     Array.from(
       container.querySelectorAll<HTMLButtonElement>(
-        '[aria-label="increaseQuantity"]',
+        'button[aria-label="increaseQuantity"]',
       ),
     );
   expect(increases().every((button) => button.disabled)).toBe(true);

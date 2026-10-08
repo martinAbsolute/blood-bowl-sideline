@@ -2,6 +2,7 @@
 
 import { useTranslations } from "gt-next";
 import { Minus, Plus } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { Button } from "./ui/button";
 
 export function QuantityStepper({
@@ -12,6 +13,7 @@ export function QuantityStepper({
   onIncrease,
   disabled = false,
   increaseDisabled = false,
+  increaseHint,
   showMax = true,
 }: {
   label: string;
@@ -21,6 +23,7 @@ export function QuantityStepper({
   onIncrease: () => void;
   disabled?: boolean;
   increaseDisabled?: boolean;
+  increaseHint?: string;
   showMax?: boolean;
 }) {
   const t = useTranslations();
@@ -50,17 +53,34 @@ export function QuantityStepper({
           <span className="text-xs text-muted-foreground">/{max}</span>
         )}
       </output>
-      <Button
-        type="button"
-        variant="default"
-        size="icon"
-        className="size-8 shrink-0"
-        disabled={disabled || increaseDisabled || value >= max}
-        aria-label={t("increaseQuantity", { name: label })}
-        onClick={onIncrease}
-      >
-        <Plus className="size-4" />
-      </Button>
+      <Tooltip disabled={!increaseHint}>
+        <TooltipTrigger
+          render={
+            <span
+              className="inline-flex"
+              tabIndex={increaseHint ? 0 : undefined}
+              aria-label={
+                increaseHint
+                  ? t("increaseQuantity", { name: label })
+                  : undefined
+              }
+            />
+          }
+        >
+          <Button
+            type="button"
+            variant="default"
+            size="icon"
+            className="size-8 shrink-0"
+            disabled={disabled || increaseDisabled || value >= max}
+            aria-label={t("increaseQuantity", { name: label })}
+            onClick={onIncrease}
+          >
+            <Plus className="size-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{increaseHint}</TooltipContent>
+      </Tooltip>
     </div>
   );
 }

@@ -904,7 +904,8 @@ html:has(.catalog-layout) {
 }
 
 .skill-box.skill-added {
-  border-style: dashed;
+  border-color: var(--skill-background);
+  font-weight: 700;
 }
 .skill-box.skill-removable {
   align-items: stretch;

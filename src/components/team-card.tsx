@@ -46,7 +46,7 @@ export function TeamCard({
     legal = selection ? !selection.disabled : validateTeam(team).valid;
   const content = (
     <>
-      <div className="relative overflow-hidden bg-primary px-5 pb-4 pt-4 text-primary-foreground">
+      <div className="relative flex-1 overflow-hidden bg-primary px-5 pb-4 pt-4 text-primary-foreground">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -right-6 -top-6 size-40 rounded-full border-[24px] border-white/5"
@@ -155,10 +155,10 @@ export function TeamCard({
           ? LoaderCircle
           : CloudOff;
   return (
-    <article className="min-w-0">
+    <article className="flex min-w-0 flex-col">
       <Card
         className={cn(
-          "group min-w-0 gap-0 rounded-2xl py-0 shadow-sm transition-shadow",
+          "group min-w-0 flex-1 gap-0 rounded-2xl py-0 shadow-sm transition-shadow",
           selection?.disabled ? "grayscale" : "hover:shadow-lg",
           selection?.selected && "ring-2 ring-primary",
         )}
@@ -170,7 +170,7 @@ export function TeamCard({
             aria-pressed={selection.selected}
             aria-label={team.name || t("untitled")}
             onClick={selection.onSelect}
-            className="block w-full flex-1 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-55"
+            className="flex w-full flex-1 flex-col text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-55"
           >
             {content}
           </button>
@@ -178,12 +178,12 @@ export function TeamCard({
           <Link
             href={href}
             prefetch
-            className="block flex-1 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+            className="flex flex-1 flex-col outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
           >
             {content}
           </Link>
         ) : (
-          <div className="flex-1">{content}</div>
+          <div className="flex flex-1 flex-col">{content}</div>
         )}
         {footer ? (
           <footer className="border-t bg-secondary/15 px-5 py-3">

@@ -69,6 +69,8 @@ import { PlayerRecruitment } from "./player-recruitment";
 import { TableSkills } from "./skill-box";
 import { TeamAffiliations, SpecialRules } from "./team-affiliations";
 import { Checkbox } from "./ui/checkbox";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { RemovePlayerButton } from "./remove-player-button";
 import { PlayerDialog } from "./player-dialog";
 import { positionLabel } from "./position-name";
 import { TeamSupport } from "./team-support";
@@ -90,7 +92,6 @@ import {
   RectangleVertical,
   RectangleHorizontal,
   Star,
-  X,
 } from "lucide-react";
 import { toast } from "@/components/ui/toast";
 import Link from "next/link";
@@ -446,6 +447,11 @@ export function TeamEditor({
                       <TableHead className="w-8">
                         <span className="sr-only">{t("managePlayer")}</span>
                       </TableHead>
+                      {!readOnly && (
+                        <TableHead className="no-print hidden w-11 lg:table-cell">
+                          <span className="sr-only">{t("removePlayer")}</span>
+                        </TableHead>
+                      )}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -552,44 +558,54 @@ export function TeamEditor({
                                   p.skills.length > 0 &&
                                   team.captainId !== p.id
                                 ) && (
-                                  <label
-                                    className="inline-flex size-8 items-center justify-center"
-                                    onClick={(event) => event.stopPropagation()}
-                                  >
-                                    <Checkbox
-                                      checked={team.captainId === p.id}
-                                      disabled={readOnly}
-                                      title={
+                                  <Tooltip
+                                    disabled={
+                                      !(
                                         team.rulesetId ===
                                           "kyiv-seven-sins-sevens" &&
                                         totals.tier === 2 &&
                                         p.skills.length > 0
-                                          ? t("sevensCaptainSkillConflict")
-                                          : undefined
+                                      )
+                                    }
+                                  >
+                                    <TooltipTrigger
+                                      render={<label />}
+                                      className="inline-flex size-8 items-center justify-center"
+                                      onClick={(event) =>
+                                        event.stopPropagation()
                                       }
-                                      aria-label={`${t("teamCaptain")} · ${p.name || positionLabel(pos.position)}`}
-                                      onCheckedChange={(checked) => {
-                                        const next = { ...team };
-                                        if (checked) {
-                                          next.captainId = p.id;
-                                          if (!isSevens(team))
-                                            next.players = team.players.map(
-                                              (player) =>
-                                                player.id === p.id
-                                                  ? {
-                                                      ...player,
-                                                      skills:
-                                                        player.skills.filter(
-                                                          (id) => id !== "pro",
-                                                        ),
-                                                    }
-                                                  : player,
-                                            );
-                                        } else delete next.captainId;
-                                        change(next);
-                                      }}
-                                    />
-                                  </label>
+                                    >
+                                      <Checkbox
+                                        checked={team.captainId === p.id}
+                                        disabled={readOnly}
+                                        aria-label={`${t("teamCaptain")} · ${p.name || positionLabel(pos.position)}`}
+                                        onCheckedChange={(checked) => {
+                                          const next = { ...team };
+                                          if (checked) {
+                                            next.captainId = p.id;
+                                            if (!isSevens(team))
+                                              next.players = team.players.map(
+                                                (player) =>
+                                                  player.id === p.id
+                                                    ? {
+                                                        ...player,
+                                                        skills:
+                                                          player.skills.filter(
+                                                            (id) =>
+                                                              id !== "pro",
+                                                          ),
+                                                      }
+                                                    : player,
+                                              );
+                                          } else delete next.captainId;
+                                          change(next);
+                                        }}
+                                      />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      {t("sevensCaptainSkillConflict")}
+                                    </TooltipContent>
+                                  </Tooltip>
                                 )}
                             </TableCell>
                           )}
@@ -629,6 +645,16 @@ export function TeamEditor({
                               className="size-4 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
                             />
                           </TableCell>
+                          {!readOnly && (
+                            <TableCell className="no-print hidden px-1 pr-2 lg:table-cell">
+                              <RemovePlayerButton
+                                team={team}
+                                selected={p.id}
+                                onChange={change}
+                                compact
+                              />
+                            </TableCell>
+                          )}
                         </TableRow>
                       );
                     })}
@@ -677,26 +703,6 @@ export function TeamEditor({
                                 >
                                   {s.name}
                                 </button>
-                                {!readOnly && (
-                                  <button
-                                    className="ml-2 text-muted-foreground"
-                                    aria-label={`${t("remove")} ${s.name}`}
-                                    onClick={() => {
-                                      const pairs = starPairs;
-                                      const pair = pairs.find((p) =>
-                                        p.includes(id),
-                                      ) ?? [id];
-                                      change({
-                                        ...team,
-                                        stars: team.stars.filter(
-                                          (s) => !pair.includes(s),
-                                        ),
-                                      });
-                                    }}
-                                  >
-                                    <X className="size-3" />
-                                  </button>
-                                )}
                               </div>
                             </TableCell>
                             {[s.ma, s.st, s.ag, s.pa, s.av].map((x, i) => (
@@ -721,6 +727,16 @@ export function TeamEditor({
                                 className="size-4 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
                               />
                             </TableCell>
+                            {!readOnly && (
+                              <TableCell className="no-print hidden px-1 pr-2 lg:table-cell">
+                                <RemovePlayerButton
+                                  team={team}
+                                  selected={id}
+                                  onChange={change}
+                                  compact
+                                />
+                              </TableCell>
+                            )}
                           </TableRow>
                         )
                       );

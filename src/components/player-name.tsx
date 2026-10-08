@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useTranslations } from "gt-next";
 import { Dice5, Pencil } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { generatePlayerName } from "@/lib/player-name-generator";
 
 /** Matches the team-name affordance, but only edits the modal's local draft. */
@@ -68,15 +69,17 @@ export function PlayerName({
         className="pointer-events-none size-3.5 shrink-0 text-muted-foreground"
       />
       <span className="relative inline-flex size-3.5 shrink-0">
-        <button
-          type="button"
-          aria-label={t("playerModal.randomizeName")}
-          title={t("playerModal.randomizeName")}
-          className="absolute left-1/2 top-1/2 inline-flex size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-secondary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 after:absolute after:-inset-1.5 sm:after:inset-0"
-          onClick={() => onChange(generatePlayerName())}
-        >
-          <Dice5 aria-hidden="true" className="size-3.5" />
-        </button>
+        <Tooltip>
+          <TooltipTrigger
+            type="button"
+            aria-label={t("playerModal.randomizeName")}
+            className="absolute left-1/2 top-1/2 inline-flex size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-secondary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 after:absolute after:-inset-1.5 sm:after:inset-0"
+            onClick={() => onChange(generatePlayerName())}
+          >
+            <Dice5 aria-hidden="true" className="size-3.5" />
+          </TooltipTrigger>
+          <TooltipContent>{t("playerModal.randomizeName")}</TooltipContent>
+        </Tooltip>
       </span>
     </span>
   );
