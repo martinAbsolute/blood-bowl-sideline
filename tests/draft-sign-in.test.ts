@@ -292,8 +292,8 @@ it("assigns one Sevens veteran using eligible player checkboxes and persists its
   const veteranHeading = Array.from(container.querySelectorAll("th")).find(
     (heading) => heading.textContent === "sevensVeteranColumn",
   );
-  expect(veteranHeading?.querySelector("button")?.className).toContain(
-    "underline",
+  expect(veteranHeading?.querySelector("button > span")?.className).toContain(
+    "border-b border-dotted",
   );
   expect(veteranHeading?.querySelector("svg")).toBeNull();
   const checkbox = (number: number) =>
