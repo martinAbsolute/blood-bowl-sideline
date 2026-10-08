@@ -406,7 +406,7 @@ export function TeamEditor({
               ) : (
                 <Table
                   aria-label={t("players")}
-                  className="player-table min-w-[740px] table-auto md:table-fixed"
+                  className="player-table min-w-[740px] table-auto lg:table-fixed"
                 >
                   <TableHeader>
                     <TableRow>
@@ -504,7 +504,7 @@ export function TeamEditor({
                                 variant={index}
                                 className="size-8"
                               />
-                              <div className="min-w-0">
+                              <div className="lg:min-w-0">
                                 {readOnly ? (
                                   <strong className="text-sm">
                                     {p.name || positionLabel(pos.position)}
@@ -514,9 +514,9 @@ export function TeamEditor({
                                     <strong className="hidden text-sm print:block">
                                       {p.name || positionLabel(pos.position)}
                                     </strong>
-                                    <div className="no-print flex w-fit max-w-full items-center gap-1">
+                                    <div className="no-print inline-flex items-center gap-1 lg:max-w-full">
                                       <button
-                                        className="min-w-0 whitespace-normal wrap-anywhere text-left text-sm font-semibold text-primary hover:underline"
+                                        className="text-left text-sm font-semibold text-primary hover:underline lg:min-w-0 lg:whitespace-normal lg:wrap-anywhere"
                                         onClick={() => {
                                           setSelected(p.id);
                                           setSearch("");
@@ -524,14 +524,12 @@ export function TeamEditor({
                                       >
                                         {p.name || positionLabel(pos.position)}
                                       </button>
-                                      <span className="hidden shrink-0 lg:inline-flex">
-                                        <RemovePlayerButton
-                                          team={team}
-                                          selected={p.id}
-                                          onChange={change}
-                                          compact
-                                        />
-                                      </span>
+                                      <RemovePlayerButton
+                                        team={team}
+                                        selected={p.id}
+                                        onChange={change}
+                                        compact
+                                      />
                                     </div>
                                   </>
                                 )}
@@ -724,22 +722,20 @@ export function TeamEditor({
                                 <strong className="hidden text-sm print:block">
                                   {s.name}
                                 </strong>
-                                <div className="no-print flex min-w-0 items-center gap-1">
+                                <div className="no-print inline-flex items-center gap-1 lg:min-w-0">
                                   <button
-                                    className="min-w-0 whitespace-normal wrap-anywhere text-left text-sm font-semibold"
+                                    className="text-left text-sm font-semibold lg:min-w-0 lg:whitespace-normal lg:wrap-anywhere"
                                     onClick={() => setSelected(id)}
                                   >
                                     {s.name}
                                   </button>
                                   {!readOnly && (
-                                    <span className="hidden shrink-0 lg:inline-flex">
-                                      <RemovePlayerButton
-                                        team={team}
-                                        selected={id}
-                                        onChange={change}
-                                        compact
-                                      />
-                                    </span>
+                                    <RemovePlayerButton
+                                      team={team}
+                                      selected={id}
+                                      onChange={change}
+                                      compact
+                                    />
                                   )}
                                 </div>
                               </div>
