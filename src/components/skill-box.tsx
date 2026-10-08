@@ -59,7 +59,10 @@ export function SkillBox({
         type="button"
         className="skill-removable-action"
         aria-label={`${t("removeSkill")} · ${skillName(id)}`}
-        onClick={onRemove}
+        onClick={(event) => {
+          event.stopPropagation();
+          onRemove();
+        }}
       >
         <X aria-hidden="true" className="size-3" />
       </button>
@@ -75,12 +78,14 @@ export function SkillList({
   additionalIds = [],
   captain = false,
   veteran = false,
+  onRemoveAdditionalSkill,
 }: {
   ids: string[];
   added?: boolean;
   additionalIds?: string[];
   captain?: boolean;
   veteran?: boolean;
+  onRemoveAdditionalSkill?: (id: string) => void;
 }) {
   const t = useTranslations();
   return ids.length || additionalIds.length || captain || veteran ? (
@@ -89,7 +94,16 @@ export function SkillList({
         <SkillBox key={id} id={id} added={added} />
       ))}
       {sortSkillIds(additionalIds).map((id) => (
-        <SkillBox key={`added-${id}`} id={id} added />
+        <SkillBox
+          key={`added-${id}`}
+          id={id}
+          added
+          onRemove={
+            onRemoveAdditionalSkill
+              ? () => onRemoveAdditionalSkill(id)
+              : undefined
+          }
+        />
       ))}
       {captain && <SkillBox id="pro" captain />}
       {veteran && <VeteranSkill />}

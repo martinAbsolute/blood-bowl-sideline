@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { useTranslations } from "gt-next";
-import { ShieldCheck, Trash2 } from "lucide-react";
+import { ShieldCheck, Trash2, X } from "lucide-react";
 import { getRoster, starPairs, stars } from "@/domain/catalog";
 import type { Team } from "@/domain/types";
 import { Button } from "./ui/button";
@@ -14,6 +14,7 @@ import {
 } from "./dialog";
 import { SkillList } from "./skill-box";
 import { positionLabel } from "./position-name";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 /** Player removal preserves a confirmation for customisation, not base skills. */
 export function RemovePlayerButton({
@@ -22,12 +23,14 @@ export function RemovePlayerButton({
   onChange,
   onRemoved,
   dirty = false,
+  compact = false,
 }: {
   team: Team;
   selected: string;
   onChange: (team: Team) => void;
   onRemoved?: () => void;
   dirty?: boolean;
+  compact?: boolean;
 }) {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
@@ -74,9 +77,15 @@ export function RemovePlayerButton({
       ref={triggerRef}
       type="button"
       variant="ghost"
-      size="default"
-      className="h-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:h-8"
-      aria-label={t("removePlayer")}
+      size={compact ? "icon" : "default"}
+      className={
+        compact
+          ? "size-6 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 hover:bg-destructive/10 hover:text-destructive"
+          : "h-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:h-8"
+      }
+      aria-label={
+        compact ? `${t("removePlayer")} · ${name}` : t("removePlayer")
+      }
       onClick={(event) => {
         event.stopPropagation();
         if (savedCustomisation || dirty || removedStars.length > 1)
@@ -84,14 +93,27 @@ export function RemovePlayerButton({
         else remove();
       }}
     >
-      <Trash2 aria-hidden="true" className="size-4" />
-      <span className="sm:hidden">{t("remove")}</span>
-      <span className="hidden sm:inline">{t("removePlayer")}</span>
+      {compact ? (
+        <X aria-hidden="true" className="size-3.5" />
+      ) : (
+        <>
+          <Trash2 aria-hidden="true" className="size-4" />
+          <span className="sm:hidden">{t("remove")}</span>
+          <span className="hidden sm:inline">{t("removePlayer")}</span>
+        </>
+      )}
     </Button>
   );
   return (
     <>
-      {button}
+      {compact ? (
+        <Tooltip>
+          <TooltipTrigger render={button} />
+          <TooltipContent>{t("removePlayer")}</TooltipContent>
+        </Tooltip>
+      ) : (
+        button
+      )}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           initialFocus={cancelRef}

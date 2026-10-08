@@ -71,6 +71,7 @@ import { TeamAffiliations, SpecialRules } from "./team-affiliations";
 import { Checkbox } from "./ui/checkbox";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { PlayerDialog } from "./player-dialog";
+import { RemovePlayerButton } from "./remove-player-button";
 import { positionLabel } from "./position-name";
 import { TeamSupport } from "./team-support";
 import { RuleHelp } from "./rule-help";
@@ -457,7 +458,12 @@ export function TeamEditor({
                       <TableHead className="w-12 px-1 text-right text-xs">
                         {t("cost")}
                       </TableHead>
-                      <TableHead className="no-print w-6 px-1">
+                      {!readOnly && (
+                        <TableHead className="no-print hidden w-8 px-1 lg:table-cell">
+                          <span className="sr-only">{t("removePlayer")}</span>
+                        </TableHead>
+                      )}
+                      <TableHead className="no-print w-8 px-1">
                         <span className="sr-only">{t("managePlayer")}</span>
                       </TableHead>
                     </TableRow>
@@ -550,6 +556,24 @@ export function TeamEditor({
                             <TableSkills
                               ids={pos.skills}
                               additionalIds={p.skills}
+                              onRemoveAdditionalSkill={
+                                readOnly
+                                  ? undefined
+                                  : (skillId) =>
+                                      change({
+                                        ...team,
+                                        players: team.players.map((player) =>
+                                          player.id === p.id
+                                            ? {
+                                                ...player,
+                                                skills: player.skills.filter(
+                                                  (id) => id !== skillId,
+                                                ),
+                                              }
+                                            : player,
+                                        ),
+                                      })
+                              }
                               captain={team.captainId === p.id}
                               veteran={
                                 isSevens(team) && team.veteranId === p.id
@@ -647,6 +671,16 @@ export function TeamEditor({
                                   : 0),
                             )}
                           </TableCell>
+                          {!readOnly && (
+                            <TableCell className="no-print hidden px-1 lg:table-cell">
+                              <RemovePlayerButton
+                                team={team}
+                                selected={p.id}
+                                onChange={change}
+                                compact
+                              />
+                            </TableCell>
+                          )}
                           <TableCell className="no-print px-1">
                             <ChevronRight
                               aria-hidden="true"
@@ -719,6 +753,16 @@ export function TeamEditor({
                             <TableCell className="px-1 text-right font-mono text-xs tabular-nums">
                               {gold(s.cost)}
                             </TableCell>
+                            {!readOnly && (
+                              <TableCell className="no-print hidden px-1 lg:table-cell">
+                                <RemovePlayerButton
+                                  team={team}
+                                  selected={id}
+                                  onChange={change}
+                                  compact
+                                />
+                              </TableCell>
+                            )}
                             <TableCell className="no-print px-1">
                               <ChevronRight
                                 aria-hidden="true"

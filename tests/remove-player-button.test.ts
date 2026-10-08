@@ -49,6 +49,7 @@ async function render(selected = "player") {
           team,
           selected,
           onChange,
+          compact: true,
         }),
       ),
     ),

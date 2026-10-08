@@ -278,6 +278,57 @@ function editor(team = newTeam(randomUUID())) {
   );
 }
 
+it("removes only the selected player's added skill from the table and saves without opening a dialog", async () => {
+  const team = newTeam(randomUUID(), "human");
+  const position = getRoster("human")!.players[1];
+  team.players = [0, 1].map((index) => ({
+    id: randomUUID(),
+    positionId: position.id,
+    name: `Player ${index + 1}`,
+    skills: ["block", "guard"],
+  }));
+  team.captainId = team.players[0].id;
+  await act(async () => root.render(editor(team)));
+  const rows = container.querySelectorAll(".player-table tbody tr");
+  expect(rows[0].querySelectorAll(".skill-removable-action")).toHaveLength(2);
+  const remove = rows[0].querySelector<HTMLButtonElement>(
+    'button[aria-label="removeSkill · Block"]',
+  )!;
+  await act(async () => remove.click());
+  expect(readDrafts()[0].players[0].skills).toEqual(["guard"]);
+  expect(readDrafts()[0].players[1].skills).toEqual(["block", "guard"]);
+  expect(readDrafts()[0].captainId).toBe(team.captainId);
+  expect(rows[0].textContent).toContain("proCaptain");
+  expect(rows[0].textContent).toContain("Dodge");
+  expect(rows[0].querySelectorAll(".skill-removable-action")).toHaveLength(1);
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
+});
+
+it("keeps added skills in read-only player tables without remove buttons", async () => {
+  const team = newTeam(randomUUID(), "human");
+  team.players = [
+    {
+      id: randomUUID(),
+      positionId: getRoster("human")!.players[0].id,
+      name: "Player",
+      skills: ["block"],
+    },
+  ];
+  await act(async () =>
+    root.render(
+      createElement(
+        DraftSignInProvider,
+        null,
+        createElement(TeamEditor, { initial: team, readOnly: true }),
+      ),
+    ),
+  );
+  expect(container.querySelector(".player-table")?.textContent).toContain(
+    "Block",
+  );
+  expect(container.querySelector(".skill-removable-action")).toBeNull();
+});
+
 it("assigns one Sevens veteran using eligible player checkboxes and persists its skill badge", async () => {
   const team = newTeam(randomUUID(), "human");
   team.rulesetId = "kyiv-seven-sins-sevens";
