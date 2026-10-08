@@ -606,7 +606,7 @@ html:has(.catalog-layout) {
 .player-recruitment .skill-box,
 .player-table .skill-box,
 .star-recruitment .skill-box {
-  min-height: 28px;
+  min-height: var(--skill-touch-height, 28px);
   padding: 3px 7px;
   white-space: nowrap;
 }
@@ -638,7 +638,8 @@ html:has(.catalog-layout) {
 }
 @media (pointer: coarse), (max-width: 640px) {
   .skill-box {
-    min-height: 36px;
+    --skill-touch-height: 36px;
+    min-height: var(--skill-touch-height);
     padding: 6px 8px;
   }
 }
@@ -932,13 +933,12 @@ html:has(.catalog-layout) {
   outline: 2px solid var(--ring);
   outline-offset: -2px;
 }
-@media (max-width: 639px), (pointer: coarse) {
+@media (max-width: 640px), (pointer: coarse) {
   .skill-removable-label {
     padding: 6px 8px;
   }
   .skill-removable-action {
     width: 36px;
-    min-height: 36px;
   }
 }
 
