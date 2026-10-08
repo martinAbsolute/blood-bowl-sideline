@@ -422,7 +422,7 @@ export function TeamEditor({
                       ))}
                       <TableHead>{t("skills")}</TableHead>
                       {requiresCaptain && (
-                        <TableHead className="w-16 text-center">
+                        <TableHead className="w-14 px-1 text-center text-xs">
                           <RuleHelp
                             title={t("teamCaptain")}
                             description={t("teamSpecialRules.captain")}
@@ -439,7 +439,7 @@ export function TeamEditor({
                         </TableHead>
                       )}
                       {isSevens(team) && (
-                        <TableHead className="w-16 text-center">
+                        <TableHead className="w-14 px-1 text-center text-xs">
                           <RuleHelp
                             title={t("sevensVeteran")}
                             description={t("sevensVeteranHelp")}
@@ -458,11 +458,6 @@ export function TeamEditor({
                       <TableHead className="w-12 px-1 text-right text-xs">
                         {t("cost")}
                       </TableHead>
-                      {!readOnly && (
-                        <TableHead className="no-print hidden w-8 px-1 lg:table-cell">
-                          <span className="sr-only">{t("removePlayer")}</span>
-                        </TableHead>
-                      )}
                       <TableHead className="no-print w-8 px-1">
                         <span className="sr-only">{t("managePlayer")}</span>
                       </TableHead>
@@ -509,7 +504,7 @@ export function TeamEditor({
                                 variant={index}
                                 className="size-8"
                               />
-                              <div>
+                              <div className="min-w-0">
                                 {readOnly ? (
                                   <strong className="text-sm">
                                     {p.name || positionLabel(pos.position)}
@@ -519,15 +514,25 @@ export function TeamEditor({
                                     <strong className="hidden text-sm print:block">
                                       {p.name || positionLabel(pos.position)}
                                     </strong>
-                                    <button
-                                      className="no-print inline-flex items-center gap-2 text-left text-sm font-semibold text-primary hover:underline"
-                                      onClick={() => {
-                                        setSelected(p.id);
-                                        setSearch("");
-                                      }}
-                                    >
-                                      {p.name || positionLabel(pos.position)}
-                                    </button>
+                                    <div className="no-print flex w-fit max-w-full items-center gap-1">
+                                      <button
+                                        className="min-w-0 whitespace-normal wrap-anywhere text-left text-sm font-semibold text-primary hover:underline"
+                                        onClick={() => {
+                                          setSelected(p.id);
+                                          setSearch("");
+                                        }}
+                                      >
+                                        {p.name || positionLabel(pos.position)}
+                                      </button>
+                                      <span className="hidden shrink-0 lg:inline-flex">
+                                        <RemovePlayerButton
+                                          team={team}
+                                          selected={p.id}
+                                          onChange={change}
+                                          compact
+                                        />
+                                      </span>
+                                    </div>
                                   </>
                                 )}
                                 {p.name && (
@@ -582,7 +587,7 @@ export function TeamEditor({
                             />
                           </TableCell>
                           {requiresCaptain && (
-                            <TableCell className="text-center [&:has([role=checkbox])]:pr-2">
+                            <TableCell className="px-1 text-center [&:has([role=checkbox])]:pr-1">
                               {!pos.position.includes("Big Guy") &&
                                 !(
                                   team.rulesetId === "kyiv-seven-sins-sevens" &&
@@ -642,7 +647,7 @@ export function TeamEditor({
                             </TableCell>
                           )}
                           {isSevens(team) && (
-                            <TableCell className="text-center [&:has([role=checkbox])]:pr-2">
+                            <TableCell className="px-1 text-center [&:has([role=checkbox])]:pr-1">
                               {isLineman(pos) && (
                                 <label
                                   className="inline-flex size-8 items-center justify-center"
@@ -671,16 +676,6 @@ export function TeamEditor({
                                   : 0),
                             )}
                           </TableCell>
-                          {!readOnly && (
-                            <TableCell className="no-print hidden px-1 lg:table-cell">
-                              <RemovePlayerButton
-                                team={team}
-                                selected={p.id}
-                                onChange={change}
-                                compact
-                              />
-                            </TableCell>
-                          )}
                           <TableCell className="no-print px-1">
                             <ChevronRight
                               aria-hidden="true"
@@ -729,12 +724,24 @@ export function TeamEditor({
                                 <strong className="hidden text-sm print:block">
                                   {s.name}
                                 </strong>
-                                <button
-                                  className="no-print text-left text-sm font-semibold"
-                                  onClick={() => setSelected(id)}
-                                >
-                                  {s.name}
-                                </button>
+                                <div className="no-print flex min-w-0 items-center gap-1">
+                                  <button
+                                    className="min-w-0 whitespace-normal wrap-anywhere text-left text-sm font-semibold"
+                                    onClick={() => setSelected(id)}
+                                  >
+                                    {s.name}
+                                  </button>
+                                  {!readOnly && (
+                                    <span className="hidden shrink-0 lg:inline-flex">
+                                      <RemovePlayerButton
+                                        team={team}
+                                        selected={id}
+                                        onChange={change}
+                                        compact
+                                      />
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </TableCell>
                             {[s.ma, s.st, s.ag, s.pa, s.av].map((x, i) => (
@@ -753,16 +760,6 @@ export function TeamEditor({
                             <TableCell className="px-1 text-right font-mono text-xs tabular-nums">
                               {gold(s.cost)}
                             </TableCell>
-                            {!readOnly && (
-                              <TableCell className="no-print hidden px-1 lg:table-cell">
-                                <RemovePlayerButton
-                                  team={team}
-                                  selected={id}
-                                  onChange={change}
-                                  compact
-                                />
-                              </TableCell>
-                            )}
                             <TableCell className="no-print px-1">
                               <ChevronRight
                                 aria-hidden="true"

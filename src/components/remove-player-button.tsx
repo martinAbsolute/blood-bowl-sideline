@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { useTranslations } from "gt-next";
-import { ShieldCheck, Trash2, X } from "lucide-react";
+import { ShieldCheck, Trash2 } from "lucide-react";
 import { getRoster, starPairs, stars } from "@/domain/catalog";
 import type { Team } from "@/domain/types";
 import { Button } from "./ui/button";
@@ -94,7 +94,7 @@ export function RemovePlayerButton({
       }}
     >
       {compact ? (
-        <X aria-hidden="true" className="size-3.5" />
+        <Trash2 aria-hidden="true" className="size-3.5" />
       ) : (
         <>
           <Trash2 aria-hidden="true" className="size-4" />
