@@ -450,7 +450,8 @@ html:has(.catalog-layout) {
   border-radius: var(--radius-lg);
   background: var(--card);
 }
-.mobile-budget-drawer {
+.mobile-budget-drawer,
+.mobile-budget-bar {
   --drawer-content-height: auto;
   --drawer-content-max-height: 85dvh;
   margin: 0 var(--page-gutter);
@@ -460,12 +461,10 @@ html:has(.catalog-layout) {
   border-bottom-right-radius: 0;
   box-shadow: 0 -4px 16px #193e320a;
 }
-/* Anchor the resting header to the viewport even when hidden warnings resize.
-   A measured pixel snap offset would animate after each content-height change. */
-.mobile-budget-drawer[data-expanded="false"] {
-  --translate-y: calc(
-    100% - var(--budget-collapsed-height) + var(--drawer-swipe-movement-y, 0px)
-  );
+.mobile-budget-bar {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 40;
 }
 .budget-drawer-summary {
   touch-action: pan-x;
@@ -500,7 +499,8 @@ html:has(.catalog-layout) {
   border-radius: 999px;
   background: var(--border);
 }
-.mobile-budget-drawer .budget-overview {
+.mobile-budget-drawer .budget-overview,
+.mobile-budget-bar .budget-overview {
   padding: 0 12px 10px;
   pointer-events: none;
   position: relative;

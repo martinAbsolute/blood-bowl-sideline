@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "gt-next";
 import type { Team } from "@/domain/types";
 import { budgetSummary } from "@/domain/budget";
@@ -36,35 +30,10 @@ export function TeamBudget({
     summary.pools.find((pool) => pool.id === "funds" && pool.used > 0) ??
     summary.pools[0];
   const section = useRef<HTMLElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
   const [aboveBudget, setAboveBudget] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const [summaryElement, setSummaryElement] = useState<HTMLDivElement | null>(
-    null,
-  );
-  const [collapsedHeight, setCollapsedHeight] = useState(64);
-  const collapsedPoint = `${collapsedHeight}px`;
-  // 1 clamps to the panel's natural height, rather than forcing a full screen.
-  const snapPoints = useMemo(() => [collapsedPoint, 1], [collapsedPoint]);
-
-  useEffect(() => {
-    if (!summaryElement) return;
-    const observer = new ResizeObserver(() => {
-      const panel = summaryElement.closest<HTMLElement>(
-        ".mobile-budget-drawer",
-      );
-      if (!panel) return;
-      const styles = getComputedStyle(panel);
-      setCollapsedHeight(
-        Math.ceil(
-          summaryElement.getBoundingClientRect().height +
-            parseFloat(styles.borderTopWidth) +
-            parseFloat(styles.paddingBottom),
-        ),
-      );
-    });
-    observer.observe(summaryElement);
-    return () => observer.disconnect();
-  }, [summaryElement]);
+  const swipeStart = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const target = section.current;
@@ -107,37 +76,57 @@ export function TeamBudget({
         <BudgetOverview pool={summary.pools[0]} />
         <BudgetBreakdown summary={summary} />
       </section>
-      {floating && (
-        <Drawer
-          open={aboveBudget}
-          modal={expanded}
-          disablePointerDismissal={!expanded}
-          snapPoints={snapPoints}
-          snapToSequentialPoints
-          snapPoint={expanded ? 1 : collapsedPoint}
-          onSnapPointChange={(point, details) => {
-            // Keep the compact budget visible even after a fast downward swipe.
-            if (point === null) details.cancel();
-            setExpanded(point === 1);
-          }}
-          onOpenChange={(open, details) => {
-            if (!open) {
-              // Dismissal returns to the compact resting position.
-              details.cancel();
-              setExpanded(false);
+      {/* An open Base UI drawer owns Android Back, even when non-modal.
+          Keep the resting bar outside the drawer so Back navigates immediately. */}
+      {floating && aboveBudget && !expanded && (
+        <div
+          className="mobile-budget-bar budget-panel no-print"
+          onPointerDown={(event) => {
+            if (event.isPrimary && event.button === 0) {
+              swipeStart.current = { x: event.clientX, y: event.clientY };
+              // Capture on the pressed control so a tap still clicks it.
+              if (event.target instanceof HTMLElement)
+                event.target.setPointerCapture(event.pointerId);
             }
+          }}
+          onPointerCancel={() => {
+            swipeStart.current = null;
+          }}
+          onPointerUp={(event) => {
+            const start = swipeStart.current;
+            swipeStart.current = null;
+            if (
+              start &&
+              start.y - event.clientY > 30 &&
+              start.y - event.clientY > Math.abs(start.x - event.clientX)
+            )
+              setExpanded(true);
           }}
         >
+          <div className="budget-drawer-summary">
+            <span className="budget-drawer-handle" aria-hidden="true" />
+            <div className="relative">
+              <button
+                ref={trigger}
+                type="button"
+                className="absolute inset-0 w-full cursor-pointer rounded-sm"
+                aria-label={t("budgetBreakdown")}
+                aria-expanded={false}
+                onClick={() => setExpanded(true)}
+              />
+              <BudgetOverview pool={drawerPool} />
+            </div>
+          </div>
+        </div>
+      )}
+      {floating && (
+        <Drawer open={aboveBudget && expanded} onOpenChange={setExpanded}>
           <DrawerContent
             className="mobile-budget-drawer budget-panel no-print"
-            data-expanded={expanded}
-            style={
-              { "--budget-collapsed-height": collapsedPoint } as CSSProperties
-            }
-            initialFocus={false}
-            finalFocus={false}
+            data-expanded="true"
+            finalFocus={trigger}
             swipeHeader={
-              <div ref={setSummaryElement} className="budget-drawer-summary">
+              <div className="budget-drawer-summary">
                 <span className="budget-drawer-handle" aria-hidden="true" />
                 <div className="relative">
                   <button
@@ -156,11 +145,7 @@ export function TeamBudget({
             <DrawerDescription className="sr-only">
               {t("budgetBreakdown")}
             </DrawerDescription>
-            <div
-              className="budget-drawer-breakdown min-h-0 overflow-y-auto overscroll-contain"
-              inert={!expanded}
-              aria-hidden={!expanded}
-            >
+            <div className="budget-drawer-breakdown min-h-0 overflow-y-auto overscroll-contain">
               <BudgetBreakdown summary={summary} drawerPool={drawerPool} />
               <div className="px-3 pb-3">
                 <TeamReadiness

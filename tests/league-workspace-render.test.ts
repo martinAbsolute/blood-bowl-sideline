@@ -11,11 +11,12 @@ const state = vi.hoisted(() => ({
   withdrawn: false,
   view: "overview",
   seasonStatus: "" as string,
+  replace: vi.fn(),
 }));
 vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
-  useSearchParams: () => new URLSearchParams({ view: state.view }),
+  useRouter: () => ({ replace: state.replace }),
+  useSearchParams: () => new URLSearchParams({ view: state.view, keep: "1" }),
 }));
 vi.mock("next/link", () => ({
   default: ({ children, ...props }: { children: ReactNode; href: string }) =>
@@ -101,6 +102,7 @@ vi.mock("../src/components/league-ui", () => ({
 }));
 
 afterEach(() => {
+  state.replace.mockReset();
   Object.assign(state, {
     commissioner: false,
     participant: false,
@@ -108,6 +110,36 @@ afterEach(() => {
     withdrawn: false,
     view: "overview",
     seasonStatus: "",
+  });
+});
+
+it("replaces league views without stacking tab history or discarding other parameters", async () => {
+  await render((container) => {
+    const buttons = Array.from(
+      container.querySelectorAll<HTMLButtonElement>("nav button"),
+    );
+    buttons
+      .find((button) => button.getAttribute("aria-current") === "page")!
+      .click();
+    expect(state.replace).not.toHaveBeenCalled();
+    buttons
+      .find((button) => button.textContent?.includes("leagueUi.history"))!
+      .click();
+    expect(state.replace).toHaveBeenCalledExactlyOnceWith(
+      "/leagues/manage/league?view=history&keep=1",
+      { scroll: false },
+    );
+  });
+  state.view = "history";
+  state.replace.mockClear();
+  await render((container) => {
+    const select = container.querySelector<HTMLSelectElement>("nav select")!;
+    select.value = "overview";
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(state.replace).toHaveBeenCalledExactlyOnceWith(
+      "/leagues/manage/league?keep=1",
+      { scroll: false },
+    );
   });
 });
 

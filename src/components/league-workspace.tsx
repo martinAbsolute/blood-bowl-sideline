@@ -113,8 +113,16 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
     (requestedTab !== "manage" || data?.canCommission)
       ? requestedTab
       : "overview";
-  const setTab = (view: string) =>
-    router.push(`/leagues/manage/${leagueId}?view=${view}`, { scroll: false });
+  const setTab = (view: string) => {
+    if (view === tab) return;
+    const params = new URLSearchParams(searchParams);
+    if (view === "overview") params.delete("view");
+    else params.set("view", view);
+    const query = params.toString();
+    router.replace(`/leagues/manage/${leagueId}${query ? `?${query}` : ""}`, {
+      scroll: false,
+    });
+  };
   const [selectedRound, setSelectedRound] = useState("");
   const [detailedStats, setDetailedStats] = useState(false);
   const [copied, setCopied] = useState(false);
