@@ -311,6 +311,7 @@ export function LeagueCareer({
   if (auth.isLoading || !auth.isAuthenticated || data === undefined)
     return (
       <LeagueGate
+        variant="league-career"
         authenticated={auth.isAuthenticated}
         loading={auth.isLoading || auth.isAuthenticated}
       />

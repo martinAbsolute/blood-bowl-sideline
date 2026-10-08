@@ -1,5 +1,5 @@
-import { LeagueGate } from "@/components/league-ui";
+import { InitialLoading } from "@/components/initial-loading";
 
 export default function Loading() {
-  return <LeagueGate authenticated loading />;
+  return <InitialLoading variant="league" />;
 }

@@ -8,7 +8,7 @@ import { getRoster, getRuleset, inducements } from "@/domain/catalog";
 import { inducementInfo, staffInfo } from "@/domain/rules";
 import { needsPlayerRecruitment } from "@/lib/builder";
 import { budgetSummary } from "@/domain/budget";
-import type { Team } from "@/domain/types";
+import type { Roster, RulesetId, Team } from "@/domain/types";
 import { TeamHeader } from "./team-header";
 import { Badge } from "./ui/badge";
 import { ArrowLeft, Copy, Printer, ChevronDown, Ellipsis } from "lucide-react";
@@ -23,6 +23,7 @@ import {
 import { rosterChoices } from "@/lib/roster-ruleset";
 
 export type LoadingVariant =
+  | "page"
   | "library"
   | "editor"
   | "catalog"
@@ -37,11 +38,9 @@ export type LoadingVariant =
 export function LibraryCardsLoading({
   label,
   text,
-  actionLabel,
 }: {
   label: string;
   text?: (key: string) => string;
-  actionLabel?: string;
 }) {
   return (
     <div
@@ -56,7 +55,7 @@ export function LibraryCardsLoading({
           aria-hidden="true"
           className={`min-w-0 gap-0 rounded-2xl py-0 shadow-sm ${index === 1 ? "hidden sm:flex" : index === 2 ? "hidden xl:flex" : ""}`}
         >
-          <div className="bg-primary/10 px-5 pb-5 pt-4">
+          <div className="bg-primary px-5 pb-4 pt-4 [&_[data-slot=skeleton]]:bg-white/15">
             <div className="mb-4 flex h-6 justify-between">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-6 w-14 rounded-full" />
@@ -69,8 +68,8 @@ export function LibraryCardsLoading({
               </div>
             </div>
           </div>
-          <div className="space-y-4 p-5">
-            <div className="h-8">
+          <div className="space-y-3 px-5 py-4">
+            <div className="h-4">
               <Skeleton className="h-4 w-3/4" />
             </div>
             <dl className="grid grid-cols-3 divide-x rounded-lg border bg-secondary/25 py-3 text-center">
@@ -87,15 +86,59 @@ export function LibraryCardsLoading({
                 </div>
               ))}
             </dl>
-            <div className="flex h-4 items-center text-xs font-semibold text-primary">
-              {actionLabel ?? <Skeleton className="h-4 w-24" />}
-            </div>
           </div>
           <div className="flex min-h-14 items-center border-t bg-secondary/15 px-5">
             <Skeleton className="h-4 w-28" />
           </div>
         </Card>
       ))}
+    </div>
+  );
+}
+
+function RulesetPickerLoading() {
+  return (
+    <div className="flex w-72 max-w-full flex-col gap-1 text-xs sm:max-w-80">
+      <Skeleton className="h-4 w-14" />
+      <div className="mt-1">
+        <Skeleton className="h-11 w-full sm:h-9" />
+      </div>
+    </div>
+  );
+}
+
+function RosterTableLoading({
+  rows,
+  framed = true,
+}: {
+  rows: number;
+  framed?: boolean;
+}) {
+  return (
+    <div className={framed ? "overflow-hidden rounded-lg border bg-card" : ""}>
+      <div className="overflow-hidden">
+        <div className="min-w-[856px]">
+          <Skeleton className="h-[34px] w-full rounded-none" />
+          {Array.from({ length: rows }, (_, index) => (
+            <div
+              key={index}
+              className="flex min-h-[49px] items-center gap-3 border-t px-2.5 py-[7px]"
+            >
+              <Skeleton className="size-8 shrink-0" />
+              <div className="w-40 space-y-1">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-8" />
+              </div>
+              <Skeleton className="h-4 w-56" />
+              <Skeleton className="h-4 flex-1" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="space-y-1.5 border-t px-3 py-2.5">
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-4 w-1/2" />
+      </div>
     </div>
   );
 }
@@ -167,16 +210,32 @@ function TableLoading({
 }
 
 export function LoadingLayout({
-  variant = "library",
+  variant = "page",
   label,
   team,
   text,
+  rulesetId = "bb2025-default",
+  referenceRoster,
 }: {
   variant?: LoadingVariant;
   label: string;
   team?: Team;
   text?: (key: string) => string;
+  rulesetId?: RulesetId;
+  referenceRoster?: Roster;
 }) {
+  if (variant === "page")
+    return (
+      <div
+        className="page-width py-8 sm:py-10"
+        data-loading-layout="page"
+        role="status"
+        aria-label={label}
+      >
+        <span className="sr-only">{label}</span>
+        <Skeleton aria-hidden="true" className="h-1 w-full" />
+      </div>
+    );
   const roster = team ? getRoster(team.rosterId) : undefined;
   const budget = team ? budgetSummary(team) : undefined;
   const budgetRows = budget
@@ -200,8 +259,7 @@ export function LoadingLayout({
         ).length,
       ]
     : [5, 6];
-  const catalogChoices =
-    variant === "catalog" ? rosterChoices("bb2025-default") : [];
+  const catalogChoices = variant === "catalog" ? rosterChoices(rulesetId) : [];
   const catalogTiers = [
     ...new Set(catalogChoices.map(({ tier }) => tier)),
   ].filter((tier) => tier > 0);
@@ -215,7 +273,7 @@ export function LoadingLayout({
       >
         <span className="sr-only">{label}</span>
         <div aria-hidden="true" className="space-y-5">
-          <Skeleton className="h-5 w-24" />
+          <Skeleton className="h-11 w-24 sm:h-4" />
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <Skeleton className="size-10" />
@@ -226,11 +284,13 @@ export function LoadingLayout({
             </div>
             <Skeleton className="h-11 w-32 sm:h-9" />
           </div>
-          <Skeleton className="h-9 w-48" />
-          <TableLoading rows={5} title={false} />
-          <div className="grid items-start gap-5 xl:grid-cols-[300px_minmax(0,1fr)]">
+          <RulesetPickerLoading />
+          <RosterTableLoading rows={referenceRoster?.players.length ?? 5} />
+          <div
+            className={`grid items-start gap-5 ${getRuleset(rulesetId).sevens ? "sm:max-w-lg" : "xl:grid-cols-[300px_minmax(0,1fr)]"}`}
+          >
             <TableLoading rows={5} />
-            <TableLoading rows={6} />
+            {!getRuleset(rulesetId).sevens && <TableLoading rows={6} />}
           </div>
         </div>
       </div>
@@ -241,6 +301,7 @@ export function LoadingLayout({
     return (
       <div
         className="page-width team-builder py-3"
+        data-loading-layout={variant}
         role="status"
         aria-label={label}
       >
@@ -478,16 +539,18 @@ export function LoadingLayout({
         </div>
         {variant === "catalog" ? (
           <div className="flex max-w-full flex-wrap items-end gap-x-4 gap-y-2">
-            <div className="flex flex-wrap items-center gap-1 pb-1">
-              {catalogTiers.map((tier) => (
-                <Skeleton key={tier} className="h-[26px] w-14 rounded-full" />
-              ))}
-            </div>
-            <div className="flex w-full flex-col gap-1 text-xs sm:max-w-80">
-              <Skeleton className="h-4 w-14" />
-              <div className="relative mt-1 block min-w-0">
-                <Skeleton className="h-11 w-full sm:h-9" />
+            {catalogTiers.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1 pb-1">
+                {catalogTiers.map((tier) => (
+                  <Skeleton key={tier} className="h-[26px] w-14 rounded-full" />
+                ))}
               </div>
+            )}
+            <div className="flex min-w-0 items-end gap-1">
+              <RulesetPickerLoading />
+              {rulesetId !== "bb2025-default" && (
+                <Skeleton className="mb-0.5 size-8 shrink-0" />
+              )}
             </div>
           </div>
         ) : (
@@ -517,27 +580,30 @@ export function LoadingLayout({
             </div>
           </aside>
           <div aria-hidden="true" className="min-w-0 space-y-5">
-            {catalogChoices.slice(0, 3).map(({ roster }) => (
+            {catalogChoices.slice(0, 8).map(({ roster }, index) => (
               <div
                 key={roster.id}
-                className="overflow-hidden rounded-lg border bg-card"
+                className={`overflow-hidden rounded-lg border bg-card ${index > 2 ? "md:hidden" : ""}`}
               >
                 <div className="flex items-center gap-1 border-b bg-secondary/40 px-2 py-2 md:gap-2 md:px-3">
-                  <Skeleton className="size-4 shrink-0 min-[360px]:size-6 md:size-8" />
-                  <Skeleton className="h-4 min-w-0 max-w-36 flex-1 md:h-5" />
+                  <div className="flex min-w-0 flex-1 items-center gap-1 md:gap-2">
+                    <Skeleton className="size-4 shrink-0 min-[360px]:size-6 md:size-8" />
+                    <Skeleton className="h-4 min-w-0 max-w-36 flex-1 md:h-5" />
+                  </div>
                   <Skeleton className="h-11 w-16 shrink-0 md:h-7 md:w-24" />
                   <Skeleton className="h-11 w-20 shrink-0 md:h-7 md:w-28" />
                   <span className="flex h-11 w-7 shrink-0 items-center justify-center md:hidden">
                     <ChevronDown className="size-5 text-muted-foreground" />
                   </span>
                 </div>
-                <div className="hidden md:block">
-                  <TableLoading
-                    rows={roster.players.length}
-                    title={false}
-                    framed={false}
-                  />
-                </div>
+                {index < 3 && (
+                  <div className="hidden md:block">
+                    <RosterTableLoading
+                      rows={roster.players.length}
+                      framed={false}
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>

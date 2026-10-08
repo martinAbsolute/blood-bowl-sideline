@@ -9,7 +9,7 @@ import { ConvexError } from "convex/values";
 import { LoginButton } from "./site-shell";
 import { Button } from "./ui/button";
 import { ButtonGroup } from "./ui/button-group";
-import { InitialLoading } from "./initial-loading";
+import { LoadingLayout } from "./loading-layouts";
 import { LeagueEmptyState } from "./league-layout";
 
 export function useLeagueAction() {
@@ -119,12 +119,14 @@ export function useLeagueAction() {
 export function LeagueGate({
   authenticated,
   loading,
+  variant = "league",
 }: {
   authenticated: boolean;
   loading: boolean;
+  variant?: "league" | "league-match" | "league-career";
 }) {
   const t = useTranslations();
-  if (loading) return <InitialLoading label={t("loading")} />;
+  if (loading) return <LoadingLayout variant={variant} label={t("loading")} />;
   return (
     <div className="page-width py-8 sm:py-10">
       <LeagueBack />

@@ -206,6 +206,7 @@ export function LeagueMatch({
   if (auth.isLoading || !auth.isAuthenticated || data === undefined)
     return (
       <LeagueGate
+        variant="league-match"
         authenticated={auth.isAuthenticated}
         loading={auth.isLoading || auth.isAuthenticated}
       />

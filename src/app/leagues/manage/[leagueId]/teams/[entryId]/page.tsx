@@ -1,5 +1,3 @@
-import { Suspense } from "react";
-import { LeagueGate } from "@/components/league-ui";
 import { LeagueCareer } from "@/components/league-career";
 import { contentMetadata } from "@/lib/content-metadata";
 import { api } from "../../../../../../../convex/_generated/api";
@@ -24,23 +22,11 @@ export async function generateMetadata({
   );
 }
 
-async function LeagueContent({
+export default async function Page({
   params,
 }: {
   params: Promise<{ leagueId: string; entryId: string }>;
 }) {
   const { leagueId, entryId } = await params;
   return <LeagueCareer leagueId={leagueId} entryId={entryId} />;
-}
-
-export default function Page({
-  params,
-}: {
-  params: Promise<{ leagueId: string; entryId: string }>;
-}) {
-  return (
-    <Suspense fallback={<LeagueGate authenticated loading />}>
-      <LeagueContent params={params} />
-    </Suspense>
-  );
 }

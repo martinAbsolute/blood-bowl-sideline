@@ -2,7 +2,7 @@
 import { useTranslations } from "gt-next";
 import { LoadingLayout, type LoadingVariant } from "./loading-layouts";
 import { usePathname } from "next/navigation";
-import { useSyncExternalStore } from "react";
+import { Suspense, useSyncExternalStore } from "react";
 import {
   draftSnapshot,
   parseDrafts,
@@ -17,7 +17,20 @@ export function WorkspaceLoading({
   variant?: LoadingVariant;
 }) {
   const t = useTranslations();
-  if (variant === "editor") return <EditorLoading />;
+  if (variant === "editor")
+    return (
+      <Suspense
+        fallback={
+          <LoadingLayout
+            variant="editor"
+            label={t("loading")}
+            text={(key) => t(key)}
+          />
+        }
+      >
+        <EditorLoading />
+      </Suspense>
+    );
   return (
     <LoadingLayout
       variant={variant}

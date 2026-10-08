@@ -3,8 +3,6 @@ import { getRoster, rosters } from "@/domain/catalog";
 import { TeamReference } from "@/components/team-reference";
 import { pageMetadata } from "@/lib/site-metadata";
 import { rosterRuleset } from "@/lib/roster-ruleset";
-import { Suspense } from "react";
-import { WorkspaceLoading } from "@/components/workspace-loading";
 export function generateStaticParams() {
   return rosters.map(({ id }) => ({ slug: id }));
 }
@@ -22,21 +20,7 @@ export async function generateMetadata({
       )
     : {};
 }
-export default function Page({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ ruleset?: string | string[] }>;
-}) {
-  return (
-    <Suspense fallback={<WorkspaceLoading variant="reference" />}>
-      <ReferenceWithRuleset params={params} searchParams={searchParams} />
-    </Suspense>
-  );
-}
-
-async function ReferenceWithRuleset({
+export default async function Page({
   params,
   searchParams,
 }: {

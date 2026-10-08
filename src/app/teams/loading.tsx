@@ -1,5 +1,5 @@
-import { WorkspaceLoading } from "@/components/workspace-loading";
+import { InitialLoading } from "@/components/initial-loading";
 
 export default function Loading() {
-  return <WorkspaceLoading />;
+  return <InitialLoading variant="library" />;
 }

@@ -315,11 +315,7 @@ export function TeamLibrary() {
           (isAuthenticated &&
             status === "LoadingFirstPage" &&
             !cachedResults)) ? (
-          <LibraryCardsLoading
-            label={t("loading")}
-            text={(key) => t(key)}
-            actionLabel={t("openTeam")}
-          />
+          <LibraryCardsLoading label={t("loading")} text={(key) => t(key)} />
         ) : cards.length === 0 ? (
           <div className="flex min-h-[400px] flex-col items-center justify-center rounded-xl border border-dashed bg-card/50 px-6 py-16 text-center">
             <FileText className="mx-auto mb-4 size-7 text-muted-foreground" />
@@ -550,11 +546,7 @@ function ArchivedTeams({
   return (
     <div aria-busy={status === "LoadingFirstPage"}>
       {status === "LoadingFirstPage" && !lastResults ? (
-        <LibraryCardsLoading
-          label={t("loading")}
-          text={(key) => t(key)}
-          actionLabel={t("restore")}
-        />
+        <LibraryCardsLoading label={t("loading")} text={(key) => t(key)} />
       ) : visibleResults.length === 0 ? (
         <p className="rounded-xl border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
           {t(
