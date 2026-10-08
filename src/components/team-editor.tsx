@@ -411,7 +411,9 @@ export function TeamEditor({
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-10 px-2 text-left">#</TableHead>
-                      <TableHead className="w-48">{t("player")}</TableHead>
+                      <TableHead className="w-48 lg:w-64">
+                        {t("player")}
+                      </TableHead>
                       {["MA", "ST", "AG", "PA", "AV"].map((x) => (
                         <TableHead
                           key={x}
@@ -516,7 +518,10 @@ export function TeamEditor({
                                     </strong>
                                     <div className="no-print inline-flex items-center gap-1 lg:max-w-full">
                                       <button
-                                        className="text-left text-sm font-semibold text-primary hover:underline lg:min-w-0 lg:whitespace-normal lg:wrap-anywhere"
+                                        className="text-left text-sm font-semibold text-primary hover:underline lg:min-w-0 lg:truncate"
+                                        title={
+                                          p.name || positionLabel(pos.position)
+                                        }
                                         onClick={() => {
                                           setSelected(p.id);
                                           setSearch("");
@@ -677,7 +682,7 @@ export function TeamEditor({
                           <TableCell className="no-print px-1">
                             <ChevronRight
                               aria-hidden="true"
-                              className="mx-auto size-3.5 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
+                              className="mx-auto size-3.5 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 group-has-[:focus-visible]:opacity-100 [@media(hover:none)]:opacity-100"
                             />
                           </TableCell>
                         </TableRow>
@@ -724,7 +729,8 @@ export function TeamEditor({
                                 </strong>
                                 <div className="no-print inline-flex items-center gap-1 lg:min-w-0">
                                   <button
-                                    className="text-left text-sm font-semibold lg:min-w-0 lg:whitespace-normal lg:wrap-anywhere"
+                                    className="text-left text-sm font-semibold lg:min-w-0 lg:truncate"
+                                    title={s.name}
                                     onClick={() => setSelected(id)}
                                   >
                                     {s.name}
@@ -759,7 +765,7 @@ export function TeamEditor({
                             <TableCell className="no-print px-1">
                               <ChevronRight
                                 aria-hidden="true"
-                                className="mx-auto size-3.5 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
+                                className="mx-auto size-3.5 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 group-has-[:focus-visible]:opacity-100 [@media(hover:none)]:opacity-100"
                               />
                             </TableCell>
                           </TableRow>
