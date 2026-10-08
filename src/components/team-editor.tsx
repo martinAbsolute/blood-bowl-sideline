@@ -83,7 +83,6 @@ import { ShareButton } from "./share-button";
 import { hasTeamProgress, resetTeamRoster } from "@/lib/builder";
 import {
   ArrowLeft,
-  ChevronRight,
   Copy,
   Ellipsis,
   ChevronDown,
@@ -444,9 +443,6 @@ export function TeamEditor({
                       <TableHead className="w-16 pr-3 text-right">
                         {t("cost")}
                       </TableHead>
-                      <TableHead className="w-8">
-                        <span className="sr-only">{t("managePlayer")}</span>
-                      </TableHead>
                       {!readOnly && (
                         <TableHead className="no-print hidden w-11 lg:table-cell">
                           <span className="sr-only">{t("removePlayer")}</span>
@@ -639,12 +635,6 @@ export function TeamEditor({
                                   : 0),
                             )}
                           </TableCell>
-                          <TableCell className="pr-3">
-                            <ChevronRight
-                              aria-hidden="true"
-                              className="size-4 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
-                            />
-                          </TableCell>
                           {!readOnly && (
                             <TableCell className="no-print hidden px-1 pr-2 lg:table-cell">
                               <RemovePlayerButton
@@ -720,12 +710,6 @@ export function TeamEditor({
                             {isSevens(team) && <TableCell />}
                             <TableCell className="pr-5 text-right font-mono text-xs">
                               {gold(s.cost)}
-                            </TableCell>
-                            <TableCell className="pr-3">
-                              <ChevronRight
-                                aria-hidden="true"
-                                className="size-4 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
-                              />
                             </TableCell>
                             {!readOnly && (
                               <TableCell className="no-print hidden px-1 pr-2 lg:table-cell">

@@ -80,7 +80,7 @@ export function RemovePlayerButton({
       size={compact ? "icon" : "default"}
       className={
         compact
-          ? "size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+          ? "size-8 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 hover:bg-destructive/10 hover:text-destructive"
           : "h-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:h-8"
       }
       aria-label={
