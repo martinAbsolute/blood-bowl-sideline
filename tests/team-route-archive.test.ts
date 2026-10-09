@@ -46,3 +46,42 @@ it("propagates backend outages rather than classifying the team as missing", asy
     proxy(new NextRequest(`https://sideline.example/teams/${uuid}`)),
   ).rejects.toThrow("Backend unavailable");
 });
+
+it("serves complete roster HTML at the shared URL for text-only readers", async () => {
+  for (const agent of [
+    "ChatGPT-User/1.0",
+    "OAI-SearchBot/1.0",
+    "GPTBot/1.0",
+    "Claude-User/1.0",
+    "PerplexityBot/1.0",
+    "curl/8.0",
+    "node",
+  ]) {
+    const response = await proxy(
+      new NextRequest(`https://sideline.example/teams/${uuid}`, {
+        headers: { "user-agent": agent },
+      }),
+    );
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      `https://sideline.example/teams/${uuid}/roster`,
+    );
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("vary")).toBe("User-Agent");
+  }
+  expect(query).not.toHaveBeenCalled();
+});
+
+it("keeps browsers and React navigation on the interactive page", async () => {
+  query.mockResolvedValue(false);
+  const requests: Record<string, string>[] = [
+    { "user-agent": "Mozilla/5.0 Chrome/130.0 Safari/537.36" },
+    { "user-agent": "ChatGPT-User/1.0", rsc: "1" },
+    { "user-agent": "ChatGPT-User/1.0", "next-router-prefetch": "1" },
+  ];
+  for (const headers of requests) {
+    const response = await proxy(
+      new NextRequest(`https://sideline.example/teams/${uuid}`, { headers }),
+    );
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+  }
+});

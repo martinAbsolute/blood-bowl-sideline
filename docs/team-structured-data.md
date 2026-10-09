@@ -5,6 +5,32 @@
 response body (Next.js can stream it), find this script, and parse its text as
 JSON. No JavaScript execution or sign-in is needed to read the saved roster.
 
+The same snapshot also initializes the existing roster view in read-only mode
+on the server. Its headings, player table, skills, staff quantities and treasury
+are ordinary HTML text, so readers that discard script tags can read the team
+without processing JSON-LD. Hydration waits for authentication, draft recovery
+and live permissions before enabling edits; the server snapshot never grants
+edit access. A missing live team invalidates the preview. No separate hidden
+roster is added to the interactive page.
+
+Next.js may stream that view inside a container revealed by its runtime. To
+support readers that cannot execute that runtime, requests from known bot and
+text-client user agents (including `ChatGPT-User`, `OAI-SearchBot`, `GPTBot`,
+Claude, Perplexity, curl and Node fetch) are internally rewritten to
+`/teams/[uuid]/roster`. This route returns a complete semantic HTML document
+with headings, definition lists and a player table, plus the same JSON-LD.
+It has no loading placeholders, hidden streaming containers or executable
+scripts. Browser and React navigation requests retain the interactive page.
+The roster route is also directly accessible for unrecognized readers and is
+advertised in the page's alternate link metadata.
+
+The complete reader response includes the ruleset treasury allowance and
+remaining treasury for standalone teams. If the team has league context, it
+states that league-specific allowances are unavailable rather than assuming
+the ruleset allowance. Responses use `no-store`, `Vary: User-Agent` and
+`noindex, nofollow`; missing or archived teams return 404 and backend outages
+return 503. Only the existing anonymous Convex team query is used.
+
 The document is a Schema.org `WebPage` whose `mainEntity` is a `SportsTeam`.
 The team identifier, name, canonical URL and fictional athletes use standard
 Schema.org properties. `dateModified` identifies the saved snapshot's timestamp.
@@ -50,7 +76,8 @@ Missing/archived teams and backend failures emit no snapshot. Device-only drafts
 and the browser's existing retry/edit behavior remain available. Archived links
 retain the existing proxy's 404 behavior. Team links retain `noindex, nofollow`.
 
-The script has no visual output; the editor and its HTML/CSS are unchanged.
+The script has no visual output. The existing editor layout and styles are used
+for the server preview and the hydrated page.
 User text is serialized with `<` escaped to prevent script-tag injection.
 
 References: [Next.js JSON-LD guide](https://nextjs.org/docs/app/guides/json-ld),

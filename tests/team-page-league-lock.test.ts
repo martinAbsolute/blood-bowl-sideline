@@ -11,6 +11,7 @@ import { getFunctionName, type FunctionReference } from "convex/server";
 const state = vi.hoisted(() => ({
   live: undefined as
     | undefined
+    | null
     | {
         team: Team;
         revision: number;
@@ -20,10 +21,15 @@ const state = vi.hoisted(() => ({
       },
   draft: null as Team | null,
   isOwner: true,
+  authLoading: false,
+  syncReady: true,
 }));
 vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
 vi.mock("convex/react", () => ({
-  useConvexAuth: () => ({ isAuthenticated: true }),
+  useConvexAuth: () => ({
+    isAuthenticated: true,
+    isLoading: state.authLoading,
+  }),
   useQuery: (query: FunctionReference<"query">) =>
     getFunctionName(query) === "leagues:listTeamCareers"
       ? [
@@ -43,7 +49,7 @@ vi.mock("../src/lib/drafts", () => ({
   subscribeDrafts: () => () => {},
 }));
 vi.mock("../src/components/draft-sync-provider", () => ({
-  useDraftSync: () => ({ ready: true, account: "coach" }),
+  useDraftSync: () => ({ ready: state.syncReady, account: "coach" }),
 }));
 vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
@@ -86,6 +92,8 @@ beforeEach(() => {
   state.live = undefined;
   state.draft = null;
   state.isOwner = true;
+  state.authLoading = false;
+  state.syncReady = true;
 });
 afterEach(async () => {
   await act(async () => root.unmount());
@@ -196,4 +204,83 @@ it("permits planning after participation ends while showing that the team remain
     false,
   );
   expect(container.textContent).toContain("leagueUi.experiencedTeamHint");
+});
+
+it("renders the saved public snapshot read-only while auth and draft recovery load, then restores local editing", async () => {
+  const team = newTeam(randomUUID());
+  team.name = "Saved public roster";
+  const initial = {
+    team,
+    revision: 8,
+    legal: false,
+    updatedAt: Date.now(),
+    favorite: undefined,
+    draftLeagueId: undefined,
+    canEdit: true,
+    leagueLocked: false,
+    leagueExperienced: false,
+  };
+  state.authLoading = true;
+  state.syncReady = false;
+  state.draft = { ...team, name: "Unsaved local recovery" };
+  await act(async () =>
+    root.render(createElement(TeamPage, { uuid: team.uuid, initial })),
+  );
+  expect(container.querySelector<HTMLButtonElement>("button")?.disabled).toBe(
+    true,
+  );
+  expect(container.textContent).toContain(team.name);
+  expect(container.textContent).not.toContain(state.draft.name);
+
+  state.authLoading = false;
+  state.syncReady = true;
+  state.live = initial;
+  await act(async () =>
+    root.render(createElement(TeamPage, { uuid: team.uuid, initial })),
+  );
+  expect(container.querySelector<HTMLButtonElement>("button")?.disabled).toBe(
+    false,
+  );
+  expect(container.textContent).toContain(state.draft.name);
+  expect(container.textContent).not.toContain(team.name);
+});
+
+it("drops the server preview when the live team disappears and replaces it with a newer locked revision", async () => {
+  const team = newTeam(randomUUID());
+  team.name = "Saved public roster";
+  const initial = {
+    team,
+    revision: 8,
+    legal: false,
+    updatedAt: Date.now(),
+    favorite: undefined,
+    draftLeagueId: undefined,
+    canEdit: false,
+    leagueLocked: true,
+    leagueExperienced: true,
+  };
+  await act(async () =>
+    root.render(createElement(TeamPage, { uuid: team.uuid, initial })),
+  );
+  expect(container.textContent).toContain(team.name);
+  state.live = {
+    ...initial,
+    revision: 9,
+    team: { ...team, name: "New locked roster" },
+  };
+  await act(async () =>
+    root.render(createElement(TeamPage, { uuid: team.uuid, initial })),
+  );
+  expect(container.textContent).toContain("New locked roster");
+  expect(container.textContent).not.toContain(team.name);
+  expect(container.querySelector<HTMLButtonElement>("button")?.disabled).toBe(
+    true,
+  );
+  state.live = null;
+  await act(async () =>
+    root.render(createElement(TeamPage, { uuid: team.uuid, initial })),
+  );
+  expect(container.textContent).not.toContain(team.name);
+  expect(container.textContent).not.toContain("New locked roster");
+  expect(container.querySelector("button")).toBeNull();
 });

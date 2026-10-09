@@ -19,6 +19,10 @@ export async function generateMetadata({
   );
   return {
     ...metadata,
+    alternates: {
+      ...metadata.alternates,
+      types: { "text/html": `/teams/${slug}/roster` },
+    },
     robots: { index: false, follow: false },
   };
 }
@@ -41,7 +45,7 @@ export default async function Page({
           }}
         />
       )}
-      <TeamPage uuid={slug} />
+      <TeamPage uuid={slug} initial={data} />
     </>
   );
 }

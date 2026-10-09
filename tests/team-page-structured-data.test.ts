@@ -14,8 +14,13 @@ vi.mock("next/navigation", () => ({
   },
 }));
 vi.mock("../src/components/team-page", () => ({
-  TeamPage: ({ uuid }: { uuid: string }) =>
-    createElement("div", { "data-team-editor": uuid }),
+  TeamPage: ({
+    uuid,
+    initial,
+  }: {
+    uuid: string;
+    initial?: { team: { name: string } } | null;
+  }) => createElement("div", { "data-team-editor": uuid }, initial?.team.name),
 }));
 
 const uuid = "11111111-1111-4111-8111-111111111111";
@@ -43,6 +48,7 @@ it("includes parseable JSON-LD in server HTML and preserves the editor and shari
   expect(script).not.toBeNull();
   expect(JSON.parse(script![1]).mainEntity.teamSnapshot.name).toBe(team.name);
   expect(html).toContain(`data-team-editor="${uuid}"`);
+  expect(html).toContain(`>${team.name}</div>`);
   expect(mocks.fetchQuery).toHaveBeenCalledWith(api.teams.getByUuid, { uuid });
   expect(mocks.connection.mock.invocationCallOrder[0]).toBeLessThan(
     mocks.fetchQuery.mock.invocationCallOrder[0],

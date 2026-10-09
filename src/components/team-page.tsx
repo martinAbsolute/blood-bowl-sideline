@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import type { Id } from "../../convex/_generated/dataModel";
+import type { FunctionReturnType } from "convex/server";
 import { useSyncExternalStore } from "react";
 import { useConvexAuth, useQuery } from "convex/react";
 import { useTranslations } from "gt-next";
@@ -18,7 +19,13 @@ import { WorkspaceLoading } from "./workspace-loading";
 import { TeamLeagueLinks } from "./team-league-links";
 import { PageStatus } from "./page-status";
 
-export function TeamPage({ uuid }: { uuid: string }) {
+export function TeamPage({
+  uuid,
+  initial,
+}: {
+  uuid: string;
+  initial?: FunctionReturnType<typeof api.teams.getByUuid>;
+}) {
   const t = useTranslations();
   const requestedLeagueId = useSearchParams().get("league");
   const sync = useDraftSync();
@@ -41,8 +48,32 @@ export function TeamPage({ uuid }: { uuid: string }) {
     !sync.ready ||
     live === undefined ||
     (isAuthenticated && leagueId && leagueContext === undefined)
-  )
+  ) {
+    // Render the public roster into the initial HTML for text-only readers.
+    // Wait for auth, local recovery and live permissions before enabling edits.
+    // An explicit null from the live query must invalidate the server snapshot.
+    if (initial && initial.team.uuid === uuid && live !== null) {
+      const preview = live ?? initial;
+      return (
+        <TeamEditor
+          key={`preview-${uuid}:${preview.revision}`}
+          initial={preview.team}
+          revision={preview.revision}
+          readOnly
+          server={preview}
+          recovered={false}
+          leagueNotice={
+            <TeamLeagueLinks
+              uuid={uuid}
+              locked={preview.leagueLocked}
+              experienced={preview.leagueExperienced}
+            />
+          }
+        />
+      );
+    }
     return <WorkspaceLoading variant="editor" />;
+  }
   const editable = live ? isAuthenticated && live.canEdit : !!local;
   if (sync.ready && (local || live))
     return (
