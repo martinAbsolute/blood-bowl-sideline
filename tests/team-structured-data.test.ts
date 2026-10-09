@@ -97,6 +97,70 @@ it("expands a saved roster with named skills, stats, staff, inducements and expl
   // League-specific allowances are not available to this anonymous query.
   expect(snapshot.summary).not.toHaveProperty("remaining");
   expect(snapshot.summary).not.toHaveProperty("budget");
+  expect(snapshot.budgets).toBeNull();
+});
+
+it("includes the standalone treasury and uses the roster tier when the ruleset has no tiers", () => {
+  const team = newTeam(randomUUID(), "orc");
+  team.players = [
+    { id: randomUUID(), name: "", positionId: "orc-3", skills: ["guard"] },
+  ];
+  const snapshot = teamStructuredData({
+    ...saved(team),
+    draftLeagueId: undefined,
+  }).mainEntity.teamSnapshot;
+  expect(snapshot.roster.tier).toBe(
+    rosters.find((roster) => roster.id === "orc")!.tier,
+  );
+  expect(snapshot.budgets).toEqual([
+    {
+      id: "team",
+      name: "Treasury",
+      allowance: 1000000,
+      used: 115000,
+      remaining: 885000,
+      unit: "gold pieces",
+      shared: false,
+    },
+  ]);
+});
+
+it.each([
+  ["bb2025-matched-play", "SP"],
+  ["world-cup-2027", "SPP"],
+  ["kyiv-seven-sins-sevens", "skills"],
+] as const)(
+  "includes the editor's skill allowance and units for %s",
+  (rulesetId, unit) => {
+    const team = { ...newTeam(randomUUID(), "orc"), rulesetId };
+    const snapshot = teamStructuredData({
+      ...saved(team),
+      draftLeagueId: undefined,
+    }).mainEntity.teamSnapshot;
+    expect(
+      snapshot.budgets?.find((pool) => pool.id === "skills"),
+    ).toMatchObject({
+      allowance: rulesets.find((rules) => rules.id === rulesetId)!.tierBudgets[
+        snapshot.roster.tier
+      ].skillGold,
+      used: 0,
+      unit,
+      shared: false,
+    });
+  },
+);
+
+it.each([
+  { draftLeagueId: "private-league" },
+  { leagueLocked: true },
+  { leagueExperienced: true },
+])("does not invent league allowances: %j", (context) => {
+  const snapshot = teamStructuredData({
+    ...saved(newTeam(randomUUID())),
+    draftLeagueId: undefined,
+    ...context,
+  }).mainEntity.teamSnapshot;
+  expect(snapshot.budgets).toBeNull();
 });
 
 it("uses Sevens veteran movement and free dedicated fans, with SP separate from gold", () => {

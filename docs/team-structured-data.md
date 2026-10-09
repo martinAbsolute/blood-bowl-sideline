@@ -23,6 +23,8 @@ It has no loading placeholders, hidden streaming containers or executable
 scripts. Browser and React navigation requests retain the interactive page.
 The roster route is also directly accessible for unrecognized readers and is
 advertised in the page's alternate link metadata.
+Social preview bots retain the interactive page's Open Graph and Twitter
+metadata; a generic `bot` match would incorrectly strip those link previews.
 
 The representation contract does not depend on recognizing a user agent:
 
@@ -33,16 +35,23 @@ The representation contract does not depend on recognizing a user agent:
   header and HTML alternate metadata. Bot detection is only a convenience for
   existing web readers that follow the original shared URL without negotiation.
 
-HTML and JSON-LD use the same snapshot builder and rules, with no second backend
-call or second snapshot computation for the reader document. These formats are
-both read-only representations of the same public saved team.
+HTML and JSON-LD use the same snapshot builder and the editor's `budgetSummary`,
+with no second backend call or second totals computation for the reader
+document. These formats are both read-only representations of the same public
+saved team.
 
-The complete reader response includes the ruleset treasury allowance and
-remaining treasury for standalone teams. If the team has league context, it
-states that league-specific allowances are unavailable rather than assuming
+Both formats include the ruleset's budget pools for standalone teams: treasury,
+skills and (where applicable) shared Flowing Funds, with allowances, spending,
+remaining amounts and explicit units. The HTML explains shared allowances so a
+negative base balance is not mistaken for overspending the combined budget.
+If the team has league context, the HTML states that league-specific
+allowances are unavailable rather than assuming
 the ruleset allowance. Responses use `no-store`, `Vary: Accept, User-Agent` and
 `noindex, nofollow`; missing or archived teams return 404 and backend outages
-return 503. Only the existing anonymous Convex team query is used.
+return 503. The proxy also sets `no-store` on the interactive response: Next.js
+can replace its `Vary` header with RSC fields, so cache safety must not depend on
+custom `Vary` fields surviving page rendering. Only the existing anonymous
+Convex team query is used.
 
 The document is a Schema.org `WebPage` whose `mainEntity` is a `SportsTeam`.
 The team identifier, name, canonical URL and fictional athletes use standard
@@ -63,7 +72,9 @@ The snapshot includes:
   This is the saved builder roster; current league progression lives on league
   entry pages and is not represented here.
 - `roster` and `ruleset`, with readable names and stable catalog IDs. Roster tier
-  is specific to the selected ruleset. Leagues here are roster affiliations,
+  is specific to the selected ruleset, falling back to the roster's tier when
+  the ruleset has no tier assignments, as in the editor. The roster URL retains
+  the selected ruleset. Leagues here are roster affiliations,
   not the team's tournament history.
 - `players`, in roster order, with player number, name, position, full attribute
   names, separately named built-in and added skills, captain Pro skills,
@@ -79,8 +90,10 @@ The snapshot includes:
   or `SPP`. Skills cost includes any star-player skill tax; team value includes
   advancements only where the ruleset counts them toward team value.
 
-Budget allowances and remaining treasury are omitted because the anonymous team
-query does not provide league-specific budget overrides. Notes, owner IDs,
+`budgets` is `null` for teams with league context because the anonymous team
+query does not provide league-specific budget overrides. Standalone teams use
+the same budget pools as the editor; a pool's `shared` flag indicates that
+overspending draws from Flowing Funds. Notes, owner IDs,
 favorites, edit permissions and draft league IDs are never serialized.
 
 The server uses the existing anonymous Convex `teams.getByUuid` query. Metadata

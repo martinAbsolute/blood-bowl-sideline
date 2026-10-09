@@ -91,10 +91,29 @@ it("negotiates JSON-LD independently of user-agent identification and advertises
     }),
   );
   expect(browser.headers.get("x-middleware-next")).toBe("1");
+  expect(browser.headers.get("vary")).toBe("Accept, User-Agent");
+  expect(browser.headers.get("cache-control")).toBe("no-store");
   expect(browser.headers.get("link")).toContain(
     `https://sideline.example/teams/${uuid}/roster`,
   );
   expect(browser.headers.get("link")).toContain('type="application/ld+json"');
+});
+
+it.each([
+  "Twitterbot/1.0",
+  "Slackbot-LinkExpanding 1.0",
+  "facebookexternalhit/1.1",
+  "Discordbot/2.0",
+])("preserves the page's social sharing metadata for %s", async (agent) => {
+  query.mockResolvedValue(false);
+  const response = await proxy(
+    new NextRequest(`https://sideline.example/teams/${uuid}`, {
+      headers: { "user-agent": agent },
+    }),
+  );
+  expect(response.headers.get("x-middleware-next")).toBe("1");
+  expect(response.headers.get("x-middleware-rewrite")).toBeNull();
+  expect(response.headers.get("link")).toContain("/roster");
 });
 
 it("keeps browsers and React navigation on the interactive page", async () => {

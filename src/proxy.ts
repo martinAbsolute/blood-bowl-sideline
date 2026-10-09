@@ -16,6 +16,15 @@ export async function proxy(request: NextRequest) {
   // Keep browser navigation/RSC requests on the interactive page, and serve
   // the same public roster as a complete semantic document to web readers.
   const rosterUrl = new URL(`/teams/${uuid}/roster`, request.url);
+  // Next.js can replace Vary with its RSC fields on page responses. Keep every
+  // representation non-cacheable so browser HTML cannot be reused for a reader.
+  const headers = validUuid
+    ? {
+        Vary: "Accept, User-Agent",
+        "Cache-Control": "no-store",
+        Link: `<${rosterUrl.href}>; rel="alternate"; type="text/html"; title="Complete saved roster", <${rosterUrl.href}>; rel="alternate"; type="application/ld+json"`,
+      }
+    : undefined;
   if (
     validUuid &&
     ["GET", "HEAD"].includes(request.method) &&
@@ -24,26 +33,15 @@ export async function proxy(request: NextRequest) {
     (prefersTeamJsonLd(request.headers.get("accept") ?? "") ||
       teamReaderUserAgent.test(request.headers.get("user-agent") ?? ""))
   ) {
-    const response = NextResponse.rewrite(rosterUrl);
-    response.headers.set("Cache-Control", "no-store");
-    response.headers.set("Vary", "Accept, User-Agent");
-    return response;
+    return NextResponse.rewrite(rosterUrl, { headers });
   }
   if (validUuid && (await fetchQuery(api.teams.isArchived, { uuid }))) {
-    const response = NextResponse.rewrite(new URL("/404", request.url), {
+    return NextResponse.rewrite(new URL("/404", request.url), {
       status: 404,
+      headers,
     });
-    response.headers.set("Cache-Control", "no-store");
-    return response;
   }
-  const response = NextResponse.next();
-  if (validUuid) {
-    response.headers.set(
-      "Link",
-      `<${rosterUrl.href}>; rel="alternate"; type="text/html"; title="Complete saved roster", <${rosterUrl.href}>; rel="alternate"; type="application/ld+json"`,
-    );
-  }
-  return response;
+  return NextResponse.next({ headers });
 }
 
 export const config = { matcher: "/teams/:slug" };

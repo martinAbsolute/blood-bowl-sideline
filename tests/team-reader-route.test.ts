@@ -62,9 +62,13 @@ it("returns visible semantic roster text even after scripts are removed, with no
     expect(window.document.querySelector("img")).toBeNull();
     const text = window.document.body.textContent;
     expect(text).toContain("Team re-rolls2; 120,000 gold pieces");
-    expect(text).toContain("Remaining treasury765,000 gold pieces");
+    expect(text).toContain(
+      "Treasury budgetRuleset allowance1,000,000 gold piecesUsed235,000 gold piecesRemaining765,000 gold pieces",
+    );
     expect(text).not.toContain("Loading");
-    expect(query).toHaveBeenCalledWith(api.teams.getByUuid, { uuid });
+    expect(query).toHaveBeenCalledExactlyOnceWith(api.teams.getByUuid, {
+      uuid,
+    });
   } finally {
     await window.happyDOM.close();
   }
@@ -73,9 +77,38 @@ it("returns visible semantic roster text even after scripts are removed, with no
 it("does not claim a ruleset allowance is the league's treasury", async () => {
   query.mockResolvedValue({ ...saved, draftLeagueId: "league-id" });
   const html = await (await get()).text();
-  expect(html).not.toContain("Remaining treasury");
+  expect(html).not.toContain("Treasury budget");
   expect(html).toContain("League-specific treasury allowances");
   expect(html).not.toContain("league-id");
+});
+
+it("includes tournament skill allowances and shared funds in readable HTML", async () => {
+  query.mockResolvedValue({
+    ...saved,
+    team: { ...team, rulesetId: "eurobowl-2026" },
+  });
+  const window = new Window({
+    settings: { disableJavaScriptEvaluation: true },
+  });
+  try {
+    window.document.write(await (await get()).text());
+    window.document
+      .querySelectorAll("script")
+      .forEach((script) => script.remove());
+    const text = window.document.body.textContent;
+    expect(text).toContain("Skills budget");
+    expect(text).toContain("Flowing Funds budget");
+    expect(text).toContain(
+      "Overspending this base allowance draws from the shared Flowing Funds reserve.",
+    );
+    expect(
+      window.document
+        .querySelector('a[href*="/rosters/orc"]')
+        ?.getAttribute("href"),
+    ).toContain("ruleset=eurobowl-2026");
+  } finally {
+    await window.happyDOM.close();
+  }
 });
 
 it("offers the same snapshot as negotiated JSON-LD, with explicit media type and cache variation", async () => {

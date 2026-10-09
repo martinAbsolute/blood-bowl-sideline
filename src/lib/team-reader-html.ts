@@ -1,6 +1,5 @@
 import type { FunctionReturnType } from "convex/server";
 import type { api } from "../../convex/_generated/api";
-import { summarize } from "@/domain/rules";
 import {
   serializeTeamJsonLd,
   teamStructuredData,
@@ -58,11 +57,15 @@ export function teamReaderHtml(
           "",
         )}<td>${escapeHtml(skills(star.builtInSkills))}</td><td>${escapeHtml(amount(star.cost))}</td></tr>`,
   );
-  const totals = summarize(data.team);
   const treasury =
-    data.draftLeagueId || data.leagueExperienced
+    snapshot.budgets === null
       ? "<p>League-specific treasury allowances and current league progression are not included in this saved builder snapshot.</p>"
-      : `<dl>${definition("Ruleset treasury allowance", amount({ value: totals.budget.teamBudget, unit: "gold pieces" }))}${definition("Remaining treasury", amount({ value: totals.remaining, unit: "gold pieces" }))}</dl>`;
+      : snapshot.budgets
+          .map(
+            (pool) =>
+              `<section><h3>${escapeHtml(pool.name)} budget</h3><dl>${definition("Ruleset allowance", amount({ value: pool.allowance, unit: pool.unit }))}${definition("Used", amount({ value: pool.used, unit: pool.unit }))}${definition("Remaining", amount({ value: pool.remaining, unit: pool.unit }))}</dl>${pool.shared ? "<p>Overspending this base allowance draws from the shared Flowing Funds reserve.</p>" : ""}</section>`,
+          )
+          .join("");
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(snapshot.name)} | Blood Bowl Sideline.</title><meta name="robots" content="noindex, nofollow"><link rel="canonical" href="${escapeHtml(structured.url)}"><script id="team-structured-data" type="application/ld+json">${serializeTeamJsonLd(structured)}</script></head>
 <body><main><article>
@@ -72,6 +75,6 @@ export function teamReaderHtml(
 <section><h2>Staff</h2><dl>${snapshot.staff.map((staff) => definition(staff.name, `${staff.count}${staff.count !== staff.purchased ? ` (${staff.purchased} purchased)` : ""}; ${amount(staff.cost)}`)).join("")}</dl></section>
 <section><h2>Selected inducements</h2>${snapshot.inducements.length ? `<dl>${snapshot.inducements.map((item) => definition(item.name, `${item.count}; ${amount(item.cost)}`)).join("")}</dl>` : "<p>None purchased.</p>"}</section>
 <section><h2>Costs and treasury</h2><dl>${definition("Players cost", amount(snapshot.summary.playersCost))}${definition("Star players cost", amount(snapshot.summary.starPlayersCost))}${definition("Staff cost", amount(snapshot.summary.staffCost))}${definition("Inducements cost", amount(snapshot.summary.inducementsCost))}${definition("Skills cost, including star-player skill tax", amount(snapshot.summary.skillsCost))}${definition("Team value", amount(snapshot.summary.teamValue))}</dl>${treasury}<p>All costs are in-game currency. Skill costs can use gold pieces, SP or SPP depending on the ruleset.</p></section>
-<footer><p><a href="${escapeHtml(structured.url)}">Open this team in Blood Bowl Sideline.</a></p></footer>
+<footer><p><a href="${escapeHtml(snapshot.roster.url)}">Roster options for ${escapeHtml(snapshot.ruleset.name)}</a></p><p><a href="${escapeHtml(structured.url)}">Open this team in Blood Bowl Sideline.</a></p></footer>
 </article></main></body></html>`;
 }

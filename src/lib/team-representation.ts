@@ -26,5 +26,6 @@ export function prefersTeamJsonLd(accept: string) {
 
 // A convenience for known readers, not the public representation's contract.
 // Every client can access /roster directly or negotiate application/ld+json.
+// Keep social preview bots on the page with its Open Graph/Twitter metadata.
 export const teamReaderUserAgent =
-  /bot\b|crawler|spider|ChatGPT-User|Claude-User|Perplexity-User|curl\/|Wget\/|python-requests\/|^node$/i;
+  /ChatGPT-User|OAI-SearchBot|GPTBot|ClaudeBot|Claude-User|Claude-SearchBot|PerplexityBot|Perplexity-User|curl\/|Wget\/|python-requests\/|^node$/i;

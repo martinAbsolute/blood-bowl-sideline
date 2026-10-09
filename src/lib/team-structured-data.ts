@@ -14,8 +14,8 @@ import {
   playerMovement,
   playerSkillCost,
   staffInfo,
-  summarize,
 } from "@/domain/rules";
+import { budgetSummary } from "@/domain/budget";
 import type { Position, Star, Team } from "@/domain/types";
 import { siteUrl } from "./site-metadata";
 
@@ -26,6 +26,7 @@ type PublicSnapshot = {
   updatedAt: number;
   leagueLocked: boolean;
   leagueExperienced: boolean;
+  draftLeagueId?: string;
 };
 
 const gold = (value: number) => ({ value, unit: "gold pieces" });
@@ -54,7 +55,8 @@ export function teamStructuredData(data: PublicSnapshot) {
   const { team } = data;
   const roster = getRoster(team.rosterId)!;
   const ruleset = getRuleset(team.rulesetId);
-  const totals = summarize(team);
+  const budget = budgetSummary(team);
+  const { totals } = budget;
   const skillUnit = ruleset.skillCurrency?.toUpperCase() ?? "gold pieces";
   const url = new URL(`/teams/${team.uuid}`, siteUrl).href;
   const players = team.players.map((player, index) => {
@@ -106,8 +108,8 @@ export function teamStructuredData(data: PublicSnapshot) {
     roster: {
       id: roster.id,
       name: roster.name,
-      url: new URL(`/rosters/${roster.id}`, siteUrl).href,
-      tier: totals.tier,
+      url: new URL(`/rosters/${roster.id}?ruleset=${ruleset.id}`, siteUrl).href,
+      tier: budget.tier,
       leagues: roster.id === "norse" ? [team.norseLeague] : roster.leagues,
       specialRules: roster.specialRules.flatMap((name) =>
         name.startsWith("Favoured of") || name.startsWith("If Chaos Clash")
@@ -146,6 +148,25 @@ export function teamStructuredData(data: PublicSnapshot) {
       starPlayerSkillTax: { value: totals.starTax, unit: skillUnit },
       teamValue: gold(totals.teamGold),
     },
+    // The public query doesn't include league treasury overrides. Never present
+    // a default allowance as the team's actual league budget.
+    budgets:
+      data.draftLeagueId || data.leagueLocked || data.leagueExperienced
+        ? null
+        : budget.pools.map((pool) => ({
+            id: pool.id,
+            name:
+              pool.id === "team"
+                ? "Treasury"
+                : pool.id === "funds"
+                  ? "Flowing Funds"
+                  : "Skills",
+            allowance: pool.limit,
+            used: pool.used,
+            remaining: pool.limit - pool.used,
+            unit: pool.unit === "GP" ? "gold pieces" : pool.unit,
+            shared: pool.shared,
+          })),
   };
   return {
     "@context": [
