@@ -2,7 +2,7 @@ import type { FunctionReturnType } from "convex/server";
 import type { api } from "../../convex/_generated/api";
 import { summarize } from "@/domain/rules";
 import {
-  serializeTeamStructuredData,
+  serializeTeamJsonLd,
   teamStructuredData,
 } from "./team-structured-data";
 
@@ -64,7 +64,7 @@ export function teamReaderHtml(
       ? "<p>League-specific treasury allowances and current league progression are not included in this saved builder snapshot.</p>"
       : `<dl>${definition("Ruleset treasury allowance", amount({ value: totals.budget.teamBudget, unit: "gold pieces" }))}${definition("Remaining treasury", amount({ value: totals.remaining, unit: "gold pieces" }))}</dl>`;
   return `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(snapshot.name)} | Blood Bowl Sideline.</title><meta name="robots" content="noindex, nofollow"><link rel="canonical" href="${escapeHtml(structured.url)}"><script id="team-structured-data" type="application/ld+json">${serializeTeamStructuredData(data)}</script></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(snapshot.name)} | Blood Bowl Sideline.</title><meta name="robots" content="noindex, nofollow"><link rel="canonical" href="${escapeHtml(structured.url)}"><script id="team-structured-data" type="application/ld+json">${serializeTeamJsonLd(structured)}</script></head>
 <body><main><article>
 <header><h1>${escapeHtml(snapshot.name)}</h1><p>Saved Blood Bowl tabletop game roster. Players are fictional game characters.</p><p>Last saved: <time datetime="${structured.dateModified}">${structured.dateModified}</time>. Revision ${snapshot.revision}.</p></header>
 <section><h2>Team overview</h2><dl>${definition("Roster", snapshot.roster.name)}${definition("Ruleset", snapshot.ruleset.name)}${definition("Rules version", snapshot.rulesVersion)}${definition("Ruleset tier", snapshot.roster.tier)}${definition("Player count", snapshot.summary.playerCount)}${definition("Validation", snapshot.legal ? "Legal saved roster" : "Incomplete or invalid saved roster")}${definition("Roster affiliations", snapshot.roster.leagues.join(", "))}${definition("Special rules", snapshot.roster.specialRules.join(", ") || "None")}</dl></section>

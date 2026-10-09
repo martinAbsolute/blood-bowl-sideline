@@ -24,10 +24,23 @@ scripts. Browser and React navigation requests retain the interactive page.
 The roster route is also directly accessible for unrecognized readers and is
 advertised in the page's alternate link metadata.
 
+The representation contract does not depend on recognizing a user agent:
+
+- Fetch `/teams/[uuid]/roster` for complete HTML using any HTTP client.
+- Send `Accept: application/ld+json` to either URL for the JSON-LD document
+  itself. Explicit quality weights are honored when HTML is also accepted.
+- The interactive URL advertises both representations through an HTTP `Link`
+  header and HTML alternate metadata. Bot detection is only a convenience for
+  existing web readers that follow the original shared URL without negotiation.
+
+HTML and JSON-LD use the same snapshot builder and rules, with no second backend
+call or second snapshot computation for the reader document. These formats are
+both read-only representations of the same public saved team.
+
 The complete reader response includes the ruleset treasury allowance and
 remaining treasury for standalone teams. If the team has league context, it
 states that league-specific allowances are unavailable rather than assuming
-the ruleset allowance. Responses use `no-store`, `Vary: User-Agent` and
+the ruleset allowance. Responses use `no-store`, `Vary: Accept, User-Agent` and
 `noindex, nofollow`; missing or archived teams return 404 and backend outages
 return 503. Only the existing anonymous Convex team query is used.
 

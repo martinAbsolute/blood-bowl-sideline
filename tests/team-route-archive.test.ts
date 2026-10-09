@@ -66,9 +66,35 @@ it("serves complete roster HTML at the shared URL for text-only readers", async 
       `https://sideline.example/teams/${uuid}/roster`,
     );
     expect(response.headers.get("cache-control")).toBe("no-store");
-    expect(response.headers.get("vary")).toBe("User-Agent");
+    expect(response.headers.get("vary")).toBe("Accept, User-Agent");
   }
   expect(query).not.toHaveBeenCalled();
+});
+
+it("negotiates JSON-LD independently of user-agent identification and advertises alternate representations", async () => {
+  const response = await proxy(
+    new NextRequest(`https://sideline.example/teams/${uuid}`, {
+      headers: {
+        "user-agent": "UnknownAgent/1.0",
+        accept: "application/ld+json",
+      },
+    }),
+  );
+  expect(response.headers.get("x-middleware-rewrite")).toBe(
+    `https://sideline.example/teams/${uuid}/roster`,
+  );
+  expect(query).not.toHaveBeenCalled();
+  query.mockResolvedValue(false);
+  const browser = await proxy(
+    new NextRequest(`https://sideline.example/teams/${uuid}`, {
+      headers: { "user-agent": "Mozilla/5.0", accept: "text/html" },
+    }),
+  );
+  expect(browser.headers.get("x-middleware-next")).toBe("1");
+  expect(browser.headers.get("link")).toContain(
+    `https://sideline.example/teams/${uuid}/roster`,
+  );
+  expect(browser.headers.get("link")).toContain('type="application/ld+json"');
 });
 
 it("keeps browsers and React navigation on the interactive page", async () => {

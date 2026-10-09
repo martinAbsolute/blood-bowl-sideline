@@ -4,6 +4,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import { newTeam } from "../src/domain/catalog";
 import { api } from "../convex/_generated/api";
 import { GET } from "../src/app/teams/[slug]/roster/route";
+import { prefersTeamJsonLd } from "../src/lib/team-representation";
 
 const { query } = vi.hoisted(() => ({ query: vi.fn() }));
 vi.mock("convex/nextjs", () => ({ fetchQuery: query }));
@@ -75,6 +76,41 @@ it("does not claim a ruleset allowance is the league's treasury", async () => {
   expect(html).not.toContain("Remaining treasury");
   expect(html).toContain("League-specific treasury allowances");
   expect(html).not.toContain("league-id");
+});
+
+it("offers the same snapshot as negotiated JSON-LD, with explicit media type and cache variation", async () => {
+  query.mockResolvedValue(saved);
+  const html = await (await get()).text();
+  const embedded = JSON.parse(
+    html.match(/<script[^>]*>([\s\S]*?)<\/script>/)![1],
+  );
+  const jsonResponse = await GET(
+    new Request(`https://sideline.example/teams/${uuid}/roster`, {
+      headers: {
+        accept: "application/ld+json",
+        "user-agent": "UnknownReader/1.0",
+      },
+    }),
+    { params: Promise.resolve({ slug: uuid }) },
+  );
+  expect(jsonResponse.headers.get("content-type")).toBe(
+    "application/ld+json; charset=utf-8",
+  );
+  expect(jsonResponse.headers.get("vary")).toBe("Accept, User-Agent");
+  expect(await jsonResponse.json()).toEqual(embedded);
+});
+
+it.each([
+  ["application/ld+json", true],
+  ["text/html, application/ld+json;q=0.5", false],
+  ["application/ld+json;q=0", false],
+  ["application/ld+json;q=0.5, */*;q=1", false],
+  ["application/ld+json;q=1, text/*;q=0.5", true],
+  ["application/ld+json;q=invalid", false],
+  ["text/html, */*", false],
+  ["*/*", false],
+])("respects explicit HTTP representation preference: %s", (accept, jsonLd) => {
+  expect(prefersTeamJsonLd(accept)).toBe(jsonLd);
 });
 
 it("returns 404 for missing/archived or invalid teams, and 503 for an unavailable backend", async () => {

@@ -21,7 +21,10 @@ export async function generateMetadata({
     ...metadata,
     alternates: {
       ...metadata.alternates,
-      types: { "text/html": `/teams/${slug}/roster` },
+      types: {
+        "text/html": `/teams/${slug}/roster`,
+        "application/ld+json": `/teams/${slug}/roster`,
+      },
     },
     robots: { index: false, follow: false },
   };

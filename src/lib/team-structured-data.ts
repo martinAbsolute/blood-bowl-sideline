@@ -196,5 +196,11 @@ export function teamStructuredData(data: PublicSnapshot) {
 
 /** Escape raw-text script delimiters while keeping names losslessly parseable. */
 export function serializeTeamStructuredData(data: PublicSnapshot) {
-  return JSON.stringify(teamStructuredData(data)).replace(/</g, "\\u003c");
+  return serializeTeamJsonLd(teamStructuredData(data));
+}
+
+export function serializeTeamJsonLd(
+  data: ReturnType<typeof teamStructuredData>,
+) {
+  return JSON.stringify(data).replace(/</g, "\\u003c");
 }
