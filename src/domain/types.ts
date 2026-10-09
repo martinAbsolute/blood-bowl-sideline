@@ -1,7 +1,11 @@
 import { z } from "zod";
 import { TEAM_NAME_MAX_LENGTH } from "./team-name";
 
-export const RULES_VERSION = "bb2025-2026-09-30";
+export const RULES_VERSION = "bb2025-2026-10-09";
+// This catalog correction preserves all saved roster/position/skill IDs and the
+// schemaVersion 1 shape. Keep the previous snapshot readable; revalidate its
+// selections against current rules before saving an upgraded copy.
+export const PREVIOUS_RULES_VERSION = "bb2025-2026-09-30";
 export const rulesetIds = [
   "bb2025-default",
   "bb2025-matched-play",
@@ -15,7 +19,7 @@ const count = (max: number) => z.number().int().min(0).max(max);
 export const teamSchema = z
   .object({
     schemaVersion: z.literal(1),
-    rulesVersion: z.literal(RULES_VERSION),
+    rulesVersion: z.enum([RULES_VERSION, PREVIOUS_RULES_VERSION]),
     uuid: z.uuid(),
     name: z.string().trim().min(1).max(TEAM_NAME_MAX_LENGTH),
     rosterId: z.string().max(60),
@@ -60,6 +64,11 @@ export const teamSchema = z
   })
   .strict();
 export type Team = z.infer<typeof teamSchema>;
+export function upgradeTeamRules(
+  team: Team,
+): Team & { rulesVersion: typeof RULES_VERSION } {
+  return { ...team, rulesVersion: RULES_VERSION };
+}
 export interface Position {
   id: string;
   position: string;
@@ -139,6 +148,7 @@ export interface Ruleset {
   maxSecondaryByTier?: Record<string, number>;
   maxStackPerTeam: number;
   maxElitePerTeam?: number;
+  maxCopiesPerEliteSkill?: number;
   teamOverrides?: Record<
     string,
     {
@@ -152,6 +162,7 @@ export interface Ruleset {
     {
       maxVeterans: number;
       maxLegends: number;
+      maxStars?: number;
       canMix: boolean;
       veteranSkillGoldCost: number;
       legendSkillGoldCost: number;

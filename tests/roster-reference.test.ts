@@ -82,7 +82,7 @@ describe("ruleset-aware roster references", () => {
     expect(html).toContain("sevensPrayersHelp");
     expect(html).toContain("sevensApothecaryHelp");
     expect(html).toContain("Desperate Measures");
-    expect(html).not.toContain("starPlayers");
+    expect(html).toContain("starPlayers:</span> no");
     expect(html).not.toContain("inducementDescriptions.mercenary-players");
     expect(html).not.toContain("referencePreset");
   });

@@ -1,5 +1,6 @@
 import { getRoster, getSkill, skills, sortSkillIds } from "./catalog";
 import { skillAccess, summarize, validateTeam } from "./rules";
+import { skillCompatible } from "./skill-eligibility";
 import type { Position, Team } from "./types";
 
 export type SkillAccess = "primary" | "secondary";
@@ -124,46 +125,10 @@ export function advancementChoices(
   return sortSkillIds(skills.map((skill) => skill.id)).flatMap((skillId) => {
     const access = skillAccess(position, skillId);
     const skill = getSkill(skillId)!;
-    const incompatible =
-      (skillId === "frenzy" &&
-        ["grab", "hit_and_run", "multiple_block"].some((id) =>
-          known.has(id),
-        )) ||
-      (["grab", "hit_and_run", "multiple_block"].includes(skillId) &&
-        known.has("frenzy")) ||
-      (skillId === "saboteur" && !known.has("secret_weapon")) ||
-      (skillId === "lethal_flight" && !known.has("right_stuff")) ||
-      (["bullseye", "strong_arm"].includes(skillId) &&
-        !known.has("throw_team_mate")) ||
-      (skillId === "leap" && known.has("pogo")) ||
-      (skillId === "violent_innovator" &&
-        ![
-          "ball_and_chain",
-          "bombardier",
-          "breathe_fire",
-          "chainsaw",
-          "hypnotic_gaze",
-          "kick_team_mate",
-          "projectile_vomit",
-          "stab",
-        ].some((id) => known.has(id))) ||
-      (known.has("ball_and_chain") &&
-        [
-          "diving_tackle",
-          "eye_gouge",
-          "frenzy",
-          "grab",
-          "hit_and_run",
-          "leap",
-          "multiple_block",
-          "on_the_ball",
-          "shadowing",
-          "steady_footing",
-        ].includes(skillId));
     return access &&
       skill.category !== "trait" &&
       !known.has(skillId) &&
-      !incompatible
+      skillCompatible(skillId, [...known])
       ? [{ skillId, access, elite: skill.isElite }]
       : [];
   });

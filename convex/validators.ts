@@ -1,8 +1,11 @@
 import { v } from "convex/values";
-import { RULES_VERSION } from "../src/domain/types";
+import { PREVIOUS_RULES_VERSION, RULES_VERSION } from "../src/domain/types";
 export const teamValidator = v.object({
   schemaVersion: v.literal(1),
-  rulesVersion: v.literal(RULES_VERSION),
+  rulesVersion: v.union(
+    v.literal(RULES_VERSION),
+    v.literal(PREVIOUS_RULES_VERSION),
+  ),
   uuid: v.string(),
   name: v.string(),
   rosterId: v.string(),

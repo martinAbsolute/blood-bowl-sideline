@@ -265,40 +265,50 @@
       "4": 4
     },
     "maxStackPerTeam": 0,
-    "maxElitePerTeam": 4,
+    "maxCopiesPerEliteSkill": 4,
     "starPlayerTierRules": {
       "1": {
         "maxVeterans": 1,
-        "maxLegends": 0,
-        "canMix": false,
+        "maxLegends": 1,
+        "canMix": true,
         "veteranSkillGoldCost": 2,
-        "legendSkillGoldCost": 0
+        "legendSkillGoldCost": 4,
+        "maxStars": 1
       },
       "2": {
         "maxVeterans": 2,
-        "maxLegends": 0,
-        "canMix": false,
+        "maxLegends": 1,
+        "canMix": true,
         "veteranSkillGoldCost": 2,
-        "legendSkillGoldCost": 0
+        "legendSkillGoldCost": 4,
+        "maxStars": 2
       },
       "3": {
         "maxVeterans": 2,
-        "maxLegends": 0,
-        "canMix": false,
+        "maxLegends": 1,
+        "canMix": true,
         "veteranSkillGoldCost": 2,
-        "legendSkillGoldCost": 0
+        "legendSkillGoldCost": 4,
+        "maxStars": 2
       },
       "4": {
         "maxVeterans": 2,
-        "maxLegends": 0,
-        "canMix": false,
+        "maxLegends": 1,
+        "canMix": true,
         "veteranSkillGoldCost": 2,
-        "legendSkillGoldCost": 0
+        "legendSkillGoldCost": 4,
+        "maxStars": 2
       }
     },
     "bannedStarPlayers": [],
     "veteranStarPlayers": [],
-    "legendStarPlayers": [],
+    "legendStarPlayers": [
+      "griff-oberwald",
+      "hakflem-skuttlespike",
+      "hthark-the-unstoppable",
+      "ivan-the-animal-deathshroud",
+      "morg-n-thorg"
+    ],
     "allowedInducements": [
       "prayers-to-nuffle",
       "part-time-assistant-coaches",

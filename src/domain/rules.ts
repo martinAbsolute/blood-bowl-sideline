@@ -15,6 +15,7 @@ import {
   type Star,
   type Inducement,
 } from "./types";
+import { skillCompatible } from "./skill-eligibility";
 
 export type Issue = { code: string; values: Record<string, string | number> };
 export const isLineman = (position: Position) =>
@@ -145,7 +146,13 @@ export function affiliation(team: Team) {
 export function starEligible(team: Team, star: Star) {
   const roster = getRoster(team.rosterId),
     rules = getRuleset(team.rulesetId);
-  if (!roster || rules.bannedStarPlayers.includes(star.id)) return false;
+  if (
+    !roster ||
+    rules.sevens ||
+    rules.excludedRosters?.includes(roster.id) ||
+    rules.bannedStarPlayers.includes(star.id)
+  )
+    return false;
   const leagues = roster.id === "norse" ? [team.norseLeague] : roster.leagues;
   if (
     !star.playsFor.some(
@@ -357,6 +364,7 @@ export function validateTeam(
     eliteSkills = 0,
     bigGuys = 0,
     insignificant = 0;
+  const eliteCopies = new Map<string, number>();
   for (const p of team.players) {
     const position = roster.players.find((x) => x.id === p.positionId);
     if (!position) {
@@ -388,16 +396,24 @@ export function validateTeam(
       issue("duplicateSkill", { player: p.name || position.position });
     for (const id of p.skills) {
       if (isKyivSevens(team) && id === "leader") issue("leaderBanned");
+      if (!skillCompatible(id, [...position.skills, ...p.skills]))
+        issue("skillCompatibility", {
+          skill: getSkill(id)?.name ?? id,
+          player: p.name || position.position,
+        });
       if (
         !skillAccess(position, id) ||
-        !getSkill(id) ||
+        getSkill(id)?.id !== id ||
         position.skills.map((s) => s.split(":")[0]).includes(id)
       )
         issue("skillAccess", {
           skill: getSkill(id)?.name ?? id,
           player: p.name || position.position,
         });
-      if (getSkill(id)?.isElite) eliteSkills++;
+      if (getSkill(id)?.isElite) {
+        eliteSkills++;
+        eliteCopies.set(id, (eliteCopies.get(id) ?? 0) + 1);
+      }
     }
   }
   if (!isSevens(team) && insignificant > team.players.length - insignificant)
@@ -427,6 +443,13 @@ export function validateTeam(
     eliteSkills > rules.maxElitePerTeam
   )
     issue("eliteLimit", { max: rules.maxElitePerTeam });
+  if (rules.maxCopiesPerEliteSkill !== undefined)
+    for (const [id, count] of eliteCopies)
+      if (count > rules.maxCopiesPerEliteSkill)
+        issue("eliteCopies", {
+          skill: getSkill(id)!.name,
+          max: rules.maxCopiesPerEliteSkill,
+        });
   if (new Set(team.stars).size !== team.stars.length) issue("duplicateStar");
   let veterans = 0,
     legends = 0;
@@ -443,7 +466,8 @@ export function validateTeam(
   const limits = rules.starPlayerTierRules[totals.tier];
   if (
     limits &&
-    (veterans > limits.maxVeterans ||
+    (veterans + legends > (limits.maxStars ?? 2) ||
+      veterans > limits.maxVeterans ||
       legends > limits.maxLegends ||
       (!limits.canMix && veterans > 0 && legends > 0))
   )

@@ -777,23 +777,29 @@ export function TeamEditor({
               )}
               {!readOnly && !isSevens(team) && (
                 <div className="flex justify-end border-t px-3 py-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={
-                      starChoices(team.stars).length >= 2 ||
-                      totals.playerCount >= 16 ||
-                      (rules.id === "world-cup-2027" &&
-                        team.players.length < 11)
-                    }
-                    onClick={() => {
-                      setDialog("stars");
-                      setSearch("");
-                    }}
-                  >
-                    <Star className="size-4 text-amber-700" />
-                    {t("addStar")}
-                  </Button>
+                  {stars.some((star) => starEligible(team, star)) ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={
+                        starChoices(team.stars).length >= 2 ||
+                        totals.playerCount >= 16 ||
+                        (rules.id === "world-cup-2027" &&
+                          team.players.length < 11)
+                      }
+                      onClick={() => {
+                        setDialog("stars");
+                        setSearch("");
+                      }}
+                    >
+                      <Star className="size-4 text-amber-700" />
+                      {t("addStar")}
+                    </Button>
+                  ) : (
+                    <p className="py-1 text-xs text-muted-foreground">
+                      {t("noStars")}
+                    </p>
+                  )}
                 </div>
               )}
             </div>

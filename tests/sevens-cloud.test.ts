@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import schema from "../convex/schema";
 import { api } from "../convex/_generated/api";
 import { getRoster, newTeam } from "../src/domain/catalog";
-import { isLineman } from "../src/domain/rules";
+import { isLineman, validateTeam } from "../src/domain/rules";
 import type { Team } from "../src/domain/types";
 
 const modules = import.meta.glob("../convex/**/*.ts");
@@ -221,6 +221,116 @@ describe("Kyiv Seven Sins cloud persistence and enforcement", () => {
         expectedRevision: 0,
       });
       mutate(team);
+      await expect(
+        owner.mutation(api.teams.save, {
+          team,
+          expectedRevision: saved.revision,
+        }),
+      ).rejects.toThrow("INVALID_TEAM");
+      const shared = await t.query(api.teams.getByUuid, { uuid: team.uuid });
+      expect(shared?.team).toEqual(saved.team);
+      expect(shared?.revision).toBe(saved.revision);
+    },
+  );
+});
+
+describe("standard Sevens server validation", () => {
+  it("saves a captain with starting Pro and purchased Leader", async () => {
+    const { owner } = await setup();
+    const team = sevensTeam();
+    team.rulesetId = "bb2025-sevens";
+    team.players[0].positionId = getRoster("human")!.players.find((p) =>
+      p.primarySkills.includes("P"),
+    )!.id;
+    team.players[0].skills = ["leader"];
+    const saved = await owner.mutation(api.teams.save, {
+      team,
+      expectedRevision: 0,
+    });
+    expect(saved.legal).toBe(true);
+    expect(saved.team.captainId).toBe(team.players[0].id);
+    expect(saved.team.players[0].skills).toEqual(["leader"]);
+  });
+
+  const invalidCases: [string, (team: Team) => void][] = [
+    [
+      "specialists",
+      (team) => {
+        const positions = getRoster("human")!
+          .players.filter((p) => !isLineman(p))
+          .flatMap((p) =>
+            Array.from({ length: Number(p.qty.split("-")[1]) }, () => p.id),
+          );
+        team.players.slice(2).forEach((player, index) => {
+          player.positionId = positions[index];
+        });
+      },
+    ],
+    [
+      "veteran",
+      (team) => {
+        team.veteranId = randomUUID();
+      },
+    ],
+    [
+      "maxSkills",
+      (team) => {
+        team.players[2].skills = ["pro", "leader"];
+      },
+    ],
+    [
+      "skillCompatibility",
+      (team) => {
+        team.players[2].skills = ["bullseye"];
+      },
+    ],
+    [
+      "sevensFans",
+      (team) => {
+        team.staff.dedicatedFans = 6;
+      },
+    ],
+    [
+      "sevensStaff",
+      (team) => {
+        team.staff.cheerleaders = 4;
+      },
+    ],
+    [
+      "inducementEligibility",
+      (team) => {
+        team.inducements = { "team-mascot": 1 };
+      },
+    ],
+    [
+      "inducementLimit",
+      (team) => {
+        team.inducements = { "prayers-to-nuffle": 3 };
+      },
+    ],
+    [
+      "starEligibility",
+      (team) => {
+        team.stars = ["griff-oberwald"];
+      },
+    ],
+  ];
+
+  it.each(invalidCases)(
+    "rejects %s in forged standard Sevens saves",
+    async (code, mutate) => {
+      const { t, owner } = await setup();
+      const team = sevensTeam();
+      team.rulesetId = "bb2025-sevens";
+      const saved = await owner.mutation(api.teams.save, {
+        team,
+        expectedRevision: 0,
+      });
+      expect(saved.legal).toBe(true);
+      mutate(team);
+      expect(validateTeam(team).issues.map((issue) => issue.code)).toContain(
+        code,
+      );
       await expect(
         owner.mutation(api.teams.save, {
           team,

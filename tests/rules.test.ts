@@ -185,14 +185,26 @@ describe("Tournament currencies and restrictions", () => {
     expect(summarize(t).playerCount).toBe(13);
     expect(summarize(t).starGold).toBe(250000);
   });
-  it("prices Matched primary/secondary and checks the four-elite cap", () => {
+  it("prices Matched primary/secondary and caps each elite skill at four copies", () => {
     const t = human("bb2025-matched-play"),
       p = getRoster("human")!.players[0];
     expect(playerSkillCost(t, p, ["block"])).toBe(1);
     expect(playerSkillCost(t, p, ["dodge"])).toBe(2);
     const elite = skills.find((s) => s.category === "general" && s.isElite)!;
     t.players.slice(0, 5).forEach((p) => (p.skills = [elite.id]));
-    expect(codes(t)).toContain("eliteLimit");
+    expect(codes(t)).toContain("eliteCopies");
+  });
+  it("allows more than four total elite additions when no individual skill exceeds four copies", () => {
+    const t = human("bb2025-matched-play");
+    t.captainId = t.players[10].id;
+    t.players.slice(0, 4).forEach((p) => (p.skills = ["block"]));
+    t.players.slice(4, 6).forEach((p) => (p.skills = ["dodge"]));
+    expect(summarize(t).skills).toBe(8);
+    expect(validateTeam(t).issues).toEqual([]);
+    t.players[4].skills = ["block"];
+    expect(validateTeam(t).issues).toEqual([
+      { code: "eliteCopies", values: { skill: "Block", max: 4 } },
+    ]);
   });
   it("prices Euro primary stacks and rejects secondary stacks", () => {
     const t = human("eurobowl-2026"),

@@ -1,0 +1,596 @@
+[
+  {
+    "id": "akhorne-the-squirrel",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Akhorne_The_Squirrel/",
+    "ma": 7,
+    "st": 1,
+    "ag": "2+",
+    "pa": "-",
+    "av": "6+"
+  },
+  {
+    "id": "anqi-panqi",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Anqi_Panqi/",
+    "ma": 7,
+    "st": 4,
+    "ag": "5+",
+    "pa": "6+",
+    "av": "10+"
+  },
+  {
+    "id": "barik-farblast",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Barik_Farblast/",
+    "ma": 6,
+    "st": 3,
+    "ag": "4+",
+    "pa": "3+",
+    "av": "9+"
+  },
+  {
+    "id": "bilerot-vomitflesh",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Bilerot_Vomitflesh/",
+    "ma": 4,
+    "st": 5,
+    "ag": "4+",
+    "pa": "6+",
+    "av": "10+"
+  },
+  {
+    "id": "boa-konsstriktr",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Boa_Kon%27ssstriktr/",
+    "ma": 6,
+    "st": 3,
+    "ag": "3+",
+    "pa": "4+",
+    "av": "9+"
+  },
+  {
+    "id": "bomber-dribblesnot",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Bomber_Dribblesnot/",
+    "ma": 6,
+    "st": 2,
+    "ag": "3+",
+    "pa": "3+",
+    "av": "8+"
+  },
+  {
+    "id": "captain-karina-von-riesz",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Captain_Karina_von_Riesz/",
+    "ma": 7,
+    "st": 4,
+    "ag": "2+",
+    "pa": "3+",
+    "av": "9+"
+  },
+  {
+    "id": "cindy-piewhistle",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Cindy_Piewhistle/",
+    "ma": 5,
+    "st": 2,
+    "ag": "3+",
+    "pa": "3+",
+    "av": "7+"
+  },
+  {
+    "id": "count-luthor-von-drakenforg",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Count_Luthor_von_Drakenborg/",
+    "ma": 6,
+    "st": 5,
+    "ag": "2+",
+    "pa": "3+",
+    "av": "10+"
+  },
+  {
+    "id": "deeproot-strongbranch",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Deeproot_Strongbranch/",
+    "ma": 2,
+    "st": 7,
+    "ag": "5+",
+    "pa": "4+",
+    "av": "11+"
+  },
+  {
+    "id": "dribl",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Dribl_and_Drull/",
+    "ma": 8,
+    "st": 2,
+    "ag": "3+",
+    "pa": "4+",
+    "av": "8+"
+  },
+  {
+    "id": "drull",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Dribl_and_Drull/",
+    "ma": 8,
+    "st": 2,
+    "ag": "3+",
+    "pa": "4+",
+    "av": "8+"
+  },
+  {
+    "id": "eldril-sidewinder",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Eldril_Sidewinder/",
+    "ma": 8,
+    "st": 3,
+    "ag": "2+",
+    "pa": "3+",
+    "av": "8+"
+  },
+  {
+    "id": "estelle-la-veneaux",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Estelle_la_Veneaux/",
+    "ma": 6,
+    "st": 3,
+    "ag": "3+",
+    "pa": "4+",
+    "av": "8+"
+  },
+  {
+    "id": "fungus-the-loon",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Fungus_the_Loon/",
+    "ma": 4,
+    "st": 7,
+    "ag": "3+",
+    "pa": "-",
+    "av": "8+"
+  },
+  {
+    "id": "glart-smashrip",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Glart_Smashrip/",
+    "ma": 5,
+    "st": 4,
+    "ag": "4+",
+    "pa": "6+",
+    "av": "9+"
+  },
+  {
+    "id": "gloriel-summerbloom",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Gloriel_Summerbloom/",
+    "ma": 7,
+    "st": 2,
+    "ag": "2+",
+    "pa": "2+",
+    "av": "8+"
+  },
+  {
+    "id": "glotl-stop",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Glotl_Stop/",
+    "ma": 6,
+    "st": 6,
+    "ag": "5+",
+    "pa": "6+",
+    "av": "10+"
+  },
+  {
+    "id": "grak",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Grak_and_Crumbleberry/",
+    "ma": 5,
+    "st": 5,
+    "ag": "4+",
+    "pa": "4+",
+    "av": "10+"
+  },
+  {
+    "id": "crumbleberry",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Grak_and_Crumbleberry/",
+    "ma": 5,
+    "st": 2,
+    "ag": "3+",
+    "pa": "5+",
+    "av": "7+"
+  },
+  {
+    "id": "grashnak-blackhoof",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Grashnak_Blackhoof/",
+    "ma": 6,
+    "st": 6,
+    "ag": "4+",
+    "pa": "6+",
+    "av": "9+"
+  },
+  {
+    "id": "gretchen-wachter",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Gretchen_W%C3%A4chter/",
+    "ma": 7,
+    "st": 3,
+    "ag": "2+",
+    "pa": "-",
+    "av": "9+"
+  },
+  {
+    "id": "griff-oberwald",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Griff_Oberwald/",
+    "ma": 7,
+    "st": 4,
+    "ag": "2+",
+    "pa": "3+",
+    "av": "9+"
+  },
+  {
+    "id": "grim-ironjaw",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Grim_Ironjaw/",
+    "ma": 5,
+    "st": 4,
+    "ag": "3+",
+    "pa": "6+",
+    "av": "9+"
+  },
+  {
+    "id": "grombrindal",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Grombrindal/",
+    "ma": 5,
+    "st": 3,
+    "ag": "3+",
+    "pa": "4+",
+    "av": "10+"
+  },
+  {
+    "id": "guffle-pusmaw",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Guffle_Pusmaw/",
+    "ma": 5,
+    "st": 4,
+    "ag": "4+",
+    "pa": "6+",
+    "av": "10+"
+  },
+  {
+    "id": "hthark-the-unstoppable",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/H%27thark_the_Unstoppable/",
+    "ma": 6,
+    "st": 6,
+    "ag": "4+",
+    "pa": "6+",
+    "av": "10+"
+  },
+  {
+    "id": "hakflem-skuttlespike",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Hakflem_Skuttlespike/",
+    "ma": 8,
+    "st": 3,
+    "ag": "2+",
+    "pa": "3+",
+    "av": "8+"
+  },
+  {
+    "id": "helmut-wulf",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Helmut_Wulf/",
+    "ma": 6,
+    "st": 3,
+    "ag": "3+",
+    "pa": "-",
+    "av": "9+"
+  },
+  {
+    "id": "ivan-the-animal-deathshroud",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Ivan_%27the_Animal%27_Deathshroud/",
+    "ma": 6,
+    "st": 4,
+    "ag": "4+",
+    "pa": "5+",
+    "av": "9+"
+  },
+  {
+    "id": "ivar-eriksson",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Ivar_Eriksson/",
+    "ma": 6,
+    "st": 4,
+    "ag": "3+",
+    "pa": "4+",
+    "av": "9+"
+  },
+  {
+    "id": "jeremiah-kool",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Jeremiah_Kool/",
+    "ma": 8,
+    "st": 3,
+    "ag": "1+",
+    "pa": "2+",
+    "av": "9+"
+  },
+  {
+    "id": "jordell-freshbreeze",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Jordell_Freshbreeze/",
+    "ma": 8,
+    "st": 3,
+    "ag": "1+",
+    "pa": "3+",
+    "av": "8+"
+  },
+  {
+    "id": "josef-bugman",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Josef_Bugman/",
+    "ma": 5,
+    "st": 3,
+    "ag": "3+",
+    "pa": "4+",
+    "av": "9+"
+  },
+  {
+    "id": "karla-von-kill",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Karla_von_Kill/",
+    "ma": 6,
+    "st": 4,
+    "ag": "3+",
+    "pa": "3+",
+    "av": "9+"
+  },
+  {
+    "id": "kiroth-krakeneye",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Kiroth_Krakeneye/",
+    "ma": 7,
+    "st": 3,
+    "ag": "2+",
+    "pa": "3+",
+    "av": "8+"
+  },
+  {
+    "id": "kreek-rustgouger",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Kreek_Rustgouger/",
+    "ma": 4,
+    "st": 7,
+    "ag": "4+",
+    "pa": "-",
+    "av": "10+"
+  },
+  {
+    "id": "lord-borak-the-despoiler",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Lord_Borak_the_Despoiler/",
+    "ma": 5,
+    "st": 5,
+    "ag": "3+",
+    "pa": "5+",
+    "av": "10+"
+  },
+  {
+    "id": "maple-highgrove",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Maple_Highgrove/",
+    "ma": 3,
+    "st": 5,
+    "ag": "5+",
+    "pa": "5+",
+    "av": "11+"
+  },
+  {
+    "id": "max-spleenripper",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Max_Spleenripper/",
+    "ma": 5,
+    "st": 4,
+    "ag": "4+",
+    "pa": "-",
+    "av": "9+"
+  },
+  {
+    "id": "morg-n-thorg",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Morg_%27n%27_Thorg/",
+    "ma": 6,
+    "st": 6,
+    "ag": "3+",
+    "pa": "4+",
+    "av": "11+"
+  },
+  {
+    "id": "nobbla-blackwart",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Nobbla_Blackwart/",
+    "ma": 6,
+    "st": 2,
+    "ag": "3+",
+    "pa": "-",
+    "av": "8+"
+  },
+  {
+    "id": "puggy-baconbreath",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Puggy_Baconbreath/",
+    "ma": 5,
+    "st": 3,
+    "ag": "3+",
+    "pa": "3+",
+    "av": "8+"
+  },
+  {
+    "id": "rashnak-backstabber",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Rashnak_Backstabber/",
+    "ma": 7,
+    "st": 3,
+    "ag": "3+",
+    "pa": "5+",
+    "av": "8+"
+  },
+  {
+    "id": "ripper-bolgrot",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Ripper_Bolgrot/",
+    "ma": 5,
+    "st": 6,
+    "ag": "5+",
+    "pa": "4+",
+    "av": "10+"
+  },
+  {
+    "id": "rodney-roachbait",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Rodney_Roachbait/",
+    "ma": 6,
+    "st": 2,
+    "ag": "3+",
+    "pa": "4+",
+    "av": "7+"
+  },
+  {
+    "id": "rowana-forestfoot",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Rowana_Forestfoot/",
+    "ma": 6,
+    "st": 3,
+    "ag": "3+",
+    "pa": "4+",
+    "av": "8+"
+  },
+  {
+    "id": "roxanna-darknail",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Roxanna_Darknail/",
+    "ma": 8,
+    "st": 3,
+    "ag": "1+",
+    "pa": "3+",
+    "av": "8+"
+  },
+  {
+    "id": "rumbelow-sheepskin",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Rumbelow_Sheepskin/",
+    "ma": 6,
+    "st": 3,
+    "ag": "3+",
+    "pa": "5+",
+    "av": "8+"
+  },
+  {
+    "id": "scrappa-sorehead",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Scrappa_Sorehead/",
+    "ma": 7,
+    "st": 2,
+    "ag": "3+",
+    "pa": "4+",
+    "av": "8+"
+  },
+  {
+    "id": "scyla-anfingrimm",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Scyla_Anfingrimm/",
+    "ma": 5,
+    "st": 5,
+    "ag": "4+",
+    "pa": "6+",
+    "av": "10+"
+  },
+  {
+    "id": "skitter-stab-stab",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Skitter_Stab-stab/",
+    "ma": 9,
+    "st": 2,
+    "ag": "2+",
+    "pa": "4+",
+    "av": "8+"
+  },
+  {
+    "id": "skrorg-snowpelt",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Skrorg_Snowpelt/",
+    "ma": 5,
+    "st": 5,
+    "ag": "4+",
+    "pa": "6+",
+    "av": "9+"
+  },
+  {
+    "id": "skrull-halfheight",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Skrull_Halfheight/",
+    "ma": 6,
+    "st": 3,
+    "ag": "4+",
+    "pa": "3+",
+    "av": "9+"
+  },
+  {
+    "id": "swiftvine-glimmershard",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Swiftvine_Glimmershard/",
+    "ma": 7,
+    "st": 2,
+    "ag": "3+",
+    "pa": "5+",
+    "av": "7+"
+  },
+  {
+    "id": "the-black-gobbo",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/The_Black_Gobbo/",
+    "ma": 6,
+    "st": 2,
+    "ag": "3+",
+    "pa": "3+",
+    "av": "8+"
+  },
+  {
+    "id": "the-mighty-zug",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/The_Mighty_Zug/",
+    "ma": 5,
+    "st": 5,
+    "ag": "4+",
+    "pa": "6+",
+    "av": "10+"
+  },
+  {
+    "id": "lucien-swift",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/The_Swift_Twins/",
+    "ma": 7,
+    "st": 3,
+    "ag": "2+",
+    "pa": "3+",
+    "av": "9+"
+  },
+  {
+    "id": "valen-swift",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/The_Swift_Twins/",
+    "ma": 7,
+    "st": 3,
+    "ag": "2+",
+    "pa": "2+",
+    "av": "9+"
+  },
+  {
+    "id": "thorsson-stoutmead",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Thorsson_Stoutmead/",
+    "ma": 6,
+    "st": 3,
+    "ag": "4+",
+    "pa": "3+",
+    "av": "8+"
+  },
+  {
+    "id": "varag-ghoul-chewer",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Varag_Ghoul-Chewer/",
+    "ma": 6,
+    "st": 5,
+    "ag": "3+",
+    "pa": "5+",
+    "av": "10+"
+  },
+  {
+    "id": "wilhelm-chaney",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Wilhelm_Chaney/",
+    "ma": 8,
+    "st": 4,
+    "ag": "3+",
+    "pa": "4+",
+    "av": "9+"
+  },
+  {
+    "id": "willow-rosebark",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Willow_Rosebark/",
+    "ma": 6,
+    "st": 4,
+    "ag": "3+",
+    "pa": "5+",
+    "av": "9+"
+  },
+  {
+    "id": "withergrasp-doubledrool",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Withergrasp_Doubledrool/",
+    "ma": 6,
+    "st": 3,
+    "ag": "3+",
+    "pa": "4+",
+    "av": "9+"
+  },
+  {
+    "id": "zolcath-the-zoat",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Zolcath_the_Zoat/",
+    "ma": 5,
+    "st": 5,
+    "ag": "4+",
+    "pa": "5+",
+    "av": "10+"
+  },
+  {
+    "id": "zzharg-madeye",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Zzharg_Madeye/",
+    "ma": 4,
+    "st": 4,
+    "ag": "4+",
+    "pa": "3+",
+    "av": "10+"
+  }
+]

@@ -4,14 +4,32 @@ import {
   paginationResultValidator,
 } from "convex/server";
 import { ConvexError, v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, type QueryCtx } from "./_generated/server";
+import type { Doc } from "./_generated/dataModel";
 import { publicTeam, teamValidator } from "./validators";
-import { teamSchema } from "../src/domain/types";
+import {
+  RULES_VERSION,
+  teamSchema,
+  upgradeTeamRules,
+} from "../src/domain/types";
 import { z } from "zod";
 import { getRoster, getRuleset } from "../src/domain/catalog";
 import { teamSaveIssues, validateTeam } from "../src/domain/rules";
 import { currentUser, requireUser } from "./roles";
 import { teamLeagueState } from "./teamLeagueState";
+
+// Catalog corrections must not delete saved teams or silently keep an obsolete
+// legal badge. Reads project a current draft without mutating the stored row or
+// historical league snapshots. Normal revision-checked saves persist upgrades.
+async function currentDraft(ctx: QueryCtx, doc: Doc<"teams">) {
+  if (doc.team.rulesVersion === RULES_VERSION)
+    return { team: doc.team, legal: doc.legal };
+  const team = upgradeTeamRules(doc.team);
+  const league = doc.draftLeagueId
+    ? await ctx.db.get("leagues", doc.draftLeagueId)
+    : null;
+  return { team, legal: validateTeam(team, league?.startingTreasury).valid };
+}
 
 export const getByUuid = query({
   args: { uuid: v.string() },
@@ -26,11 +44,10 @@ export const getByUuid = query({
     const viewer = await currentUser(ctx);
     const leagueState = await teamLeagueState(ctx, doc);
     return {
-      team: doc.team,
+      ...(await currentDraft(ctx, doc)),
       favorite: viewer?._id === doc.ownerId ? doc.favorite : undefined,
       draftLeagueId: doc.draftLeagueId,
       revision: doc.revision,
-      legal: doc.legal,
       updatedAt: doc.updatedAt,
       ...leagueState,
       canEdit:
@@ -147,11 +164,10 @@ export const listMine = query({
         result.page.map(async (d) => {
           const leagueState = await teamLeagueState(ctx, d);
           return {
-            team: d.team,
+            ...(await currentDraft(ctx, d)),
             favorite: d.favorite,
             draftLeagueId: d.draftLeagueId,
             revision: d.revision,
-            legal: d.legal,
             updatedAt: d.updatedAt,
             ...leagueState,
             canEdit: !leagueState.leagueLocked,
@@ -184,7 +200,7 @@ export const save = mutation({
     if (!parsed.success || !getRoster(parsed.data.rosterId))
       throw new ConvexError("INVALID_TEAM");
     const team = {
-      ...parsed.data,
+      ...upgradeTeamRules(parsed.data),
       notes: "",
     };
     const existing = await ctx.db
@@ -220,6 +236,7 @@ export const save = mutation({
       // Acknowledge it without advancing the revision or overwriting changes.
       if (
         existing &&
+        existing.team.rulesVersion === RULES_VERSION &&
         !existing.archived &&
         args.expectedRevision < existing.revision &&
         JSON.stringify(teamSchema.parse(existing.team)) === JSON.stringify(team)

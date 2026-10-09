@@ -3,12 +3,13 @@ import { useTranslations } from "gt-next";
 import { SkillList } from "./skill-box";
 import { PositionName } from "./position-name";
 import type { Roster, RulesetId } from "@/domain/types";
-import { getRuleset, newTeam } from "@/domain/catalog";
+import { getRuleset, newTeam, stars } from "@/domain/catalog";
 import {
   budgetFor,
   isLineman,
   isSevens,
   staffInfo,
+  starEligible,
   tierFor,
 } from "@/domain/rules";
 import { PlayerIcon } from "./player-icon";
@@ -198,6 +199,10 @@ export function RosterFacts({
             0–4
           </p>
         )}
+        <p>
+          <span className="font-medium">{t("starPlayers")}:</span>{" "}
+          {t(stars.some((star) => starEligible(team, star)) ? "yes" : "no")}
+        </p>
         {roster.bigGuyMax !== undefined && (
           <p>
             <span className="font-medium">{t("bigGuyLimit")}:</span>{" "}

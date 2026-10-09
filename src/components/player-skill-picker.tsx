@@ -136,6 +136,11 @@ export function PlayerSkillPicker({
       aria-label={t("playerModal.browseSkills")}
     >
       <div className="player-skill-toolbar">
+        {rules.sevens && (
+          <p className="mb-3 text-xs text-muted-foreground">
+            {t(kyiv ? "sevensKyivSkillsHelp" : "sevensMatchedSkillsHelp")}
+          </p>
+        )}
         {kyiv && (
           <div
             role="status"

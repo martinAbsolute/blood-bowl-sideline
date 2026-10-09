@@ -216,7 +216,7 @@
         "ma": 6,
         "st": 3,
         "ag": "3+",
-        "pa": "4+",
+        "pa": "3+",
         "av": "9+",
         "skills": ["horns", "thick_skull"],
         "primarySkills": ["G", "M"],
@@ -508,7 +508,7 @@
         "av": "9+",
         "skills": ["animosity:all", "pass", "sure_hands"],
         "primarySkills": ["D", "G", "M", "P"],
-        "secondarySkills": ["S"],
+        "secondarySkills": ["A", "S"],
         "id": "chaos-renegade-5"
       },
       {
@@ -595,7 +595,7 @@
           "unchannelled_fury"
         ],
         "primarySkills": ["S"],
-        "secondarySkills": ["A", "G"],
+        "secondarySkills": ["A", "G", "M"],
         "id": "chaos-renegade-8"
       },
       {
@@ -975,7 +975,7 @@
       }
     ],
     "rerolls": {
-      "cost": 60000,
+      "cost": 50000,
       "max": 8
     },
     "apothecary": true
@@ -1216,7 +1216,7 @@
         "av": "9+",
         "skills": [],
         "primarySkills": ["A", "G"],
-        "secondarySkills": ["P", "S"],
+        "secondarySkills": ["S"],
         "id": "high-elf-0"
       },
       {
@@ -1244,7 +1244,7 @@
         "av": "9+",
         "skills": ["claws", "wrestle"],
         "primarySkills": ["A", "G"],
-        "secondarySkills": ["M", "S"],
+        "secondarySkills": ["P", "S"],
         "id": "high-elf-2"
       },
       {
@@ -1258,7 +1258,7 @@
         "av": "9+",
         "skills": ["block", "my_ball", "steady_footing"],
         "primarySkills": ["A", "G"],
-        "secondarySkills": ["P", "S"],
+        "secondarySkills": ["S"],
         "id": "high-elf-3"
       }
     ],
@@ -1430,7 +1430,7 @@
         "ma": 5,
         "st": 3,
         "ag": "3+",
-        "pa": "-",
+        "pa": "4+",
         "av": "9+",
         "skills": ["stand_firm", "wrestle"],
         "primarySkills": ["G", "S"],
@@ -2267,7 +2267,7 @@
         "ma": 6,
         "st": 2,
         "ag": "3+",
-        "pa": "3+",
+        "pa": "4+",
         "av": "8+",
         "skills": ["dodge", "right_stuff", "stunty"],
         "primarySkills": ["A", "D"],
@@ -2610,7 +2610,7 @@
         "st": 1,
         "ag": "3+",
         "pa": "4+",
-        "av": "8+",
+        "av": "6+",
         "skills": [
           "dodge",
           "insignificant",
@@ -2631,7 +2631,7 @@
         "st": 1,
         "ag": "3+",
         "pa": "4+",
-        "av": "8+",
+        "av": "6+",
         "skills": ["dodge", "pogo", "right_stuff", "sidestep", "stunty"],
         "primarySkills": ["A", "D"],
         "secondarySkills": ["G"],
@@ -2645,7 +2645,7 @@
         "st": 1,
         "ag": "3+",
         "pa": "4+",
-        "av": "8+",
+        "av": "6+",
         "skills": ["dodge", "right_stuff", "sidestep", "sprint", "stunty"],
         "primarySkills": ["A", "D"],
         "secondarySkills": ["G"],
@@ -2659,7 +2659,7 @@
         "st": 1,
         "ag": "3+",
         "pa": "4+",
-        "av": "8+",
+        "av": "6+",
         "skills": [
           "bombardier",
           "dodge",
@@ -2681,7 +2681,7 @@
         "st": 5,
         "ag": "5+",
         "pa": "6+",
-        "av": "-",
+        "av": "9+",
         "skills": [
           "dirty_player",
           "juggernaut",
@@ -2701,7 +2701,7 @@
         "st": 5,
         "ag": "5+",
         "pa": "5+",
-        "av": "-",
+        "av": "10+",
         "skills": [
           "always_hungry",
           "mighty_blow",
@@ -3004,7 +3004,7 @@
           "regeneration"
         ],
         "primarySkills": ["A", "G", "S"],
-        "secondarySkills": ["S"],
+        "secondarySkills": [],
         "id": "vampire-3"
       },
       {
@@ -3032,7 +3032,7 @@
       "cost": 60000,
       "max": 8
     },
-    "apothecary": false
+    "apothecary": true
   },
   {
     "id": "wood-elf",

@@ -1,10 +1,18 @@
-import { teamSchema, type Team } from "@/domain/types";
+import {
+  RULES_VERSION,
+  teamSchema,
+  upgradeTeamRules,
+  type Team,
+} from "@/domain/types";
 import { z } from "zod";
 import { TEAM_NAME_MAX_LENGTH } from "@/domain/team-name";
 // Preserve recovery snapshots while team names are being edited. Account saves
 // still use the stricter shared server validator.
 const localDraftSchema = teamSchema
   .extend({
+    rulesVersion: teamSchema.shape.rulesVersion.transform(
+      (): typeof RULES_VERSION => RULES_VERSION,
+    ),
     name: z.string().max(TEAM_NAME_MAX_LENGTH),
     players: z
       .array(
@@ -146,7 +154,7 @@ export function storeDraft(
     index = all.findIndex((t) => t.uuid === team.uuid);
   // Ownership and base revision commit atomically with the snapshot.
   const snapshot = {
-    ...team,
+    ...upgradeTeamRules(team),
     baseRevision: revision,
     draftOwner: account ?? draftAccount(team.uuid),
     favorite: index < 0 ? undefined : all[index].favorite,

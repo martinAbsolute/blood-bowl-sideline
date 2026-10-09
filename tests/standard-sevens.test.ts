@@ -7,6 +7,7 @@ import {
   isLineman,
   staffInfo,
   starEligible,
+  summarize,
   tierFor,
   validateTeam,
 } from "../src/domain/rules";
@@ -69,6 +70,46 @@ describe("Blood Bowl Sevens 2025 matched play", () => {
     team.players[1].skills = ["block", "wrestle"];
     expect(codes(team)).toContain("maxSkills");
     expect(getRuleset(team.rulesetId).maxElitePerTeam).toBe(2);
+  });
+  it("allows Leader on a captain with free Pro without treating it as an added skill stack", () => {
+    const team = draft();
+    team.players[1].positionId = getRoster("human")!.players.find((p) =>
+      p.primarySkills.includes("P"),
+    )!.id;
+    team.captainId = team.players[1].id;
+    team.players[1].skills = ["leader"];
+    expect(codes(team)).toEqual([]);
+    expect(summarize(team).skills).toBe(1);
+    // Starting Pro is granted by captaincy, never bought a second time.
+    team.players[1].skills.push("pro");
+    expect(codes(team)).toContain("captain");
+    expect(codes(team)).toContain("maxSkills");
+  });
+  it("allows purchased Pro and Leader on one team while rejecting two added skills on one player", () => {
+    const team = draft("chaos-chosen");
+    team.players[1].skills = ["pro"];
+    team.players[2].skills = ["leader"];
+    expect(codes(team)).toEqual([]);
+    expect(summarize(team).skills).toBe(3);
+    team.players[1].skills = ["pro", "leader"];
+    team.players[2].skills = [];
+    expect(codes(team)).toContain("maxSkills");
+    expect(codes(team)).toContain("stackLimit");
+    expect(codes(team)).not.toContain("leaderBanned");
+  });
+  it("counts only added elite skills toward the cap, independently of SP", () => {
+    const team = draft("chaos-chosen");
+    team.players[4].positionId = getRoster("chaos-chosen")!.players.find((p) =>
+      p.skills.includes("mighty_blow"),
+    )!.id;
+    team.players[1].skills = ["block"];
+    team.players[2].skills = ["block"];
+    expect(codes(team)).toEqual([]);
+    team.players[3].positionId = getRoster("chaos-chosen")!.players.find(
+      (p) => p.primarySkills.includes("G") && p.primarySkills.includes("S"),
+    )!.id;
+    team.players[3].skills = ["guard"];
+    expect(codes(team)).toEqual(["eliteLimit"]);
   });
   it("starts with zero fans, allows five purchases, shares Sevens prices and excludes stars", () => {
     const team = draft("halfling");
