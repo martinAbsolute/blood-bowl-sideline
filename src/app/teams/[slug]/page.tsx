@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { TeamPage } from "@/components/team-page";
-import { contentMetadata } from "@/lib/content-metadata";
-import { api } from "../../../../convex/_generated/api";
+import { pageMetadata } from "@/lib/site-metadata";
+import { publicTeamContent } from "@/lib/public-team-content";
+import { serializeTeamStructuredData } from "@/lib/team-structured-data";
 export async function generateMetadata({
   params,
 }: {
@@ -10,13 +11,11 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
   if (!z.uuid().safeParse(slug).success) notFound();
-  const metadata = await contentMetadata(
-    api.teams.getByUuid,
-    { uuid: slug },
+  const data = await publicTeamContent(slug);
+  const metadata = pageMetadata(
+    data?.team.name.trim() || "Shared Blood Bowl Team",
     `/teams/${slug}`,
-    "Shared Blood Bowl Team",
     "View a shared Blood Bowl roster, player advancements and team costs on Blood Bowl Sideline.",
-    (data) => data?.team.name,
   );
   return {
     ...metadata,
@@ -30,5 +29,19 @@ export default async function Page({
 }) {
   const { slug } = await params;
   if (!z.uuid().safeParse(slug).success) notFound();
-  return <TeamPage uuid={slug} />;
+  const data = await publicTeamContent(slug);
+  return (
+    <>
+      {data && (
+        <script
+          id="team-structured-data"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: serializeTeamStructuredData(data),
+          }}
+        />
+      )}
+      <TeamPage uuid={slug} />
+    </>
+  );
 }
