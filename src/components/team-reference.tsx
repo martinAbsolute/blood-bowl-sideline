@@ -101,7 +101,7 @@ export function TeamReference({
                 <TableRow key={i.id}>
                   <TableCell className="whitespace-normal">
                     <RuleHelp
-                      title={i.name}
+                      title={t(`inducementNames.${i.id}`)}
                       description={t(
                         isSevens(team) && i.id === "prayers-to-nuffle"
                           ? "sevensPrayersHelp"
@@ -112,7 +112,7 @@ export function TeamReference({
                       skillPreview
                       className="underline decoration-dotted underline-offset-4"
                     >
-                      {i.name}
+                      {t(`inducementNames.${i.id}`)}
                     </RuleHelp>
                     <p className="text-[11px] text-muted-foreground">
                       0–{i.max}

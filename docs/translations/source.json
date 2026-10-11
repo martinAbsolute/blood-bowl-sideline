@@ -1,0 +1,24 @@
+{
+  "title": "Blood Bowl Термінологія – Draft 1.0",
+  "url": "https://docs.google.com/spreadsheets/d/1bz-S0B6Il8RVcZUBpVBBQwDPgk9uAmfRwKPDLTz7ox0/edit",
+  "retrievedOn": "2026-10-11",
+  "authors": [
+    "Михайло Чепель",
+    "Андрій Савич",
+    "Владислав Зінченко",
+    "Тарас Кашук"
+  ],
+  "snapshot": "community-glossary.json",
+  "snapshotFormat": "All non-empty cells from all four sheets, including the disclaimer and contextual duplicates. Cell addresses and original spelling are preserved.",
+  "termRows": 418,
+  "application": "Community terms are used in Ukrainian catalog labels, rule descriptions, UI copy and print output. Existing English dictionary entries and domain catalog data are unchanged. Ukrainian labels and descriptions omit parenthetical English equivalents. English skill names remain searchable. Stat abbreviations and rule parameters are preserved.",
+  "untranslatedTerms": "Names and terms not covered by the community glossary remain English, per the user’s instruction. This includes roster and star-player names, named team rules and uncovered special actions.",
+  "aliases": {
+    "Ball and Chain": "Ball & Chain",
+    "Pogo Stick": "Pogo",
+    "Timmm-ber!": "Timm-ber!",
+    "Hatred (x)": "Hatred (Х)"
+  },
+  "context": "Eye Gouge uses the Skills & Traits translation for the skill; the General status-token translation is retained separately in the source snapshot. Scoring in league standings means points, not the glossary’s touchdown-scoring action.",
+  "updates": "Update the source snapshot and both locale dictionaries together; run tests/translations.test.ts to check all skill names, catalog aliases, locale keys and interpolation parameters."
+}

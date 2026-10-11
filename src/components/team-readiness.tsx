@@ -1,4 +1,6 @@
 "use client";
+
+import { translatedIssueValues } from "@/lib/translated-issue-values";
 import { useTranslations } from "gt-next";
 import { ShieldCheck } from "lucide-react";
 import type { Team } from "@/domain/types";
@@ -36,7 +38,9 @@ export function TeamReadiness({
           {validation.issues.map((issue, index) => (
             <li key={`${issue.code}-${index}`} className="flex gap-2">
               <span className="mt-1.5 size-1 shrink-0 rounded-full bg-orange-600" />
-              <span>{t(`issues.${issue.code}`, issue.values)}</span>
+              <span>
+                {t(`issues.${issue.code}`, translatedIssueValues(issue, t))}
+              </span>
             </li>
           ))}
         </ul>

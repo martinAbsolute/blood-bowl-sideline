@@ -56,12 +56,12 @@ describe("rule explanations", () => {
     for (const dictionary of [en, uk]) {
       expect(dictionary.skillDescriptions.really_stupid).toContain("+2");
       expect(dictionary.skillDescriptions.monstrous_mouth).toContain("3+");
-      expect(dictionary.skillDescriptions.monstrous_mouth).toContain("1-2");
+      expect(dictionary.skillDescriptions.monstrous_mouth).toMatch(/1[-–]2/);
       expect(dictionary.skillDescriptions.pile_driver).not.toContain(
         "not Marking",
       );
       expect(dictionary.skillDescriptions.nerves_of_steel).toContain(
-        "Passing Ability Test",
+        dictionary === uk ? "тесту Паса" : "Passing Ability Test",
       );
     }
   });
@@ -79,13 +79,13 @@ describe("rule explanations", () => {
     }
   });
   it("keeps complete Ukrainian exceptions and paragraph breaks in long skill definitions", () => {
-    expect(uk.skillDescriptions.pro).toContain("Armour Roll");
-    expect(uk.skillDescriptions.pro).toContain("Argue the Call");
-    expect(uk.skillDescriptions.always_hungry).toContain("Apothecary");
-    expect(uk.skillDescriptions.always_hungry).toContain("Regeneration");
+    expect(uk.skillDescriptions.pro).toContain("кидка на Броню");
+    expect(uk.skillDescriptions.pro).toContain("Спору з Суддею");
+    expect(uk.skillDescriptions.always_hungry).toContain("Апотекарій");
+    expect(uk.skillDescriptions.always_hungry).toContain("Регенерації");
     expect(uk.skillDescriptions.kick_team_mate).toContain("Star Player Points");
-    expect(uk.skillDescriptions.ball_and_chain).toContain("Chomped");
-    expect(uk.skillDescriptions.monstrous_mouth).toContain("Strip Ball");
+    expect(uk.skillDescriptions.ball_and_chain).toContain("Вкушений");
+    expect(uk.skillDescriptions.monstrous_mouth).toContain("Вибивання М’яча");
     expect(uk.skillDescriptions.kick_team_mate).toContain("\n\n");
   });
 });

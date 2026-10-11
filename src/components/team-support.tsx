@@ -171,7 +171,7 @@ export function TeamSupport({
               return (
                 <SupportItem
                   key={item.id}
-                  label={item.name}
+                  label={t(`inducementNames.${item.id}`)}
                   description={t(
                     isSevens(team) && item.id === "prayers-to-nuffle"
                       ? "sevensPrayersHelp"

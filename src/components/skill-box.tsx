@@ -1,7 +1,9 @@
 "use client";
 
+import { translatedSkillName } from "@/lib/translated-skill-name";
+
 import { useTranslations } from "gt-next";
-import { getSkill, skillName, sortSkillIds } from "@/domain/catalog";
+import { getSkill, sortSkillIds } from "@/domain/catalog";
 import { RuleHelp } from "./rule-help";
 import { X } from "lucide-react";
 
@@ -43,13 +45,13 @@ export function SkillBox({
   const className = `skill-box skill-${category}${added || captain ? " skill-added" : ""}`;
   const help = (
     <RuleHelp
-      title={captain ? t("proCaptain") : skillName(id)}
+      title={captain ? t("proCaptain") : translatedSkillName(id, t)}
       description={t(`skillDescriptions.${id.split(":")[0]}`)}
       meta={meta}
       skillPreview
       className={onRemove ? "skill-removable-label" : className}
     >
-      {captain ? t("proCaptain") : skillName(id)}
+      {captain ? t("proCaptain") : translatedSkillName(id, t)}
     </RuleHelp>
   );
   return onRemove ? (
@@ -58,7 +60,7 @@ export function SkillBox({
       <button
         type="button"
         className="skill-removable-action"
-        aria-label={`${t("removeSkill")} · ${skillName(id)}`}
+        aria-label={`${t("removeSkill")} · ${translatedSkillName(id, t)}`}
         onClick={(event) => {
           event.stopPropagation();
           onRemove();

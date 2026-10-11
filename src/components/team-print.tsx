@@ -1,3 +1,4 @@
+import { translatedSkillName } from "@/lib/translated-skill-name";
 import { Fragment } from "react";
 import {
   getRoster,
@@ -83,11 +84,11 @@ function PrintedSkills({
 }) {
   const entries = [
     ...sortSkillIds(builtIn).map((id) => ({
-      name: skillName(id),
+      name: translatedSkillName(id, t),
       className: undefined,
     })),
     ...sortSkillIds(added).map((id) => ({
-      name: skillName(id),
+      name: translatedSkillName(id, t),
       className: "added",
     })),
     ...(captain ? [{ name: t("proCaptain"), className: "captain" }] : []),
@@ -128,7 +129,7 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
     ]),
   ].sort((a, b) => skillName(a).localeCompare(skillName(b)));
   const appendix = skillIds.map((id) => ({
-    name: skillName(id),
+    name: translatedSkillName(id, t),
     text: t(`skillDescriptions.${id.split(":")[0]}`),
   }));
   if (isSevens(team) && team.veteranId) {
@@ -167,7 +168,8 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
                   {selectedInducements.map((item) => (
                     <div key={item.id}>
                       <dt>
-                        {team.inducements[item.id]} × {item.name}
+                        {team.inducements[item.id]} ×{" "}
+                        {t(`inducementNames.${item.id}`)}
                       </dt>
                       <dd>
                         {gold(

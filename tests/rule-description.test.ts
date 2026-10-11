@@ -30,8 +30,12 @@ describe("full inducement rule formatting", () => {
       );
       expect(html.match(/<li /g)).toHaveLength(16);
       expect(html).toContain("<ol ");
-      expect(html).toContain("Treacherous Trapdoor:");
-      expect(html).toContain("Intensive Training:");
+      expect(html).toContain(
+        dictionary === uk ? "Підступні Люки:" : "Treacherous Trapdoor:",
+      );
+      expect(html).toContain(
+        dictionary === uk ? "Інтенсивне Тренування:" : "Intensive Training:",
+      );
     });
   }
 });

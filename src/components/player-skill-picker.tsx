@@ -1,5 +1,12 @@
 "use client";
 
+import { translatedIssueValues } from "@/lib/translated-issue-values";
+
+import {
+  translatedSkillName,
+  skillSearchText,
+} from "@/lib/translated-skill-name";
+
 import { useDeferredValue, useRef, useState } from "react";
 import { useTranslations } from "gt-next";
 import { Check, LockKeyhole, Plus, Search, X } from "lucide-react";
@@ -8,7 +15,6 @@ import {
   getRuleset,
   getRoster,
   skills,
-  skillName,
   sortSkillIds,
 } from "@/domain/catalog";
 import {
@@ -122,7 +128,7 @@ export function PlayerSkillPicker({
               secondaryRemaining > 0) &&
             !blocked([...selected, id]))) &&
         (category === "all" || skillsById.get(id)?.category === category) &&
-        skillName(id).toLowerCase().includes(deferredSearch)),
+        skillSearchText(id, t).includes(deferredSearch)),
   );
   const availableCategories = Object.entries(categories).filter(
     ([, code]) =>
@@ -271,14 +277,16 @@ export function PlayerSkillPicker({
               ? `${t("skillLimitReached")} ${t("playerModal.makeRoom")}`
               : canReplace
                 ? t("playerModal.replaceSkillHint", {
-                    current: skillName(selected[0]),
-                    next: skillName(id),
+                    current: translatedSkillName(selected[0], t),
+                    next: translatedSkillName(id, t),
                   })
                 : issue?.code === "starSkills" &&
                     skillAccess(position, id) === "secondary"
-                  ? t("playerModal.starSecondaryHint", { skill: skillName(id) })
+                  ? t("playerModal.starSecondaryHint", {
+                      skill: translatedSkillName(id, t),
+                    })
                   : issue
-                    ? t(`issues.${issue.code}`, issue.values)
+                    ? t(`issues.${issue.code}`, translatedIssueValues(issue, t))
                     : undefined;
           const delta = playerSkillCost(team, position, next) - cost;
           return (
@@ -303,14 +311,14 @@ export function PlayerSkillPicker({
               )}
               {restriction ? (
                 <RuleHelp
-                  title={skillName(id)}
+                  title={translatedSkillName(id, t)}
                   meta={t("playerModal.unavailable")}
                   description={restriction}
                   action={
                     canReplace
                       ? {
                           label: t("playerModal.replaceSkill", {
-                            skill: skillName(id),
+                            skill: translatedSkillName(id, t),
                           }),
                           onClick: () => {
                             if (!blocked([id])) onChange([id]);
@@ -322,7 +330,7 @@ export function PlayerSkillPicker({
                         }
                       : undefined
                   }
-                  label={`${t("playerModal.unavailable")} · ${skillName(id)}`}
+                  label={`${t("playerModal.unavailable")} · ${translatedSkillName(id, t)}`}
                   className="flex size-11 shrink-0 items-center justify-center rounded-md border border-dashed text-muted-foreground hover:bg-secondary hover:text-foreground sm:size-8"
                 >
                   <LockKeyhole aria-hidden="true" className="size-4" />
@@ -333,7 +341,7 @@ export function PlayerSkillPicker({
                   size="icon"
                   className="group size-11 shrink-0 sm:size-8"
                   aria-pressed={chosen}
-                  aria-label={`${t(chosen ? "removeSkill" : "addSkill")} · ${skillName(id)}`}
+                  aria-label={`${t(chosen ? "removeSkill" : "addSkill")} · ${translatedSkillName(id, t)}`}
                   onClick={() => {
                     if (chosen || (!full && !blocked(next))) onChange(next);
                   }}

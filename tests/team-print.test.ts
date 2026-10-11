@@ -1,8 +1,9 @@
+import { translatedSkillName } from "../src/lib/translated-skill-name";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { randomUUID } from "node:crypto";
-import { newTeam, rosters, skillName, stars } from "../src/domain/catalog";
+import { newTeam, rosters, stars } from "../src/domain/catalog";
 import { TeamPrint, printStyles } from "../src/components/team-print";
 import { duplicateTeam } from "../src/lib/duplicate-team";
 import { TEAM_NAME_MAX_LENGTH } from "../src/domain/team-name";
@@ -109,7 +110,9 @@ describe.each([
         ...stars.flatMap((s) => s.skills),
       ])) {
         expect(html).toContain(
-          renderToStaticMarkup(createElement("strong", null, skillName(id))),
+          renderToStaticMarkup(
+            createElement("strong", null, translatedSkillName(id, t)),
+          ),
         );
         expect(html).toContain(
           renderToStaticMarkup(

@@ -1,4 +1,9 @@
 "use client";
+
+import {
+  translatedSkillName,
+  skillSearchText,
+} from "@/lib/translated-skill-name";
 import { useContentTitle } from "@/lib/use-content-title";
 
 import { Fragment, useState } from "react";
@@ -26,7 +31,7 @@ import {
 } from "lucide-react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
-import { getRoster, skillName } from "@/domain/catalog";
+import { getRoster } from "@/domain/catalog";
 import { expensiveMistake } from "@/domain/league-rules";
 import { canEnrollTeam } from "@/lib/league-team-eligibility";
 import {
@@ -1580,9 +1585,9 @@ function AdvancementPicker({
   const t = useTranslations();
   const [search, setSearch] = useState("");
   const visible = options.filter((option) =>
-    skillName(option.skillId)
-      .toLocaleLowerCase()
-      .includes(search.trim().toLocaleLowerCase()),
+    skillSearchText(option.skillId, t).includes(
+      search.trim().toLocaleLowerCase(),
+    ),
   );
   return (
     <LeagueFormSection title={t("leagueUi.spendSpp")}>
@@ -1604,7 +1609,7 @@ function AdvancementPicker({
             className={`flex items-start justify-between gap-3 rounded-md border px-3 py-2 text-left disabled:opacity-45 focus-visible:outline-2 focus-visible:outline-ring ${value === option.skillId ? "border-primary bg-secondary" : "enabled:hover:bg-secondary/40"}`}
           >
             <span className="text-xs font-medium">
-              {skillName(option.skillId)}
+              {translatedSkillName(option.skillId, t)}
               <span className="mt-1 block text-[10px] font-normal text-muted-foreground">
                 +{option.valueIncrease / 1000}k GP
               </span>

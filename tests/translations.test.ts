@@ -6,6 +6,17 @@ import en from "../src/i18n/en.json";
 import uk from "../src/i18n/uk.json";
 import dictionary from "../src/dictionary";
 import loadDictionary from "../src/loadDictionary";
+import {
+  skills,
+  inducements,
+  skillName,
+  sortSkillIds,
+} from "../src/domain/catalog";
+import {
+  translatedSkillName,
+  skillSearchText,
+} from "../src/lib/translated-skill-name";
+import glossary from "../docs/translations/community-glossary.json";
 
 // Resolve the actual GT runtime used by gt-next, including pnpm's dependency layout.
 const require = createRequire(import.meta.url);
@@ -95,4 +106,83 @@ it("the actual source and locale loader preserve nested league and development e
   }
   expect(await loadDictionary("en-US")).toBe(dictionary);
   expect(await loadDictionary("uk-UA")).toBe(uk);
+});
+
+it("uses every community skill translation, including catalog spelling variants", () => {
+  const rows = glossary.find(
+    (sheet) => sheet.sheet === "Skills & Traits",
+  )!.rows;
+  const terms = new Map(
+    rows.slice(1).map((row) => {
+      const cells = Object.entries(row);
+      return [
+        cells
+          .find(([cell]) => cell.startsWith("B"))![1]!
+          .trim()
+          .toLowerCase(),
+        cells.find(([cell]) => cell.startsWith("C"))![1]!.trim(),
+      ];
+    }),
+  );
+  const aliases: Record<string, string> = {
+    "ball and chain": "ball & chain",
+    "pogo stick": "pogo",
+    "timmm-ber!": "timm-ber!",
+    hatred: "hatred (х)",
+  };
+  for (const skill of skills) {
+    const base = skill.name.replace(/ \(x\+?\)$/i, "").toLowerCase();
+    const expected = terms.get(aliases[base] ?? base);
+    expect(expected, skill.id).toBeDefined();
+    expect(
+      uk.skillNames[skill.id as keyof typeof uk.skillNames].replace(
+        / \(x\+?\)$/i,
+        "",
+      ),
+    ).toBe(expected);
+    expect(en.skillNames[skill.id as keyof typeof en.skillNames]).toBe(
+      skill.name,
+    );
+  }
+  for (const item of inducements) {
+    expect(uk.inducementNames).toHaveProperty(item.id);
+    expect(en.inducementNames[item.id as keyof typeof en.inducementNames]).toBe(
+      item.name,
+    );
+  }
+});
+
+it("renders Ukrainian parameterized names without changing English identities or sorting", async () => {
+  runtimeCache();
+  const t = await getTranslationsInternal({ locale: "uk", enableI18n: true });
+  expect(translatedSkillName("dodge", t)).toBe("Ухилення");
+  expect(translatedSkillName("loner:4+", t)).toBe("Одинак (4+)");
+  expect(translatedSkillName("hatred:Orc", t)).toBe("Ненависть (Orc)");
+  expect(translatedSkillName("unknown", t)).toBe("unknown");
+  expect(skillName("dodge")).toBe("Dodge");
+  expect(skillSearchText("dodge", t)).toBe("ухилення dodge");
+  expect(uk.skillDescriptions.dodge).not.toContain("(Dodge)");
+  expect(uk.inducementNames.bribes).toBe("Хабарі");
+  expect(sortSkillIds(["dodge", "block"])).toEqual(["block", "dodge"]);
+});
+
+it("keeps both locales' keys and interpolation parameters in sync", () => {
+  function flatten(value: object, prefix = ""): Record<string, string> {
+    return Object.fromEntries(
+      Object.entries(value).flatMap(([key, entry]) => {
+        const path = prefix ? `${prefix}.${key}` : key;
+        return typeof entry === "string"
+          ? [[path, entry]]
+          : Object.entries(flatten(entry, path));
+      }),
+    );
+  }
+  const source = flatten(en),
+    translated = flatten(uk);
+  expect(Object.keys(translated).sort()).toEqual(Object.keys(source).sort());
+  for (const [key, value] of Object.entries(source)) {
+    const parameters = (text: string) =>
+      [...text.matchAll(/\{(\w+)\}/g)].map((match) => match[1]).sort();
+    expect(parameters(translated[key]), key).toEqual(parameters(value));
+  }
 });
