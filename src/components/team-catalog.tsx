@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useState } from "react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { RosterExplorer } from "./roster-explorer";
 import type { RulesetId } from "@/domain/types";
 import { RosterRulesetPicker } from "./roster-ruleset-picker";

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import {
   ArrowDownWideNarrow,
   ArrowUpWideNarrow,

@@ -1,6 +1,6 @@
 "use client";
 import { useDeferredValue, useState, useSyncExternalStore } from "react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import {
   useConvex,
   useConvexAuth,

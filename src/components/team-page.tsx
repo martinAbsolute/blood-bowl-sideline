@@ -5,7 +5,7 @@ import type { Id } from "../../convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
 import { useSyncExternalStore } from "react";
 import { useConvexAuth, useQuery } from "convex/react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { api } from "../../convex/_generated/api";
 import {
   draftAccount,

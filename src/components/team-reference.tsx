@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { ArrowLeft } from "lucide-react";
 import { inducements, newTeam, stars } from "@/domain/catalog";
 import { SkillList } from "./skill-box";

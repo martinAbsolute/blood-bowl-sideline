@@ -6,10 +6,17 @@ import { getRoster, newTeam, skillName } from "../src/domain/catalog";
 import { PlayerSkillPicker } from "../src/components/player-skill-picker";
 import type { Team } from "../src/domain/types";
 
-vi.mock("gt-next", () => ({
-  useTranslations: () => (key: string, values?: Record<string, number>) =>
-    key + (values ? JSON.stringify(values) : ""),
-}));
+vi.mock("next-intl", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next-intl")>();
+  const { formats, timeZone } = await import("../src/i18n/config");
+  return {
+    ...actual,
+    useFormatter: () =>
+      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useTranslations: () => (key: string, values?: Record<string, number>) =>
+      key + (values ? JSON.stringify(values) : ""),
+  };
+});
 vi.mock("../src/components/skill-box", () => ({
   SkillBox: ({ id }: { id: string }) =>
     createElement("span", null, skillName(id)),

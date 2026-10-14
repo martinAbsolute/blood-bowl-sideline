@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import type { Team } from "@/domain/types";
 import { budgetSummary } from "@/domain/budget";
 import { BudgetBreakdown, BudgetOverview } from "./budget-details";

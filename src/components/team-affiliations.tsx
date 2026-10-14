@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Fragment } from "react";
 import { ArrowUpRight } from "lucide-react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { affiliation } from "@/domain/rules";
 import {
   leagueName,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "gt-next";
+import { useFormatter, useTranslations } from "next-intl";
 import {
   CalendarDays,
   Coins,
@@ -92,6 +92,7 @@ export function auditChanges(raw: string) {
 
 function AuditDetails({ raw }: { raw: string }) {
   const t = useTranslations();
+  const format = useFormatter();
   const names: Record<string, string> = {
     previous: t("leagueUi.before"),
     next: t("leagueUi.after"),
@@ -137,10 +138,7 @@ function AuditDetails({ raw }: { raw: string }) {
       value &&
       Number.isFinite(Number(value))
     ) {
-      return new Date(Number(value)).toLocaleString(undefined, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      });
+      return format.dateTime(Number(value), "dateTime");
     }
     if (
       [
@@ -212,6 +210,7 @@ function AuditDetails({ raw }: { raw: string }) {
 
 export function LeagueHistory({ records }: { records: HistoryRecord[] }) {
   const t = useTranslations();
+  const format = useFormatter();
   const [search, setSearch] = useState("");
   const [action, setAction] = useState("all");
   const actions = [...new Set(records.map((record) => record.action))];
@@ -224,11 +223,7 @@ export function LeagueHistory({ records }: { records: HistoryRecord[] }) {
   );
   const groups = new Map<string, HistoryRecord[]>();
   for (const record of visible) {
-    const day = new Date(record.createdAt).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    const day = format.dateTime(record.createdAt, "long");
     const group = groups.get(day);
     if (group) group.push(record);
     else groups.set(day, [record]);
@@ -319,10 +314,7 @@ export function LeagueHistory({ records }: { records: HistoryRecord[] }) {
                           dateTime={new Date(record.createdAt).toISOString()}
                           className="text-[11px] text-muted-foreground"
                         >
-                          {new Date(record.createdAt).toLocaleTimeString(
-                            undefined,
-                            { hour: "2-digit", minute: "2-digit" },
-                          )}
+                          {format.dateTime(record.createdAt, "time")}
                         </time>
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">

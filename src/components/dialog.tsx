@@ -2,7 +2,7 @@
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { X } from "lucide-react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { DialogClose, DialogOverlay, DialogPortal } from "./ui/dialog";

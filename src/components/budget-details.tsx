@@ -1,11 +1,17 @@
 "use client";
-import { useTranslations } from "gt-next";
+import { useFormatter, useTranslations } from "next-intl";
 import type { BudgetPool, BudgetSummary } from "@/domain/budget";
 import { RuleInfo } from "./rule-help";
 
-const gold = (n: number) => `${(n / 1000).toLocaleString("en")}k`;
-const amount = (n: number, unit: BudgetPool["unit"]) =>
-  unit === "GP" ? gold(n) : unit === "skills" ? String(n) : `${n} ${unit}`;
+function useAmount() {
+  const format = useFormatter();
+  return (value: number, unit: BudgetPool["unit"]) =>
+    unit === "GP"
+      ? `${format.number(value / 1000, "gold")}k`
+      : unit === "skills"
+        ? format.number(value, "integer")
+        : `${format.number(value, "integer")} ${unit}`;
+}
 
 function usePoolLabel() {
   const t = useTranslations();
@@ -25,6 +31,7 @@ function usePoolLabel() {
 
 function BudgetMeter({ pool }: { pool: BudgetPool }) {
   const t = useTranslations();
+  const amount = useAmount();
   const label = usePoolLabel()(pool);
   const excess = Math.max(0, pool.used - pool.limit);
   // Shared base pools draw on Flowing Funds; the reserve reports overspending.
@@ -100,6 +107,7 @@ export function BudgetBreakdown({
   drawerPool?: BudgetPool;
 }) {
   const t = useTranslations();
+  const amount = useAmount();
   const { totals, pools, counts } = summary;
   const skillUnit = pools.find((pool) => pool.id === "skills")?.unit ?? "GP";
   const costs: [string, number, BudgetPool["unit"]][] = [

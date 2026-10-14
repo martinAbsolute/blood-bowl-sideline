@@ -38,11 +38,18 @@ const mocks = vi.hoisted(() => ({
   query: vi.fn(),
   t: (key: string) => key,
 }));
-vi.mock("gt-next", () => ({
-  useTranslations: () => mocks.t,
-  useLocale: () => "en",
-  useSetLocale: () => vi.fn(),
-}));
+vi.mock("next-intl", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next-intl")>();
+  const { formats, timeZone } = await import("../src/i18n/config");
+  return {
+    ...actual,
+    useFormatter: () =>
+      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useTranslations: () => mocks.t,
+    useLocale: () => "en",
+    useSetLocale: () => vi.fn(),
+  };
+});
 vi.mock("convex/react", () => ({
   useConvexAuth: () => mocks.auth,
   useConvexConnectionState: () => ({ isWebSocketConnected: mocks.connected }),

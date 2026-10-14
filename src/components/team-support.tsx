@@ -1,14 +1,13 @@
 "use client";
+import { useGold } from "@/i18n/use-gold";
 
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { inducements } from "@/domain/catalog";
 import { inducementInfo, staffInfo, isSevens } from "@/domain/rules";
 import type { Team } from "@/domain/types";
 import { QuantityStepper } from "./quantity-stepper";
 import { RuleInfo } from "./rule-help";
 import { Switch } from "./ui/switch";
-
-const gold = (value: number) => `${(value / 1000).toLocaleString("en")}k`;
 
 function SupportItem({
   label,
@@ -32,6 +31,7 @@ function SupportItem({
   longRule?: boolean;
 }) {
   const t = useTranslations();
+  const gold = useGold();
   const meta =
     max === 0
       ? t("supportUnavailable")
@@ -95,6 +95,7 @@ export function TeamSupport({
   readOnly?: boolean;
 }) {
   const t = useTranslations();
+  const gold = useGold();
   const staff = staffInfo(team);
   const staffItems = (Object.keys(staff) as (keyof Team["staff"])[]).map(
     (key) => ({ key, ...staff[key] }),

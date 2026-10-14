@@ -1,5 +1,5 @@
 "use client";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { rulesets } from "@/domain/catalog";
 import type { RulesetId } from "@/domain/types";
 import { EditorSelect } from "./editor-select";

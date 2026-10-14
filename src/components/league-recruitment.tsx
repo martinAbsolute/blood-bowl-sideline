@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { Check, Coins, Plus, Users } from "lucide-react";
 import type { Roster } from "@/domain/types";
 import { Button } from "./ui/button";

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { SidebarTooltip } from "./sidebar-tooltip";
 import { BookOpen, Flag, House, Trophy, UsersRound } from "lucide-react";
 
@@ -22,8 +22,10 @@ export function AppNavigation({
     { href: "/rosters", key: "rosters", icon: BookOpen },
     { href: "/leagues", key: "leagues", icon: Flag },
     { href: null, key: "tournaments", icon: Trophy },
-    ...(admin ? [{ href: "/users", key: "users", icon: UsersRound }] : []),
-  ];
+    ...(admin
+      ? [{ href: "/users", key: "users" as const, icon: UsersRound }]
+      : []),
+  ] as const;
   return (
     <nav aria-label={t("menu")} className="space-y-1">
       {items.map(({ href, key, icon: Icon }) => {

@@ -65,7 +65,7 @@ Run it with `enabled: false` to restore the user role. This mutation is internal
 
 ## Stack and project layout
 
-Next.js App Router, React, TypeScript, Tailwind CSS, shadcn/ui, and Magic UI power the frontend. Convex provides authentication and reactive persistence; `gt-next` uses local English and Ukrainian dictionaries. Vercel Web Analytics and Speed Insights are mounted in the root layout.
+Next.js App Router, React, TypeScript, Tailwind CSS, shadcn/ui, and Magic UI power the frontend. Convex provides authentication and reactive persistence; `next-intl` provides local English and Ukrainian messages, ICU pluralization, and locale-aware formatting. The `bbs_locale` cookie stores the language preference; routes are shared across languages. Vercel Web Analytics and Speed Insights are mounted in the root layout.
 
 | Directory               | Purpose                                                             |
 | ----------------------- | ------------------------------------------------------------------- |

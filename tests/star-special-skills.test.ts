@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import {
   getSkill,
+  sortSkillIds,
   rosters,
   skills,
   starPairs,
@@ -15,7 +16,16 @@ import en from "../src/i18n/en.json";
 import uk from "../src/i18n/uk.json";
 import verified from "./fixtures/bb2025-star-skills.json";
 
-vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
+vi.mock("next-intl", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next-intl")>();
+  const { formats, timeZone } = await import("../src/i18n/config");
+  return {
+    ...actual,
+    useFormatter: () =>
+      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useTranslations: () => (key: string) => key,
+  };
+});
 vi.mock("../src/components/rule-help", () => ({
   RuleHelp: ({
     children,
@@ -99,6 +109,7 @@ describe("verified BB2025 star skills and special rules", () => {
     );
     expect(html).toContain('class="skill-box skill-special"');
     expect(html).toContain("Blind Rage");
+    expect(html.indexOf("Blind Rage")).toBeLessThan(html.indexOf(">Dodge<"));
     expect(html).toContain('data-description="skillDescriptions.blind_rage"');
     expect(html).toContain('data-meta="skillCategories.special"');
     expect(html).toContain('class="skill-box skill-agility"');
@@ -117,4 +128,10 @@ describe("verified BB2025 star skills and special rules", () => {
         ).toBe(false);
       }
   });
+});
+
+it("groups special rules before ordinary skills and sorts within each group", () => {
+  expect(
+    sortSkillIds(["dodge", "mesmerising_dance", "block", "blind_rage"]),
+  ).toEqual(["blind_rage", "mesmerising_dance", "block", "dodge"]);
 });

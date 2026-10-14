@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { getRoster, getRuleset } from "@/domain/catalog";
 import { isSevens, isLineman } from "@/domain/rules";
 import { needsPlayerRecruitment } from "@/lib/builder";

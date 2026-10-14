@@ -7,7 +7,7 @@ import {
   Sun,
   ThermometerSun,
 } from "lucide-react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { WEATHER_RESULTS, weatherResult } from "@/domain/match-pregame";
 
 const icons = [ThermometerSun, Sun, CloudSun, CloudRain, Snowflake];

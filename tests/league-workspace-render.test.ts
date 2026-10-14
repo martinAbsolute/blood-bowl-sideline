@@ -13,7 +13,16 @@ const state = vi.hoisted(() => ({
   seasonStatus: "" as string,
   replace: vi.fn(),
 }));
-vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
+vi.mock("next-intl", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next-intl")>();
+  const { formats, timeZone } = await import("../src/i18n/config");
+  return {
+    ...actual,
+    useFormatter: () =>
+      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useTranslations: () => (key: string) => key,
+  };
+});
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: state.replace }),
   useSearchParams: () => new URLSearchParams({ view: state.view, keep: "1" }),

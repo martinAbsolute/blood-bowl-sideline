@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { ArrowUpRight, BookOpen, Search, Star } from "lucide-react";
 import { LeagueEmptyState, LeaguePageHeader } from "./league-layout";
 import { LeagueBack } from "./league-ui";

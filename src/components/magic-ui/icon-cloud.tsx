@@ -50,7 +50,6 @@ export function IconCloud({
   const iconCanvasesRef = useRef<HTMLCanvasElement[]>([])
   const imagesLoadedRef = useRef<boolean[]>([])
 
-  // Pause animation if user prefers reduced motion
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
     if (mediaQuery.matches) {
@@ -65,7 +64,6 @@ export function IconCloud({
     return () => mediaQuery.removeEventListener("change", handleChange)
   }, [])
 
-  // Create icon canvases once when icons/images change
   useEffect(() => {
     if (!icons && !images) return
 
@@ -80,26 +78,24 @@ export function IconCloud({
 
       if (offCtx) {
         if (images) {
-          // Handle image URLs directly
+
           const img = new Image()
           img.crossOrigin = "anonymous"
           img.src = items[index] as string
           img.onload = () => {
             offCtx.clearRect(0, 0, offscreen.width, offscreen.height)
 
-            // Create circular clipping path
             offCtx.beginPath()
             offCtx.arc(20, 20, 20, 0, Math.PI * 2)
             offCtx.closePath()
             offCtx.clip()
 
-            // Draw the image
             offCtx.drawImage(img, 0, 0, 40, 40)
 
             imagesLoadedRef.current[index] = true
           }
         } else {
-          // Handle SVG icons
+
           offCtx.scale(0.4, 0.4)
           const svgString = renderToString(item as React.ReactElement)
           const img = new Image()
@@ -117,13 +113,11 @@ export function IconCloud({
     iconCanvasesRef.current = newIconCanvases
   }, [icons, images])
 
-  // Generate initial icon positions on a sphere
   useEffect(() => {
     const items = icons ?? images ?? []
     const newIcons: Icon[] = []
     const numIcons = items.length || 20
 
-    // Fibonacci sphere parameters
     const offset = 2 / numIcons
     const increment = Math.PI * (3 - Math.sqrt(5))
 
@@ -147,7 +141,6 @@ export function IconCloud({
     setIconPositions(newIcons)
   }, [icons, images])
 
-  // Handle mouse events
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect()
     if (!rect || !canvasRef.current) return
@@ -233,7 +226,6 @@ export function IconCloud({
     setIsDragging(false)
   }
 
-  // Animation and rendering
   useEffect(() => {
     const canvas = canvasRef.current
     const ctx = canvas?.getContext("2d")
@@ -295,7 +287,7 @@ export function IconCloud({
           ctx.globalAlpha = opacity
 
           if (icons || images) {
-            // Only try to render icons/images if they exist
+
             if (
               iconCanvasesRef.current[index] &&
               imagesLoadedRef.current[index]
@@ -303,7 +295,7 @@ export function IconCloud({
               ctx.drawImage(iconCanvasesRef.current[index], -20, -20, 40, 40)
             }
           } else {
-            // Show numbered circles if no icons/images are provided
+
             ctx.beginPath()
             ctx.arc(0, 0, 20, 0, Math.PI * 2)
             ctx.fillStyle = "#4444ff"

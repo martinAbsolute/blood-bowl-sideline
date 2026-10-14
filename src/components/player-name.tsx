@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { Dice5, Pencil } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { generatePlayerName } from "@/lib/player-name-generator";

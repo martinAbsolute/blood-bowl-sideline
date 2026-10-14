@@ -5,7 +5,16 @@ import { getRoster } from "../src/domain/catalog";
 import { RosterFacts, RosterTable } from "../src/components/roster-reference";
 import { TeamReference } from "../src/components/team-reference";
 
-vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
+vi.mock("next-intl", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next-intl")>();
+  const { formats, timeZone } = await import("../src/i18n/config");
+  return {
+    ...actual,
+    useFormatter: () =>
+      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useTranslations: () => (key: string) => key,
+  };
+});
 vi.mock("next/navigation", () => ({ useSearchParams: () => null }));
 vi.mock("../src/components/team-affiliations", () => ({
   TeamAffiliations: () => null,

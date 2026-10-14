@@ -12,15 +12,22 @@ const mocks = vi.hoisted(() => ({
   pathname: "/leagues",
   directory: vi.fn(),
 }));
-vi.mock("gt-next", () => ({
-  useLocale: () => "en",
-  useTranslations: () => (key: string, args?: Record<string, string>) => {
-    let text = en[key as keyof typeof en] as string;
-    for (const [name, value] of Object.entries(args ?? {}))
-      text = text.replace(`{${name}}`, value);
-    return text;
-  },
-}));
+vi.mock("next-intl", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next-intl")>();
+  const { formats, timeZone } = await import("../src/i18n/config");
+  return {
+    ...actual,
+    useFormatter: () =>
+      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useLocale: () => "en",
+    useTranslations: () => (key: string, args?: Record<string, string>) => {
+      let text = en[key as keyof typeof en] as string;
+      for (const [name, value] of Object.entries(args ?? {}))
+        text = text.replace(`{${name}}`, value);
+      return text;
+    },
+  };
+});
 vi.mock("next/navigation", () => ({ usePathname: () => mocks.pathname }));
 vi.mock("next/link", () => ({ default: "a" }));
 vi.mock("convex/react", () => ({

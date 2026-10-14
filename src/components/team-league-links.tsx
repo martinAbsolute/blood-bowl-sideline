@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useQuery } from "convex/react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { Flag, ArrowUpRight } from "lucide-react";
 import { api } from "../../convex/_generated/api";
 

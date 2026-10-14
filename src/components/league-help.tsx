@@ -1,9 +1,8 @@
 "use client";
 
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { RuleHelp } from "./rule-help";
 
-/** The same hover, keyboard and tap help used by skills in the team builder. */
 export function LeagueHelp({
   stat,
   profile = false,

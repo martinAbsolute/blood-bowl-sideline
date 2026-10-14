@@ -94,7 +94,16 @@ vi.mock("convex/react", () => ({
     };
   },
 }));
-vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
+vi.mock("next-intl", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next-intl")>();
+  const { formats, timeZone } = await import("../src/i18n/config");
+  return {
+    ...actual,
+    useFormatter: () =>
+      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useTranslations: () => (key: string) => key,
+  };
+});
 vi.mock("../src/components/player-icon", () => ({
   PlayerIcon: () => null,
   RosterIcon: () => null,

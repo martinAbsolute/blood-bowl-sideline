@@ -3,7 +3,6 @@
 import type { ComponentType } from "react";
 import { LeagueSelect } from "./league-field";
 
-/** Every destination stays reachable without a horizontally clipped tab bar. */
 export function LeagueNavigation<T extends string>({
   label,
   value,

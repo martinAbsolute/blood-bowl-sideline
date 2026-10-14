@@ -9,7 +9,7 @@ import {
   UserMinus,
 } from "lucide-react";
 import { useMutation } from "convex/react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { Button } from "./ui/button";
@@ -204,11 +204,13 @@ export function CommissionerRuling({
             <option value="" disabled>
               {t("leagueUx.chooseRuling")}
             </option>
-            {["home-win", "away-win", "draw", "void"].map((value) => (
-              <option key={value} value={value}>
-                {t("leagueUi." + value)}
-              </option>
-            ))}
+            {(["home-win", "away-win", "draw", "void"] as const).map(
+              (value) => (
+                <option key={value} value={value}>
+                  {t(`leagueUi.${value}`)}
+                </option>
+              ),
+            )}
           </LeagueSelect>
           <LeagueField>
             {t("leagueUi.reason")}

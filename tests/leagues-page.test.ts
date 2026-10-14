@@ -8,10 +8,17 @@ const state = vi.hoisted(() => ({
   create: vi.fn().mockResolvedValue("new-league"),
   push: vi.fn(),
 }));
-vi.mock("gt-next", () => ({
-  useTranslations: () => (key: string) => key,
-  useLocale: () => "en",
-}));
+vi.mock("next-intl", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next-intl")>();
+  const { formats, timeZone } = await import("../src/i18n/config");
+  return {
+    ...actual,
+    useFormatter: () =>
+      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useTranslations: () => (key: string) => key,
+    useLocale: () => "en",
+  };
+});
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: state.push }) }));
 vi.mock("next/link", () => ({
   default: ({ children, ...props }: { children: ReactNode; href: string }) =>
@@ -51,13 +58,11 @@ it("creates a league directly with today's date and the selected treasury", asyn
   expect(dialog.textContent).not.toContain("leagueUx.createReview");
   const date = new Date();
   expect(dialog.textContent).toContain(
-    date
-      .toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
-      .replaceAll("/", "."),
+    date.toLocaleDateString("en", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }),
   );
   const name = dialog.querySelector<HTMLInputElement>(
     'input[maxlength="100"]',

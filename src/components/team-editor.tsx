@@ -1,7 +1,8 @@
 "use client";
+import { useGold } from "@/i18n/use-gold";
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "gt-next";
+import { useLocale, useTranslations } from "next-intl";
 import { useConvexAuth } from "convex/react";
 import {
   getRoster,
@@ -99,7 +100,6 @@ import { PlayerIcon, StarPlayerIcon } from "./player-icon";
 import { useTeamAutosave, type SavedTeam } from "@/lib/use-team-autosave";
 import { useTeamSave } from "@/lib/use-team-save";
 import { useContentTitle } from "@/lib/use-content-title";
-const gold = (n: number) => `${(n / 1000).toLocaleString("en")}k`;
 export function TeamEditor({
   initial,
   revision: initialRevision = 0,
@@ -117,6 +117,7 @@ export function TeamEditor({
   leagueContext?: FunctionReturnType<typeof api.leagues.get>;
   leagueNotice?: ReactNode;
 }) {
+  const gold = useGold();
   const t = useTranslations(),
     router = useRouter(),
     { isAuthenticated, isLoading } = useConvexAuth(),

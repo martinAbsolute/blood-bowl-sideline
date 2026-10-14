@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useConvexAuth } from "convex/react";
 import { ConvexError } from "convex/values";
-import { useTranslations } from "gt-next";
+import type { MessageKey } from "@/i18n/messages";
+import { useTranslations } from "next-intl";
 import { teamSaveIssues } from "@/domain/rules";
 import type { Team } from "@/domain/types";
 import {
@@ -51,7 +52,7 @@ export function useTeamAutosave(
   const [syncError, setSyncError] = useState<{
     team: Team;
     conflict: boolean;
-    message: string;
+    message: MessageKey;
   } | null>(null);
   const [localSave, setLocalSave] = useState<{
     team: Team;

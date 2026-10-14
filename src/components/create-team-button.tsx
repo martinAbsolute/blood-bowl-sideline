@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";

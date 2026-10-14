@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { Share2 } from "lucide-react";
 import { shareTeamLink } from "@/lib/share-team";
 import { ActionButton } from "./action-button";

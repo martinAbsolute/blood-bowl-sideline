@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "gt-next";
+import { useFormatter, useTranslations } from "next-intl";
 import { Check, ChevronDown, Search, Star, Users } from "lucide-react";
 import { favoritesFirst } from "@/lib/team-library";
 import type { Team } from "@/domain/types";
@@ -50,6 +50,7 @@ export function LeagueTeamPicker({
   onOpenChange?: (open: boolean) => void;
 }) {
   const t = useTranslations();
+  const format = useFormatter();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [creating, setCreating] = useState(false);
@@ -99,7 +100,7 @@ export function LeagueTeamPicker({
         <LeagueDialogHeader
           title={t("leagueUi.chooseTeam")}
           description={t("leagueUx.pickerHint", {
-            amount: startingTreasury.toLocaleString("uk-UA"),
+            amount: format.number(startingTreasury, "integer"),
           })}
           icon={<Users className="size-5" />}
         />
@@ -157,8 +158,9 @@ export function LeagueTeamPicker({
                         <span className="mt-0.5 block truncate text-xs text-primary-foreground/75">
                           {getRoster(team.rosterId)?.name} ·{" "}
                           {team.players.length} {t("players")} ·{" "}
-                          {(summarize(team).teamGold / 1000).toLocaleString(
-                            "uk-UA",
+                          {format.number(
+                            summarize(team).teamGold / 1000,
+                            "gold",
                           )}
                           k
                         </span>

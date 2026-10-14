@@ -50,7 +50,6 @@ const attributes = (
   armourValue: player.av,
 });
 
-/** A public, saved roster, expanded using the same catalog/rules as the editor. */
 export function teamStructuredData(data: PublicSnapshot) {
   const { team } = data;
   const roster = getRoster(team.rosterId)!;

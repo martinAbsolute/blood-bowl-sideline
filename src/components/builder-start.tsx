@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { getRoster, newTeam } from "@/domain/catalog";
 import { ACTIVE, readDrafts, draftAccount } from "@/lib/drafts";
 import { TeamEditor } from "./team-editor";

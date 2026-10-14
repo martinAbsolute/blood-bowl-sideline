@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-import { withGTConfig } from "gt-next/config";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
@@ -24,17 +24,5 @@ const nextConfig: NextConfig = {
     ];
   },
 };
-export default withGTConfig(nextConfig, {
-  defaultLocale: "en",
-  locales: ["en", "uk"],
-  ignoreBrowserLocales: true,
-  dictionary: "./src/dictionary.ts",
-  loadDictionaryPath: "./src/loadDictionary.ts",
-  loadTranslationsPath: "./src/loadTranslations.ts",
-  getLocalePath: "./src/getLocale.ts",
-  getRegionPath: "./src/getRegion.ts",
-  getEnableI18nPath: "./src/getEnableI18n.ts",
-  cacheUrl: null,
-  runtimeUrl: null,
-  headersAndCookies: { localeCookieName: "bbs_locale" },
-});
+const withNextIntl = createNextIntlPlugin();
+export default withNextIntl(nextConfig);

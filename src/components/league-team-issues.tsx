@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { rookieLeagueIssues } from "@/domain/league-rules";
 import { validateTeam } from "@/domain/rules";
 import type { Team } from "@/domain/types";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale, useTranslations } from "gt-next";
+import { useFormatter, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -44,7 +44,7 @@ import {
 
 export function LeaguesPage() {
   const t = useTranslations();
-  const locale = useLocale();
+  const format = useFormatter();
   const router = useRouter();
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { results, status, loadMore } = usePaginatedQuery(
@@ -71,10 +71,6 @@ export function LeaguesPage() {
   const busy = action.busy;
   const treasuryValid =
     treasury >= 100_000 && treasury <= 10_000_000 && treasury % 5_000 === 0;
-  const dateFormat = new Intl.DateTimeFormat(
-    locale === "uk" ? "uk-UA" : "en-GB",
-    { dateStyle: "medium" },
-  );
   async function createLeague(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!name.trim() || !treasuryValid) return;
@@ -161,7 +157,7 @@ export function LeaguesPage() {
                     type="text"
                     inputMode="numeric"
                     required
-                    value={treasury ? treasury.toLocaleString("uk-UA") : ""}
+                    value={treasury ? format.number(treasury, "integer") : ""}
                     onChange={(event) => {
                       const input = event.currentTarget;
                       const digitsBeforeCursor = input.value
@@ -378,7 +374,7 @@ export function LeaguesPage() {
                         <dt className="sr-only">
                           {t("leagueUx.plannedStart")}
                         </dt>
-                        <dd>{dateFormat.format(league.startAt)}</dd>
+                        <dd>{format.dateTime(league.startAt, "medium")}</dd>
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock3 className="size-4 text-muted-foreground" />
@@ -395,9 +391,10 @@ export function LeaguesPage() {
                           {t("leagueUi.treasury")}
                         </dt>
                         <dd>
-                          {(
-                            league.startingTreasury ?? DEFAULT_LEAGUE_TREASURY
-                          ).toLocaleString("uk-UA")}{" "}
+                          {format.number(
+                            league.startingTreasury ?? DEFAULT_LEAGUE_TREASURY,
+                            "integer",
+                          )}{" "}
                           {t("leagueUx.goldUnit")}
                         </dd>
                       </div>

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useLocale, useTranslations } from "gt-next";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { enGB, uk } from "react-day-picker/locale";
 import { CalendarDays } from "lucide-react";
 import { Calendar } from "./ui/calendar";
@@ -17,6 +17,7 @@ export function LeagueDatePicker({
   disabled?: boolean;
 }) {
   const locale = useLocale();
+  const format = useFormatter();
   const t = useTranslations();
   const [open, setOpen] = useState(false);
   return (
@@ -41,13 +42,17 @@ export function LeagueDatePicker({
         >
           <CalendarDays className="size-4 text-muted-foreground" />
           <span id="league-start-value">
-            {value
-              .toLocaleDateString(locale === "uk" ? "uk-UA" : "en-GB", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              })
-              .replaceAll("/", ".")}
+            {format.dateTime(
+              new Date(
+                Date.UTC(
+                  value.getFullYear(),
+                  value.getMonth(),
+                  value.getDate(),
+                ),
+              ),
+              "short",
+              { timeZone: "UTC" },
+            )}
           </span>
         </PopoverTrigger>
         <PopoverContent

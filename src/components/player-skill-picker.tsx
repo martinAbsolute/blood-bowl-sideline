@@ -8,7 +8,7 @@ import {
 } from "@/lib/translated-skill-name";
 
 import { useDeferredValue, useRef, useState } from "react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { Check, LockKeyhole, Plus, Search, X } from "lucide-react";
 import {
   categories,

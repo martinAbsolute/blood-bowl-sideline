@@ -1,10 +1,11 @@
 import { translatedSkillName } from "@/lib/translated-skill-name";
 import { Fragment } from "react";
+import { createFormatter } from "next-intl";
+import { formats, timeZone, type AppLocale } from "@/i18n/config";
 import {
   getRoster,
   getRuleset,
   inducements,
-  skillName,
   sortSkillIds,
   stars,
 } from "@/domain/catalog";
@@ -21,9 +22,8 @@ import { specialRuleKey } from "@/domain/team-reference";
 import type { Team } from "@/domain/types";
 import { positionLabel } from "./position-name";
 
-type Translate = (key: string) => string;
+import type { Translate } from "@/i18n/messages";
 export type PrintOrientation = "portrait" | "landscape";
-const gold = (value: number) => `${(value / 1000).toLocaleString("en")}k`;
 
 export function printStyles(orientation: PrintOrientation) {
   return `
@@ -102,7 +102,17 @@ function PrintedSkills({
   ));
 }
 
-export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
+export function TeamPrint({
+  team,
+  t,
+  locale = "en",
+}: {
+  team: Team;
+  t: Translate;
+  locale?: AppLocale;
+}) {
+  const format = createFormatter({ locale, formats, timeZone });
+  const gold = (value: number) => `${format.number(value / 1000, "gold")}k`;
   const roster = getRoster(team.rosterId)!;
   const ruleset = getRuleset(team.rulesetId);
   const totals = summarize(team);
@@ -117,7 +127,7 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
       ? (affiliation(team) ?? [])
       : name,
   );
-  const skillIds = [
+  const skillIds = sortSkillIds([
     ...new Set([
       ...team.players.flatMap((player) => [
         ...(roster.players.find((p) => p.id === player.positionId)?.skills ??
@@ -127,7 +137,7 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
       ...selectedStars.flatMap((star) => star.skills),
       ...(team.captainId ? ["pro"] : []),
     ]),
-  ].sort((a, b) => skillName(a).localeCompare(skillName(b)));
+  ]);
   const appendix = skillIds.map((id) => ({
     name: translatedSkillName(id, t),
     text: t(`skillDescriptions.${id.split(":")[0]}`),
@@ -151,7 +161,7 @@ export function TeamPrint({ team, t }: { team: Team; t: Translate }) {
               <dl>
                 {Object.entries(team.staff).map(([key, count]) => (
                   <div key={key}>
-                    <dt>{t(key)}</dt>
+                    <dt>{t(key as keyof Team["staff"])}</dt>
                     <dd>
                       {isSevens(team) && key === "dedicatedFans"
                         ? count + dedicatedFansBase(team)
@@ -311,7 +321,7 @@ export async function printTeam(
   team: Team,
   orientation: PrintOrientation,
   t: Translate,
-  locale: string,
+  locale: AppLocale,
 ) {
   const { renderToStaticMarkup } = await import("react-dom/server");
   // This is a standalone iframe document, outside Next.js's page and head manager.
@@ -324,7 +334,7 @@ export async function printTeam(
         <style>{printStyles(orientation)}</style>
       </head>
       <body>
-        <TeamPrint team={team} t={t} />
+        <TeamPrint team={team} t={t} locale={locale} />
       </body>
     </html>,
   );

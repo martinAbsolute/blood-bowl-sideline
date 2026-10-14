@@ -2,7 +2,6 @@ import { getRuleset, newTeam, rosters, rulesets } from "@/domain/catalog";
 import { budgetFor, tierFor } from "@/domain/rules";
 import type { RulesetId } from "@/domain/types";
 
-/** Use the same tier and budget resolution as the team builder. */
 export function rosterChoices(rulesetId: RulesetId) {
   const rules = getRuleset(rulesetId);
   return rosters

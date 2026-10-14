@@ -16,9 +16,16 @@ vi.hoisted(() => {
 
 const closeWatchers = new Set<EventTarget & { requestClose(): void }>();
 
-vi.mock("gt-next", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+vi.mock("next-intl", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next-intl")>();
+  const { formats, timeZone } = await import("../src/i18n/config");
+  return {
+    ...actual,
+    useFormatter: () =>
+      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useTranslations: () => (key: string) => key,
+  };
+});
 
 let root: Root;
 let container: HTMLDivElement;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { ShieldCheck, UserRound } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 

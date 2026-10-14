@@ -85,9 +85,14 @@ export function skillName(id: string) {
     ? name.replace(/\(x\+?\)/i, `(${parameter})`)
     : `${name} (${parameter})`;
 }
-/** A fixed English alphabetical order, independent of selection or UI language. */
+/** Star special rules first, then English alphabetical order within each group. */
 export function sortSkillIds(ids: string[]) {
-  return ids.toSorted((a, b) => skillName(a).localeCompare(skillName(b), "en"));
+  return ids.toSorted(
+    (a, b) =>
+      Number(getSkill(b)?.category === "special") -
+        Number(getSkill(a)?.category === "special") ||
+      skillName(a).localeCompare(skillName(b), "en"),
+  );
 }
 export function newTeam(uuid: string, rosterId = "human"): Team {
   return {

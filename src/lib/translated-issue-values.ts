@@ -5,7 +5,7 @@ import { translatedSkillName } from "./translated-skill-name";
 /** Translate catalog labels at the display boundary, never coach-entered names. */
 export function translatedIssueValues(
   issue: Issue,
-  t: (key: string) => string,
+  t: (key: `skillNames.${string}` | `inducementNames.${string}`) => string,
 ) {
   const values = { ...issue.values };
   if (

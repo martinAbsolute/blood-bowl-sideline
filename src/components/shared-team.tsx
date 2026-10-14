@@ -1,6 +1,6 @@
 "use client";
 import { useConvexAuth, useQuery } from "convex/react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { api } from "../../convex/_generated/api";
 import type { Team } from "@/domain/types";
 import { TeamEditor } from "./team-editor";

@@ -5,7 +5,7 @@ import fumbbl from "./fixtures/fumbbl-roster-profiles-bb2025.json";
 
 // Extracted from external roster tables, not from the application catalog.
 // Source conflicts and the FUMBBL browser comparison are documented in
-// docs/roster-stat-audit.md.
+// docs/roster-sources.md.
 describe("verified BB2025 regular player profiles", () => {
   const players = rosters.flatMap((roster) => roster.players);
 

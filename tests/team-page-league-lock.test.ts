@@ -24,7 +24,16 @@ const state = vi.hoisted(() => ({
   authLoading: false,
   syncReady: true,
 }));
-vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
+vi.mock("next-intl", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next-intl")>();
+  const { formats, timeZone } = await import("../src/i18n/config");
+  return {
+    ...actual,
+    useFormatter: () =>
+      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useTranslations: () => (key: string) => key,
+  };
+});
 vi.mock("convex/react", () => ({
   useConvexAuth: () => ({
     isAuthenticated: true,

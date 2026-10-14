@@ -6,9 +6,16 @@ import { SidebarAccountMenu } from "../src/components/sidebar-account-menu";
 import { TooltipProvider } from "../src/components/ui/tooltip";
 import en from "../src/i18n/en.json";
 
-vi.mock("gt-next", () => ({
-  useTranslations: () => (key: string) => en[key as keyof typeof en],
-}));
+vi.mock("next-intl", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next-intl")>();
+  const { formats, timeZone } = await import("../src/i18n/config");
+  return {
+    ...actual,
+    useFormatter: () =>
+      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useTranslations: () => (key: string) => en[key as keyof typeof en],
+  };
+});
 let root: Root, container: HTMLDivElement;
 const user = {
   name: "Test Coach",

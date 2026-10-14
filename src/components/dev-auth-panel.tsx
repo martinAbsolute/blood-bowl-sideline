@@ -8,7 +8,7 @@ import {
   usePaginatedQuery,
   useQuery,
 } from "convex/react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { EditorSelect } from "./editor-select";

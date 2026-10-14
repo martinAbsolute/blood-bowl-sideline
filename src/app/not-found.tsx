@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTranslations } from "gt-next/server";
+import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { PageStatus } from "@/components/page-status";
 import { House } from "lucide-react";

@@ -10,10 +10,17 @@ import { createRoot } from "react-dom/client";
 import { expect, it, vi } from "vitest";
 import { LeagueNumber } from "../src/components/league-number";
 
-vi.mock("gt-next", () => ({
-  useTranslations: () => (key: string, args: { name: string }) =>
-    `${key} ${args.name}`,
-}));
+vi.mock("next-intl", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next-intl")>();
+  const { formats, timeZone } = await import("../src/i18n/config");
+  return {
+    ...actual,
+    useFormatter: () =>
+      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useTranslations: () => (key: string, args: { name: string }) =>
+      `${key} ${args.name}`,
+  };
+});
 vi.mock("../src/components/ui/input", () => ({
   Input: (props: InputHTMLAttributes<HTMLInputElement>) =>
     createElement("input", { ...props, onInput: props.onChange }),

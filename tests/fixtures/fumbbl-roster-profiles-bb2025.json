@@ -2079,7 +2079,7 @@
       "accepted": ["A", "D"],
       "source": "https://fumbbl.com/help:BB25ChaosSetUp",
       "corroboratingSource": "https://bbtactics.com/chaos-chosen-teams/",
-      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-stat-audit.md."
+      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-sources.md."
     },
     {
       "id": "chaos-chosen-2",
@@ -2088,7 +2088,7 @@
       "accepted": ["A", "G", "P"],
       "source": "https://fumbbl.com/help:BB25ChaosSetUp",
       "corroboratingSource": "https://bbtactics.com/chaos-chosen-teams/",
-      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-stat-audit.md."
+      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-sources.md."
     },
     {
       "id": "chaos-renegade-4",
@@ -2097,7 +2097,7 @@
       "accepted": ["S"],
       "source": "https://fumbbl.com/help:BB25ChaosPactSetUp",
       "corroboratingSource": "https://bbtactics.com/chaos-renegade-teams/",
-      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-stat-audit.md."
+      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-sources.md."
     },
     {
       "id": "elven-union-0",
@@ -2106,7 +2106,7 @@
       "accepted": "0-16",
       "source": "https://fumbbl.com/help:BB25ElfSetUp",
       "corroboratingSource": "https://bbtactics.com/elven-union-teams/",
-      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-stat-audit.md."
+      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-sources.md."
     },
     {
       "id": "goblin-3",
@@ -2115,7 +2115,7 @@
       "accepted": ["G", "S"],
       "source": "https://fumbbl.com/help:BB25GoblinSetUp",
       "corroboratingSource": "https://bbtactics.com/goblin-teams/",
-      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-stat-audit.md."
+      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-sources.md."
     },
     {
       "id": "norse-0",
@@ -2124,7 +2124,7 @@
       "accepted": "0-16",
       "source": "https://fumbbl.com/help:BB25NorseSetUp",
       "corroboratingSource": "https://bbtactics.com/norse-teams/",
-      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-stat-audit.md."
+      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-sources.md."
     },
     {
       "id": "norse-2",
@@ -2133,7 +2133,7 @@
       "accepted": ["A", "P"],
       "source": "https://fumbbl.com/help:BB25NorseSetUp",
       "corroboratingSource": "https://bbtactics.com/norse-teams/",
-      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-stat-audit.md."
+      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-sources.md."
     },
     {
       "id": "old-world-alliance-8",
@@ -2142,7 +2142,7 @@
       "accepted": "4+",
       "source": "https://fumbbl.com/help:BB25OldworldSetUp",
       "corroboratingSource": "https://bbtactics.com/old-world-alliance-teams/",
-      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-stat-audit.md."
+      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-sources.md."
     },
     {
       "id": "orc-1",
@@ -2160,7 +2160,7 @@
       "accepted": ["A", "D"],
       "source": "https://fumbbl.com/help:BB25OrcSetUp",
       "corroboratingSource": "https://bbtactics.com/orc-teams/",
-      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-stat-audit.md."
+      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-sources.md."
     },
     {
       "id": "tomb-kings-2",
@@ -2169,7 +2169,7 @@
       "accepted": "5+",
       "source": "https://fumbbl.com/help:BB25KhemriSetUp",
       "corroboratingSource": "https://bbtactics.com/tomb-king-teams/",
-      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-stat-audit.md."
+      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-sources.md."
     },
     {
       "id": "wood-elf-0",
@@ -2178,7 +2178,7 @@
       "accepted": "0-16",
       "source": "https://fumbbl.com/help:BB25WoodElfSetUp",
       "corroboratingSource": "https://bbtactics.com/wood-elf-teams/",
-      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-stat-audit.md."
+      "basis": "BBTC, Blood Bowl Base and Blood Bowl Tactics agree on the retained value; see docs/roster-sources.md."
     }
   ],
   "teamProfiles": [

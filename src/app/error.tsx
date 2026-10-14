@@ -1,5 +1,5 @@
 "use client";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { PageStatus } from "@/components/page-status";
 export default function ErrorPage({

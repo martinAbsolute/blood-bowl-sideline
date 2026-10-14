@@ -7,7 +7,16 @@ import { rosterChoices, sharedRosterBudget } from "../src/lib/roster-ruleset";
 import { rulesets } from "../src/domain/catalog";
 import type { RulesetId } from "../src/domain/types";
 
-vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
+vi.mock("next-intl", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next-intl")>();
+  const { formats, timeZone } = await import("../src/i18n/config");
+  return {
+    ...actual,
+    useFormatter: () =>
+      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useTranslations: () => (key: string) => key,
+  };
+});
 const navigation = vi.hoisted(() => ({
   params: null as URLSearchParams | null,
 }));

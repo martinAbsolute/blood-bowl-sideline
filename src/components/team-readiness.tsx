@@ -1,7 +1,7 @@
 "use client";
 
 import { translatedIssueValues } from "@/lib/translated-issue-values";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { ShieldCheck } from "lucide-react";
 import type { Team } from "@/domain/types";
 import { getRuleset } from "@/domain/catalog";

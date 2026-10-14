@@ -11,7 +11,7 @@ import Link from "next/link";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import type { FunctionArgs, FunctionReturnType } from "convex/server";
 import { ConvexError } from "convex/values";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import {
   ArrowLeft,
   ArrowRight,
@@ -370,7 +370,7 @@ export function LeagueMatch({
         <div className="col-start-2 row-start-1 rounded-lg border bg-card px-3 py-2 text-center font-mono text-xl font-semibold tabular-nums sm:px-5 sm:py-3 sm:text-4xl">
           {match.administrativeResult ? (
             <span className="text-sm">
-              {t("leagueUi." + match.administrativeResult)}
+              {t(`leagueUi.${match.administrativeResult}`)}
             </span>
           ) : match.status === "bye" ? (
             "—"

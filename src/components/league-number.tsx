@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { Minus, Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";

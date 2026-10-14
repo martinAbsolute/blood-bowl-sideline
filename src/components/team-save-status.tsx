@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import {
   Check,
   ChevronDown,
@@ -53,16 +53,16 @@ export function TeamSaveStatus({
   const reconnecting =
     isAuthenticated && !connection.isWebSocketConnected && (dirty || saving);
   const { label, Icon } = reconnecting
-    ? { label: "saveReconnecting", Icon: CloudOff }
+    ? { label: "saveReconnecting" as const, Icon: CloudOff }
     : syncError || cloudInvalid
-      ? { label: "saveStatusError", Icon: CloudOff }
+      ? { label: "saveStatusError" as const, Icon: CloudOff }
       : localSave?.failed
-        ? { label: "saveStatusLocalError", Icon: CloudOff }
+        ? { label: "saveStatusLocalError" as const, Icon: CloudOff }
         : cloudPending || localPending
-          ? { label: "saving", Icon: LoaderCircle }
+          ? { label: "saving" as const, Icon: LoaderCircle }
           : revision > 0 && !dirty
-            ? { label: "savedCloud", Icon: CloudCheck }
-            : { label: "savedInDrafts", Icon: Check };
+            ? { label: "savedCloud" as const, Icon: CloudCheck }
+            : { label: "savedInDrafts" as const, Icon: Check };
   const detail = syncError
     ? syncError.message
     : reconnecting

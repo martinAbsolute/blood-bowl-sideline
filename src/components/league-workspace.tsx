@@ -10,7 +10,7 @@ import {
   usePaginatedQuery,
   useQuery,
 } from "convex/react";
-import { useTranslations } from "gt-next";
+import { useFormatter, useTranslations } from "next-intl";
 import {
   ArrowRight,
   CalendarDays,
@@ -54,7 +54,6 @@ import {
   LeagueSection,
   LeagueStatTable,
   LeagueStatus,
-  leagueDate,
   localDateInput,
   useLeagueAction,
 } from "./league-ui";
@@ -88,6 +87,7 @@ const playerColumns = [
 
 export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
   const t = useTranslations();
+  const format = useFormatter();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, isLoading } = useConvexAuth();
@@ -289,7 +289,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
         )}
         <span className="inline-flex items-center gap-2">
           <CalendarDays className="size-4" />
-          {leagueDate(league.startAt)}
+          {format.dateTime(league.startAt, "dateTime")}
         </span>
         {data.canCommission && (
           <span className="inline-flex items-center gap-2 text-primary">
@@ -538,7 +538,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                         <p className="text-xs text-muted-foreground">
                           {t("leagueUi.round")} {currentRound.number} ·{" "}
                           {t("leagueUi.deadline")}:{" "}
-                          {leagueDate(currentRound.deadlineAt)}
+                          {format.dateTime(currentRound.deadlineAt, "dateTime")}
                         </p>
                       )}
                       {unresolved.map((match) => (
@@ -612,9 +612,10 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                     </span>
                     <br />
                     <strong>
-                      {(
-                        league.startingTreasury ?? DEFAULT_LEAGUE_TREASURY
-                      ).toLocaleString("uk-UA")}{" "}
+                      {format.number(
+                        league.startingTreasury ?? DEFAULT_LEAGUE_TREASURY,
+                        "integer",
+                      )}{" "}
                       {t("leagueUx.goldUnit")}
                     </strong>
                   </p>
@@ -728,7 +729,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                     </label>
                     <span className="text-sm text-muted-foreground">
                       {t("leagueUi.deadline")}:{" "}
-                      {leagueDate(visibleRound.deadlineAt)}
+                      {format.dateTime(visibleRound.deadlineAt, "dateTime")}
                     </span>
                   </div>
                   <LeagueSection
@@ -803,7 +804,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                             <div className="mt-1 flex flex-wrap items-center justify-end gap-3">
                               {match.administrativeResult && (
                                 <span className="text-xs text-muted-foreground">
-                                  {t("leagueUi." + match.administrativeResult)}
+                                  {t(`leagueUi.${match.administrativeResult}`)}
                                 </span>
                               )}
                               {away && (

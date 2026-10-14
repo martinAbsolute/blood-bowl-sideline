@@ -1,3 +1,4 @@
+import type { Translate } from "@/i18n/messages";
 import { Skeleton } from "./ui/skeleton";
 import { BrandLogo } from "./brand";
 import { SiteFooter } from "./site-footer";
@@ -40,7 +41,7 @@ export function LibraryCardsLoading({
   text,
 }: {
   label: string;
-  text?: (key: string) => string;
+  text?: Translate;
 }) {
   return (
     <div
@@ -73,7 +74,7 @@ export function LibraryCardsLoading({
               <Skeleton className="h-4 w-3/4" />
             </div>
             <dl className="grid grid-cols-3 divide-x rounded-lg border bg-secondary/25 py-3 text-center">
-              {["players", "teamValue", "remaining"].map((key) => (
+              {(["players", "teamValue", "remaining"] as const).map((key) => (
                 <div key={key}>
                   <dt className="text-[10px] text-muted-foreground">
                     {text?.(key) ?? (
@@ -160,7 +161,7 @@ function TableLoading({
   title?: boolean;
   framed?: boolean;
   heading?: string;
-  text?: (key: string) => string;
+  text?: Translate;
 }) {
   return (
     <div
@@ -220,7 +221,7 @@ export function LoadingLayout({
   variant?: LoadingVariant;
   label: string;
   team?: Team;
-  text?: (key: string) => string;
+  text?: Translate;
   rulesetId?: RulesetId;
   referenceRoster?: Roster;
 }) {

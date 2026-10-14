@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Roboto_Condensed } from "next/font/google";
-import { GTProvider } from "gt-next";
+import { NextIntlClientProvider } from "next-intl";
 import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -87,11 +87,11 @@ export default function RootLayout({
             </ShellLoading>
           }
         >
-          <GTProvider>
+          <NextIntlClientProvider>
             <Providers>
               <SiteShell footer={<SiteFooter />}>{children}</SiteShell>
             </Providers>
-          </GTProvider>
+          </NextIntlClientProvider>
         </Suspense>
         <Analytics />
         <SpeedInsights />

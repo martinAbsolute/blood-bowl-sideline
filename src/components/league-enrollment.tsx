@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
-import { useTranslations } from "gt-next";
+import { useFormatter, useTranslations } from "next-intl";
 import { ArrowRight, Trophy } from "lucide-react";
 import type { Doc } from "../../convex/_generated/dataModel";
 import { api } from "../../convex/_generated/api";
@@ -27,6 +27,7 @@ export function LeagueEnrollment({
   canRegister: boolean;
 }) {
   const t = useTranslations();
+  const format = useFormatter();
   const router = useRouter();
   const register = useMutation(api.leagues.register);
   const action = useLeagueAction();
@@ -46,9 +47,10 @@ export function LeagueEnrollment({
             </Link>
             <p className="mt-1 text-xs text-muted-foreground">
               {t("leagueUx.pickerHint", {
-                amount: (
-                  league.startingTreasury ?? DEFAULT_LEAGUE_TREASURY
-                ).toLocaleString("uk-UA"),
+                amount: format.number(
+                  league.startingTreasury ?? DEFAULT_LEAGUE_TREASURY,
+                  "integer",
+                ),
               })}
             </p>
           </div>

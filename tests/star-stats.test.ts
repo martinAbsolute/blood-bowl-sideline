@@ -3,7 +3,7 @@ import { newTeam, stars } from "../src/domain/catalog";
 import { summarize } from "../src/domain/rules";
 import verifiedStats from "./fixtures/bb2025-star-stats.json";
 
-// Independently transcribed source profiles; see docs/star-stat-audit.md.
+// Independently transcribed source profiles; see docs/star-player-rules.md.
 describe("verified BB2025 Star Player characteristics", () => {
   it.each([
     { ids: ["dribl", "drull"], cost: 230000 },

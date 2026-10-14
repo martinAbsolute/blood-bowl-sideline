@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useLocale, useSetLocale, useTranslations } from "gt-next";
+import { setLocale } from "@/i18n/actions";
+import { useEffect, useState, useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { useAction, useConvexAuth, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useAuthActions } from "@convex-dev/auth/react";
@@ -272,8 +273,8 @@ export function SiteShell({
 
 function LanguageSwitch({ compact = false }: { compact?: boolean }) {
   const t = useTranslations(),
-    locale = useLocale(),
-    setLocale = useSetLocale();
+    locale = useLocale();
+  const [pending, startTransition] = useTransition();
   return (
     <SidebarTooltip
       enabled={compact}
@@ -284,7 +285,12 @@ function LanguageSwitch({ compact = false }: { compact?: boolean }) {
         aria-label={t("language")}
         data-collapsed={compact}
         className="sidebar-menu-button sidebar-language-button h-11 w-full rounded-lg"
-        onClick={() => setLocale(locale === "uk" ? "en" : "uk")}
+        disabled={pending}
+        onClick={() =>
+          startTransition(async () => {
+            await setLocale(locale === "uk" ? "en" : "uk");
+          })
+        }
       >
         <span className="sidebar-language-icon" aria-hidden="true">
           <Languages className="size-4" />

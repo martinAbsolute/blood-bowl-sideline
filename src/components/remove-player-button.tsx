@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { ShieldCheck, Trash2 } from "lucide-react";
 import { getRoster, starPairs, stars } from "@/domain/catalog";
 import type { Team } from "@/domain/types";

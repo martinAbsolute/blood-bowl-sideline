@@ -2,7 +2,7 @@
 
 import { translatedSkillName } from "@/lib/translated-skill-name";
 
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { getSkill, sortSkillIds } from "@/domain/catalog";
 import { RuleHelp } from "./rule-help";
 import { X } from "lucide-react";

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useTranslations } from "gt-next"
+import { useTranslations } from "next-intl"
 import { Toast as ToastPrimitive } from "@base-ui/react/toast"
 import { cn } from "cn"
 

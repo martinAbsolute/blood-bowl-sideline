@@ -1,11 +1,9 @@
 import { readFileSync, readdirSync } from "node:fs";
-import { createRequire } from "node:module";
+import { createTranslator, type Messages } from "next-intl";
 import { join } from "node:path";
 import { expect, it } from "vitest";
 import en from "../src/i18n/en.json";
 import uk from "../src/i18n/uk.json";
-import dictionary from "../src/dictionary";
-import loadDictionary from "../src/loadDictionary";
 import {
   skills,
   inducements,
@@ -16,40 +14,32 @@ import {
   translatedSkillName,
   skillSearchText,
 } from "../src/lib/translated-skill-name";
+import { formats } from "../src/i18n/config";
 import glossary from "../docs/translations/community-glossary.json";
 
-// Resolve the actual GT runtime used by gt-next, including pnpm's dependency layout.
-const require = createRequire(import.meta.url);
-const gtRequire = createRequire(require.resolve("gt-next"));
-const {
-  I18nCache,
-  I18nConfig,
-  getTranslationsInternal,
-  setI18nCache,
-  setI18nConfig,
-} = gtRequire("gt-i18n/internal");
-
-function runtimeCache() {
-  setI18nConfig(
-    new I18nConfig({
-      defaultLocale: "en",
-      locales: ["en", "uk"],
-      runtimeUrl: null,
-    }),
-  );
-  const cache = new I18nCache({
-    dictionary,
-    loadDictionary,
-    loadTranslations: async () => ({}),
-    runtimeUrl: null,
+function translator(locale: "en" | "uk") {
+  return createTranslator({
+    locale,
+    formats,
+    messages: (locale === "uk" ? uk : en) as Messages,
+    onError(error) {
+      throw error;
+    },
   });
-  setI18nCache(cache);
-  return cache;
 }
 
-it("the installed GT runtime resolves every literal UI translation key in both locales", async () => {
-  const cache = runtimeCache();
-  await cache.loadDictionary("uk");
+function flatten(value: object, prefix = ""): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(value).flatMap(([key, entry]) => {
+      const path = prefix ? `${prefix}.${key}` : key;
+      return typeof entry === "string"
+        ? [[path, entry]]
+        : Object.entries(flatten(entry, path));
+    }),
+  );
+}
+
+it("resolves every literal UI translation key in both locales", () => {
   function walk(dir: string): string[] {
     return readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
       entry.isDirectory()
@@ -60,52 +50,35 @@ it("the installed GT runtime resolves every literal UI translation key in both l
     );
   }
   for (const file of walk("src")) {
-    const source = readFileSync(file, "utf8");
-    for (const match of source.matchAll(/\bt\("([\w.-]+)"\s*[,)]/g)) {
+    for (const match of readFileSync(file, "utf8").matchAll(
+      /\bt(?:\.rich)?\("([\w.-]+)"\s*[,)]/g,
+    )) {
       expect(en, `${file}: ${match[1]}`).toHaveProperty(match[1]);
       expect(uk, `${file}: ${match[1]}`).toHaveProperty(match[1]);
-      for (const locale of ["en", "uk"]) {
-        expect(
-          cache.lookupDictionary(locale, match[1])?.entry,
-          `${locale} runtime: ${file}: ${match[1]}`,
-        ).toEqual(expect.any(String));
-      }
     }
   }
 });
 
-it("the actual source and locale loader preserve nested league and development entries", async () => {
-  const cache = runtimeCache();
-  for (const [locale, expected] of [
-    ["en", en],
-    ["uk", uk],
-  ] as const) {
-    await cache.loadDictionary(locale);
-    function checkLeaves(value: object, prefix = "") {
-      for (const [key, entry] of Object.entries(value)) {
-        const path = prefix ? `${prefix}.${key}` : key;
-        if (typeof entry === "string") {
-          expect(
-            cache.lookupDictionary(locale, path)?.entry,
-            `${locale}: ${path}`,
-          ).toBe(entry);
-        } else {
-          checkLeaves(entry, path);
-        }
-      }
+it("renders every message with the next-intl ICU runtime in both locales", () => {
+  for (const locale of ["en", "uk"] as const) {
+    const t = translator(locale);
+    for (const [key, message] of Object.entries(
+      flatten(locale === "uk" ? uk : en),
+    )) {
+      const values = Object.fromEntries(
+        [...message.matchAll(/\{(\w+)(?:\}|,)/g)].map(([, name]) => [
+          name,
+          name === "count" ? 2 : "test",
+        ]),
+      );
+      expect(
+        t(key as Parameters<typeof t>[0], values),
+        `${locale}: ${key}`,
+      ).toEqual(expect.any(String));
     }
-    checkLeaves(expected);
-    const t = await getTranslationsInternal({ locale, enableI18n: true });
-    expect(t("devAuth.title")).toBe(expected.devAuth.title);
-    expect(t("leagueUi.errors.CONFLICT")).toBe(
-      expected.leagueUi.errors.CONFLICT,
-    );
-    expect(t("appVersion", { version: "test" })).toBe(
-      expected.appVersion.replace("{version}", "test"),
-    );
+    expect(t("devAuth.title")).toBe((locale === "uk" ? uk : en).devAuth.title);
+    expect(t("appVersion", { version: "test" })).toContain("test");
   }
-  expect(await loadDictionary("en-US")).toBe(dictionary);
-  expect(await loadDictionary("uk-UA")).toBe(uk);
 });
 
 it("uses every community skill translation, including catalog spelling variants", () => {
@@ -154,8 +127,7 @@ it("uses every community skill translation, including catalog spelling variants"
 });
 
 it("renders Ukrainian parameterized names without changing English identities or sorting", async () => {
-  runtimeCache();
-  const t = await getTranslationsInternal({ locale: "uk", enableI18n: true });
+  const t = translator("uk");
   expect(translatedSkillName("dodge", t)).toBe("Ухилення");
   expect(translatedSkillName("loner:4+", t)).toBe("Одинак (4+)");
   expect(translatedSkillName("hatred:Orc", t)).toBe("Ненависть (Orc)");
@@ -186,4 +158,19 @@ it("keeps both locales' keys and interpolation parameters in sync", () => {
       [...text.matchAll(/\{(\w+)\}/g)].map((match) => match[1]).sort();
     expect(parameters(translated[key]), key).toEqual(parameters(value));
   }
+});
+
+it("uses English and Ukrainian plural rules for recruitment counts", () => {
+  const english = translator("en"),
+    ukrainian = translator("uk");
+  expect(english("sevensRecruitMore", { count: 1 })).toBe(
+    "Add 1 more player to start.",
+  );
+  expect(english("sevensRecruitMore", { count: 2 })).toBe(
+    "Add 2 more players to start.",
+  );
+  expect(ukrainian("sevensRecruitMore", { count: 1 })).toContain("1 гравця");
+  expect(ukrainian("sevensRecruitMore", { count: 2 })).toContain("2 гравців");
+  expect(ukrainian("sevensRecruitMore", { count: 5 })).toContain("5 гравців");
+  expect(ukrainian("sevensRecruitMore", { count: 21 })).toContain("21 гравця");
 });

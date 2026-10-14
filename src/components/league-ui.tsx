@@ -3,7 +3,7 @@
 import { LeagueNumber } from "./league-number";
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { ArrowLeft, Trophy } from "lucide-react";
 import { ConvexError } from "convex/values";
 import { LoginButton } from "./site-shell";
@@ -214,13 +214,6 @@ export function LeagueStatus({ status }: { status: string }) {
       {t(`leagueUi.status.${status}`)}
     </span>
   );
-}
-
-export function leagueDate(value: number) {
-  return new Date(value).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
 }
 
 export function localDateInput(value: number) {

@@ -13,7 +13,16 @@ import type { Team } from "../src/domain/types";
 import { PlayerDialog } from "../src/components/player-dialog";
 import { generatePlayerName } from "../src/lib/player-name-generator";
 
-vi.mock("gt-next", () => ({ useTranslations: () => (key: string) => key }));
+vi.mock("next-intl", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next-intl")>();
+  const { formats, timeZone } = await import("../src/i18n/config");
+  return {
+    ...actual,
+    useFormatter: () =>
+      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useTranslations: () => (key: string) => key,
+  };
+});
 vi.mock("../src/lib/player-name-generator", () => ({
   generatePlayerName: vi.fn(),
 }));

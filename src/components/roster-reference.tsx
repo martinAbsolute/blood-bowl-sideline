@@ -1,5 +1,5 @@
 "use client";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { SkillList } from "./skill-box";
 import { PositionName } from "./position-name";
 import type { Roster, RulesetId } from "@/domain/types";

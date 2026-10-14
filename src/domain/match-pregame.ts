@@ -10,7 +10,7 @@ export const WEATHER_RESULTS = [
 export function weatherResult(roll?: number | null) {
   if (roll == null || !Number.isInteger(roll) || roll < 2 || roll > 12)
     return null;
-  return roll >= 4 && roll <= 10 ? 4 : roll;
+  return WEATHER_RESULTS.find(({ value }) => value === roll)?.value ?? 4;
 }
 
 export function isPreGameComplete(match: {

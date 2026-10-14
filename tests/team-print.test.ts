@@ -219,3 +219,22 @@ it("uses A4, starts skills on a new page, and controls print margins in both ori
     "font-size: 9pt; line-height: 1.3;",
   );
 });
+
+it("prints star special rules before ordinary skills in both the roster and appendix", () => {
+  const team = newTeam(randomUUID());
+  team.stars = [
+    stars.find((star) => star.skills.includes("mesmerising_dance"))!.id,
+  ];
+  const html = renderToStaticMarkup(
+    createElement(TeamPrint, { team, t: translator(en) }),
+  );
+  const row = html.slice(
+    html.indexOf("Eldril Sidewinder"),
+    html.indexOf("</tr>", html.indexOf("Eldril Sidewinder")),
+  );
+  expect(row.indexOf("Mesmerising Dance")).toBeLessThan(row.indexOf(">Dodge<"));
+  const appendix = html.slice(html.indexOf('class="reference"'));
+  expect(appendix.indexOf("Mesmerising Dance")).toBeLessThan(
+    appendix.indexOf(">Dodge<"),
+  );
+});

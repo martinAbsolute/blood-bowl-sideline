@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useEffectEvent, useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { Search, ArrowUpRight, ChevronDown } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";

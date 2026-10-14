@@ -9,15 +9,6 @@ import {
 } from "motion/react"
 
 import { cn } from "@/lib/utils"
-
-/**
- * A custom pointer component that displays an animated cursor.
- * Add this as a child to any component to enable a custom pointer when hovering.
- * You can pass custom children to render as the pointer.
- *
- * @component
- * @param {HTMLMotionProps<"div">} props - The component props
- */
 export function Pointer({
   className,
   style,

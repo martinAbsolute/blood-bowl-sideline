@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { ChevronsUpDown, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import {

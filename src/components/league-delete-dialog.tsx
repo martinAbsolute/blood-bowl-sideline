@@ -3,7 +3,7 @@
 import { useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { Trash2 } from "lucide-react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";

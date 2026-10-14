@@ -15,7 +15,7 @@ import {
   useQuery,
 } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { useTranslations } from "gt-next";
+import { useFormatter, useTranslations } from "next-intl";
 import {
   Check,
   ChevronDown,
@@ -283,6 +283,7 @@ export function LeagueCareer({
   entryId: string;
 }) {
   const t = useTranslations();
+  const format = useFormatter();
   const auth = useConvexAuth();
   const id = entryId as Id<"leagueTeams">;
   const data = useQuery(
@@ -392,8 +393,8 @@ export function LeagueCareer({
       >
         <span className="inline-flex items-center gap-2">
           <Coins className="size-4" />
-          {t("leagueUi.treasury")}: {(entry.treasury / 1000).toLocaleString()}k
-          GP
+          {t("leagueUi.treasury")}:{" "}
+          {format.number(entry.treasury / 1000, "gold")}k GP
         </span>
         <span>
           {active.length} / 16 {t("players")}

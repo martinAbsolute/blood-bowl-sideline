@@ -6,9 +6,16 @@ import { getRoster, newTeam } from "../src/domain/catalog";
 import type { Team } from "../src/domain/types";
 import { PlayerRecruitment } from "../src/components/player-recruitment";
 
-vi.mock("gt-next", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+vi.mock("next-intl", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next-intl")>();
+  const { formats, timeZone } = await import("../src/i18n/config");
+  return {
+    ...actual,
+    useFormatter: () =>
+      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useTranslations: () => (key: string) => key,
+  };
+});
 vi.mock("../src/components/player-icon", () => ({ PlayerIcon: () => null }));
 vi.mock("../src/components/skill-box", () => ({
   SkillList: () => null,

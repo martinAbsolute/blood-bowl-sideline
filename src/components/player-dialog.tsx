@@ -1,7 +1,8 @@
 "use client";
+import { useGold } from "@/i18n/use-gold";
 
 import { useRef, useState } from "react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { Check, Plus, ShieldCheck, X } from "lucide-react";
 import { getRoster, getRuleset, sortSkillIds, stars } from "@/domain/catalog";
 import {
@@ -26,8 +27,6 @@ import { SkillBox, VeteranSkill } from "./skill-box";
 import { RemovePlayerButton } from "./remove-player-button";
 import { positionLabel } from "./position-name";
 
-const gold = (value: number) => (value / 1000).toLocaleString("en") + "k GP";
-
 /** Name and skill edits are staged until Save; removal is a separate action. */
 export function PlayerDialog({
   team,
@@ -43,6 +42,8 @@ export function PlayerDialog({
   onClose: () => void;
 }) {
   const t = useTranslations();
+  const formatGold = useGold();
+  const gold = (value: number) => `${formatGold(value)} GP`;
   const titleRef = useRef<HTMLHeadingElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const [discardOpen, setDiscardOpen] = useState(false);

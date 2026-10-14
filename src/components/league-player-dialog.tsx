@@ -1,11 +1,10 @@
 "use client";
 
 import { Dialog } from "@base-ui/react/dialog";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
 
-/** Keep player drafts mounted when inspecting another player. */
 export function LeaguePlayerDialog({
   open,
   onClose,

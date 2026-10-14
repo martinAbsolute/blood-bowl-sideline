@@ -1,5 +1,5 @@
 "use client";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { LoadingLayout, type LoadingVariant } from "./loading-layouts";
 import { usePathname } from "next/navigation";
 import { Suspense, useSyncExternalStore } from "react";

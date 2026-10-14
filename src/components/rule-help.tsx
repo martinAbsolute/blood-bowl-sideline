@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useId, useRef, useState, type ReactNode } from "react";
-import { useTranslations } from "gt-next";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import {
@@ -59,7 +59,6 @@ export function RuleDescription({ description }: { description: string }) {
   );
 }
 
-/** Hover/focus for a quick explanation; click, tap or Enter for a persistent one. */
 export function RuleHelp({
   title,
   description,

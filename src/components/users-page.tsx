@@ -1,7 +1,7 @@
 "use client";
 
 import { useConvexAuth, usePaginatedQuery, useQuery } from "convex/react";
-import { useLocale, useTranslations } from "gt-next";
+import { useFormatter, useTranslations } from "next-intl";
 import { LoaderCircle, LockKeyhole, UsersRound } from "lucide-react";
 import { api } from "../../convex/_generated/api";
 import { UsersLoading } from "./list-loading";
@@ -42,17 +42,13 @@ export function UsersPage() {
 
 function UserDirectory() {
   const t = useTranslations();
-  const locale = useLocale();
+  const format = useFormatter();
   const { results, status, loadMore } = usePaginatedQuery(
     api.users.list,
     {},
     { initialNumItems: 30 },
   );
   const users = sortUsers(results);
-  const dateFormat = new Intl.DateTimeFormat(
-    locale === "uk" ? "uk-UA" : "en-GB",
-    { dateStyle: "medium", timeStyle: "short" },
-  );
   return (
     <>
       {users.length ? (
@@ -71,7 +67,7 @@ function UserDirectory() {
                     ? t("online")
                     : user.lastSeenAt
                       ? t("lastSeen", {
-                          date: dateFormat.format(user.lastSeenAt),
+                          date: format.dateTime(user.lastSeenAt, "dateTime"),
                         })
                       : t("notSeenYet")}
                 </p>
