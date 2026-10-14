@@ -14,7 +14,7 @@ vi.hoisted(() => {
   });
 });
 
-const closeWatchers = new Set<EventTarget>();
+const closeWatchers = new Set<EventTarget & { requestClose(): void }>();
 
 vi.mock("gt-next", () => ({
   useTranslations: () => (key: string) => key,
@@ -35,6 +35,14 @@ beforeEach(() => {
       }
       destroy() {
         closeWatchers.delete(this);
+      }
+      requestClose() {
+        // Android Back sends cancel before close. Base UI 1.9 handles cancel
+        // so a controlled drawer can veto the request while the watcher lives.
+        if (this.dispatchEvent(new Event("cancel", { cancelable: true }))) {
+          this.destroy();
+          this.dispatchEvent(new Event("close"));
+        }
       }
     },
   );
@@ -96,9 +104,7 @@ it("never consumes Android Back for the resting bar, and releases it after closi
         .click(),
     );
     expect(closeWatchers.size).toBe(1);
-    await act(async () =>
-      [...closeWatchers][0].dispatchEvent(new Event("close")),
-    );
+    await act(async () => [...closeWatchers][0].requestClose());
     expect(closeWatchers.size).toBe(0);
     expect(document.querySelector(".mobile-budget-bar")).not.toBeNull();
   }

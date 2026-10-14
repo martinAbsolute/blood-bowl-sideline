@@ -1,5 +1,5 @@
 import { Send } from "lucide-react";
-import { version } from "../../package.json";
+import packageInfo from "../../package.json";
 import { BrandPeriod } from "./brand-period";
 
 export function SiteFooter() {
@@ -39,7 +39,7 @@ export function SiteFooter() {
             </svg>
             GitHub
           </a>
-          <p className="font-mono tabular-nums">v{version}</p>
+          <p className="font-mono tabular-nums">v{packageInfo.version}</p>
         </div>
       </div>
     </footer>
