@@ -75,8 +75,9 @@ export const categories: Record<string, string> = {
 };
 export const getRoster = (id: string) => rosters.find((r) => r.id === id);
 export const getRuleset = (id: string) => rulesets.find((r) => r.id === id)!;
-export const getSkill = (id: string) =>
-  skills.find((s) => s.id === id.split(":")[0]);
+const skillsById = new Map(skills.map((skill) => [skill.id, skill]));
+const skillCollator = new Intl.Collator("en");
+export const getSkill = (id: string) => skillsById.get(id.split(":")[0]);
 export function skillName(id: string) {
   const [base, parameter] = id.split(":");
   const name = getSkill(id)?.name ?? base;
@@ -87,12 +88,18 @@ export function skillName(id: string) {
 }
 /** Star special rules first, then English alphabetical order within each group. */
 export function sortSkillIds(ids: string[]) {
-  return ids.toSorted(
-    (a, b) =>
-      Number(getSkill(b)?.category === "special") -
-        Number(getSkill(a)?.category === "special") ||
-      skillName(a).localeCompare(skillName(b), "en"),
-  );
+  return ids
+    .map((id) => ({
+      id,
+      special: getSkill(id)?.category === "special",
+      name: skillName(id),
+    }))
+    .sort(
+      (a, b) =>
+        Number(b.special) - Number(a.special) ||
+        skillCollator.compare(a.name, b.name),
+    )
+    .map(({ id }) => id);
 }
 export function newTeam(uuid: string, rosterId = "human"): Team {
   return {

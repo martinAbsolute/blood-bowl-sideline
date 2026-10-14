@@ -115,9 +115,10 @@ describe("verified BB2025 star skills and special rules", () => {
     expect(html).toContain('class="skill-box skill-agility"');
   });
 
-  it("never offers star special rules as purchasable advancements", () => {
-    const special = skills.filter((s) => s.category === "special");
-    for (const roster of rosters)
+  it.each(rosters)(
+    "never offers star special rules as purchasable advancements for $id",
+    (roster) => {
+      const special = skills.filter((s) => s.category === "special");
       for (const position of roster.players) {
         for (const skill of special)
           expect(skillAccess(position, skill.id)).toBeNull();
@@ -127,7 +128,8 @@ describe("verified BB2025 star skills and special rules", () => {
           ),
         ).toBe(false);
       }
-  });
+    },
+  );
 });
 
 it("groups special rules before ordinary skills and sorts within each group", () => {

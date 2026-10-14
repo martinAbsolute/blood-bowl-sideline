@@ -207,8 +207,9 @@ it("resolves parameterized skills and escapes script termination without changin
   ]);
 });
 
-it("can describe every catalog roster and ruleset, including empty drafts and stars", () => {
-  for (const roster of rosters) {
+it.each(rosters)(
+  "can describe $id under every ruleset, including empty drafts and stars",
+  (roster) => {
     for (const ruleset of rulesets) {
       const team = newTeam(randomUUID(), roster.id);
       team.rulesetId = ruleset.id;
@@ -228,5 +229,5 @@ it("can describe every catalog roster and ruleset, including empty drafts and st
         "undefined",
       );
     }
-  }
-});
+  },
+);
