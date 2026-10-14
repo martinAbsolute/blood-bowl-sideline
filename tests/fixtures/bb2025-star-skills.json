@@ -1,0 +1,805 @@
+[
+  {
+    "id": "akhorne-the-squirrel",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Akhorne_The_Squirrel/",
+    "skills": [
+      "claws",
+      "dauntless",
+      "dodge",
+      "frenzy",
+      "jump_up",
+      "loner:4+",
+      "no_ball",
+      "sidestep",
+      "stunty",
+      "titchy"
+    ],
+    "specialRule": "blind_rage"
+  },
+  {
+    "id": "anqi-panqi",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Anqi_Panqi/",
+    "skills": ["block", "grab", "loner:4+", "stand_firm", "unsteady"],
+    "specialRule": "savage_blow"
+  },
+  {
+    "id": "barik-farblast",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Barik_Farblast/",
+    "skills": [
+      "cannoneer",
+      "hail_mary_pass",
+      "loner:4+",
+      "pass",
+      "secret_weapon",
+      "sure_hands",
+      "thick_skull"
+    ],
+    "specialRule": "blast_it"
+  },
+  {
+    "id": "bilerot-vomitflesh",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Bilerot_Vomitflesh/",
+    "skills": [
+      "dirty_player",
+      "disturbing_presence",
+      "foul_appearance",
+      "lone_fouler",
+      "loner:4+",
+      "regeneration",
+      "unsteady"
+    ],
+    "specialRule": "putrid_regurgitation"
+  },
+  {
+    "id": "boa-konsstriktr",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Boa_Kon%27ssstriktr/",
+    "skills": [
+      "dodge",
+      "fend",
+      "hypnotic_gaze",
+      "loner:4+",
+      "prehensile_tail",
+      "safe_pair_of_hands",
+      "sidestep"
+    ],
+    "specialRule": "look_into_my_eyes"
+  },
+  {
+    "id": "bomber-dribblesnot",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Bomber_Dribblesnot/",
+    "skills": [
+      "accurate",
+      "bombardier",
+      "dodge",
+      "loner:4+",
+      "right_stuff",
+      "secret_weapon",
+      "stunty"
+    ],
+    "specialRule": "kaboom"
+  },
+  {
+    "id": "captain-karina-von-riesz",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Captain_Karina_von_Riesz/",
+    "skills": [
+      "bloodlust:2+",
+      "dodge",
+      "hypnotic_gaze",
+      "jump_up",
+      "loner:4+",
+      "regeneration"
+    ],
+    "specialRule": "tasty_morsel"
+  },
+  {
+    "id": "cindy-piewhistle",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Cindy_Piewhistle/",
+    "skills": [
+      "accurate",
+      "bombardier",
+      "dodge",
+      "loner:4+",
+      "secret_weapon",
+      "stunty"
+    ],
+    "specialRule": "all_you_can_eat"
+  },
+  {
+    "id": "count-luthor-von-drakenforg",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Count_Luthor_von_Drakenborg/",
+    "skills": [
+      "block",
+      "hypnotic_gaze",
+      "loner:4+",
+      "regeneration",
+      "sidestep"
+    ],
+    "specialRule": "star_of_the_show"
+  },
+  {
+    "id": "deeproot-strongbranch",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Deeproot_Strongbranch/",
+    "skills": [
+      "block",
+      "bullseye",
+      "loner:4+",
+      "mighty_blow",
+      "stand_firm",
+      "strong_arm",
+      "thick_skull",
+      "throw_team_mate",
+      "timmm_ber"
+    ],
+    "specialRule": "reliable"
+  },
+  {
+    "id": "dribl",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Dribl_and_Drull/",
+    "skills": [
+      "dirty_player",
+      "dodge",
+      "loner:4+",
+      "quick_foul",
+      "sidestep",
+      "sneaky_git",
+      "stunty"
+    ],
+    "specialRule": "a_sneaky_pair"
+  },
+  {
+    "id": "drull",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Dribl_and_Drull/",
+    "skills": ["dodge", "loner:4+", "sidestep", "stab", "stunty"],
+    "specialRule": "a_sneaky_pair"
+  },
+  {
+    "id": "eldril-sidewinder",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Eldril_Sidewinder/",
+    "skills": [
+      "catch",
+      "dodge",
+      "hypnotic_gaze",
+      "loner:4+",
+      "nerves_of_steel",
+      "on_the_ball"
+    ],
+    "specialRule": "mesmerising_dance"
+  },
+  {
+    "id": "estelle-la-veneaux",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Estelle_la_Veneaux/",
+    "skills": ["disturbing_presence", "dodge", "guard", "loner:4+", "sidestep"],
+    "specialRule": "baleful_hex"
+  },
+  {
+    "id": "fungus-the-loon",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Fungus_the_Loon/",
+    "skills": [
+      "ball_and_chain",
+      "loner:4+",
+      "mighty_blow",
+      "no_ball",
+      "secret_weapon",
+      "stunty"
+    ],
+    "specialRule": "whirling_dervish"
+  },
+  {
+    "id": "glart-smashrip",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Glart_Smashrip/",
+    "skills": [
+      "block",
+      "claws",
+      "grab",
+      "juggernaut",
+      "loner:4+",
+      "stand_firm"
+    ],
+    "specialRule": "frenzied_rush"
+  },
+  {
+    "id": "gloriel-summerbloom",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Gloriel_Summerbloom/",
+    "skills": [
+      "accurate",
+      "dodge",
+      "loner:3+",
+      "pass",
+      "sidestep",
+      "sure_hands"
+    ],
+    "specialRule": "shot_to_nothing"
+  },
+  {
+    "id": "glotl-stop",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Glotl_Stop/",
+    "skills": [
+      "animal_savagery",
+      "frenzy",
+      "loner:4+",
+      "mighty_blow",
+      "prehensile_tail",
+      "stand_firm",
+      "thick_skull"
+    ],
+    "specialRule": "primal_savagery"
+  },
+  {
+    "id": "grak",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Grak_and_Crumbleberry/",
+    "skills": [
+      "bone_head",
+      "kick_team_mate",
+      "loner:4+",
+      "mighty_blow",
+      "thick_skull"
+    ],
+    "specialRule": "ill_carry_you"
+  },
+  {
+    "id": "crumbleberry",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Grak_and_Crumbleberry/",
+    "skills": [
+      "dodge",
+      "lethal_flight",
+      "loner:4+",
+      "right_stuff",
+      "stunty",
+      "sure_hands"
+    ],
+    "specialRule": "ill_carry_you"
+  },
+  {
+    "id": "grashnak-blackhoof",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Grashnak_Blackhoof/",
+    "skills": [
+      "frenzy",
+      "horns",
+      "loner:4+",
+      "mighty_blow",
+      "thick_skull",
+      "unchannelled_fury"
+    ],
+    "specialRule": "gored_by_the_bull"
+  },
+  {
+    "id": "gretchen-wachter",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Gretchen_W%C3%A4chter/",
+    "skills": [
+      "disturbing_presence",
+      "dodge",
+      "foul_appearance",
+      "jump_up",
+      "loner:4+",
+      "no_ball",
+      "regeneration",
+      "shadowing",
+      "sidestep"
+    ],
+    "specialRule": "incorporeal"
+  },
+  {
+    "id": "griff-oberwald",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Griff_Oberwald/",
+    "skills": ["block", "dodge", "fend", "loner:3+", "sprint", "sure_feet"],
+    "specialRule": "consummate_professional"
+  },
+  {
+    "id": "grim-ironjaw",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Grim_Ironjaw/",
+    "skills": [
+      "block",
+      "dauntless",
+      "frenzy",
+      "hatred:Big Guy",
+      "loner:4+",
+      "multiple_block",
+      "thick_skull"
+    ],
+    "specialRule": "slayer"
+  },
+  {
+    "id": "grombrindal",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Grombrindal/",
+    "skills": [
+      "block",
+      "break_tackle",
+      "dauntless",
+      "loner:4+",
+      "mighty_blow",
+      "stand_firm",
+      "sure_feet",
+      "thick_skull"
+    ],
+    "specialRule": "wisdom_of_the_white_dwarf"
+  },
+  {
+    "id": "guffle-pusmaw",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Guffle_Pusmaw/",
+    "skills": [
+      "foul_appearance",
+      "loner:4+",
+      "monstrous_mouth",
+      "nerves_of_steel",
+      "on_the_ball",
+      "plague_ridden"
+    ],
+    "specialRule": "quick_bite"
+  },
+  {
+    "id": "hthark-the-unstoppable",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/H%27thark_the_Unstoppable/",
+    "skills": [
+      "block",
+      "break_tackle",
+      "defensive",
+      "juggernaut",
+      "loner:4+",
+      "sprint",
+      "sure_feet",
+      "thick_skull",
+      "unsteady"
+    ],
+    "specialRule": "unstoppable_momentum"
+  },
+  {
+    "id": "hakflem-skuttlespike",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Hakflem_Skuttlespike/",
+    "skills": [
+      "dodge",
+      "extra_arms",
+      "loner:4+",
+      "prehensile_tail",
+      "two_heads"
+    ],
+    "specialRule": "treacherous"
+  },
+  {
+    "id": "helmut-wulf",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Helmut_Wulf/",
+    "skills": [
+      "chainsaw",
+      "loner:4+",
+      "no_ball",
+      "pro",
+      "secret_weapon",
+      "stand_firm"
+    ],
+    "specialRule": "old_pro"
+  },
+  {
+    "id": "ivan-the-animal-deathshroud",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Ivan_%27the_Animal%27_Deathshroud/",
+    "skills": [
+      "block",
+      "disturbing_presence",
+      "hatred:Dwarf",
+      "juggernaut",
+      "loner:4+",
+      "regeneration",
+      "strip_ball",
+      "tackle"
+    ],
+    "specialRule": "dwarven_scourge"
+  },
+  {
+    "id": "ivar-eriksson",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Ivar_Eriksson/",
+    "skills": ["block", "guard", "loner:4+", "tackle"],
+    "specialRule": "raiding_party"
+  },
+  {
+    "id": "jeremiah-kool",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Jeremiah_Kool/",
+    "skills": [
+      "block",
+      "dodge",
+      "diving_catch",
+      "dump_off",
+      "loner:4+",
+      "nerves_of_steel",
+      "on_the_ball",
+      "pass",
+      "sidestep"
+    ],
+    "specialRule": "the_flashing_blade"
+  },
+  {
+    "id": "jordell-freshbreeze",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Jordell_Freshbreeze/",
+    "skills": [
+      "block",
+      "diving_catch",
+      "dodge",
+      "leap",
+      "loner:4+",
+      "sidestep",
+      "steady_footing"
+    ],
+    "specialRule": "swift_as_the_breeze"
+  },
+  {
+    "id": "josef-bugman",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Josef_Bugman/",
+    "skills": [
+      "block",
+      "drunkard",
+      "fend",
+      "loner:3+",
+      "tackle",
+      "taunt",
+      "thick_skull"
+    ],
+    "specialRule": "dwarfen_grit"
+  },
+  {
+    "id": "karla-von-kill",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Karla_von_Kill/",
+    "skills": ["block", "dauntless", "dodge", "jump_up", "loner:4+"],
+    "specialRule": "indomitable"
+  },
+  {
+    "id": "kiroth-krakeneye",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Kiroth_Krakeneye/",
+    "skills": [
+      "disturbing_presence",
+      "foul_appearance",
+      "loner:4+",
+      "on_the_ball",
+      "tackle",
+      "tentacles"
+    ],
+    "specialRule": "black_ink"
+  },
+  {
+    "id": "kreek-rustgouger",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Kreek_Rustgouger/",
+    "skills": [
+      "ball_and_chain",
+      "loner:4+",
+      "mighty_blow",
+      "no_ball",
+      "prehensile_tail",
+      "secret_weapon"
+    ],
+    "specialRule": "ill_be_back"
+  },
+  {
+    "id": "lord-borak-the-despoiler",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Lord_Borak_the_Despoiler/",
+    "skills": [
+      "block",
+      "dirty_player",
+      "leader",
+      "loner:3+",
+      "mighty_blow",
+      "put_the_boot_in",
+      "sneaky_git"
+    ],
+    "specialRule": "lord_of_chaos"
+  },
+  {
+    "id": "maple-highgrove",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Maple_Highgrove/",
+    "skills": [
+      "brawler",
+      "grab",
+      "loner:4+",
+      "mighty_blow",
+      "stand_firm",
+      "tentacles",
+      "thick_skull"
+    ],
+    "specialRule": "vicious_vines"
+  },
+  {
+    "id": "max-spleenripper",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Max_Spleenripper/",
+    "skills": ["chainsaw", "loner:4+", "no_ball", "secret_weapon"],
+    "specialRule": "maximum_carnage"
+  },
+  {
+    "id": "morg-n-thorg",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Morg_%27n%27_Thorg/",
+    "skills": [
+      "block",
+      "bullseye",
+      "hatred:Undead",
+      "loner:4+",
+      "mighty_blow",
+      "thick_skull",
+      "throw_team_mate"
+    ],
+    "specialRule": "the_ballista"
+  },
+  {
+    "id": "nobbla-blackwart",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Nobbla_Blackwart/",
+    "skills": [
+      "block",
+      "chainsaw",
+      "dodge",
+      "loner:4+",
+      "no_ball",
+      "saboteur",
+      "secret_weapon",
+      "stunty"
+    ],
+    "specialRule": "kick_em_while_theyre_down"
+  },
+  {
+    "id": "puggy-baconbreath",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Puggy_Baconbreath/",
+    "skills": [
+      "block",
+      "dodge",
+      "loner:3+",
+      "nerves_of_steel",
+      "right_stuff",
+      "stunty"
+    ],
+    "specialRule": "halfling_luck"
+  },
+  {
+    "id": "rashnak-backstabber",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Rashnak_Backstabber/",
+    "skills": ["loner:4+", "shadowing", "sidestep", "sneaky_git", "stab"],
+    "specialRule": "toxin_connoisseur"
+  },
+  {
+    "id": "ripper-bolgrot",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Ripper_Bolgrot/",
+    "skills": [
+      "bullseye",
+      "grab",
+      "loner:4+",
+      "mighty_blow",
+      "regeneration",
+      "throw_team_mate"
+    ],
+    "specialRule": "thinking_mans_troll"
+  },
+  {
+    "id": "rodney-roachbait",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Rodney_Roachbait/",
+    "skills": [
+      "catch",
+      "diving_catch",
+      "jump_up",
+      "loner:4+",
+      "on_the_ball",
+      "sidestep",
+      "stunty",
+      "wrestle"
+    ],
+    "specialRule": "catch_of_the_day"
+  },
+  {
+    "id": "rowana-forestfoot",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Rowana_Forestfoot/",
+    "skills": [
+      "dodge",
+      "dump_off",
+      "guard",
+      "horns",
+      "jump_up",
+      "leap",
+      "loner:4+"
+    ],
+    "specialRule": "bounding_leap"
+  },
+  {
+    "id": "roxanna-darknail",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Roxanna_Darknail/",
+    "skills": ["dodge", "frenzy", "jump_up", "juggernaut", "leap", "loner:4+"],
+    "specialRule": "slashing_nails"
+  },
+  {
+    "id": "rumbelow-sheepskin",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Rumbelow_Sheepskin/",
+    "skills": [
+      "block",
+      "horns",
+      "juggernaut",
+      "loner:4+",
+      "tackle",
+      "thick_skull"
+    ],
+    "specialRule": "ram"
+  },
+  {
+    "id": "scrappa-sorehead",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Scrappa_Sorehead/",
+    "skills": [
+      "dirty_player",
+      "dodge",
+      "loner:4+",
+      "pogo",
+      "right_stuff",
+      "sprint",
+      "stunty",
+      "sure_feet"
+    ],
+    "specialRule": "yoink"
+  },
+  {
+    "id": "scyla-anfingrimm",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Scyla_Anfingrimm/",
+    "skills": [
+      "claws",
+      "frenzy",
+      "loner:4+",
+      "mighty_blow",
+      "prehensile_tail",
+      "thick_skull",
+      "unchannelled_fury"
+    ],
+    "specialRule": "fury_of_the_blood_god"
+  },
+  {
+    "id": "skitter-stab-stab",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Skitter_Stab-stab/",
+    "skills": ["dodge", "loner:4+", "prehensile_tail", "shadowing", "stab"],
+    "specialRule": "master_assassin"
+  },
+  {
+    "id": "skrorg-snowpelt",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Skrorg_Snowpelt/",
+    "skills": [
+      "block",
+      "claws",
+      "disturbing_presence",
+      "juggernaut",
+      "loner:4+",
+      "mighty_blow"
+    ],
+    "specialRule": "pump_up_the_crowd"
+  },
+  {
+    "id": "skrull-halfheight",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Skrull_Halfheight/",
+    "skills": [
+      "accurate",
+      "loner:4+",
+      "nerves_of_steel",
+      "pass",
+      "regeneration",
+      "sure_hands",
+      "thick_skull"
+    ],
+    "specialRule": "strong_passing_game"
+  },
+  {
+    "id": "swiftvine-glimmershard",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Swiftvine_Glimmershard/",
+    "skills": [
+      "disturbing_presence",
+      "fend",
+      "loner:4+",
+      "sidestep",
+      "stab",
+      "stunty"
+    ],
+    "specialRule": "furious_outburst"
+  },
+  {
+    "id": "the-black-gobbo",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/The_Black_Gobbo/",
+    "skills": [
+      "bombardier",
+      "disturbing_presence",
+      "dodge",
+      "loner:3+",
+      "sidestep",
+      "sneaky_git",
+      "stab",
+      "stunty"
+    ],
+    "specialRule": "sneakiest_of_the_lot"
+  },
+  {
+    "id": "the-mighty-zug",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/The_Mighty_Zug/",
+    "skills": ["block", "loner:4+", "mighty_blow", "unsteady"],
+    "specialRule": "crushing_blow"
+  },
+  {
+    "id": "lucien-swift",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/The_Swift_Twins/",
+    "skills": ["block", "loner:4+", "mighty_blow", "tackle"],
+    "specialRule": "working_in_tandem"
+  },
+  {
+    "id": "valen-swift",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/The_Swift_Twins/",
+    "skills": [
+      "accurate",
+      "loner:4+",
+      "nerves_of_steel",
+      "pass",
+      "safe_pass",
+      "sure_hands"
+    ],
+    "specialRule": "working_in_tandem"
+  },
+  {
+    "id": "thorsson-stoutmead",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Thorsson_Stoutmead/",
+    "skills": ["block", "drunkard", "loner:4+", "thick_skull"],
+    "specialRule": "beer_barrel_bash"
+  },
+  {
+    "id": "varag-ghoul-chewer",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Varag_Ghoul-Chewer/",
+    "skills": [
+      "block",
+      "hatred:Undead",
+      "jump_up",
+      "loner:4+",
+      "mighty_blow",
+      "thick_skull",
+      "unsteady"
+    ],
+    "specialRule": "krump_and_smash"
+  },
+  {
+    "id": "wilhelm-chaney",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Wilhelm_Chaney/",
+    "skills": [
+      "catch",
+      "claws",
+      "frenzy",
+      "loner:4+",
+      "regeneration",
+      "wrestle"
+    ],
+    "specialRule": "savage_mauling"
+  },
+  {
+    "id": "willow-rosebark",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Willow_Rosebark/",
+    "skills": ["dauntless", "loner:4+", "sidestep", "thick_skull"],
+    "specialRule": "woodland_fury"
+  },
+  {
+    "id": "withergrasp-doubledrool",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Withergrasp_Doubledrool/",
+    "skills": [
+      "foul_appearance",
+      "loner:4+",
+      "prehensile_tail",
+      "tackle",
+      "tentacles",
+      "two_heads",
+      "wrestle"
+    ],
+    "specialRule": "watch_out"
+  },
+  {
+    "id": "zolcath-the-zoat",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Zolcath_the_Zoat/",
+    "skills": [
+      "disturbing_presence",
+      "juggernaut",
+      "loner:4+",
+      "mighty_blow",
+      "prehensile_tail",
+      "regeneration",
+      "sure_feet"
+    ],
+    "specialRule": "excuse_me_are_you_a_zoat"
+  },
+  {
+    "id": "zzharg-madeye",
+    "source": "https://bloodbowlbase.ru/bb2025/starplayers/Zzharg_Madeye/",
+    "skills": [
+      "cannoneer",
+      "hail_mary_pass",
+      "loner:4+",
+      "nerves_of_steel",
+      "secret_weapon",
+      "thick_skull"
+    ],
+    "specialRule": "blastin_solves_everything"
+  }
+]

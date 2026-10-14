@@ -646,5 +646,383 @@
     "name": "Breathe Fire",
     "category": "trait",
     "isElite": false
+  },
+  {
+    "id": "blind_rage",
+    "name": "Blind Rage",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "savage_blow",
+    "name": "Savage Blow",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "blast_it",
+    "name": "Blast It!",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "putrid_regurgitation",
+    "name": "Putrid Regurgitation",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "look_into_my_eyes",
+    "name": "Look Into My Eyes",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "kaboom",
+    "name": "Kaboom!",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "tasty_morsel",
+    "name": "Tasty Morsel",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "all_you_can_eat",
+    "name": "All You Can Eat",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "star_of_the_show",
+    "name": "Star of the Show",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "reliable",
+    "name": "Reliable",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "a_sneaky_pair",
+    "name": "A Sneaky Pair",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "mesmerising_dance",
+    "name": "Mesmerising Dance",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "baleful_hex",
+    "name": "Baleful Hex",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "whirling_dervish",
+    "name": "Whirling Dervish",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "frenzied_rush",
+    "name": "Frenzied Rush",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "shot_to_nothing",
+    "name": "Shot to Nothing",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "primal_savagery",
+    "name": "Primal Savagery",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "ill_carry_you",
+    "name": "I'll Carry You",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "gored_by_the_bull",
+    "name": "Gored by the Bull",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "incorporeal",
+    "name": "Incorporeal",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "consummate_professional",
+    "name": "Consummate Professional",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "slayer",
+    "name": "Slayer",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "wisdom_of_the_white_dwarf",
+    "name": "Wisdom of the White Dwarf",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "quick_bite",
+    "name": "Quick Bite",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "unstoppable_momentum",
+    "name": "Unstoppable Momentum",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "treacherous",
+    "name": "Treacherous",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "old_pro",
+    "name": "Old Pro",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "dwarven_scourge",
+    "name": "Dwarven Scourge",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "raiding_party",
+    "name": "Raiding Party",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "the_flashing_blade",
+    "name": "The Flashing Blade",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "swift_as_the_breeze",
+    "name": "Swift as the Breeze",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "dwarfen_grit",
+    "name": "Dwarfen Grit",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "indomitable",
+    "name": "Indomitable",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "black_ink",
+    "name": "Black Ink",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "ill_be_back",
+    "name": "I'll Be Back!",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "lord_of_chaos",
+    "name": "Lord of Chaos",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "vicious_vines",
+    "name": "Vicious Vines",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "maximum_carnage",
+    "name": "Maximum Carnage",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "the_ballista",
+    "name": "The Ballista",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "kick_em_while_theyre_down",
+    "name": "Kick 'em While They're Down!",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "halfling_luck",
+    "name": "Halfling Luck",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "toxin_connoisseur",
+    "name": "Toxin Connoisseur",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "thinking_mans_troll",
+    "name": "Thinking Man's Troll",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "catch_of_the_day",
+    "name": "Catch of the Day",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "bounding_leap",
+    "name": "Bounding Leap",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "slashing_nails",
+    "name": "Slashing Nails",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "ram",
+    "name": "Ram",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "yoink",
+    "name": "Yoink!",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "fury_of_the_blood_god",
+    "name": "Fury of the Blood God",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "master_assassin",
+    "name": "Master Assassin",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "pump_up_the_crowd",
+    "name": "Pump Up the Crowd",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "strong_passing_game",
+    "name": "Strong Passing Game",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "furious_outburst",
+    "name": "Furious Outburst",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "sneakiest_of_the_lot",
+    "name": "Sneakiest of the Lot",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "crushing_blow",
+    "name": "Crushing Blow",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "working_in_tandem",
+    "name": "Working in Tandem",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "beer_barrel_bash",
+    "name": "Beer Barrel Bash",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "krump_and_smash",
+    "name": "Krump and Smash",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "savage_mauling",
+    "name": "Savage Mauling",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "woodland_fury",
+    "name": "Woodland Fury",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "watch_out",
+    "name": "Watch Out!",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "excuse_me_are_you_a_zoat",
+    "name": "Excuse me, are you a Zoat?",
+    "category": "special",
+    "isElite": false
+  },
+  {
+    "id": "blastin_solves_everything",
+    "name": "Blastin' Solves Everything",
+    "category": "special",
+    "isElite": false
   }
 ]

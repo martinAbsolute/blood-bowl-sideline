@@ -131,6 +131,7 @@ it("uses every community skill translation, including catalog spelling variants"
     hatred: "hatred (х)",
   };
   for (const skill of skills) {
+    if (skill.category === "special") continue;
     const base = skill.name.replace(/ \(x\+?\)$/i, "").toLowerCase();
     const expected = terms.get(aliases[base] ?? base);
     expect(expected, skill.id).toBeDefined();

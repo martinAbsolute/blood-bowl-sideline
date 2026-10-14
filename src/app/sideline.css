@@ -596,6 +596,11 @@ html:has(.catalog-layout) {
   --skill-border: #ccd0c3;
   --skill-foreground: #515b4c;
 }
+.skill-special {
+  --skill-background: #d9efeb;
+  --skill-border: #9fcfc5;
+  --skill-foreground: #205f56;
+}
 
 .recruitment-menu [data-slot="accordion-trigger"] > svg {
   translate: 0 0;
