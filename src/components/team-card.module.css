@@ -216,7 +216,6 @@
   align-items: center;
   gap: 3px;
   padding-left: 5px;
-  border-left: 1px solid currentColor;
 }
 .support {
   grid-area: support;
