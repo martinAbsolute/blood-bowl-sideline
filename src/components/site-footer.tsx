@@ -28,7 +28,7 @@ export function SiteFooter() {
             rel="noopener noreferrer"
             className={linkClass}
           >
-            {/* GitHub Octicons mark-github-16, MIT; see THIRD_PARTY_NOTICES.md. */}
+            {/* GitHub Octicons mark-github-16, MIT; see ATTRIBUTION.md. */}
             <svg
               aria-hidden="true"
               className="size-4"

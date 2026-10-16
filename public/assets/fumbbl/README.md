@@ -8,7 +8,7 @@ sprites come from the [separate Slann roster](https://fumbbl.com/help:BB20SlannS
 
 Artwork is by the FUMBBL community. Attribution does not assert a new license for
 these images. Player artwork is excluded from the project's AGPL license; see
-[third-party notices](../../../THIRD_PARTY_NOTICES.md).
+[Attribution](../../../ATTRIBUTION.md).
 
 The manifest records every original image's URL, dimensions and SHA-256, each
 player's source label and page, and the coordinates of every lossless PNG crop.

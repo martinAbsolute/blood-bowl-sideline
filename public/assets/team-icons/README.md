@@ -1,13 +1,12 @@
 # Team roster SVGs
 
-These 31 SVGs were downloaded on 6 October 2026 from the [Blood Bowl 2025
-teams reference](https://bb-rules-g2p.pages.dev/en/teams), version 0.5.3. Each
-file's source URL is `https://bb-rules-g2p.pages.dev/images/teams/<roster-id>.svg`.
-The filenames match all 31 roster IDs in the application catalog.
+These 31 SVGs match the roster IDs in the application catalog. Their original
+creator and license have not been verified.
 
-The SVG files are byte-identical downloads. Each has one path with
-`fill="currentColor"`. The app renders them as CSS masks over the surrounding
-text color so the icons remain legible across light and dark surfaces.
+Each SVG has one path with `fill="currentColor"`. The app renders the icons as CSS
+masks using the surrounding text color so they remain legible in light and dark
+themes.
 
 These icons are third-party artwork. The application's AGPL license does not
-cover them, and this attribution does not assert permission to relicense them.
+cover them, and attribution does not assert permission to relicense them.
+See [Attribution](../../../ATTRIBUTION.md).

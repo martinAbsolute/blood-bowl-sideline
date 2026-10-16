@@ -1,4 +1,4 @@
-# Third-party notices
+# Attribution
 
 The application's AGPL-3.0-only license covers its original code. It does not
 license Blood Bowl names, rules, trademarks, or third-party artwork.
@@ -10,10 +10,10 @@ checksums, and lossless crop coordinates are recorded in that directory's
 source pages and the supplemental Josef Bugman source. Attribution does not
 assert permission to relicense the artwork.
 
-Roster SVGs under `public/assets/team-icons/` were downloaded from the
-[Blood Bowl 2025 teams reference](https://bb-rules-g2p.pages.dev/en/teams).
-See the [icon notes](public/assets/team-icons/README.md) for the source URL
-pattern and usage. Attribution does not assert permission to relicense them.
+Roster SVGs under `public/assets/team-icons/` are third-party artwork. Their
+original creator and license have not been verified. The application's AGPL
+license does not cover them. See the [icon notes](public/assets/team-icons/README.md)
+for usage details. Attribution does not assert permission to relicense them.
 
 Blood Bowl is a trademark of Games Workshop. This independent community project
 is not affiliated with, endorsed by, or sponsored by Games Workshop or FUMBBL.
