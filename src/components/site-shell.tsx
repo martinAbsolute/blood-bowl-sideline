@@ -160,7 +160,7 @@ export function SiteShell({
           <header className="site-header no-print">
             <div className="site-header-content flex h-full items-center justify-between gap-3">
               <Link
-                href="/teams"
+                href="/"
                 className="flex items-center text-primary"
                 aria-label={t("app")}
               >
@@ -223,7 +223,7 @@ export function SiteShell({
             <div className="site-sidebar-header flex h-16 shrink-0 items-center">
               <SidebarTooltip enabled={collapsed} label={t("app")}>
                 <Link
-                  href="/teams"
+                  href="/"
                   aria-label={t("app")}
                   className="site-sidebar-logo flex h-11 items-center overflow-hidden rounded-sm text-primary focus-visible:outline-2 focus-visible:outline-primary"
                 >

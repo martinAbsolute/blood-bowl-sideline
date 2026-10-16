@@ -52,6 +52,7 @@ it("serves complete roster HTML at the shared URL for text-only readers", async 
     "ChatGPT-User/1.0",
     "OAI-SearchBot/1.0",
     "GPTBot/1.0",
+    "Claude-SearchBot/1.0",
     "Claude-User/1.0",
     "PerplexityBot/1.0",
     "curl/8.0",

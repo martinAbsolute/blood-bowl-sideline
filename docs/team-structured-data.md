@@ -47,8 +47,10 @@ negative base balance is not mistaken for overspending the combined budget.
 If the team has league context, the HTML states that league-specific
 allowances are unavailable rather than assuming
 the ruleset allowance. Responses use `no-store`, `Vary: Accept, User-Agent` and
-`noindex, nofollow`; missing or archived teams return 404 and backend outages
-return 503. The proxy also sets `no-store` on the interactive response: Next.js
+`noindex, nofollow`. Each HTML document points to `/teams/[uuid]` as its canonical
+URL. Individual teams are excluded from search indexing while remaining
+readable through a direct shared link. Missing or archived teams return 404
+and backend outages return 503. The proxy also sets `no-store` on the interactive response: Next.js
 can replace its `Vary` header with RSC fields, so cache safety must not depend on
 custom `Vary` fields surviving page rendering. Only the existing anonymous
 Convex team query is used.
@@ -74,7 +76,10 @@ The snapshot includes:
 - `roster` and `ruleset`, with readable names and stable catalog IDs. Roster tier
   is specific to the selected ruleset, falling back to the roster's tier when
   the ruleset has no tier assignments, as in the editor. The roster URL retains
-  the selected ruleset. Leagues here are roster affiliations,
+  the selected ruleset. The full ruleset configuration includes tier budgets,
+  skill costs, advancement limits, inducement allowances and star player
+  restrictions. The HTML also shows player and advancement limits. Leagues here
+  are roster affiliations,
   not the team's tournament history.
 - `players`, in roster order, with player number, name, position, full attribute
   names, separately named built-in and added skills, captain Pro skills,
@@ -100,7 +105,9 @@ The server uses the existing anonymous Convex `teams.getByUuid` query. Metadata
 and JSON-LD share a request-scoped React cache; nothing is cached across requests.
 Missing/archived teams and backend failures emit no snapshot. Device-only drafts
 and the browser's existing retry/edit behavior remain available. Archived links
-retain the existing proxy's 404 behavior. Team links retain `noindex, nofollow`.
+retain the existing proxy's 404 behavior. Team links retain `noindex, nofollow` and are
+excluded from the sitemap. Direct agent fetches still receive the public saved
+roster and ruleset details.
 
 The script has no visual output. The existing editor layout and styles are used
 for the server preview and the hydrated page.

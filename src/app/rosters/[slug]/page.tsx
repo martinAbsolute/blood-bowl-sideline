@@ -14,7 +14,7 @@ export async function generateMetadata({
   const roster = getRoster((await params).slug);
   return roster
     ? pageMetadata(
-        `${roster.name} Roster · BB2025`,
+        `${roster.name} Roster. BB2025`,
         `/rosters/${roster.id}`,
         `Build your ${roster.name} Blood Bowl team. Browse BB2025 player stats, skills, costs, eligible star players and special rules.`,
       )

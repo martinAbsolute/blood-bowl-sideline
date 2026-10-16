@@ -6,7 +6,9 @@ import { isPreview, siteUrl } from "@/lib/site-metadata";
 export default function sitemap(): MetadataRoute.Sitemap {
   if (isPreview) return [];
   return [
+    "/",
     "/teams",
+    "/leagues",
     "/rosters",
     ...rosters.map(({ id }) => `/rosters/${id}`),
     ...leagues.map((name) => `/leagues/${leagueSlug(name)}`),

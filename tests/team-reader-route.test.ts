@@ -52,6 +52,17 @@ it("returns visible semantic roster text even after scripts are removed, with no
       .querySelectorAll("script")
       .forEach((script) => script.remove());
     expect(window.document.querySelector("h1")?.textContent).toBe(team.name);
+    expect(window.document.title).toBe(`${team.name}. Blood Bowl Sideline.`);
+    expect(
+      window.document
+        .querySelector('meta[name="robots"]')
+        ?.getAttribute("content"),
+    ).toBe("noindex, nofollow");
+    expect(
+      window.document
+        .querySelector('link[rel="canonical"]')
+        ?.getAttribute("href"),
+    ).toContain(`/teams/${uuid}`);
     const table = window.document.querySelector("table")!;
     expect(table.closest("[hidden]")).toBeNull();
     expect(table.querySelectorAll("tbody tr")).toHaveLength(1);
@@ -130,7 +141,13 @@ it("offers the same snapshot as negotiated JSON-LD, with explicit media type and
     "application/ld+json; charset=utf-8",
   );
   expect(jsonResponse.headers.get("vary")).toBe("Accept, User-Agent");
-  expect(await jsonResponse.json()).toEqual(embedded);
+  const json = await jsonResponse.json();
+  expect(json).toEqual(embedded);
+  expect(json.mainEntity.teamSnapshot.ruleset).toMatchObject({
+    id: "bb2025-default",
+    minPlayers: 11,
+    skillCosts: { primaryNonElite: 20000 },
+  });
 });
 
 it.each([

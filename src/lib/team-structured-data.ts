@@ -116,7 +116,7 @@ export function teamStructuredData(data: PublicSnapshot) {
           : name,
       ),
     },
-    ruleset: { id: ruleset.id, name: ruleset.name, skillCurrency: skillUnit },
+    ruleset: { ...ruleset, skillCurrency: skillUnit },
     players,
     starPlayers,
     staff: (Object.keys(team.staff) as (keyof Team["staff"])[]).map((id) => ({

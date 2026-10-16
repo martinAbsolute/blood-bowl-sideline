@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import {
+  homeTitle,
   isPreview,
   siteDescription,
   siteName,
@@ -36,8 +37,8 @@ export const metadata: Metadata = {
     { name: "Martin Bahniuk", url: "https://github.com/martinAbsolute/" },
   ],
   title: {
-    default: "Blood Bowl Sideline. — Teams, Leagues & Tournaments",
-    template: `%s | ${siteName}`,
+    default: homeTitle,
+    template: `%s. ${siteName}`,
   },
   description: siteDescription,
   robots: isPreview
@@ -54,7 +55,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName,
-    title: "Blood Bowl Sideline. — Teams, Leagues & Tournaments",
+    title: homeTitle,
     description: siteDescription,
     locale: "en_US",
     alternateLocale: ["uk_UA"],
@@ -62,7 +63,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Blood Bowl Sideline. — Teams, Leagues & Tournaments",
+    title: homeTitle,
     description: siteDescription,
     images: [shareImage],
   },

@@ -1,3 +1,4 @@
+import { getRoster, getRuleset } from "@/domain/catalog";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { TeamPage } from "@/components/team-page";
@@ -15,7 +16,9 @@ export async function generateMetadata({
   const metadata = pageMetadata(
     data?.team.name.trim() || "Shared Blood Bowl Team",
     `/teams/${slug}`,
-    "View a shared Blood Bowl roster, player advancements and team costs on Blood Bowl Sideline.",
+    data
+      ? `${data.team.name}: ${getRoster(data.team.rosterId)!.name} Blood Bowl team using ${getRuleset(data.team.rulesetId).name}. View players, skills, advancements and team costs.`
+      : "View a shared Blood Bowl roster, player advancements and team costs on Blood Bowl Sideline.",
   );
   return {
     ...metadata,
