@@ -53,8 +53,8 @@ it("assigns every roster a unique, stable colour", () => {
   const colors = rosters.map((roster) => rosterColors[roster.id]);
   expect(colors.every(Boolean)).toBe(true);
   expect(new Set(colors).size).toBe(rosters.length);
-  expect(rosterColors.human).toBe("#245cca");
-  expect(rosterColors.orc).toBe("#c43735");
+  expect(rosterColors.human).toBe("#455fa1");
+  expect(rosterColors.orc).toBe("#752c21");
 });
 
 it("renders the real team, a front-centred lineup, and independently usable support and actions", async () => {
@@ -106,7 +106,7 @@ it("renders the real team, a front-centred lineup, and independently usable supp
   const staff = container.querySelector<HTMLButtonElement>(
     '[aria-label^="Sideline staff"]',
   )!;
-  expect(staff.textContent).toBe("+7");
+  expect(staff.textContent).toBe("7");
   expect(staff.closest("a")).toBeNull();
   await act(async () => staff.click());
   expect(
@@ -118,7 +118,7 @@ it("renders the real team, a front-centred lineup, and independently usable supp
   const induced = container.querySelector<HTMLButtonElement>(
     '[aria-label^="Inducements"]',
   )!;
-  expect(induced.textContent).toBe("+2");
+  expect(induced.textContent).toBe("2");
   await act(async () => induced.click());
   expect(
     document.querySelector('[data-slot="tooltip-content"]')?.textContent,

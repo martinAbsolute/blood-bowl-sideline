@@ -237,12 +237,12 @@ export function TeamCard({
           <SupportMetric
             label={staffTooltip}
             icon={<Megaphone size={16} />}
-            value={`+${sidelineStaff}`}
+            value={sidelineStaff}
           />
           <SupportMetric
             label={inducementTooltip}
             icon={<HandCoins size={16} />}
-            value={`+${inducementCount}`}
+            value={inducementCount}
           />
         </div>
         <div className={styles.economy}>
@@ -251,6 +251,7 @@ export function TeamCard({
             <strong>{(totals.teamGold / 1000).toLocaleString("en")}k</strong>
           </span>
           <span
+            data-zero={totals.remaining === 0}
             data-negative={totals.remaining < 0}
             data-positive={totals.remaining > 0}
           >

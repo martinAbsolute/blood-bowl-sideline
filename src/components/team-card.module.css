@@ -199,14 +199,14 @@
 }
 .squadCaption {
   position: absolute;
-  right: 10px;
+  left: 50%;
+  transform: translateX(-50%);
   bottom: 7px;
   display: flex;
   align-items: center;
   gap: 5px;
   padding: 2px 6px;
-  background: #284323a6;
-  border-radius: 5px;
+  color: #284323a6;
   font:
     600 10px ui-monospace,
     monospace;
@@ -216,7 +216,7 @@
   align-items: center;
   gap: 3px;
   padding-left: 5px;
-  border-left: 1px solid #ffffff40;
+  border-left: 1px solid currentColor;
 }
 .support {
   grid-area: support;
@@ -293,6 +293,9 @@
 }
 .economy [data-negative="true"] strong {
   color: var(--destructive);
+}
+.economy [data-zero="true"] {
+  color: color-mix(in srgb, var(--muted-foreground) 50%, var(--card));
 }
 .cardFooter {
   grid-area: footer;
