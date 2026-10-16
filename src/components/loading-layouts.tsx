@@ -1,5 +1,7 @@
 import type { Translate } from "@/i18n/messages";
 import { Skeleton } from "./ui/skeleton";
+import { TeamCardSkeleton } from "./team-card-skeleton";
+import teamCardStyles from "./team-card.module.css";
 import { BrandLogo } from "./brand";
 import { SiteFooter } from "./site-footer";
 import { ShellFrame } from "./shell-frame";
@@ -14,7 +16,6 @@ import { TeamHeader } from "./team-header";
 import { Badge } from "./ui/badge";
 import { ArrowLeft, Copy, Printer, ChevronDown, Ellipsis } from "lucide-react";
 import { BookOpen, Flag, Shield, Trophy } from "lucide-react";
-import { Card } from "./ui/card";
 import type { ReactNode } from "react";
 import { UsersLoading } from "./list-loading";
 import {
@@ -36,62 +37,21 @@ export type LoadingVariant =
   | "league-career"
   | "users";
 
-export function LibraryCardsLoading({
-  label,
-  text,
-}: {
-  label: string;
-  text?: Translate;
-}) {
+export function LibraryCardsLoading({ label }: { label: string }) {
   return (
-    <div
-      role="status"
-      aria-label={label}
-      className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3"
-    >
+    <div role="status" aria-label={label} className={teamCardStyles.grid}>
       <span className="sr-only">{label}</span>
       {[0, 1, 2].map((index) => (
-        <Card
+        <TeamCardSkeleton
           key={index}
-          aria-hidden="true"
-          className={`min-w-0 gap-0 rounded-2xl py-0 shadow-sm ${index === 1 ? "hidden sm:flex" : index === 2 ? "hidden xl:flex" : ""}`}
-        >
-          <div className="bg-primary px-5 pb-4 pt-4 [&_[data-slot=skeleton]]:bg-white/15">
-            <div className="mb-4 flex h-6 justify-between">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-6 w-14 rounded-full" />
-            </div>
-            <div className="flex h-16 items-center gap-4">
-              <Skeleton className="size-16 shrink-0 rounded-2xl" />
-              <div className="min-w-0 flex-1 space-y-1">
-                <Skeleton className="h-6 w-4/5" />
-                <Skeleton className="h-6 w-1/2" />
-              </div>
-            </div>
-          </div>
-          <div className="space-y-3 px-5 py-4">
-            <div className="h-4">
-              <Skeleton className="h-4 w-3/4" />
-            </div>
-            <dl className="grid grid-cols-3 divide-x rounded-lg border bg-secondary/25 py-3 text-center">
-              {(["players", "teamValue", "remaining"] as const).map((key) => (
-                <div key={key}>
-                  <dt className="text-[10px] text-muted-foreground">
-                    {text?.(key) ?? (
-                      <Skeleton className="mx-auto h-[15px] w-12" />
-                    )}
-                  </dt>
-                  <dd className="mt-1 flex h-6 items-center justify-center">
-                    <Skeleton className="h-4 w-10" />
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-          <div className="flex min-h-14 items-center border-t bg-secondary/15 px-5">
-            <Skeleton className="h-4 w-28" />
-          </div>
-        </Card>
+          className={
+            index === 1
+              ? "hidden sm:block"
+              : index === 2
+                ? "hidden xl:block"
+                : ""
+          }
+        />
       ))}
     </div>
   );

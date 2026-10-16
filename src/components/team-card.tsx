@@ -1,24 +1,37 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import {
-  ArrowUpRight,
   Archive,
   Check,
   CloudCheck,
   CloudOff,
   FileText,
   LoaderCircle,
+  HeartPulse,
+  HandCoins,
+  Megaphone,
+  PencilLine,
+  RotateCcw,
+  Star,
+  Users,
+  LockKeyhole,
+  Trophy,
+  CircleAlert,
 } from "lucide-react";
-import { getRoster, getRuleset } from "@/domain/catalog";
+import { getRoster, getRuleset, inducements } from "@/domain/catalog";
 import { summarize, validateTeam } from "@/domain/rules";
 import type { Team } from "@/domain/types";
-import { cn } from "@/lib/utils";
-import { Card } from "./ui/card";
-import { RosterIcon } from "./player-icon";
+import { rosterColors } from "@/lib/roster-colors";
+import { lineupPhoto } from "@/lib/lineup-photo";
 import { TeamLineup } from "./team-lineup";
+import { PlayerIcon, RosterIcon } from "./player-icon";
+import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip";
+import styles from "./team-card.module.css";
+
+const emptyPhoto = lineupPhoto(5);
 
 export function TeamCard({
   team,
@@ -41,110 +54,19 @@ export function TeamCard({
   leagueLocked?: boolean;
   leagueExperienced?: boolean;
 }) {
-  const t = useTranslations(),
-    totals = summarize(team),
-    legal = selection ? !selection.disabled : validateTeam(team).valid;
-  const content = (
-    <>
-      <div className="relative flex-1 overflow-hidden bg-primary px-5 pb-4 pt-4 text-primary-foreground">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-6 -top-6 size-40 rounded-full border-[24px] border-white/5"
-        />
-        <div className="relative mb-4 flex items-center justify-between gap-3">
-          <span className="text-xs font-medium text-white/75">
-            {getRoster(team.rosterId)?.name}
-          </span>
-          <div className="flex shrink-0 items-center gap-3">
-            <span
-              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${legal ? "bg-lime-200 text-primary" : "bg-white/15 text-white"}`}
-            >
-              {t(
-                leagueLocked
-                  ? "leagueUi.teamLocked"
-                  : leagueExperienced
-                    ? "leagueUi.experiencedTeam"
-                    : selection?.disabled
-                      ? "leagueUi.ineligibleTeam"
-                      : legal
-                        ? "ready"
-                        : "draft",
-              )}
-            </span>
-            {href && !selection && (
-              <ArrowUpRight
-                aria-hidden="true"
-                className="size-4 shrink-0 text-white transition-transform motion-safe:group-hover:translate-x-0.5 motion-safe:group-hover:-translate-y-0.5"
-              />
-            )}
-          </div>
-        </div>
-        <div className="relative flex items-start gap-4">
-          <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-white/15 shadow-sm">
-            <RosterIcon rosterId={team.rosterId} className="size-12" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <h2
-              className="display-font line-clamp-2 break-words text-2xl leading-7"
-              title={team.name}
-            >
-              {team.name || t("untitled")}
-            </h2>
-            {saveState && <TeamLineup team={team} />}
-          </div>
-        </div>
-      </div>
-      <div className="space-y-3 px-5 py-4">
-        <p className="text-xs font-medium text-muted-foreground">
-          {getRuleset(team.rulesetId).name}
-        </p>
-        <dl className="grid grid-cols-3 divide-x rounded-lg border bg-secondary/25 py-3 text-center">
-          <div>
-            <dt className="text-[10px] text-muted-foreground">
-              {t("players")}
-            </dt>
-            <dd className="mt-1 font-mono text-base font-semibold">
-              {totals.playerCount}
-              <span className="text-xs font-normal text-muted-foreground">
-                {" "}
-                / 16
-              </span>
-            </dd>
-          </div>
-          <div>
-            <dt className="text-[10px] text-muted-foreground">
-              {t("teamValue")}
-            </dt>
-            <dd className="mt-1 font-mono text-base font-semibold">
-              {totals.teamGold / 1000}k
-            </dd>
-          </div>
-          <div>
-            <dt className="text-[10px] text-muted-foreground">
-              {t("remaining")}
-            </dt>
-            <dd
-              className={`mt-1 font-mono text-base font-semibold ${totals.remaining < 0 ? "text-destructive" : "text-primary"}`}
-            >
-              {totals.remaining / 1000}k
-            </dd>
-          </div>
-        </dl>
-        {selection && (
-          <div className="flex items-center justify-between text-xs font-semibold text-primary">
-            <span>
-              {t(
-                selection.selected
-                  ? "leagueUi.selectedTeam"
-                  : "leagueUi.chooseTeam",
-              )}
-            </span>
-            {selection.selected && <Check className="size-4" />}
-          </div>
-        )}
-      </div>
-    </>
-  );
+  const t = useTranslations();
+  const roster = getRoster(team.rosterId);
+  const totals = summarize(team);
+  const ready = selection ? !selection.disabled : validateTeam(team).valid;
+  const StatusIcon = leagueLocked
+    ? LockKeyhole
+    : leagueExperienced
+      ? Trophy
+      : selection?.disabled
+        ? CircleAlert
+        : ready
+          ? Check
+          : PencilLine;
   const SaveIcon = archived
     ? Archive
     : saveState === "cloud"
@@ -154,70 +76,259 @@ export function TeamCard({
         : saveState === "pending"
           ? LoaderCircle
           : CloudOff;
+  const statusLabel = t(
+    leagueLocked
+      ? "leagueUi.teamLocked"
+      : leagueExperienced
+        ? "leagueUi.experiencedTeam"
+        : selection?.disabled
+          ? "leagueUi.ineligibleTeam"
+          : ready
+            ? "teamCard.ready"
+            : "draft",
+  );
+  const sidelineStaff =
+    team.staff.assistantCoaches +
+    team.staff.cheerleaders +
+    team.staff.dedicatedFans;
+  const inducementCount = Object.values(team.inducements).reduce(
+    (sum, count) => sum + count,
+    0,
+  );
+  const staffBreakdown = [
+    `${t("assistantCoaches")}: ${team.staff.assistantCoaches}`,
+    `${t("cheerleaders")}: ${team.staff.cheerleaders}`,
+    `${t("dedicatedFans")}: ${team.staff.dedicatedFans}`,
+  ].join("\n");
+  const inducementBreakdown = Object.entries(team.inducements)
+    .filter(([, count]) => count > 0)
+    .map(
+      ([id, count]) =>
+        `${inducements.find((item) => item.id === id)?.name ?? id}: ${count}`,
+    )
+    .join("\n");
+  const staffTooltip = sidelineStaff
+    ? `${t("staff")}\n${staffBreakdown}`
+    : `${t("staff")}: ${t("teamCard.none")}`;
+  const inducementTooltip = inducementCount
+    ? `${t("inducements")}\n${inducementBreakdown}`
+    : `${t("inducements")}: ${t("teamCard.none")}`;
   return (
-    <article className="flex min-w-0 flex-col">
-      <Card
-        className={cn(
-          "group min-w-0 flex-1 gap-0 rounded-2xl py-0 shadow-sm transition-shadow",
-          selection?.disabled ? "grayscale" : "hover:shadow-lg",
-          selection?.selected && "ring-2 ring-primary",
-        )}
-      >
-        {selection ? (
-          <button
-            type="button"
-            disabled={selection.disabled}
-            aria-pressed={selection.selected}
-            aria-label={team.name || t("untitled")}
-            onClick={selection.onSelect}
-            className="flex w-full flex-1 flex-col text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-55"
-          >
-            {content}
-          </button>
-        ) : href ? (
-          <Link
-            href={href}
-            prefetch
-            className="flex flex-1 flex-col outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-          >
-            {content}
-          </Link>
-        ) : (
-          <div className="flex flex-1 flex-col">{content}</div>
-        )}
-        {footer ? (
-          <footer className="border-t bg-secondary/15 px-5 py-3">
-            {footer}
-          </footer>
-        ) : saveState ? (
-          <footer className="flex min-h-14 items-center border-t bg-secondary/15 px-5 py-2">
-            <div className="flex w-full items-center gap-2">
-              <span
-                role="status"
-                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
+    <article
+      className={styles.card}
+      data-disabled={selection?.disabled || undefined}
+      data-selected={selection?.selected || undefined}
+      style={
+        {
+          "--roster": rosterColors[team.rosterId] ?? "#52676b",
+        } as CSSProperties
+      }
+    >
+      <div className={styles.cardLink}>
+        <div className={styles.identity}>
+          <span className={styles.status} data-team-status>
+            <StatusIcon size={12} aria-hidden="true" />
+            <span>{statusLabel}</span>
+          </span>
+        </div>
+        <div className={styles.crest}>
+          <RosterIcon rosterId={team.rosterId} className="size-12" />
+        </div>
+        <div className={styles.heading}>
+          <h2 className="display-font">
+            {selection ? (
+              <button
+                type="button"
+                className={styles.teamLink}
+                disabled={selection.disabled}
+                aria-pressed={selection.selected}
+                aria-label={team.name || t("untitled")}
+                onClick={selection.onSelect}
               >
-                <SaveIcon
-                  className={`size-3.5 ${saveState === "pending" ? "animate-spin" : ""}`}
-                />
-                {t(
-                  archived
-                    ? "archived"
-                    : saveState === "cloud"
-                      ? "savedCloud"
-                      : saveState === "device"
-                        ? "savedInDrafts"
-                        : saveState === "pending"
-                          ? "saving"
-                          : "saveStatusError",
-                )}
-              </span>
-              {action && (
-                <div className="ml-auto flex items-center gap-2">{action}</div>
-              )}
+                {team.name || t("untitled")}
+              </button>
+            ) : href ? (
+              <Link href={href} prefetch className={styles.teamLink}>
+                {team.name || t("untitled")}
+              </Link>
+            ) : (
+              team.name || t("untitled")
+            )}
+          </h2>
+        </div>
+        <p className={styles.ruleset}>
+          <span>{getRuleset(team.rulesetId).name}</span>
+          <span className={styles.rosterLabel}>
+            <i aria-hidden="true" />
+            <span className="sr-only"> · </span>
+            {roster?.name}
+          </span>
+        </p>
+        <div className={styles.squad}>
+          <span className={styles.halfwayLine} aria-hidden="true" />
+          {team.players.length + team.stars.length ? (
+            <TeamLineup team={team} />
+          ) : (
+            <div
+              className={styles.emptyLineup}
+              aria-label={t("teamCard.emptyLineup")}
+            >
+              <div
+                aria-hidden="true"
+                style={{
+                  position: "relative",
+                  width: emptyPhoto[0].width,
+                  maxWidth: "100%",
+                  height: 62,
+                }}
+              >
+                {Array.from({ length: 5 }, (_, index) => (
+                  <span
+                    key={index}
+                    style={{
+                      position: "absolute",
+                      left: emptyPhoto[index].left,
+                      top: emptyPhoto[index].top,
+                      zIndex: emptyPhoto[index].zIndex,
+                    }}
+                  >
+                    <PlayerIcon
+                      positionId={
+                        roster?.players[index % roster.players.length]?.id ?? ""
+                      }
+                      variant={index}
+                      className="size-9"
+                    />
+                  </span>
+                ))}
+              </div>
+              <span>{t("teamCard.buildLineup")}</span>
             </div>
+          )}
+          <span
+            className={styles.squadCaption}
+            aria-label={`${t("players")}: ${totals.playerCount}`}
+          >
+            <Users size={13} aria-hidden="true" />
+            {totals.playerCount}
+            {team.stars.length ? (
+              <span title={t("starPlayers")}>
+                <Star size={11} />
+                {team.stars.length}
+              </span>
+            ) : null}
+          </span>
+        </div>
+        <div
+          className={styles.support}
+          role="group"
+          aria-label={t("teamCard.support")}
+        >
+          <SupportMetric
+            label={`${t("rerolls")}: ${team.staff.rerolls}`}
+            icon={<RotateCcw size={16} />}
+            value={team.staff.rerolls}
+          />
+          <SupportMetric
+            label={`${t("apothecary")}: ${t(team.staff.apothecary ? "yes" : "no")}`}
+            icon={<HeartPulse size={16} />}
+            value={t(team.staff.apothecary ? "yes" : "no")}
+          />
+          <SupportMetric
+            label={staffTooltip}
+            icon={<Megaphone size={16} />}
+            value={`+${sidelineStaff}`}
+          />
+          <SupportMetric
+            label={inducementTooltip}
+            icon={<HandCoins size={16} />}
+            value={`+${inducementCount}`}
+          />
+        </div>
+        <div className={styles.economy}>
+          <span>
+            {t("teamCard.teamValue")}{" "}
+            <strong>{(totals.teamGold / 1000).toLocaleString("en")}k</strong>
+          </span>
+          <span
+            data-negative={totals.remaining < 0}
+            data-positive={totals.remaining > 0}
+          >
+            {t("remaining")}{" "}
+            <strong>{(totals.remaining / 1000).toLocaleString("en")}k</strong>
+          </span>
+        </div>
+        {footer ? (
+          <footer className={styles.customFooter}>{footer}</footer>
+        ) : saveState || selection || action ? (
+          <footer className={styles.cardFooter}>
+            {saveState && (
+              <span role="status" className={styles.saveStatus}>
+                <SaveIcon
+                  size={13}
+                  aria-hidden="true"
+                  className={
+                    saveState === "pending" ? "animate-spin" : undefined
+                  }
+                />
+                <span>
+                  {t(
+                    archived
+                      ? "archived"
+                      : saveState === "cloud"
+                        ? "savedCloud"
+                        : saveState === "device"
+                          ? "teamCard.localDraft"
+                          : saveState === "pending"
+                            ? "saving"
+                            : "saveStatusError",
+                  )}
+                </span>
+              </span>
+            )}
+            {selection && (
+              <span className={styles.selectionStatus}>
+                <span>
+                  {t(
+                    selection.selected
+                      ? "leagueUi.selectedTeam"
+                      : "leagueUi.chooseTeam",
+                  )}
+                </span>
+                {selection.selected && <Check size={14} aria-hidden="true" />}
+              </span>
+            )}
+            {action && <div className={styles.actions}>{action}</div>}
           </footer>
         ) : null}
-      </Card>
+      </div>
     </article>
+  );
+}
+
+function SupportMetric({
+  label,
+  icon,
+  value,
+}: {
+  label: string;
+  icon: ReactNode;
+  value: ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Tooltip open={open} onOpenChange={setOpen}>
+      <TooltipTrigger
+        className={styles.metric}
+        aria-label={label}
+        onClick={() => setOpen(!open)}
+      >
+        <span aria-hidden="true">{icon}</span>
+        <strong aria-hidden="true">{value}</strong>
+      </TooltipTrigger>
+      <TooltipContent className="whitespace-pre-line leading-5">
+        {label}
+      </TooltipContent>
+    </Tooltip>
   );
 }

@@ -975,7 +975,7 @@ it("lets a signed-in coach discard a failed recovery draft and reveal the cloud 
   expect(readDrafts()).toHaveLength(1);
   await act(async () =>
     document
-      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-action"]')!
+      .querySelector<HTMLButtonElement>('[data-slot="team-confirm-action"]')!
       .click(),
   );
   expect(readDrafts()).toEqual([]);
@@ -1007,14 +1007,10 @@ it("loads the archive only when expanded and provides restore and confirmed perm
   expect(
     archive.querySelector("article footer [role='status']")?.textContent,
   ).toBe("archived");
-  expect(archive.querySelector("article span.rounded-full")?.textContent).toBe(
+  expect(archive.querySelector("article [data-team-status]")?.textContent).toBe(
     "draft",
   );
-  expect(
-    archive
-      .querySelector("article footer .ml-auto")
-      ?.querySelectorAll("button"),
-  ).toHaveLength(2);
+  expect(archive.querySelectorAll("article footer button")).toHaveLength(2);
   expect(
     Array.from(archive.querySelectorAll("article footer button")).map(
       (button) => button.getAttribute("aria-label"),
@@ -1041,7 +1037,7 @@ it("loads the archive only when expanded and provides restore and confirmed perm
   expect(document.body.textContent).toContain("confirmPermanentDeleteTeamHint");
   await act(async () =>
     document
-      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-action"]')!
+      .querySelector<HTMLButtonElement>('[data-slot="team-confirm-action"]')!
       .click(),
   );
   expect(mocks.save).toHaveBeenCalledExactlyOnceWith({ uuid: team.uuid });
@@ -1061,14 +1057,14 @@ it("requires confirmation to archive and leaves the team unchanged on cancel", a
   expect(mocks.save).not.toHaveBeenCalled();
   await act(async () =>
     document
-      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-cancel"]')!
+      .querySelector<HTMLButtonElement>('[data-slot="team-confirm-cancel"]')!
       .click(),
   );
   expect(mocks.save).not.toHaveBeenCalled();
   await act(async () => archive.click());
   await act(async () =>
     document
-      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-action"]')!
+      .querySelector<HTMLButtonElement>('[data-slot="team-confirm-action"]')!
       .click(),
   );
   expect(mocks.save).toHaveBeenCalledExactlyOnceWith({
@@ -1094,23 +1090,73 @@ it("disables archive for league-locked cloud teams and hides their recovery dele
   expect(mocks.save).not.toHaveBeenCalled();
 });
 
-it("keeps a guest draft when deletion is cancelled", async () => {
-  const team = { ...newTeam(randomUUID()), name: "Keep me" };
-  storeDraft(team);
-  await act(async () => root.render(createElement(TeamLibrary)));
-  await act(async () =>
-    container
-      .querySelector<HTMLButtonElement>('button[aria-label="remove Keep me"]')!
-      .click(),
-  );
-  expect(readDrafts()).toHaveLength(1);
-  await act(async () =>
-    document
-      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-cancel"]')!
-      .click(),
-  );
-  expect(readDrafts()).toHaveLength(1);
-});
+it.each(["cancel", "backdrop", "escape"])(
+  "keeps a guest draft when deletion is dismissed with %s",
+  async (method) => {
+    const team = { ...newTeam(randomUUID()), name: "Keep me" };
+    storeDraft(team);
+    await act(async () => root.render(createElement(TeamLibrary)));
+    await act(async () =>
+      container
+        .querySelector<HTMLButtonElement>(
+          'button[aria-label="remove Keep me"]',
+        )!
+        .click(),
+    );
+    expect(readDrafts()).toHaveLength(1);
+    await act(async () => vi.advanceTimersByTimeAsync(100));
+    const popup = document.querySelector<HTMLElement>(
+      '[data-slot="dialog-content"]',
+    )!;
+    await act(async () => popup.click());
+    expect(
+      document.querySelector('[data-slot="dialog-content"][data-open]'),
+    ).not.toBeNull();
+    await act(async () => {
+      if (method === "cancel") {
+        document
+          .querySelector<HTMLButtonElement>(
+            '[data-slot="team-confirm-cancel"]',
+          )!
+          .click();
+      } else if (method === "escape") {
+        popup.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+        );
+      } else {
+        const backdrop = document.querySelector<HTMLElement>(
+          '[data-slot="dialog-overlay"]',
+        )!;
+        backdrop.dispatchEvent(
+          new PointerEvent("pointerdown", {
+            bubbles: true,
+            button: 0,
+            pointerType: "mouse",
+          }),
+        );
+        backdrop.dispatchEvent(
+          new MouseEvent("mousedown", { bubbles: true, button: 0 }),
+        );
+        backdrop.dispatchEvent(
+          new PointerEvent("pointerup", {
+            bubbles: true,
+            button: 0,
+            pointerType: "mouse",
+          }),
+        );
+        backdrop.dispatchEvent(
+          new MouseEvent("mouseup", { bubbles: true, button: 0 }),
+        );
+        backdrop.click();
+      }
+    });
+    expect(
+      document.querySelector('[data-slot="dialog-content"][data-open]'),
+    ).toBeNull();
+    expect(readDrafts()).toHaveLength(1);
+    expect(mocks.save).not.toHaveBeenCalled();
+  },
+);
 
 it("disables confirmation while checking league status and when a team becomes locked", async () => {
   const team = { ...newTeam(randomUUID()), name: "Pending draft" };
@@ -1127,14 +1173,14 @@ it("disables confirmation while checking league status and when a team becomes l
   );
   expect(
     document.querySelector<HTMLButtonElement>(
-      '[data-slot="alert-dialog-action"]',
+      '[data-slot="team-confirm-action"]',
     )!.disabled,
   ).toBe(true);
   mocks.selectedTeam = { leagueLocked: true };
   await act(async () => root.render(createElement(TeamLibrary)));
   expect(
     document.querySelector<HTMLButtonElement>(
-      '[data-slot="alert-dialog-action"]',
+      '[data-slot="team-confirm-action"]',
     )!.disabled,
   ).toBe(true);
   expect(document.body.textContent).toContain("teamRemovalLocked");
@@ -1156,7 +1202,7 @@ it("rechecks league status before deleting a draft absent from the current libra
   );
   await act(async () =>
     document
-      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-action"]')!
+      .querySelector<HTMLButtonElement>('[data-slot="team-confirm-action"]')!
       .click(),
   );
   expect(mocks.query).toHaveBeenCalledWith(api.teams.getByUuid, {

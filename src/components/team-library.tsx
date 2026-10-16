@@ -39,6 +39,7 @@ import { LoginButton } from "./site-shell";
 import { toast } from "@/components/ui/toast";
 import { LibraryHeader } from "./library-header";
 import { TeamCard } from "./team-card";
+import teamCardStyles from "./team-card.module.css";
 import { useDraftSync } from "./draft-sync-provider";
 import { favoritesFirst, libraryMatches } from "@/lib/team-library";
 import { finishDraftSignIn } from "@/lib/draft-sign-in";
@@ -47,15 +48,14 @@ import { withDraftPreferenceLock } from "@/lib/draft-lock";
 import { LibraryCardsLoading } from "./loading-layouts";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from "./ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "./ui/dialog";
 
 const selectClass = "h-10 rounded-lg pl-3";
 export function TeamLibrary() {
@@ -380,7 +380,7 @@ export function TeamLibrary() {
           (isAuthenticated &&
             listStatus === "LoadingFirstPage" &&
             !cachedResults)) ? (
-          <LibraryCardsLoading label={t("loading")} text={(key) => t(key)} />
+          <LibraryCardsLoading label={t("loading")} />
         ) : cards.length === 0 ? (
           <div className="flex min-h-[400px] flex-col items-center justify-center rounded-xl border border-dashed bg-card/50 px-6 py-16 text-center">
             <FileText className="mx-auto mb-4 size-7 text-muted-foreground" />
@@ -407,7 +407,7 @@ export function TeamLibrary() {
             )}
           </div>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <div className={teamCardStyles.grid}>
             {cards.map(
               ({ team, local, leagueLocked, leagueExperienced, favorite }) => (
                 <TeamCard
@@ -453,17 +453,31 @@ export function TeamLibrary() {
                         </TooltipContent>
                       </Tooltip>
                       {local ? (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          disabled={leagueLocked || busy !== null || isLoading}
-                          aria-label={`${t(isAuthenticated ? "discardDraft" : "remove")} ${team.name}`}
-                          onClick={() =>
-                            requestConfirmation({ team, action: "delete" })
-                          }
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                disabled={
+                                  leagueLocked || busy !== null || isLoading
+                                }
+                                aria-label={`${t(isAuthenticated ? "discardDraft" : "remove")} ${team.name}`}
+                                onClick={() =>
+                                  requestConfirmation({
+                                    team,
+                                    action: "delete",
+                                  })
+                                }
+                              />
+                            }
+                          >
+                            <Trash2 className="size-4" aria-hidden="true" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {t(isAuthenticated ? "discardDraft" : "remove")}
+                          </TooltipContent>
+                        </Tooltip>
                       ) : (
                         <Tooltip>
                           <TooltipTrigger
@@ -555,15 +569,16 @@ export function TeamLibrary() {
           )}
         </section>
       )}
-      <AlertDialog
+      <Dialog
         open={confirmationOpen}
+        disablePointerDismissal={busy !== null}
         onOpenChange={(open) => {
           if (!open && !busy) setConfirmationOpen(false);
         }}
       >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>
               {t(
                 confirmation?.action === "archive"
                   ? "confirmArchiveTeam"
@@ -572,8 +587,8 @@ export function TeamLibrary() {
                     : "confirmDeleteTeam",
                 { name: confirmation?.team.name ?? "" },
               )}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
+            </DialogTitle>
+            <DialogDescription>
               {t(
                 confirmationFavorited
                   ? "unfavoriteBeforeArchive"
@@ -585,13 +600,18 @@ export function TeamLibrary() {
                         ? "confirmPermanentDeleteTeamHint"
                         : "confirmDeleteTeamHint",
               )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy !== null}>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose
+              data-slot="team-confirm-cancel"
+              disabled={busy !== null}
+              render={<Button variant="outline" />}
+            >
               {t("cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
+            </DialogClose>
+            <Button
+              data-slot="team-confirm-action"
               variant="destructive"
               disabled={
                 busy !== null ||
@@ -625,10 +645,10 @@ export function TeamLibrary() {
                       : "remove",
                 )
               )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -665,7 +685,7 @@ function ArchivedTeams({
   return (
     <div aria-busy={status === "LoadingFirstPage"}>
       {status === "LoadingFirstPage" && !lastResults ? (
-        <LibraryCardsLoading label={t("loading")} text={(key) => t(key)} />
+        <LibraryCardsLoading label={t("loading")} />
       ) : visibleResults.length === 0 ? (
         <p className="rounded-xl border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
           {t(
@@ -675,7 +695,7 @@ function ArchivedTeams({
           )}
         </p>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div className={teamCardStyles.grid}>
           {visibleResults.map(({ team, leagueLocked, leagueExperienced }) => (
             <TeamCard
               key={team.uuid}
