@@ -93,7 +93,11 @@ body {
 }
 .site-sidebar-header {
   position: relative;
-  transition: padding 200ms ease-in-out;
+  align-items: flex-start;
+  padding-top: 10px;
+  transition:
+    height 200ms ease-in-out,
+    padding 200ms ease-in-out;
 }
 .site-sidebar-logo {
   width: calc(36px * 690 / 156);
@@ -111,6 +115,11 @@ body {
   height: 32px;
   border-radius: 8px;
   background: transparent;
+  transition:
+    top 200ms ease-in-out,
+    right 200ms ease-in-out,
+    background-color 200ms ease-in-out,
+    color 200ms ease-in-out;
 }
 .site-sidebar-content,
 .site-sidebar-footer {
@@ -200,13 +209,15 @@ body {
     grid-template-columns: var(--site-sidebar-width) minmax(0, 1fr);
     transition: grid-template-columns 200ms ease-in-out;
   }
+  .site-sidebar {
+    min-width: 0;
+    overflow: clip;
+  }
   .site-shell[data-sidebar-open="false"] {
     --site-sidebar-padding: 8px;
   }
   .site-shell[data-sidebar-open="false"] .site-sidebar-header {
     height: 112px;
-    align-items: flex-start;
-    padding-top: 10px;
     padding-inline: calc(
       (var(--site-sidebar-icon-width) - 1px - 36px * 38 / 52) / 2
     );

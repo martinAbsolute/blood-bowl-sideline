@@ -84,7 +84,7 @@ export function SidebarAccountMenu({
         <DropdownMenuItem
           disabled={signingOut}
           onClick={onSignOut}
-          className="min-h-11 gap-3 px-3"
+          className="min-h-11 gap-3 px-3 transition-colors duration-200 ease-in-out"
         >
           <LogOut aria-hidden="true" className="size-4" />
           {t("signOut")}
