@@ -206,9 +206,9 @@
   align-items: center;
   gap: 5px;
   padding: 2px 6px;
-  color: #284323a6;
+  color: #142b12;
   font:
-    600 10px ui-monospace,
+    700 10px ui-monospace,
     monospace;
 }
 .squadCaption > span {
@@ -398,6 +398,9 @@
 :global(.dark) .card {
   --pitch: #385b32;
   --pitch-line: #e1edcb38;
+}
+:global(.dark) .squadCaption {
+  color: #f1f8e9;
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
