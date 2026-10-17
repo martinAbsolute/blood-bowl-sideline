@@ -1,13 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import {
-  getRoster,
-  inducements,
-  newTeam,
-  rosters,
-  skills,
-  stars,
-} from "../src/domain/catalog";
+import { getRoster, inducements, newTeam, rosters, skills, stars } from "../src/domain/catalog";
 import {
   budgetFor,
   inducementInfo,
@@ -47,15 +40,7 @@ const tiers = [
     "shambling-undead",
     "tomb-kings",
   ],
-  [
-    "black-orc",
-    "chaos-chosen",
-    "chaos-dwarf",
-    "chaos-renegade",
-    "dwarf",
-    "khorne",
-    "nurgle",
-  ],
+  ["black-orc", "chaos-chosen", "chaos-dwarf", "chaos-renegade", "dwarf", "khorne", "nurgle"],
   ["gnome", "goblin", "halfling", "ogre", "snotling"],
 ];
 function team(rosterId = "human", count = 7): Team {
@@ -70,12 +55,10 @@ function team(rosterId = "human", count = 7): Team {
     skills: [],
   }));
   result.veteranId = result.players[0]?.id;
-  if (roster.specialRules.includes("Team Captain"))
-    result.captainId = result.players[0]?.id;
+  if (roster.specialRules.includes("Team Captain")) result.captainId = result.players[0]?.id;
   return result;
 }
-const codes = (value: Team) =>
-  validateTeam(value).issues.map(({ code }) => code);
+const codes = (value: Team) => validateTeam(value).issues.map(({ code }) => code);
 function advancement(position: Position, access: "primary" | "secondary") {
   return skills.find(
     (skill) =>
@@ -88,18 +71,12 @@ function advancement(position: Position, access: "primary" | "secondary") {
 
 describe("Kyiv Seven Sins Sevens", () => {
   it("assigns every roster its organiser tier, 650k budget, and 0/1/2/3 skills", () => {
-    expect(tiers.flat().toSorted()).toEqual(
-      rosters.map(({ id }) => id).toSorted(),
-    );
+    expect(tiers.flat().toSorted()).toEqual(rosters.map(({ id }) => id).toSorted());
     tiers.forEach((ids, index) =>
       ids.forEach((id) => {
         const value = team(id);
         expect(tierFor(value), id).toBe(index + 1);
-        expect(budgetFor(value)).toEqual({
-          teamBudget: 650000,
-          skillGold: index,
-          flowingFunds: 0,
-        });
+        expect(budgetFor(value)).toEqual({ teamBudget: 650000, skillGold: index, flowingFunds: 0 });
       }),
     );
   });
@@ -113,14 +90,9 @@ describe("Kyiv Seven Sins Sevens", () => {
 
   it("allows four specialists while preserving individual position caps", () => {
     const value = team();
-    const specialists = getRoster("human")!.players.filter(
-      (position) => !isLineman(position),
-    );
+    const specialists = getRoster("human")!.players.filter((position) => !isLineman(position));
     const choices = specialists.flatMap((position) =>
-      Array.from(
-        { length: Number(position.qty.split("-")[1]) },
-        () => position,
-      ),
+      Array.from({ length: Number(position.qty.split("-")[1]) }, () => position),
     );
     choices.slice(0, 4).forEach((position, index) => {
       value.players[index + 1].positionId = position.id;
@@ -137,25 +109,17 @@ describe("Kyiv Seven Sins Sevens", () => {
 
   it("requires one existing Lineman Veteran, reduces only their MA, and charges no gold", () => {
     const value = team();
-    const position = getRoster("human")!.players.find(
-      (position) => position.id === value.players[0].positionId,
-    )!;
+    const position = getRoster("human")!.players.find((position) => position.id === value.players[0].positionId)!;
     const gold = summarize(value).teamGold;
-    expect(playerMovement(value, value.players[0].id, position)).toBe(
-      position.ma - 1,
-    );
-    expect(playerMovement(value, value.players[1].id, position)).toBe(
-      position.ma,
-    );
+    expect(playerMovement(value, value.players[0].id, position)).toBe(position.ma - 1);
+    expect(playerMovement(value, value.players[1].id, position)).toBe(position.ma);
     delete value.veteranId;
     expect(codes(value)).toContain("veteran");
     expect(summarize(value).teamGold).toBe(gold);
     value.veteranId = randomUUID();
     expect(codes(value)).toContain("veteran");
     value.veteranId = value.players[1].id;
-    value.players[1].positionId = getRoster("human")!.players.find(
-      (position) => !isLineman(position),
-    )!.id;
+    value.players[1].positionId = getRoster("human")!.players.find((position) => !isLineman(position))!.id;
     expect(codes(value)).toContain("veteran");
   });
 
@@ -174,12 +138,9 @@ describe("Kyiv Seven Sins Sevens", () => {
     "caps total skills and supports secondary-to-primary replacement for %s",
     (id) => {
       const value = team(id);
-      const position = getRoster(id)!.players.find(
-        (position) => position.id === value.players[1].positionId,
-      )!;
+      const position = getRoster(id)!.players.find((position) => position.id === value.players[1].positionId)!;
       const allowance = tierFor(value) - 1;
-      for (let index = 1; index <= allowance; index++)
-        value.players[index].skills = [advancement(position, "primary")];
+      for (let index = 1; index <= allowance; index++) value.players[index].skills = [advancement(position, "primary")];
       expect(codes(value)).not.toContain("skillBudget");
       expect(summarize(value).skills).toBe(allowance);
       if (allowance >= 2) {
@@ -232,15 +193,8 @@ describe("Kyiv Seven Sins Sevens", () => {
       cheerleaders: { cost: 20000, max: 3 },
       dedicatedFans: { cost: 20000, max: 4 },
     });
-    for (const roster of rosters)
-      expect(staffInfo(team(roster.id)).rerolls.cost).toBe(100000);
-    value.staff = {
-      rerolls: 2,
-      apothecary: 1,
-      assistantCoaches: 1,
-      cheerleaders: 1,
-      dedicatedFans: 0,
-    };
+    for (const roster of rosters) expect(staffInfo(team(roster.id)).rerolls.cost).toBe(100000);
+    value.staff = { rerolls: 2, apothecary: 1, assistantCoaches: 1, cheerleaders: 1, dedicatedFans: 0 };
     expect(summarize(value).staff).toBe(320000);
     expect(codes(value)).toContain("budget");
     value.staff.assistantCoaches = 4;
@@ -288,15 +242,8 @@ describe("Kyiv Seven Sins Sevens", () => {
         team(rosterId),
         inducements.find((item) => item.id === id)!,
       );
-    expect(info("goblin", "bribes")).toMatchObject({
-      cost: 50000,
-      max: 2,
-      allowed: true,
-    });
-    expect(info("halfling", "halfling-master-chef")).toMatchObject({
-      cost: 100000,
-      allowed: true,
-    });
+    expect(info("goblin", "bribes")).toMatchObject({ cost: 50000, max: 2, allowed: true });
+    expect(info("halfling", "halfling-master-chef")).toMatchObject({ cost: 100000, allowed: true });
     expect(info("gnome", "halfling-master-chef").cost).toBe(300000);
     expect(info("human", "mortuary-assistant").allowed).toBe(false);
     expect(info("shambling-undead", "mortuary-assistant").allowed).toBe(true);
@@ -310,12 +257,8 @@ describe("Kyiv Seven Sins Sevens", () => {
   it("preserves ordinary draft economics and rejects a stale Veteran outside Sevens", () => {
     const value = team("human", 11);
     value.rulesetId = "bb2025-default";
-    const position = getRoster("human")!.players.find(
-      (position) => position.id === value.players[0].positionId,
-    )!;
-    expect(playerMovement(value, value.players[0].id, position)).toBe(
-      position.ma,
-    );
+    const position = getRoster("human")!.players.find((position) => position.id === value.players[0].positionId)!;
+    expect(playerMovement(value, value.players[0].id, position)).toBe(position.ma);
     expect(codes(value)).toContain("veteranRuleset");
     delete value.veteranId;
     expect(validateTeam(value).valid).toBe(true);

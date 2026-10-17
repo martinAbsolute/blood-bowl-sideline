@@ -31,9 +31,7 @@ it("clears an obsolete veteran reference when duplicating", () => {
 it("prints the veteran designation, ability and reduced MA only for Sevens", () => {
   const team = newTeam(randomUUID(), "human");
   const position = getRoster("human")!.players[0];
-  team.players = [
-    { id: randomUUID(), positionId: position.id, name: "Veteran", skills: [] },
-  ];
+  team.players = [{ id: randomUUID(), positionId: position.id, name: "Veteran", skills: [] }];
   team.veteranId = team.players[0].id;
   team.rulesetId = "kyiv-seven-sins-sevens";
   const t = (key: string) => key;
@@ -42,9 +40,7 @@ it("prints the veteran designation, ability and reduced MA only for Sevens", () 
   expect(html).toContain("sevensVeteranHelp");
   expect(html).toContain("<dt>dedicatedFans</dt><dd>1</dd>");
   team.staff.dedicatedFans = 4;
-  expect(renderToStaticMarkup(createElement(TeamPrint, { team, t }))).toContain(
-    "<dt>dedicatedFans</dt><dd>5</dd>",
-  );
+  expect(renderToStaticMarkup(createElement(TeamPrint, { team, t }))).toContain("<dt>dedicatedFans</dt><dd>5</dd>");
   expect(html).toContain(`>${position.ma - 1}</td>`);
   team.rulesetId = "bb2025-default";
   const standard = renderToStaticMarkup(createElement(TeamPrint, { team, t }));

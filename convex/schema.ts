@@ -35,11 +35,7 @@ export default defineSchema({
     name: v.string(),
     ownerId: v.id("users"),
     commissionerName: v.string(),
-    status: v.union(
-      v.literal("registration"),
-      v.literal("active"),
-      v.literal("completed"),
-    ),
+    status: v.union(v.literal("registration"), v.literal("active"), v.literal("completed")),
     rulesVersion: v.string(),
     startAt: v.number(),
     roundDays: v.number(),
@@ -97,11 +93,7 @@ export default defineSchema({
     number: v.number(),
     opensAt: v.number(),
     deadlineAt: v.number(),
-    status: v.union(
-      v.literal("pending"),
-      v.literal("open"),
-      v.literal("completed"),
-    ),
+    status: v.union(v.literal("pending"), v.literal("open"), v.literal("completed")),
   }).index("by_leagueId", ["leagueId"]),
   leagueMatches: defineTable({
     leagueId: v.id("leagues"),
@@ -192,11 +184,7 @@ export default defineSchema({
     revision: v.number(),
     actorId: v.id("users"),
     actorName: v.string(),
-    kind: v.union(
-      v.literal("recorded"),
-      v.literal("corrected"),
-      v.literal("replayed"),
-    ),
+    kind: v.union(v.literal("recorded"), v.literal("corrected"), v.literal("replayed")),
     reason: v.string(),
     before: v.union(recordedReportValidator, v.null()),
     after: recordedReportValidator,
@@ -232,34 +220,11 @@ export default defineSchema({
     .index("by_draftLeagueId", ["draftLeagueId"])
     .index("by_ownerId_and_archived", ["ownerId", "archived"])
     .index("by_owner_archive_roster", ["ownerId", "archived", "team.rosterId"])
-    .index("by_owner_archive_ruleset", [
-      "ownerId",
-      "archived",
-      "team.rulesetId",
-    ])
-    .index("by_owner_archive_roster_ruleset", [
-      "ownerId",
-      "archived",
-      "team.rosterId",
-      "team.rulesetId",
-    ])
-    .index("by_ownerId_and_archived_and_favorite", [
-      "ownerId",
-      "archived",
-      "favorite",
-    ])
-    .index("by_ownerId_and_archived_and_roster_and_favorite", [
-      "ownerId",
-      "archived",
-      "team.rosterId",
-      "favorite",
-    ])
-    .index("by_ownerId_and_archived_and_ruleset_and_favorite", [
-      "ownerId",
-      "archived",
-      "team.rulesetId",
-      "favorite",
-    ])
+    .index("by_owner_archive_ruleset", ["ownerId", "archived", "team.rulesetId"])
+    .index("by_owner_archive_roster_ruleset", ["ownerId", "archived", "team.rosterId", "team.rulesetId"])
+    .index("by_ownerId_and_archived_and_favorite", ["ownerId", "archived", "favorite"])
+    .index("by_ownerId_and_archived_and_roster_and_favorite", ["ownerId", "archived", "team.rosterId", "favorite"])
+    .index("by_ownerId_and_archived_and_ruleset_and_favorite", ["ownerId", "archived", "team.rulesetId", "favorite"])
     .index("by_ownerId_and_archived_and_roster_and_ruleset_and_favorite", [
       "ownerId",
       "archived",
@@ -269,12 +234,6 @@ export default defineSchema({
     ])
     .searchIndex("search_library", {
       searchField: "searchText",
-      filterFields: [
-        "ownerId",
-        "archived",
-        "team.rosterId",
-        "team.rulesetId",
-        "favorite",
-      ],
+      filterFields: ["ownerId", "archived", "team.rosterId", "team.rulesetId", "favorite"],
     }),
 });

@@ -1,8 +1,4 @@
-import {
-  casualtyOutcome,
-  emptyPlayerStats,
-  type PlayerMatchStats,
-} from "./league-rules";
+import { casualtyOutcome, emptyPlayerStats, type PlayerMatchStats } from "./league-rules";
 
 export const matchEventKinds = [
   "touchdown",
@@ -15,15 +11,7 @@ export const matchEventKinds = [
   "mvp",
 ] as const;
 export type MatchEventKind = (typeof matchEventKinds)[number];
-export const casualtyCauses = [
-  "block",
-  "foul",
-  "crowd",
-  "dodge",
-  "rush",
-  "special",
-  "other",
-] as const;
+export const casualtyCauses = ["block", "foul", "crowd", "dodge", "rush", "special", "other"] as const;
 export interface MatchEvent {
   id: string;
   kind: MatchEventKind;
@@ -74,33 +62,19 @@ export function newMatchEvent(playerId = ""): MatchEvent {
 }
 
 export function resolvedCasualty(event: MatchEvent) {
-  const roll =
-    event.apothecary && !event.keepOriginal
-      ? event.apothecaryRoll
-      : event.casualtyRoll;
-  const lasting =
-    event.apothecary && !event.keepOriginal
-      ? event.apothecaryLastingRoll
-      : event.lastingRoll;
+  const roll = event.apothecary && !event.keepOriginal ? event.apothecaryRoll : event.casualtyRoll;
+  const lasting = event.apothecary && !event.keepOriginal ? event.apothecaryLastingRoll : event.lastingRoll;
   if (roll === null) throw new Error("EVENT_CASUALTY_REQUIRED");
   const outcome = casualtyOutcome(roll, lasting ?? undefined);
-  const recovered =
-    event.regeneration === "succeeded" ||
-    (event.apothecary && outcome.result === "badly-hurt");
+  const recovered = event.regeneration === "succeeded" || (event.apothecary && outcome.result === "badly-hurt");
   return { roll, lasting, outcome, recovered };
 }
 
 /** Stable insertion order for un-timed reports; optional half/turn puts late entries in play order. */
-export function sortMatchEvents<T extends MatchEvent>(
-  events: readonly T[],
-): T[] {
+export function sortMatchEvents<T extends MatchEvent>(events: readonly T[]): T[] {
   return [...events].sort((a, b) => {
     const order = (event: MatchEvent) =>
-      event.kind === "mvp"
-        ? 1000
-        : event.half === null
-          ? 999
-          : event.half * 20 + (event.turn ?? 19);
+      event.kind === "mvp" ? 1000 : event.half === null ? 999 : event.half * 20 + (event.turn ?? 19);
     return order(a) - order(b);
   });
 }
@@ -111,10 +85,7 @@ export function projectMatchEvents<T extends EventPlayer>(
   events: readonly MatchEvent[],
   homeId: string,
 ) {
-  if (
-    events.length > 256 ||
-    new Set(events.map((event) => event.id)).size !== events.length
-  )
+  if (events.length > 256 || new Set(events.map((event) => event.id)).size !== events.length)
     throw new Error("EVENT_LIMIT");
   const rows = players.map((row) => ({
     ...row,
@@ -128,41 +99,24 @@ export function projectMatchEvents<T extends EventPlayer>(
   const mvpTeams = new Set<string>();
   const injured = new Set<string>();
   for (const event of sortMatchEvents(events)) {
-    if (!event.id || event.id.length > 100 || event.notes.length > 500)
-      throw new Error("INVALID_INPUT");
+    if (!event.id || event.id.length > 100 || event.notes.length > 500) throw new Error("INVALID_INPUT");
     if (
       (event.half !== null && ![1, 2, 3].includes(event.half)) ||
       (event.turn !== null &&
-        (event.half === null ||
-          !Number.isInteger(event.turn) ||
-          event.turn < 1 ||
-          event.turn > 8))
+        (event.half === null || !Number.isInteger(event.turn) || event.turn < 1 || event.turn > 8))
     )
       throw new Error("INVALID_INPUT");
     const player = byId.get(event.playerId);
     const target = event.targetId ? byId.get(event.targetId) : undefined;
-    if (
-      !player?.participated ||
-      (event.targetId && !target?.participated) ||
-      target === player
-    )
+    if (!player?.participated || (event.targetId && !target?.participated) || target === player)
       throw new Error("INELIGIBLE_PLAYER");
     const linked =
       ["completion", "throw-team-mate", "interception"].includes(event.kind) ||
-      (event.kind === "casualty" &&
-        ["block", "foul", "special"].includes(event.cause));
+      (event.kind === "casualty" && ["block", "foul", "special"].includes(event.cause));
     if (linked && !target) throw new Error("EVENT_TARGET_REQUIRED");
-    if (
-      target &&
-      ["completion", "throw-team-mate"].includes(event.kind) &&
-      player.entryId !== target.entryId
-    )
+    if (target && ["completion", "throw-team-mate"].includes(event.kind) && player.entryId !== target.entryId)
       throw new Error("EVENT_TEAM_MISMATCH");
-    if (
-      target &&
-      (event.kind === "interception" || event.kind === "casualty") &&
-      player.entryId === target.entryId
-    )
+    if (target && (event.kind === "interception" || event.kind === "casualty") && player.entryId === target.entryId)
       throw new Error("EVENT_TEAM_MISMATCH");
     if (!linked && event.targetId !== null) throw new Error("INVALID_INPUT");
     if (
@@ -175,10 +129,8 @@ export function projectMatchEvents<T extends EventPlayer>(
         event.keepOriginal)
     )
       throw new Error("INVALID_INPUT");
-    if (event.apothecary && !["casualty", "knockout"].includes(event.kind))
-      throw new Error("INVALID_INPUT");
-    if (event.superb && event.kind !== "throw-team-mate")
-      throw new Error("INVALID_INPUT");
+    if (event.apothecary && !["casualty", "knockout"].includes(event.kind)) throw new Error("INVALID_INPUT");
+    if (event.superb && event.kind !== "throw-team-mate") throw new Error("INVALID_INPUT");
     switch (event.kind) {
       case "touchdown":
         player.stats.td++;
@@ -190,8 +142,7 @@ export function projectMatchEvents<T extends EventPlayer>(
         player.stats.int++;
         break;
       case "mvp":
-        if (mvpTeams.has(player.entryId))
-          throw new Error("ONE_MVP_PER_TEAM_REQUIRED");
+        if (mvpTeams.has(player.entryId)) throw new Error("ONE_MVP_PER_TEAM_REQUIRED");
         mvpTeams.add(player.entryId);
         player.stats.mvp++;
         break;
@@ -200,21 +151,12 @@ export function projectMatchEvents<T extends EventPlayer>(
         target!.stats.safeLandings++;
         break;
       case "casualty": {
-        if (event.casualtyRoll === null)
-          throw new Error("EVENT_CASUALTY_REQUIRED");
+        if (event.casualtyRoll === null) throw new Error("EVENT_CASUALTY_REQUIRED");
         casualtyOutcome(event.casualtyRoll, event.lastingRoll ?? undefined);
         if (event.apothecary) {
-          if (event.apothecaryRoll === null)
-            throw new Error("EVENT_APOTHECARY_REQUIRED");
-          casualtyOutcome(
-            event.apothecaryRoll,
-            event.apothecaryLastingRoll ?? undefined,
-          );
-        } else if (
-          event.apothecaryRoll !== null ||
-          event.apothecaryLastingRoll !== null ||
-          event.keepOriginal
-        )
+          if (event.apothecaryRoll === null) throw new Error("EVENT_APOTHECARY_REQUIRED");
+          casualtyOutcome(event.apothecaryRoll, event.apothecaryLastingRoll ?? undefined);
+        } else if (event.apothecaryRoll !== null || event.apothecaryLastingRoll !== null || event.keepOriginal)
           throw new Error("INVALID_INPUT");
         const victim = target ?? player;
         victim.stats.inj++;
@@ -225,8 +167,7 @@ export function projectMatchEvents<T extends EventPlayer>(
         const resolved = resolvedCasualty(event);
         if (!resolved.recovered) {
           // A player removed as a casualty cannot suffer another until recovered.
-          if (injured.has(victim.playerId))
-            throw new Error("EVENT_DUPLICATE_INJURY");
+          if (injured.has(victim.playerId)) throw new Error("EVENT_DUPLICATE_INJURY");
           injured.add(victim.playerId);
           victim.casualtyRoll = resolved.roll;
           victim.lastingRoll = resolved.lasting;
@@ -252,11 +193,7 @@ export function projectMatchEvents<T extends EventPlayer>(
   }
   return {
     players: rows,
-    scoreHome: rows
-      .filter((row) => row.entryId === homeId)
-      .reduce((sum, row) => sum + row.stats.td, 0),
-    scoreAway: rows
-      .filter((row) => row.entryId !== homeId)
-      .reduce((sum, row) => sum + row.stats.td, 0),
+    scoreHome: rows.filter((row) => row.entryId === homeId).reduce((sum, row) => sum + row.stats.td, 0),
+    scoreAway: rows.filter((row) => row.entryId !== homeId).reduce((sum, row) => sum + row.stats.td, 0),
   };
 }

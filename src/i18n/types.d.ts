@@ -15,15 +15,7 @@ type CatalogMessages = {
   ]: Record<string, string>;
 };
 type LeagueMessages = {
-  [
-    Key in
-      | "errors"
-      | "audit"
-      | "status"
-      | "stats"
-      | "statDescriptions"
-      | "rookieIssues"
-  ]: Record<string, string>;
+  [Key in "errors" | "audit" | "status" | "stats" | "statDescriptions" | "rookieIssues"]: Record<string, string>;
 };
 
 declare module "next-intl" {
@@ -31,11 +23,8 @@ declare module "next-intl" {
     Locale: AppLocale;
     Messages: Omit<typeof en, keyof CatalogMessages | "leagueUi" | "leagueUx"> &
       CatalogMessages & {
-        leagueUx: Omit<typeof en.leagueUx, "profileHelp"> & {
-          profileHelp: Record<string, string>;
-        };
-        leagueUi: Omit<typeof en.leagueUi, keyof LeagueMessages> &
-          LeagueMessages;
+        leagueUx: Omit<typeof en.leagueUx, "profileHelp"> & { profileHelp: Record<string, string> };
+        leagueUi: Omit<typeof en.leagueUi, keyof LeagueMessages> & LeagueMessages;
       };
     Formats: typeof formats;
   }

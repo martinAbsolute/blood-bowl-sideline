@@ -6,18 +6,8 @@ import { randomUUID } from "node:crypto";
 import { ConvexError } from "convex/values";
 import { getFunctionName, type FunctionReference } from "convex/server";
 import { getRoster, newTeam } from "../src/domain/catalog";
-import {
-  readDrafts,
-  readRevision,
-  readDraftRevision,
-  storeDraft,
-  storeRevision,
-} from "../src/lib/drafts";
-import {
-  PENDING_SAVE,
-  prepareDraftSignIn,
-  pendingDraftSave,
-} from "../src/lib/draft-sign-in";
+import { readDrafts, readRevision, readDraftRevision, storeDraft, storeRevision } from "../src/lib/drafts";
+import { PENDING_SAVE, prepareDraftSignIn, pendingDraftSave } from "../src/lib/draft-sign-in";
 import { DraftSignInProvider as DraftProvider } from "../src/components/draft-sign-in-provider";
 import { TooltipProvider } from "../src/components/ui/tooltip";
 import { TeamEditor } from "../src/components/team-editor";
@@ -43,8 +33,7 @@ vi.mock("next-intl", async (importOriginal) => {
   const { formats, timeZone } = await import("../src/i18n/config");
   return {
     ...actual,
-    useFormatter: () =>
-      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useFormatter: () => actual.createFormatter({ locale: "en", formats, timeZone }),
     useTranslations: () => mocks.t,
     useLocale: () => "en",
     useSetLocale: () => vi.fn(),
@@ -53,27 +42,21 @@ vi.mock("next-intl", async (importOriginal) => {
 vi.mock("convex/react", () => ({
   useConvexAuth: () => mocks.auth,
   useConvexConnectionState: () => ({ isWebSocketConnected: mocks.connected }),
-  useMutation: () =>
-    Object.assign(mocks.save, { withOptimisticUpdate: () => mocks.save }),
+  useMutation: () => Object.assign(mocks.save, { withOptimisticUpdate: () => mocks.save }),
   useQuery: (query: FunctionReference<"query">) =>
     getFunctionName(query) === "leagues:listTeamCareers" ? [] : mocks.query(),
   useAction: () => mocks.isTelegramConfigured,
 }));
-vi.mock("@convex-dev/auth/react", () => ({
-  useAuthActions: () => ({ signIn: mocks.signIn }),
-}));
+vi.mock("@convex-dev/auth/react", () => ({ useAuthActions: () => ({ signIn: mocks.signIn }) }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: mocks.replace, push: mocks.push }),
   usePathname: () => "/builder",
   useSearchParams: () => new URLSearchParams(),
 }));
 vi.mock("next/link", () => ({
-  default: ({ children, ...props }: { children: React.ReactNode }) =>
-    createElement("a", props, children),
+  default: ({ children, ...props }: { children: React.ReactNode }) => createElement("a", props, children),
 }));
-vi.mock("@/components/ui/toast", () => ({
-  toast: { add: mocks.toast },
-}));
+vi.mock("@/components/ui/toast", () => ({ toast: { add: mocks.toast } }));
 
 let root: Root;
 it("recognizes production conflicts from structured error data despite a redacted message", async () => {
@@ -86,18 +69,10 @@ it("recognizes production conflicts from structured error data despite a redacte
   await act(async () => vi.advanceTimersByTimeAsync(450));
   expect(mocks.toast).not.toHaveBeenCalled();
   expect(readDrafts()).toHaveLength(1);
-  expect(
-    Array.from(container.querySelectorAll("button")).some(
-      (b) => b.textContent === "retry",
-    ),
-  ).toBe(false);
+  expect(Array.from(container.querySelectorAll("button")).some((b) => b.textContent === "retry")).toBe(false);
 });
 function DraftSignInProvider({ children }: { children?: React.ReactNode }) {
-  return createElement(
-    DraftProvider,
-    null,
-    createElement(TooltipProvider, null, children),
-  );
+  return createElement(DraftProvider, null, createElement(TooltipProvider, null, children));
 }
 let container: HTMLDivElement;
 beforeEach(() => {
@@ -116,9 +91,7 @@ beforeEach(() => {
   mocks.auth = { isAuthenticated: false, isLoading: false };
   mocks.connected = true;
   mocks.save.mockReset().mockResolvedValue({ revision: 1 });
-  mocks.signIn.mockReset().mockResolvedValue({
-    redirect: new URL("https://oauth.telegram.org/auth"),
-  });
+  mocks.signIn.mockReset().mockResolvedValue({ redirect: new URL("https://oauth.telegram.org/auth") });
   mocks.toast.mockClear();
   mocks.replace.mockClear();
   mocks.push.mockClear();
@@ -140,22 +113,16 @@ it("syncs rapid edits automatically with no Save button, coalescing them into on
   mocks.auth = { isAuthenticated: true, isLoading: false };
   const team = newTeam(randomUUID(), "amazon");
   await act(async () => root.render(editor(team)));
-  const add = container.querySelector<HTMLButtonElement>(
-    'button[aria-label="increaseQuantity"]',
-  )!;
+  const add = container.querySelector<HTMLButtonElement>('button[aria-label="increaseQuantity"]')!;
   await act(async () => add.click());
   await act(async () => add.click());
-  expect(container.querySelector('[role="status"]')?.textContent).toContain(
-    "saving",
-  );
+  expect(container.querySelector('[role="status"]')?.textContent).toContain("saving");
   expect(mocks.save).not.toHaveBeenCalled();
   await act(async () => vi.advanceTimersByTimeAsync(450));
   expect(mocks.save).toHaveBeenCalledTimes(1);
   expect(mocks.save.mock.calls[0][0].team.players).toHaveLength(2);
   expect(mocks.save.mock.calls[0][0].expectedRevision).toBe(0);
-  expect(container.querySelector('[role="status"]')?.textContent).toContain(
-    "savedCloud",
-  );
+  expect(container.querySelector('[role="status"]')?.textContent).toContain("savedCloud");
   expect(
     Array.from(container.querySelectorAll("button")).some((button) =>
       /saveTeam|saveChanges/.test(button.textContent ?? ""),
@@ -179,9 +146,7 @@ it("queues edits made while a save is in flight and uses the server's next revis
   mocks.auth = { isAuthenticated: true, isLoading: false };
   await act(async () => root.render(editor(team)));
   expect(mocks.save).toHaveBeenCalledTimes(1);
-  const add = container.querySelector<HTMLButtonElement>(
-    'button[aria-label="increaseQuantity"]',
-  )!;
+  const add = container.querySelector<HTMLButtonElement>('button[aria-label="increaseQuantity"]')!;
   await act(async () => add.click());
   await act(async () => vi.advanceTimersByTimeAsync(1000));
   expect(mocks.save).toHaveBeenCalledTimes(1);
@@ -199,14 +164,10 @@ it("keeps failed automatic edits locally and retries on the next edit without a 
   mocks.auth = { isAuthenticated: true, isLoading: false };
   mocks.save.mockRejectedValueOnce(new Error("offline"));
   await act(async () => root.render(editor(team)));
-  const add = container.querySelector<HTMLButtonElement>(
-    'button[aria-label="increaseQuantity"]',
-  )!;
+  const add = container.querySelector<HTMLButtonElement>('button[aria-label="increaseQuantity"]')!;
   await act(async () => add.click());
   await act(async () => vi.advanceTimersByTimeAsync(450));
-  expect(container.querySelector('[role="status"]')?.textContent).toContain(
-    "saveStatusError",
-  );
+  expect(container.querySelector('[role="status"]')?.textContent).toContain("saveStatusError");
   expect(readDrafts()[0].players).toHaveLength(1);
   await act(async () => vi.advanceTimersByTimeAsync(5000));
   expect(mocks.save).toHaveBeenCalledTimes(1);
@@ -220,19 +181,8 @@ it("opens owned UUID teams directly for editing and keeps local edits when live 
   vi.useFakeTimers();
   mocks.auth = { isAuthenticated: true, isLoading: false };
   const team = newTeam(randomUUID(), "amazon");
-  const initial = {
-    team,
-    revision: 1,
-    legal: false,
-    updatedAt: 1,
-    canEdit: false,
-  };
-  const shared = () =>
-    createElement(
-      DraftSignInProvider,
-      null,
-      createElement(SharedTeam, { initial }),
-    );
+  const initial = { team, revision: 1, legal: false, updatedAt: 1, canEdit: false };
+  const shared = () => createElement(DraftSignInProvider, null, createElement(SharedTeam, { initial }));
   await act(async () => root.render(shared()));
   expect(container.querySelector('input[aria-label="teamName"]')).toBeNull();
   mocks.query.mockReturnValue({ ...initial, canEdit: true });
@@ -240,9 +190,7 @@ it("opens owned UUID teams directly for editing and keeps local edits when live 
   const name = container.querySelector('input[aria-label="teamName"]');
   expect(name).not.toBeNull();
   expect(container.textContent).not.toContain("editTeam");
-  const add = container.querySelector<HTMLButtonElement>(
-    'button[aria-label="increaseQuantity"]',
-  )!;
+  const add = container.querySelector<HTMLButtonElement>('button[aria-label="increaseQuantity"]')!;
   await act(async () => add.click());
   mocks.query.mockReturnValue({ ...initial, canEdit: true, revision: 2 });
   await act(async () => root.render(shared()));
@@ -278,12 +226,7 @@ function editor(team = newTeam(randomUUID())) {
   return createElement(
     StrictMode,
     null,
-    createElement(
-      DraftSignInProvider,
-      null,
-      createElement(LoginButton),
-      createElement(TeamEditor, { initial: team }),
-    ),
+    createElement(DraftSignInProvider, null, createElement(LoginButton), createElement(TeamEditor, { initial: team })),
   );
 }
 
@@ -300,9 +243,7 @@ it("removes only the selected player's added skill from the table and saves with
   await act(async () => root.render(editor(team)));
   const rows = container.querySelectorAll(".player-table tbody tr");
   expect(rows[0].querySelectorAll(".skill-removable-action")).toHaveLength(2);
-  const remove = rows[0].querySelector<HTMLButtonElement>(
-    'button[aria-label="removeSkill · Block"]',
-  )!;
+  const remove = rows[0].querySelector<HTMLButtonElement>('button[aria-label="removeSkill · Block"]')!;
   await act(async () => remove.click());
   expect(readDrafts()[0].players[0].skills).toEqual(["guard"]);
   expect(readDrafts()[0].players[1].skills).toEqual(["block", "guard"]);
@@ -316,25 +257,12 @@ it("removes only the selected player's added skill from the table and saves with
 it("keeps added skills in read-only player tables without remove buttons", async () => {
   const team = newTeam(randomUUID(), "human");
   team.players = [
-    {
-      id: randomUUID(),
-      positionId: getRoster("human")!.players[0].id,
-      name: "Player",
-      skills: ["block"],
-    },
+    { id: randomUUID(), positionId: getRoster("human")!.players[0].id, name: "Player", skills: ["block"] },
   ];
   await act(async () =>
-    root.render(
-      createElement(
-        DraftSignInProvider,
-        null,
-        createElement(TeamEditor, { initial: team, readOnly: true }),
-      ),
-    ),
+    root.render(createElement(DraftSignInProvider, null, createElement(TeamEditor, { initial: team, readOnly: true }))),
   );
-  expect(container.querySelector(".player-table")?.textContent).toContain(
-    "Block",
-  );
+  expect(container.querySelector(".player-table")?.textContent).toContain("Block");
   expect(container.querySelector(".skill-removable-action")).toBeNull();
 });
 
@@ -352,28 +280,19 @@ it("assigns one Sevens veteran using eligible player checkboxes and persists its
   const veteranHeading = Array.from(container.querySelectorAll("th")).find(
     (heading) => heading.textContent === "sevensVeteranColumn",
   );
-  expect(veteranHeading?.querySelector("button > span")?.className).toContain(
-    "border-b border-dotted",
-  );
+  expect(veteranHeading?.querySelector("button > span")?.className).toContain("border-b border-dotted");
   expect(veteranHeading?.querySelector("svg")).toBeNull();
   const checkbox = (number: number) =>
-    container.querySelector<HTMLElement>(
-      `[role="checkbox"][aria-label="sevensVeteran · Player ${number}"]`,
-    )!;
+    container.querySelector<HTMLElement>(`[role="checkbox"][aria-label="sevensVeteran · Player ${number}"]`)!;
   expect(container.querySelector("#sevens-veteran")).toBeNull();
   expect(checkbox(3)).toBeNull();
   const toggle = async (number: number) =>
     act(async () => {
-      checkbox(number)
-        .closest("label")!
-        .querySelector<HTMLInputElement>('input[type="checkbox"]')!
-        .click();
+      checkbox(number).closest("label")!.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click();
     });
   await toggle(1);
   expect(readDrafts()[0].veteranId).toBe(team.players[0].id);
-  expect(
-    checkbox(1).closest("tr")?.querySelector(".table-skills")?.textContent,
-  ).toContain("sevensVeteran");
+  expect(checkbox(1).closest("tr")?.querySelector(".table-skills")?.textContent).toContain("sevensVeteran");
   await toggle(2);
   expect(readDrafts()[0].veteranId).toBe(team.players[1].id);
   expect(checkbox(1).getAttribute("aria-checked")).toBe("false");
@@ -385,10 +304,7 @@ it("assigns one Sevens veteran using eligible player checkboxes and persists its
       createElement(
         DraftSignInProvider,
         null,
-        createElement(TeamEditor, {
-          initial: { ...team, veteranId: team.players[0].id },
-          readOnly: true,
-        }),
+        createElement(TeamEditor, { initial: { ...team, veteranId: team.players[0].id }, readOnly: true }),
       ),
     ),
   );
@@ -403,24 +319,13 @@ it("header login preserves the exact draft; returning saves the entire unfinishe
   team.notes = "Keep these tactics";
   team.rulesetId = "eurobowl-2026";
   team.staff.rerolls = 2;
-  team.players.push({
-    id: randomUUID(),
-    positionId: "dwarf-0",
-    name: "Player",
-    skills: [],
-  });
+  team.players.push({ id: randomUUID(), positionId: "dwarf-0", name: "Player", skills: [] });
   // Use a known catalog position rather than trusting test-only identifiers.
   const { getRoster } = await import("../src/domain/catalog");
   team.players[0].positionId = getRoster("dwarf")!.players[0].id;
   await act(async () => root.render(editor(team)));
-  await act(async () =>
-    container
-      .querySelector<HTMLButtonElement>('button[aria-label="signIn"]')!
-      .click(),
-  );
-  expect(mocks.signIn).toHaveBeenCalledWith("telegram", {
-    redirectTo: `/teams/${team.uuid}`,
-  });
+  await act(async () => container.querySelector<HTMLButtonElement>('button[aria-label="signIn"]')!.click());
+  expect(mocks.signIn).toHaveBeenCalledWith("telegram", { redirectTo: `/teams/${team.uuid}` });
   expect(readDrafts()).toEqual([team]);
   expect(pendingDraftSave(team.uuid)?.revision).toBe(0);
   expect(mocks.save).not.toHaveBeenCalled();
@@ -431,10 +336,7 @@ it("header login preserves the exact draft; returning saves the entire unfinishe
   expect(mocks.save).not.toHaveBeenCalled();
   mocks.auth = { isAuthenticated: true, isLoading: false };
   await act(async () => root.render(editor(readDrafts()[0])));
-  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({
-    team,
-    expectedRevision: 0,
-  });
+  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({ team, expectedRevision: 0 });
   expect(readRevision(team.uuid)).toBe(1);
   expect(sessionStorage.getItem(PENDING_SAVE)).toBeNull();
   expect(readDrafts()).toEqual([]);
@@ -448,10 +350,7 @@ it("preserves the draft and pending save on rejection without repeatedly retryin
   mocks.save.mockRejectedValue(new Error("CONFLICT"));
   mocks.auth = { isAuthenticated: true, isLoading: false };
   await act(async () => root.render(editor(team)));
-  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({
-    team,
-    expectedRevision: 2,
-  });
+  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({ team, expectedRevision: 2 });
   expect(mocks.toast).not.toHaveBeenCalled();
   expect(readDrafts()).toEqual([team]);
   expect(pendingDraftSave(team.uuid)).not.toBeNull();
@@ -467,10 +366,7 @@ it("keeps a nameless local draft through login, asking for a name before the acc
   mocks.auth = { isAuthenticated: true, isLoading: false };
   await act(async () => root.render(editor(readDrafts()[0])));
   expect(mocks.save).not.toHaveBeenCalled();
-  expect(mocks.toast).toHaveBeenCalledWith({
-    type: "error",
-    title: "teamNameRequired",
-  });
+  expect(mocks.toast).toHaveBeenCalledWith({ type: "error", title: "teamNameRequired" });
 });
 
 it("never uploads an unrelated draft or a read-only public team", async () => {
@@ -481,13 +377,7 @@ it("never uploads an unrelated draft or a read-only public team", async () => {
   expect(mocks.save).not.toHaveBeenCalled();
   prepareDraftSignIn(team, 0);
   await act(async () =>
-    root.render(
-      createElement(
-        DraftSignInProvider,
-        null,
-        createElement(TeamEditor, { initial: team, readOnly: true }),
-      ),
-    ),
+    root.render(createElement(DraftSignInProvider, null, createElement(TeamEditor, { initial: team, readOnly: true }))),
   );
   expect(mocks.save).not.toHaveBeenCalled();
 });
@@ -499,11 +389,7 @@ it("does not erase the callback code while the builder mounts", async () => {
   mocks.auth = { isAuthenticated: false, isLoading: true };
   await act(async () =>
     root.render(
-      createElement(
-        DraftSignInProvider,
-        null,
-        createElement(BuilderStart, { draft: team.uuid, fresh: false }),
-      ),
+      createElement(DraftSignInProvider, null, createElement(BuilderStart, { draft: team.uuid, fresh: false })),
     ),
   );
   expect(mocks.replace).not.toHaveBeenCalled();
@@ -513,25 +399,17 @@ it("does not erase the callback code while the builder mounts", async () => {
 it("a new device opens an empty builder without creating a phantom draft", async () => {
   window.history.replaceState({}, "", "/builder");
   await act(async () =>
-    root.render(
-      createElement(
-        DraftSignInProvider,
-        null,
-        createElement(BuilderStart, { fresh: false }),
-      ),
-    ),
+    root.render(createElement(DraftSignInProvider, null, createElement(BuilderStart, { fresh: false }))),
   );
   expect(readDrafts()).toEqual([]);
   expect(mocks.replace).not.toHaveBeenCalled();
-  expect(container.querySelector('a[href="/rosters"]')?.textContent).toBe(
-    "chooseRoster",
-  );
+  expect(container.querySelector('a[href="/rosters"]')?.textContent).toBe("chooseRoster");
 });
 
 function action(label: string) {
-  return Array.from(
-    document.querySelectorAll<HTMLButtonElement>("button"),
-  ).find((button) => button.textContent === label)!;
+  return Array.from(document.querySelectorAll<HTMLButtonElement>("button")).find(
+    (button) => button.textContent === label,
+  )!;
 }
 
 it("duplicates a public team into a new guest draft without changing the source", async () => {
@@ -542,11 +420,7 @@ it("duplicates a public team into a new guest draft without changing the source"
       createElement(
         DraftSignInProvider,
         null,
-        createElement(TeamEditor, {
-          initial: team,
-          revision: 1,
-          readOnly: true,
-        }),
+        createElement(TeamEditor, { initial: team, revision: 1, readOnly: true }),
       ),
     ),
   );
@@ -555,18 +429,10 @@ it("duplicates a public team into a new guest draft without changing the source"
   await act(async () => action("duplicate").click());
   expect(readDrafts()).toEqual([]);
   expect(document.body.textContent).toContain("confirmCopyTeamHint");
-  await act(async () =>
-    document
-      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-cancel"]')!
-      .click(),
-  );
+  await act(async () => document.querySelector<HTMLButtonElement>('[data-slot="alert-dialog-cancel"]')!.click());
   expect(readDrafts()).toEqual([]);
   await act(async () => action("duplicate").click());
-  await act(async () =>
-    document
-      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-action"]')!
-      .click(),
-  );
+  await act(async () => document.querySelector<HTMLButtonElement>('[data-slot="alert-dialog-action"]')!.click());
   const duplicate = readDrafts()[0];
   expect(duplicate.name).toBe("Absolute Orcs (copySuffix)");
   expect(duplicate.uuid).not.toBe(team.uuid);
@@ -582,21 +448,13 @@ it("saves a duplicate to the signed-in account and clears its exact local recove
       createElement(
         DraftSignInProvider,
         null,
-        createElement(TeamEditor, {
-          initial: team,
-          revision: 1,
-          readOnly: true,
-        }),
+        createElement(TeamEditor, { initial: team, revision: 1, readOnly: true }),
       ),
     ),
   );
   await act(async () => action("duplicate").click());
   expect(mocks.save).not.toHaveBeenCalled();
-  await act(async () =>
-    document
-      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-action"]')!
-      .click(),
-  );
+  await act(async () => document.querySelector<HTMLButtonElement>('[data-slot="alert-dialog-action"]')!.click());
   const request = mocks.save.mock.calls[0][0];
   expect(request.team.uuid).not.toBe(team.uuid);
   expect(request.expectedRevision).toBe(0);
@@ -614,25 +472,14 @@ it("retains a failed duplicate as a recovery draft and reports the cloud failure
       createElement(
         DraftSignInProvider,
         null,
-        createElement(TeamEditor, {
-          initial: team,
-          revision: 1,
-          readOnly: true,
-        }),
+        createElement(TeamEditor, { initial: team, revision: 1, readOnly: true }),
       ),
     ),
   );
   await act(async () => action("duplicate").click());
-  await act(async () =>
-    document
-      .querySelector<HTMLButtonElement>('[data-slot="alert-dialog-action"]')!
-      .click(),
-  );
+  await act(async () => document.querySelector<HTMLButtonElement>('[data-slot="alert-dialog-action"]')!.click());
   expect(readDrafts()).toHaveLength(1);
-  expect(mocks.toast).toHaveBeenCalledWith({
-    type: "error",
-    title: "saveFailed",
-  });
+  expect(mocks.toast).toHaveBeenCalledWith({ type: "error", title: "saveFailed" });
   expect(mocks.push).toHaveBeenCalledWith(`/teams/${readDrafts()[0].uuid}`);
 });
 
@@ -640,29 +487,16 @@ it("shares only an authenticated owner's saved team and reports clipboard denial
   vi.useFakeTimers();
   mocks.auth = { isAuthenticated: true, isLoading: false };
   const writeText = vi.fn().mockResolvedValue(undefined);
-  Object.defineProperty(navigator, "clipboard", {
-    configurable: true,
-    value: { writeText },
-  });
+  Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
   const team = newTeam(randomUUID(), "orc");
   await act(async () =>
-    root.render(
-      createElement(
-        DraftSignInProvider,
-        null,
-        createElement(TeamEditor, { initial: team, revision: 1 }),
-      ),
-    ),
+    root.render(createElement(DraftSignInProvider, null, createElement(TeamEditor, { initial: team, revision: 1 }))),
   );
   const shareButton = action("share");
   await act(async () => shareButton.click());
-  expect(writeText).toHaveBeenCalledWith(
-    `${window.location.origin}/teams/${team.uuid}`,
-  );
+  expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/teams/${team.uuid}`);
   expect(shareButton.dataset.actionState).toBe("success");
-  expect(shareButton.querySelector('[role="status"]')?.textContent).toBe(
-    "shareSucceeded",
-  );
+  expect(shareButton.querySelector('[role="status"]')?.textContent).toBe("shareSucceeded");
   expect(shareButton.disabled).toBe(true);
   await act(async () => vi.advanceTimersByTimeAsync(1500));
   expect(shareButton.dataset.actionState).toBe("idle");
@@ -670,9 +504,7 @@ it("shares only an authenticated owner's saved team and reports clipboard denial
   writeText.mockRejectedValue(new Error("Clipboard denied"));
   await act(async () => shareButton.click());
   expect(shareButton.dataset.actionState).toBe("error");
-  expect(shareButton.querySelector('[role="status"]')?.textContent).toBe(
-    "copyFailed",
-  );
+  expect(shareButton.querySelector('[role="status"]')?.textContent).toBe("copyFailed");
   expect(action("duplicate")).toBeDefined();
 });
 
@@ -687,32 +519,15 @@ it("adopts another tab's cloud changes when idle, then edits from that exact rev
   mocks.auth = { isAuthenticated: true, isLoading: false };
   const team = newTeam(randomUUID(), "amazon");
   const live = { team, revision: 1, canEdit: true, legal: false, updatedAt: 1 };
-  const page = () =>
-    createElement(
-      DraftSignInProvider,
-      null,
-      createElement(TeamPage, { uuid: team.uuid }),
-    );
+  const page = () => createElement(DraftSignInProvider, null, createElement(TeamPage, { uuid: team.uuid }));
   mocks.query.mockReturnValue(live);
   await act(async () => root.render(page()));
-  const name = container.querySelector<HTMLInputElement>(
-    'input[aria-label="teamName"]',
-  )!;
-  mocks.query.mockReturnValue({
-    ...live,
-    revision: 2,
-    team: { ...team, name: "Other tab" },
-  });
+  const name = container.querySelector<HTMLInputElement>('input[aria-label="teamName"]')!;
+  mocks.query.mockReturnValue({ ...live, revision: 2, team: { ...team, name: "Other tab" } });
   await act(async () => root.render(page()));
   expect(name.value).toBe("Other tab");
   expect(mocks.save).not.toHaveBeenCalled();
-  await act(async () =>
-    container
-      .querySelector<HTMLButtonElement>(
-        'button[aria-label="increaseQuantity"]',
-      )!
-      .click(),
-  );
+  await act(async () => container.querySelector<HTMLButtonElement>('button[aria-label="increaseQuantity"]')!.click());
   await act(async () => vi.advanceTimersByTimeAsync(450));
   expect(mocks.save.mock.calls[0][0].expectedRevision).toBe(2);
   expect(mocks.save.mock.calls[0][0].team.name).toBe("Other tab");
@@ -724,23 +539,11 @@ it("recovers a stale tab without a reload loop and can save again after loading 
   const team = newTeam(randomUUID(), "amazon");
   storeDraft({ ...team, name: "My stale edit" }, null, 1);
   storeRevision(team.uuid, 8);
-  const live = {
-    team: { ...team, name: "Cloud version" },
-    revision: 8,
-    canEdit: true,
-    legal: false,
-    updatedAt: 1,
-  };
+  const live = { team: { ...team, name: "Cloud version" }, revision: 8, canEdit: true, legal: false, updatedAt: 1 };
   mocks.query.mockReturnValue(live);
   mocks.save.mockRejectedValueOnce(new ConvexError("CONFLICT"));
   await act(async () =>
-    root.render(
-      createElement(
-        DraftSignInProvider,
-        null,
-        createElement(TeamPage, { uuid: team.uuid }),
-      ),
-    ),
+    root.render(createElement(DraftSignInProvider, null, createElement(TeamPage, { uuid: team.uuid }))),
   );
   await act(async () => vi.advanceTimersByTimeAsync(450));
   expect(mocks.save.mock.calls[0][0].expectedRevision).toBe(1);
@@ -750,18 +553,9 @@ it("recovers a stale tab without a reload loop and can save again after loading 
   expect(document.body.textContent).toContain("conflict");
   await act(async () => action("useSavedTeam").click());
   expect(readDrafts()).toEqual([]);
-  expect(
-    container.querySelector<HTMLInputElement>('input[aria-label="teamName"]')!
-      .value,
-  ).toBe("Cloud version");
+  expect(container.querySelector<HTMLInputElement>('input[aria-label="teamName"]')!.value).toBe("Cloud version");
   expect(unloadPrevented()).toBe(false);
-  await act(async () =>
-    container
-      .querySelector<HTMLButtonElement>(
-        'button[aria-label="increaseQuantity"]',
-      )!
-      .click(),
-  );
+  await act(async () => container.querySelector<HTMLButtonElement>('button[aria-label="increaseQuantity"]')!.click());
   await act(async () => vi.advanceTimersByTimeAsync(450));
   expect(mocks.save.mock.calls[1][0].expectedRevision).toBe(8);
 });
@@ -779,13 +573,7 @@ it("keeps edits made during an in-flight save recoverable at the acknowledged ba
   );
   await act(async () => root.render(editor(team)));
   await act(async () => vi.advanceTimersByTimeAsync(450));
-  await act(async () =>
-    container
-      .querySelector<HTMLButtonElement>(
-        'button[aria-label="increaseQuantity"]',
-      )!
-      .click(),
-  );
+  await act(async () => container.querySelector<HTMLButtonElement>('button[aria-label="increaseQuantity"]')!.click());
   await act(async () => root.unmount());
   root = createRoot(container);
   await act(async () => complete({ revision: 1 }));
@@ -797,9 +585,7 @@ it("shows a reconnecting state for a pending cloud save without claiming it is s
   mocks.auth = { isAuthenticated: true, isLoading: false };
   mocks.connected = false;
   await act(async () => root.render(editor()));
-  expect(container.querySelector('[role="status"]')?.textContent).toContain(
-    "saveReconnecting",
-  );
+  expect(container.querySelector('[role="status"]')?.textContent).toContain("saveReconnecting");
   expect(unloadPrevented()).toBe(true);
 });
 
@@ -809,12 +595,7 @@ it("waits for authentication to settle before mounting or uploading a guest draf
   storeDraft(team);
   mocks.query.mockReturnValue(null);
   mocks.auth = { isAuthenticated: false, isLoading: true };
-  const page = () =>
-    createElement(
-      DraftSignInProvider,
-      null,
-      createElement(TeamPage, { uuid: team.uuid }),
-    );
+  const page = () => createElement(DraftSignInProvider, null, createElement(TeamPage, { uuid: team.uuid }));
   await act(async () => root.render(page()));
   expect(container.querySelector('input[aria-label="teamName"]')).toBeNull();
   await act(async () => vi.advanceTimersByTimeAsync(1000));
@@ -822,10 +603,7 @@ it("waits for authentication to settle before mounting or uploading a guest draf
   mocks.auth = { isAuthenticated: true, isLoading: false };
   await act(async () => root.render(page()));
   await act(async () => vi.advanceTimersByTimeAsync(450));
-  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({
-    team,
-    expectedRevision: 0,
-  });
+  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({ team, expectedRevision: 0 });
 });
 
 it("keeps the UUID editor, typing focus mounted across recovery writes and acknowledgements", async () => {
@@ -841,22 +619,12 @@ it("keeps the UUID editor, typing focus mounted across recovery writes and ackno
         complete = resolve;
       }),
   );
-  const page = () =>
-    createElement(
-      DraftSignInProvider,
-      null,
-      createElement(TeamPage, { uuid: team.uuid }),
-    );
+  const page = () => createElement(DraftSignInProvider, null, createElement(TeamPage, { uuid: team.uuid }));
   await act(async () => root.render(page()));
-  const name = container.querySelector<HTMLInputElement>(
-    'input[aria-label="teamName"]',
-  )!;
+  const name = container.querySelector<HTMLInputElement>('input[aria-label="teamName"]')!;
   await act(async () => name.focus());
   const input = (value: string) => {
-    Object.getOwnPropertyDescriptor(
-      window.HTMLInputElement.prototype,
-      "value",
-    )!.set!.call(name, value);
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")!.set!.call(name, value);
     name.dispatchEvent(new Event("input", { bubbles: true }));
   };
   await act(async () => input("First edit"));
@@ -864,17 +632,10 @@ it("keeps the UUID editor, typing focus mounted across recovery writes and ackno
   expect(document.activeElement).toBe(name);
   expect(unloadPrevented()).toBe(true);
   await act(async () => vi.advanceTimersByTimeAsync(450));
-  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({
-    team: { ...team, name: "First edit" },
-    expectedRevision: 3,
-  });
+  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({ team: { ...team, name: "First edit" }, expectedRevision: 3 });
   await act(async () => input("Second edit"));
   await act(async () => {
-    mocks.query.mockReturnValue({
-      ...live,
-      team: { ...team, name: "First edit" },
-      revision: 4,
-    });
+    mocks.query.mockReturnValue({ ...live, team: { ...team, name: "First edit" }, revision: 4 });
     root.render(page());
     complete({ revision: 4 });
   });
@@ -898,17 +659,13 @@ it("warns on failed cloud saves and removes the unload warning after a successfu
   mocks.auth = { isAuthenticated: true, isLoading: false };
   mocks.save.mockRejectedValueOnce(new Error("offline"));
   await act(async () => root.render(editor()));
-  const add = container.querySelector<HTMLButtonElement>(
-    'button[aria-label="increaseQuantity"]',
-  )!;
+  const add = container.querySelector<HTMLButtonElement>('button[aria-label="increaseQuantity"]')!;
   await act(async () => add.click());
   expect(unloadPrevented()).toBe(true);
   await act(async () => vi.advanceTimersByTimeAsync(450));
   expect(unloadPrevented()).toBe(true);
   await act(async () => action("saveStatusError").click());
-  const retry = Array.from(document.querySelectorAll("button")).find(
-    (b) => b.textContent === "retry",
-  )!;
+  const retry = Array.from(document.querySelectorAll("button")).find((b) => b.textContent === "retry")!;
   await act(async () => retry.click());
   expect(unloadPrevented()).toBe(false);
 });
@@ -922,11 +679,7 @@ it("does not warn when a guest draft is safely stored or a public team is read-o
       createElement(
         DraftSignInProvider,
         null,
-        createElement(TeamEditor, {
-          initial: newTeam(randomUUID()),
-          revision: 1,
-          readOnly: true,
-        }),
+        createElement(TeamEditor, { initial: newTeam(randomUUID()), revision: 1, readOnly: true }),
       ),
     ),
   );

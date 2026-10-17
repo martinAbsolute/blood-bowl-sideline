@@ -24,14 +24,7 @@ export const teamSchema = z
     name: z.string().trim().min(1).max(TEAM_NAME_MAX_LENGTH),
     rosterId: z.string().max(60),
     rulesetId: z.enum(rulesetIds),
-    favouredOf: z.enum([
-      "Undivided",
-      "Khorne",
-      "Nurgle",
-      "Slaanesh",
-      "Tzeentch",
-      "Hashut",
-    ]),
+    favouredOf: z.enum(["Undivided", "Khorne", "Nurgle", "Slaanesh", "Tzeentch", "Hashut"]),
     norseLeague: z.enum(["Old World Classic", "Chaos Clash"]),
     players: z
       .array(
@@ -50,9 +43,7 @@ export const teamSchema = z
       )
       .max(16)
       .refine((players) => {
-        const numbers = players.flatMap((player) =>
-          player.number === undefined ? [] : [Number(player.number)],
-        );
+        const numbers = players.flatMap((player) => (player.number === undefined ? [] : [Number(player.number)]));
         return new Set(numbers).size === numbers.length;
       }, "Player numbers must be unique"),
     stars: z.array(z.string().max(100)).max(4),
@@ -65,18 +56,14 @@ export const teamSchema = z
         dedicatedFans: count(6),
       })
       .strict(),
-    inducements: z
-      .record(z.string().max(100), count(8))
-      .refine((x) => Object.keys(x).length <= 20),
+    inducements: z.record(z.string().max(100), count(8)).refine((x) => Object.keys(x).length <= 20),
     notes: z.string().max(2000),
     captainId: z.uuid().optional(),
     veteranId: z.uuid().optional(),
   })
   .strict();
 export type Team = z.infer<typeof teamSchema>;
-export function upgradeTeamRules(
-  team: Team,
-): Team & { rulesVersion: typeof RULES_VERSION } {
+export function upgradeTeamRules(team: Team): Team & { rulesVersion: typeof RULES_VERSION } {
   return { ...team, rulesVersion: RULES_VERSION };
 }
 export interface Position {
@@ -138,10 +125,7 @@ export interface Ruleset {
   sevens?: boolean;
   excludedRosters?: string[];
   tiers: Record<string, string[]>;
-  tierBudgets: Record<
-    string,
-    { teamBudget: number; skillGold: number; flowingFunds: number }
-  >;
+  tierBudgets: Record<string, { teamBudget: number; skillGold: number; flowingFunds: number }>;
   skillCosts: {
     primaryNonElite: number;
     primaryElite: number;
@@ -161,11 +145,7 @@ export interface Ruleset {
   maxCopiesPerEliteSkill?: number;
   teamOverrides?: Record<
     string,
-    {
-      maxStackPlayers?: number;
-      maxSkillsPerPlayer?: number;
-      canHireStarPlayers?: boolean;
-    }
+    { maxStackPlayers?: number; maxSkillsPerPlayer?: number; canHireStarPlayers?: boolean }
   >;
   starPlayerTierRules: Record<
     string,

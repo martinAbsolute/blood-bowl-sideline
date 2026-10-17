@@ -4,14 +4,7 @@ import { useCallback, useId, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogClose,
-} from "./dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogClose } from "./dialog";
 import { Button } from "./ui/button";
 import { CircleHelp } from "lucide-react";
 
@@ -19,8 +12,7 @@ function LabeledRuleText({ text }: { text: string }) {
   const label = /^([^:\n]{1,65}):\s/.exec(text);
   return label ? (
     <>
-      <strong className="font-semibold">{label[1]}:</strong>{" "}
-      {text.slice(label[0].length)}
+      <strong className="font-semibold">{label[1]}:</strong> {text.slice(label[0].length)}
     </>
   ) : (
     text
@@ -32,10 +24,7 @@ export function RuleDescription({ description }: { description: string }) {
     <div className="space-y-3 text-base leading-relaxed">
       {description.split(/\n{2,}/).map((block, index) => {
         const lines = block.split("\n");
-        if (
-          lines.length > 1 &&
-          lines.slice(1).every((line) => /^\d+\.\s/.test(line))
-        ) {
+        if (lines.length > 1 && lines.slice(1).every((line) => /^\d+\.\s/.test(line))) {
           return (
             <section key={index}>
               <h3 className="mb-2 font-semibold">{lines[0]}</h3>
@@ -76,11 +65,7 @@ export function RuleHelp({
   children: ReactNode;
   className?: string;
   label?: string;
-  action?: {
-    label: string;
-    onClick: () => void;
-    finalFocus?: () => HTMLElement | null;
-  };
+  action?: { label: string; onClick: () => void; finalFocus?: () => HTMLElement | null };
   fullDescription?: boolean;
   skillPreview?: boolean;
 }) {
@@ -90,10 +75,7 @@ export function RuleHelp({
   const [truncated, setTruncated] = useState(false);
   const measurePreview = useCallback(
     (node: HTMLParagraphElement | null) => {
-      if (node)
-        setTruncated(
-          description.length > 0 && node.scrollHeight > node.clientHeight,
-        );
+      if (node) setTruncated(description.length > 0 && node.scrollHeight > node.clientHeight);
     },
     [description],
   );
@@ -135,18 +117,11 @@ export function RuleHelp({
           {meta && <p className="text-xs opacity-80">{meta}</p>}
           <p
             ref={skillPreview ? measurePreview : undefined}
-            className={cn(
-              "whitespace-pre-wrap",
-              skillPreview
-                ? "line-clamp-4"
-                : !fullDescription && "line-clamp-10",
-            )}
+            className={cn("whitespace-pre-wrap", skillPreview ? "line-clamp-4" : !fullDescription && "line-clamp-10")}
           >
             {description}
           </p>
-          {skillPreview && truncated && (
-            <p className="text-xs opacity-80">{t("clickToReadFullRule")}</p>
-          )}
+          {skillPreview && truncated && <p className="text-xs opacity-80">{t("clickToReadFullRule")}</p>}
         </TooltipContent>
       </Tooltip>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -163,18 +138,12 @@ export function RuleHelp({
             <DialogTitle ref={titleRef} tabIndex={-1}>
               {title}
             </DialogTitle>
-            {meta && (
-              <DialogDescription id={descriptionId}>{meta}</DialogDescription>
-            )}
+            {meta && <DialogDescription id={descriptionId}>{meta}</DialogDescription>}
           </DialogHeader>
           <RuleDescription description={description} />
           {action ? (
             <div className="mt-2 flex flex-wrap justify-end gap-2">
-              <DialogClose
-                render={<Button variant="outline" className="h-11 sm:h-8" />}
-              >
-                {t("cancel")}
-              </DialogClose>
+              <DialogClose render={<Button variant="outline" className="h-11 sm:h-8" />}>{t("cancel")}</DialogClose>
               <Button
                 className="h-auto min-h-11 whitespace-normal sm:min-h-8"
                 onClick={() => {
@@ -186,9 +155,7 @@ export function RuleHelp({
               </Button>
             </div>
           ) : (
-            <DialogClose render={<Button variant="outline" className="mt-2" />}>
-              {t("ok")}
-            </DialogClose>
+            <DialogClose render={<Button variant="outline" className="mt-2" />}>{t("ok")}</DialogClose>
           )}
         </DialogContent>
       </Dialog>
@@ -196,10 +163,7 @@ export function RuleHelp({
   );
 }
 
-export function RuleInfo({
-  className,
-  ...props
-}: Omit<React.ComponentProps<typeof RuleHelp>, "children">) {
+export function RuleInfo({ className, ...props }: Omit<React.ComponentProps<typeof RuleHelp>, "children">) {
   return (
     <RuleHelp
       {...props}

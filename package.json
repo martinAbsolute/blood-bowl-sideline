@@ -2,29 +2,30 @@
   "name": "blood-bowl-sideline",
   "version": "0.1.8",
   "private": true,
+  "homepage": "https://sideline.com.ua/",
+  "bugs": {
+    "url": "https://github.com/martinAbsolute/blood-bowl-sideline/issues"
+  },
   "license": "AGPL-3.0-only",
   "author": "Martin Bahniuk",
-  "homepage": "https://sideline.com.ua/",
   "repository": {
     "type": "git",
     "url": "https://github.com/martinAbsolute/blood-bowl-sideline.git"
   },
-  "bugs": {
-    "url": "https://github.com/martinAbsolute/blood-bowl-sideline/issues"
-  },
-  "packageManager": "pnpm@12.11.2+sha512.25a51652a196785af5f28bda6dfe8dc582ebefa4ac1d180221ce1390231c5fb76637822ea4b6e4633ce74acdcb0a77f725af11bad38177fdeddaee818a955cb9",
+  "type": "module",
   "scripts": {
     "dev": "convex dev --start \"pnpm dev:frontend\"",
     "dev:frontend": "next dev",
     "dev:backend": "convex dev",
     "typecheck": "next typegen && tsc --noEmit",
     "check": "pnpm typecheck && pnpm lint",
-    "test": "vitest run",
+    "test": "vitest run --maxWorkers=4",
     "build": "pnpm typecheck && next build",
     "start": "next start",
-    "lint": "eslint .",
-    "format": "prettier --write src convex tests scripts docs README.md package.json",
-    "format:check": "prettier --check src convex tests scripts docs README.md package.json"
+    "lint": "oxlint --deny-warnings .",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "lint:fix": "oxlint --fix --deny-warnings ."
   },
   "dependencies": {
     "@auth/core": "^0.41.3",
@@ -61,7 +62,6 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@eslint/compat": "^2.1.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^26.6.5",
@@ -69,11 +69,10 @@
     "@types/react-dom": "^19.3.0",
     "@typescript/native": "npm:typescript@^7.0.2",
     "convex-test": "^0.0.61",
-    "eslint": "^10.12.0",
-    "eslint-config-next": "^16.4.2",
     "happy-dom": "^21.0.1",
+    "oxfmt": "^0.73.0",
+    "oxlint": "^1.88.0",
     "postcss": "^8.5.30",
-    "prettier": "^3.9.10",
     "shadcn": "^4.21.5",
     "sharp": "0.35.5",
     "tailwindcss": "^4.3.3",
@@ -81,5 +80,5 @@
     "vite": "^8.3.4",
     "vitest": "^5.0.5"
   },
-  "type": "module"
+  "packageManager": "pnpm@12.11.2+sha512.25a51652a196785af5f28bda6dfe8dc582ebefa4ac1d180221ce1390231c5fb76637822ea4b6e4633ce74acdcb0a77f725af11bad38177fdeddaee818a955cb9"
 }

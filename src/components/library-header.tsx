@@ -17,9 +17,7 @@ export function LibraryHeader({
           {title}
           <BrandPeriod />
         </h1>
-        <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-          {description}
-        </p>
+        <p className="mt-2 max-w-xl text-sm text-muted-foreground">{description}</p>
       </div>
       {action}
     </header>

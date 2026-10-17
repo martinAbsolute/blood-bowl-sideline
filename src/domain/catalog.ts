@@ -3,15 +3,7 @@ import skillData from "./data/skills.json";
 import starData from "./data/stars.json";
 import inducementData from "./data/inducements.json";
 import rulesetData from "./data/rulesets.json";
-import {
-  RULES_VERSION,
-  type Team,
-  type Roster,
-  type Skill,
-  type Star,
-  type Inducement,
-  type Ruleset,
-} from "./types";
+import { RULES_VERSION, type Team, type Roster, type Skill, type Star, type Inducement, type Ruleset } from "./types";
 
 export const rosters = rosterData as Roster[];
 export const skills = skillData as Skill[];
@@ -22,21 +14,11 @@ export const starPairs = [
   ["lucien-swift", "valen-swift"],
 ];
 export function starChoices(ids: string[]) {
-  return [
-    ...new Set(
-      ids.map((id) => starPairs.find((p) => p.includes(id))?.[0] ?? id),
-    ),
-  ];
+  return [...new Set(ids.map((id) => starPairs.find((p) => p.includes(id))?.[0] ?? id))];
 }
 export const inducements: Inducement[] = [
   ...inducementData,
-  {
-    id: "desperate-measures",
-    name: "Desperate Measures",
-    cost: 50000,
-    max: "0-5",
-    availability: "Sevens only",
-  },
+  { id: "desperate-measures", name: "Desperate Measures", cost: 50000, max: "0-5", availability: "Sevens only" },
 ];
 export const rulesets: Ruleset[] = [
   {
@@ -82,23 +64,13 @@ export function skillName(id: string) {
   const [base, parameter] = id.split(":");
   const name = getSkill(id)?.name ?? base;
   if (!parameter) return name;
-  return /\(x\+?\)/i.test(name)
-    ? name.replace(/\(x\+?\)/i, `(${parameter})`)
-    : `${name} (${parameter})`;
+  return /\(x\+?\)/i.test(name) ? name.replace(/\(x\+?\)/i, `(${parameter})`) : `${name} (${parameter})`;
 }
 /** Star special rules first, then English alphabetical order within each group. */
 export function sortSkillIds(ids: string[]) {
   return ids
-    .map((id) => ({
-      id,
-      special: getSkill(id)?.category === "special",
-      name: skillName(id),
-    }))
-    .sort(
-      (a, b) =>
-        Number(b.special) - Number(a.special) ||
-        skillCollator.compare(a.name, b.name),
-    )
+    .map((id) => ({ id, special: getSkill(id)?.category === "special", name: skillName(id) }))
+    .sort((a, b) => Number(b.special) - Number(a.special) || skillCollator.compare(a.name, b.name))
     .map(({ id }) => id);
 }
 export function newTeam(uuid: string, rosterId = "human"): Team {
@@ -113,13 +85,7 @@ export function newTeam(uuid: string, rosterId = "human"): Team {
     norseLeague: "Old World Classic",
     players: [],
     stars: [],
-    staff: {
-      rerolls: 0,
-      apothecary: 0,
-      assistantCoaches: 0,
-      cheerleaders: 0,
-      dedicatedFans: 0,
-    },
+    staff: { rerolls: 0, apothecary: 0, assistantCoaches: 0, cheerleaders: 0, dedicatedFans: 0 },
     inducements: {},
     notes: "",
   };

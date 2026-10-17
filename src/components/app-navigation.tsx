@@ -22,9 +22,7 @@ export function AppNavigation({
     { href: "/rosters", key: "rosters", icon: BookOpen },
     { href: "/leagues", key: "leagues", icon: Flag },
     { href: null, key: "tournaments", icon: Trophy },
-    ...(admin
-      ? [{ href: "/users", key: "users" as const, icon: UsersRound }]
-      : []),
+    ...(admin ? [{ href: "/users", key: "users" as const, icon: UsersRound }] : []),
   ] as const;
   return (
     <nav aria-label={t("menu")} className="space-y-1">
@@ -43,10 +41,7 @@ export function AppNavigation({
               {t(key)}
             </span>
             {!href ? (
-              <span
-                className="sidebar-button-badge text-xs"
-                aria-hidden={collapsed}
-              >
+              <span className="sidebar-button-badge text-xs" aria-hidden={collapsed}>
                 {t("comingSoon")}
               </span>
             ) : null}

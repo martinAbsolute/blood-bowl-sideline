@@ -32,10 +32,7 @@ function SupportItem({
 }) {
   const t = useTranslations();
   const gold = useGold();
-  const meta =
-    max === 0
-      ? t("supportUnavailable")
-      : `${gold(cost)} ${t("each")} · ${t("maxQuantity", { max })}`;
+  const meta = max === 0 ? t("supportUnavailable") : `${gold(cost)} ${t("each")} · ${t("maxQuantity", { max })}`;
   return (
     <li
       className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2 transition-colors ${value > 0 ? "border-primary/25 bg-primary/5" : "bg-card"}`}
@@ -52,9 +49,7 @@ function SupportItem({
             className="no-print -my-1 size-6 [&>svg]:size-3.5"
           />
         </div>
-        <p className="mt-0.5 text-[11px] leading-4 text-muted-foreground">
-          {meta}
-        </p>
+        <p className="mt-0.5 text-[11px] leading-4 text-muted-foreground">{meta}</p>
       </div>
       {readOnly ? (
         <output
@@ -97,21 +92,13 @@ export function TeamSupport({
   const t = useTranslations();
   const gold = useGold();
   const staff = staffInfo(team);
-  const staffItems = (Object.keys(staff) as (keyof Team["staff"])[]).map(
-    (key) => ({ key, ...staff[key] }),
-  );
+  const staffItems = (Object.keys(staff) as (keyof Team["staff"])[]).map((key) => ({ key, ...staff[key] }));
   const eligible = inducements.filter(
-    (item) =>
-      inducementInfo(team, item).allowed ||
-      (team.inducements[item.id] ?? 0) > 0,
+    (item) => inducementInfo(team, item).allowed || (team.inducements[item.id] ?? 0) > 0,
   );
-  const staffCost = staffItems.reduce(
-    (sum, item) => sum + item.cost * team.staff[item.key],
-    0,
-  );
+  const staffCost = staffItems.reduce((sum, item) => sum + item.cost * team.staff[item.key], 0);
   const inducementCost = eligible.reduce(
-    (sum, item) =>
-      sum + inducementInfo(team, item).cost * (team.inducements[item.id] ?? 0),
+    (sum, item) => sum + inducementInfo(team, item).cost * (team.inducements[item.id] ?? 0),
     0,
   );
   return (
@@ -121,19 +108,14 @@ export function TeamSupport({
           <h2 id="sideline-staff-title" className="section-title">
             {t("staff")}
           </h2>
-          <span className="font-mono text-xs text-muted-foreground">
-            {gold(staffCost)} GP
-          </span>
+          <span className="font-mono text-xs text-muted-foreground">{gold(staffCost)} GP</span>
         </div>
         <ul className="space-y-1.5">
           {staffItems.map(({ key, cost, max }) => (
             <SupportItem
               key={key}
               label={t(
-                team.rulesetId === "kyiv-seven-sins-sevens" &&
-                  key === "dedicatedFans"
-                  ? "sevensDedicatedFans"
-                  : key,
+                team.rulesetId === "kyiv-seven-sins-sevens" && key === "dedicatedFans" ? "sevensDedicatedFans" : key,
               )}
               description={t(
                 isSevens(team) && key === "apothecary"
@@ -149,9 +131,7 @@ export function TeamSupport({
               cost={cost}
               toggle={key === "apothecary"}
               readOnly={readOnly}
-              onChange={(value) =>
-                onChange({ ...team, staff: { ...team.staff, [key]: value } })
-              }
+              onChange={(value) => onChange({ ...team, staff: { ...team.staff, [key]: value } })}
             />
           ))}
         </ul>
@@ -161,9 +141,7 @@ export function TeamSupport({
           <h2 id="inducements-title" className="section-title">
             {t("inducements")}
           </h2>
-          <span className="font-mono text-xs text-muted-foreground">
-            {gold(inducementCost)} GP
-          </span>
+          <span className="font-mono text-xs text-muted-foreground">{gold(inducementCost)} GP</span>
         </div>
         {eligible.length ? (
           <ul className="space-y-1.5">
@@ -185,20 +163,13 @@ export function TeamSupport({
                   cost={info.cost}
                   readOnly={readOnly}
                   longRule
-                  onChange={(value) =>
-                    onChange({
-                      ...team,
-                      inducements: { ...team.inducements, [item.id]: value },
-                    })
-                  }
+                  onChange={(value) => onChange({ ...team, inducements: { ...team.inducements, [item.id]: value } })}
                 />
               );
             })}
           </ul>
         ) : (
-          <p className="rounded-lg border bg-card p-3 text-xs text-muted-foreground">
-            {t("noInducements")}
-          </p>
+          <p className="rounded-lg border bg-card p-3 text-xs text-muted-foreground">{t("noInducements")}</p>
         )}
       </section>
     </div>

@@ -8,19 +8,13 @@ vi.mock("next-intl", async (importOriginal) => {
   const { formats, timeZone } = await import("../src/i18n/config");
   return {
     ...actual,
-    useFormatter: () =>
-      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useFormatter: () => actual.createFormatter({ locale: "en", formats, timeZone }),
     useTranslations: () => (key: string) => key,
   };
 });
 vi.mock("../src/components/rule-help", () => ({
-  RuleHelp: ({
-    children,
-    className,
-  }: {
-    children: ReactNode;
-    className: string;
-  }) => createElement("span", { className }, children),
+  RuleHelp: ({ children, className }: { children: ReactNode; className: string }) =>
+    createElement("span", { className }, children),
 }));
 
 it("keeps starting skills before additional skills and captain Pro, sorting only within groups", () => {
@@ -32,23 +26,12 @@ it("keeps starting skills before additional skills and captain Pro, sorting only
       veteran: true,
     }),
   );
-  const names = [...html.matchAll(/<span[^>]*>([^<]*)<\/span>/g)].map(
-    (match) => match[1],
-  );
-  expect(names).toEqual([
-    "Pass",
-    "Sure Hands",
-    "Block",
-    "Tackle",
-    "proCaptain",
-    "sevensVeteran",
-  ]);
+  const names = [...html.matchAll(/<span[^>]*>([^<]*)<\/span>/g)].map((match) => match[1]);
+  expect(names).toEqual(["Pass", "Sure Hands", "Block", "Tackle", "proCaptain", "sevensVeteran"]);
 });
 
 it("renders a veteran designation as a skill badge even without other skills", () => {
-  const html = renderToStaticMarkup(
-    createElement(SkillList, { ids: [], veteran: true }),
-  );
+  const html = renderToStaticMarkup(createElement(SkillList, { ids: [], veteran: true }));
   expect(html).toContain('class="skill-box skill-trait skill-added"');
   expect(html).toContain("sevensVeteran");
   expect(html).not.toContain("noSkills");

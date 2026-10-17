@@ -1,4 +1,1 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm exec convex deploy --cmd 'pnpm run build'"
-}
+{ "$schema": "https://openapi.vercel.sh/vercel.json", "buildCommand": "pnpm exec convex deploy --cmd 'pnpm run build'" }

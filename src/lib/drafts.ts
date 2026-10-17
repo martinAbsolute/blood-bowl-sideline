@@ -1,24 +1,13 @@
-import {
-  RULES_VERSION,
-  teamSchema,
-  upgradeTeamRules,
-  type Team,
-} from "@/domain/types";
+import { RULES_VERSION, teamSchema, upgradeTeamRules, type Team } from "@/domain/types";
 import { z } from "zod";
 import { TEAM_NAME_MAX_LENGTH } from "@/domain/team-name";
 // Preserve recovery snapshots while team names are being edited. Account saves
 // still use the stricter shared server validator.
 const localDraftSchema = teamSchema
   .extend({
-    rulesVersion: teamSchema.shape.rulesVersion.transform(
-      (): typeof RULES_VERSION => RULES_VERSION,
-    ),
+    rulesVersion: teamSchema.shape.rulesVersion.transform((): typeof RULES_VERSION => RULES_VERSION),
     name: z.string().max(TEAM_NAME_MAX_LENGTH),
-    players: z
-      .array(
-        teamSchema.shape.players.element.extend({ name: z.string().max(80) }),
-      )
-      .max(16),
+    players: z.array(teamSchema.shape.players.element.extend({ name: z.string().max(80) })).max(16),
   })
   .strip();
 export const DRAFTS_KEY = "bbsideline:drafts:v1";
@@ -102,9 +91,7 @@ export function normalizeStoredDrafts() {
 // with an existing team instead of silently overwriting it.
 export function readDraftRevision(uuid: string): number {
   try {
-    return (
-      storedDrafts().find((entry) => entry.uuid === uuid)?.baseRevision ?? 0
-    );
+    return storedDrafts().find((entry) => entry.uuid === uuid)?.baseRevision ?? 0;
   } catch {
     return 0;
   }
@@ -145,11 +132,7 @@ export function setDraftFavorite(uuid: string, favorite: boolean) {
   window.dispatchEvent(new Event("bbs-drafts-changed"));
   return true;
 }
-export function storeDraft(
-  team: Team,
-  account?: string | null,
-  revision = readDraftRevision(team.uuid),
-) {
+export function storeDraft(team: Team, account?: string | null, revision = readDraftRevision(team.uuid)) {
   const all = storedDrafts(),
     index = all.findIndex((t) => t.uuid === team.uuid);
   // Ownership and base revision commit atomically with the snapshot.
@@ -170,10 +153,7 @@ export function storeDraft(
   window.dispatchEvent(new Event("bbs-drafts-changed"));
 }
 export function removeDraft(uuid: string) {
-  localStorage.setItem(
-    KEY,
-    JSON.stringify(storedDrafts().filter((t) => t.uuid !== uuid)),
-  );
+  localStorage.setItem(KEY, JSON.stringify(storedDrafts().filter((t) => t.uuid !== uuid)));
   try {
     if (localStorage.getItem(ACTIVE) === uuid) localStorage.removeItem(ACTIVE);
     localStorage.removeItem(accountKey(uuid));
@@ -187,9 +167,5 @@ export function acknowledgeDraft(team: Team, revision: number) {
   const local = readDrafts().find((draft) => draft.uuid === team.uuid);
   // A response must never discard edits made while the request was in flight.
   // Parsing restores schema field order; object insertion order is not an edit.
-  if (
-    local &&
-    JSON.stringify(local) === JSON.stringify(localDraftSchema.parse(team))
-  )
-    removeDraft(team.uuid);
+  if (local && JSON.stringify(local) === JSON.stringify(localDraftSchema.parse(team))) removeDraft(team.uuid);
 }

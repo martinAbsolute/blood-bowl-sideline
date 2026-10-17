@@ -3,41 +3,18 @@ import { useTranslations } from "next-intl";
 import { LoadingLayout, type LoadingVariant } from "./loading-layouts";
 import { usePathname } from "next/navigation";
 import { Suspense, useSyncExternalStore } from "react";
-import {
-  draftSnapshot,
-  parseDrafts,
-  subscribeDrafts,
-  draftAccount,
-} from "@/lib/drafts";
+import { draftSnapshot, parseDrafts, subscribeDrafts, draftAccount } from "@/lib/drafts";
 import { useDraftSync } from "./draft-sync-provider";
 
-export function WorkspaceLoading({
-  variant = "library",
-}: {
-  variant?: LoadingVariant;
-}) {
+export function WorkspaceLoading({ variant = "library" }: { variant?: LoadingVariant }) {
   const t = useTranslations();
   if (variant === "editor")
     return (
-      <Suspense
-        fallback={
-          <LoadingLayout
-            variant="editor"
-            label={t("loading")}
-            text={(key) => t(key)}
-          />
-        }
-      >
+      <Suspense fallback={<LoadingLayout variant="editor" label={t("loading")} text={(key) => t(key)} />}>
         <EditorLoading />
       </Suspense>
     );
-  return (
-    <LoadingLayout
-      variant={variant}
-      label={t("loading")}
-      text={(key) => t(key)}
-    />
-  );
+  return <LoadingLayout variant={variant} label={t("loading")} text={(key) => t(key)} />;
 }
 
 function EditorLoading() {
@@ -47,17 +24,7 @@ function EditorLoading() {
   const raw = useSyncExternalStore(subscribeDrafts, draftSnapshot, () => "[]");
   const team = parseDrafts(raw).find((draft) => {
     const account = draftAccount(draft.uuid);
-    return (
-      pathname === `/teams/${draft.uuid}` &&
-      (!account || account === sync.account)
-    );
+    return pathname === `/teams/${draft.uuid}` && (!account || account === sync.account);
   });
-  return (
-    <LoadingLayout
-      variant="editor"
-      label={t("loading")}
-      team={team}
-      text={(key) => t(key)}
-    />
-  );
+  return <LoadingLayout variant="editor" label={t("loading")} team={team} text={(key) => t(key)} />;
 }

@@ -27,10 +27,7 @@ export function useLeagueAction() {
       const code =
         typeof data === "string"
           ? data
-          : data &&
-              typeof data === "object" &&
-              "code" in data &&
-              typeof data.code === "string"
+          : data && typeof data === "object" && "code" in data && typeof data.code === "string"
             ? data.code
             : "UNKNOWN";
       const known = [
@@ -141,13 +138,7 @@ export function LeagueGate({
   );
 }
 
-export function LeagueBack({
-  href = "/leagues",
-  children,
-}: {
-  href?: string;
-  children?: ReactNode;
-}) {
+export function LeagueBack({ href = "/leagues", children }: { href?: string; children?: ReactNode }) {
   const t = useTranslations();
   return (
     <Link
@@ -163,13 +154,8 @@ export function LeagueBack({
 export function LeagueError({ message }: { message: string }) {
   const t = useTranslations();
   return message ? (
-    <div
-      role="alert"
-      className="my-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm"
-    >
-      <p className="font-semibold text-destructive">
-        {t("leagueUi.actionFailed")}
-      </p>
+    <div role="alert" className="my-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm">
+      <p className="font-semibold text-destructive">{t("leagueUi.actionFailed")}</p>
       <p className="mt-1 break-words">{message}</p>
     </div>
   ) : null;
@@ -199,9 +185,7 @@ export function LeagueStatus({ status }: { status: string }) {
   const t = useTranslations();
   const tone = ["completed", "active"].includes(status)
     ? "border-emerald-700/15 bg-emerald-700/8 text-emerald-800"
-    : ["registration", "open", "in-progress", "awaiting-confirmation"].includes(
-          status,
-        )
+    : ["registration", "open", "in-progress", "awaiting-confirmation"].includes(status)
       ? "border-amber-700/15 bg-amber-500/10 text-amber-900"
       : ["withdrawn", "dead", "missing-next-game"].includes(status)
         ? "border-destructive/15 bg-destructive/5 text-destructive"
@@ -218,9 +202,7 @@ export function LeagueStatus({ status }: { status: string }) {
 
 export function localDateInput(value: number) {
   const date = new Date(value);
-  return new Date(value - date.getTimezoneOffset() * 60_000)
-    .toISOString()
-    .slice(0, 16);
+  return new Date(value - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 }
 
 export function DiceInput({
@@ -240,20 +222,9 @@ export function DiceInput({
   if (sides > 6)
     return (
       <div className="space-y-1">
-        <LeagueNumber
-          label={label}
-          min={1}
-          max={sides}
-          value={value ?? null}
-          onChange={onChange}
-        />
+        <LeagueNumber label={label} min={1} max={sides} value={value ?? null} onChange={onChange} />
         {value != null && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onChange(null)}
-          >
+          <Button type="button" variant="ghost" size="sm" onClick={() => onChange(null)}>
             {t("leagueUx.clearRoll")}
           </Button>
         )}
@@ -261,15 +232,7 @@ export function DiceInput({
     );
   return (
     <fieldset className="min-w-0 space-y-2">
-      <legend
-        className={
-          hideLabel
-            ? "sr-only"
-            : "mb-2 text-xs font-medium text-muted-foreground"
-        }
-      >
-        {label}
-      </legend>
+      <legend className={hideLabel ? "sr-only" : "mb-2 text-xs font-medium text-muted-foreground"}>{label}</legend>
       <ButtonGroup aria-label={label} className="w-full">
         {Array.from({ length: sides }, (_, index) => index + 1).map((roll) => (
           <Button

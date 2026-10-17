@@ -31,9 +31,7 @@ export function LeaguePlayerDialog({
           onClick={(event) => event.stopPropagation()}
         >
           <Dialog.Title className="sr-only">{title}</Dialog.Title>
-          <Dialog.Description className="sr-only">
-            {t("leagueDesk.playerHint")}
-          </Dialog.Description>
+          <Dialog.Description className="sr-only">{t("leagueDesk.playerHint")}</Dialog.Description>
           <Dialog.Close
             aria-label={t("close")}
             className="absolute right-2 top-2 z-10 flex size-8 items-center justify-center rounded-md bg-card text-muted-foreground hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring"

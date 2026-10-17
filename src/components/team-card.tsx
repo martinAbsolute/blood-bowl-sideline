@@ -87,14 +87,8 @@ export function TeamCard({
             ? "teamCard.ready"
             : "draft",
   );
-  const sidelineStaff =
-    team.staff.assistantCoaches +
-    team.staff.cheerleaders +
-    team.staff.dedicatedFans;
-  const inducementCount = Object.values(team.inducements).reduce(
-    (sum, count) => sum + count,
-    0,
-  );
+  const sidelineStaff = team.staff.assistantCoaches + team.staff.cheerleaders + team.staff.dedicatedFans;
+  const inducementCount = Object.values(team.inducements).reduce((sum, count) => sum + count, 0);
   const staffBreakdown = [
     `${t("assistantCoaches")}: ${team.staff.assistantCoaches}`,
     `${t("cheerleaders")}: ${team.staff.cheerleaders}`,
@@ -102,14 +96,9 @@ export function TeamCard({
   ].join("\n");
   const inducementBreakdown = Object.entries(team.inducements)
     .filter(([, count]) => count > 0)
-    .map(
-      ([id, count]) =>
-        `${inducements.find((item) => item.id === id)?.name ?? id}: ${count}`,
-    )
+    .map(([id, count]) => `${inducements.find((item) => item.id === id)?.name ?? id}: ${count}`)
     .join("\n");
-  const staffTooltip = sidelineStaff
-    ? `${t("staff")}\n${staffBreakdown}`
-    : `${t("staff")}: ${t("teamCard.none")}`;
+  const staffTooltip = sidelineStaff ? `${t("staff")}\n${staffBreakdown}` : `${t("staff")}: ${t("teamCard.none")}`;
   const inducementTooltip = inducementCount
     ? `${t("inducements")}\n${inducementBreakdown}`
     : `${t("inducements")}: ${t("teamCard.none")}`;
@@ -118,11 +107,7 @@ export function TeamCard({
       className={styles.card}
       data-disabled={selection?.disabled || undefined}
       data-selected={selection?.selected || undefined}
-      style={
-        {
-          "--roster": rosterColors[team.rosterId] ?? "#52676b",
-        } as CSSProperties
-      }
+      style={{ "--roster": rosterColors[team.rosterId] ?? "#52676b" } as CSSProperties}
     >
       <div className={styles.cardLink}>
         <div className={styles.identity}>
@@ -169,18 +154,10 @@ export function TeamCard({
           {team.players.length + team.stars.length ? (
             <TeamLineup team={team} />
           ) : (
-            <div
-              className={styles.emptyLineup}
-              aria-label={t("teamCard.emptyLineup")}
-            >
+            <div className={styles.emptyLineup} aria-label={t("teamCard.emptyLineup")}>
               <div
                 aria-hidden="true"
-                style={{
-                  position: "relative",
-                  width: emptyPhoto[0].width,
-                  maxWidth: "100%",
-                  height: 62,
-                }}
+                style={{ position: "relative", width: emptyPhoto[0].width, maxWidth: "100%", height: 62 }}
               >
                 {Array.from({ length: 5 }, (_, index) => (
                   <span
@@ -193,10 +170,7 @@ export function TeamCard({
                     }}
                   >
                     <PlayerIcon
-                      positionId={
-                        roster?.players[index % roster.players.length]?.id ?? ""
-                      }
-                      variant={index}
+                      positionId={roster?.players[index % roster.players.length]?.id ?? ""}
                       className="size-9"
                     />
                   </span>
@@ -205,10 +179,7 @@ export function TeamCard({
               <span>{t("teamCard.buildLineup")}</span>
             </div>
           )}
-          <span
-            className={styles.squadCaption}
-            aria-label={`${t("players")}: ${totals.playerCount}`}
-          >
+          <span className={styles.squadCaption} aria-label={`${t("players")}: ${totals.playerCount}`}>
             <Users size={13} aria-hidden="true" />
             {totals.playerCount}
             {team.stars.length ? (
@@ -219,11 +190,7 @@ export function TeamCard({
             ) : null}
           </span>
         </div>
-        <div
-          className={styles.support}
-          role="group"
-          aria-label={t("teamCard.support")}
-        >
+        <div className={styles.support} role="group" aria-label={t("teamCard.support")}>
           <SupportMetric
             label={`${t("rerolls")}: ${team.staff.rerolls}`}
             icon={<RotateCcw size={16} />}
@@ -234,29 +201,19 @@ export function TeamCard({
             icon={<HeartPulse size={16} />}
             value={t(team.staff.apothecary ? "yes" : "no")}
           />
-          <SupportMetric
-            label={staffTooltip}
-            icon={<Megaphone size={16} />}
-            value={sidelineStaff}
-          />
-          <SupportMetric
-            label={inducementTooltip}
-            icon={<HandCoins size={16} />}
-            value={inducementCount}
-          />
+          <SupportMetric label={staffTooltip} icon={<Megaphone size={16} />} value={sidelineStaff} />
+          <SupportMetric label={inducementTooltip} icon={<HandCoins size={16} />} value={inducementCount} />
         </div>
         <div className={styles.economy}>
           <span>
-            {t("teamCard.teamValue")}{" "}
-            <strong>{(totals.teamGold / 1000).toLocaleString("en")}k</strong>
+            {t("teamCard.teamValue")} <strong>{(totals.teamGold / 1000).toLocaleString("en")}k</strong>
           </span>
           <span
             data-zero={totals.remaining === 0}
             data-negative={totals.remaining < 0}
             data-positive={totals.remaining > 0}
           >
-            {t("remaining")}{" "}
-            <strong>{(totals.remaining / 1000).toLocaleString("en")}k</strong>
+            {t("remaining")} <strong>{(totals.remaining / 1000).toLocaleString("en")}k</strong>
           </span>
         </div>
         {footer ? (
@@ -268,9 +225,7 @@ export function TeamCard({
                 <SaveIcon
                   size={13}
                   aria-hidden="true"
-                  className={
-                    saveState === "pending" ? "animate-spin" : undefined
-                  }
+                  className={saveState === "pending" ? "animate-spin" : undefined}
                 />
                 <span>
                   {t(
@@ -289,13 +244,7 @@ export function TeamCard({
             )}
             {selection && (
               <span className={styles.selectionStatus}>
-                <span>
-                  {t(
-                    selection.selected
-                      ? "leagueUi.selectedTeam"
-                      : "leagueUi.chooseTeam",
-                  )}
-                </span>
+                <span>{t(selection.selected ? "leagueUi.selectedTeam" : "leagueUi.chooseTeam")}</span>
                 {selection.selected && <Check size={14} aria-hidden="true" />}
               </span>
             )}
@@ -307,29 +256,15 @@ export function TeamCard({
   );
 }
 
-function SupportMetric({
-  label,
-  icon,
-  value,
-}: {
-  label: string;
-  icon: ReactNode;
-  value: ReactNode;
-}) {
+function SupportMetric({ label, icon, value }: { label: string; icon: ReactNode; value: ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
     <Tooltip open={open} onOpenChange={setOpen}>
-      <TooltipTrigger
-        className={styles.metric}
-        aria-label={label}
-        onClick={() => setOpen(!open)}
-      >
+      <TooltipTrigger className={styles.metric} aria-label={label} onClick={() => setOpen(!open)}>
         <span aria-hidden="true">{icon}</span>
         <strong aria-hidden="true">{value}</strong>
       </TooltipTrigger>
-      <TooltipContent className="whitespace-pre-line leading-5">
-        {label}
-      </TooltipContent>
+      <TooltipContent className="whitespace-pre-line leading-5">{label}</TooltipContent>
     </Tooltip>
   );
 }

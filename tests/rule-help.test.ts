@@ -1,11 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  skills,
-  inducements,
-  rosters,
-  stars,
-  skillName,
-} from "../src/domain/catalog";
+import { skills, inducements, rosters, stars, skillName } from "../src/domain/catalog";
 import en from "../src/i18n/en.json";
 import uk from "../src/i18n/uk.json";
 
@@ -22,27 +16,17 @@ describe("rule explanations", () => {
       for (const id of ids) {
         expect(dictionary.skillDescriptions).toHaveProperty(id);
         expect(
-          dictionary.skillDescriptions[
-            id as keyof typeof dictionary.skillDescriptions
-          ].trim().length,
+          dictionary.skillDescriptions[id as keyof typeof dictionary.skillDescriptions].trim().length,
         ).toBeGreaterThan(10);
       }
-      for (const skill of skills)
-        expect(dictionary.skillCategories).toHaveProperty(skill.category);
+      for (const skill of skills) expect(dictionary.skillCategories).toHaveProperty(skill.category);
     });
     it(`${locale} explains every inducement and staff item`, () => {
       expect(Object.keys(dictionary.inducementDescriptions)).toHaveLength(19);
-      for (const item of inducements)
-        expect(dictionary.inducementDescriptions).toHaveProperty(item.id);
+      for (const item of inducements) expect(dictionary.inducementDescriptions).toHaveProperty(item.id);
       for (const id of ["mercenary-players", "star-players-inducement"])
         expect(dictionary.inducementDescriptions).toHaveProperty(id);
-      for (const key of [
-        "rerolls",
-        "apothecary",
-        "assistantCoaches",
-        "cheerleaders",
-        "dedicatedFans",
-      ])
+      for (const key of ["rerolls", "apothecary", "assistantCoaches", "cheerleaders", "dedicatedFans"])
         expect(dictionary.staffDescriptions).toHaveProperty(key);
     });
   }
@@ -57,9 +41,7 @@ describe("rule explanations", () => {
       expect(dictionary.skillDescriptions.really_stupid).toContain("+2");
       expect(dictionary.skillDescriptions.monstrous_mouth).toContain("3+");
       expect(dictionary.skillDescriptions.monstrous_mouth).toMatch(/1[-–]2/);
-      expect(dictionary.skillDescriptions.pile_driver).not.toContain(
-        "not Marking",
-      );
+      expect(dictionary.skillDescriptions.pile_driver).not.toContain("not Marking");
       expect(dictionary.skillDescriptions.nerves_of_steel).toContain(
         dictionary === uk ? "тесту Паса" : "Passing Ability Test",
       );
@@ -67,15 +49,9 @@ describe("rule explanations", () => {
   });
   it("uses the BB2025 Sports-Wizard spells in both languages", () => {
     for (const dictionary of [en, uk]) {
-      expect(
-        dictionary.inducementDescriptions["wizard-sports-wizard"],
-      ).toContain("Fireball");
-      expect(
-        dictionary.inducementDescriptions["wizard-sports-wizard"],
-      ).toContain("Zap!");
-      expect(
-        dictionary.inducementDescriptions["wizard-sports-wizard"],
-      ).not.toContain("Thunderbolt");
+      expect(dictionary.inducementDescriptions["wizard-sports-wizard"]).toContain("Fireball");
+      expect(dictionary.inducementDescriptions["wizard-sports-wizard"]).toContain("Zap!");
+      expect(dictionary.inducementDescriptions["wizard-sports-wizard"]).not.toContain("Thunderbolt");
     }
   });
   it("keeps complete Ukrainian exceptions and paragraph breaks in long skill definitions", () => {

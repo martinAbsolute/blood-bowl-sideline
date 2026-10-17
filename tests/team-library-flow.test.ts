@@ -18,10 +18,7 @@ import {
 } from "../src/lib/drafts";
 import { saveCloudDraft } from "../src/lib/cloud-save";
 import { DRAFT_EDITOR_RELEASED } from "../src/lib/draft-lock";
-import {
-  DraftSyncProvider,
-  useDraftSync,
-} from "../src/components/draft-sync-provider";
+import { DraftSyncProvider, useDraftSync } from "../src/components/draft-sync-provider";
 import { TeamName } from "../src/components/team-name";
 import { CreateTeamButton } from "../src/components/create-team-button";
 import { TeamLibrary } from "../src/components/team-library";
@@ -41,28 +38,17 @@ const mocks = vi.hoisted(() => ({
   push: vi.fn(),
   query: vi.fn(),
   selectedTeam: null as { leagueLocked: boolean } | null | undefined,
-  results: [] as {
-    team: ReturnType<typeof newTeam>;
-    leagueLocked?: boolean;
-    favorite?: boolean;
-  }[],
+  results: [] as { team: ReturnType<typeof newTeam>; leagueLocked?: boolean; favorite?: boolean }[],
   archivedResults: [] as { team: ReturnType<typeof newTeam> }[],
   activeStatus: "Exhausted" as "Exhausted" | "LoadingFirstPage",
   archivedStatus: "Exhausted" as "Exhausted" | "LoadingFirstPage",
   libraryQueries: vi.fn(),
-  favoriteResults: [] as {
-    team: ReturnType<typeof newTeam>;
-    favorite?: boolean;
-  }[],
-  favoriteStatus: "Exhausted" as
-    "Exhausted" | "CanLoadMore" | "LoadingFirstPage",
+  favoriteResults: [] as { team: ReturnType<typeof newTeam>; favorite?: boolean }[],
+  favoriteStatus: "Exhausted" as "Exhausted" | "CanLoadMore" | "LoadingFirstPage",
   loadFavorites: vi.fn(),
 }));
 vi.mock("convex/react", () => ({
-  useConvexAuth: () => ({
-    isAuthenticated: mocks.authenticated,
-    isLoading: false,
-  }),
+  useConvexAuth: () => ({ isAuthenticated: mocks.authenticated, isLoading: false }),
   useConvex: () => ({ query: mocks.query }),
   useQuery: (ref: Parameters<typeof getFunctionName>[0]) =>
     getFunctionName(ref) === "teams:getByUuid"
@@ -70,12 +56,8 @@ vi.mock("convex/react", () => ({
       : mocks.account
         ? { id: mocks.account, name: "Telegram Coach" }
         : null,
-  useMutation: () =>
-    Object.assign(mocks.save, { withOptimisticUpdate: () => mocks.save }),
-  usePaginatedQuery: (
-    _ref: unknown,
-    args: { archived: boolean; favoritesOnly?: boolean } | "skip",
-  ) => ({
+  useMutation: () => Object.assign(mocks.save, { withOptimisticUpdate: () => mocks.save }),
+  usePaginatedQuery: (_ref: unknown, args: { archived: boolean; favoritesOnly?: boolean } | "skip") => ({
     results:
       (mocks.libraryQueries(args),
       args !== "skip" && args.favoritesOnly
@@ -89,8 +71,7 @@ vi.mock("convex/react", () => ({
         : args !== "skip" && args.archived
           ? mocks.archivedStatus
           : mocks.activeStatus,
-    loadMore:
-      args !== "skip" && args.favoritesOnly ? mocks.loadFavorites : vi.fn(),
+    loadMore: args !== "skip" && args.favoritesOnly ? mocks.loadFavorites : vi.fn(),
   }),
 }));
 vi.mock("next-intl", async (importOriginal) => {
@@ -98,28 +79,18 @@ vi.mock("next-intl", async (importOriginal) => {
   const { formats, timeZone } = await import("../src/i18n/config");
   return {
     ...actual,
-    useFormatter: () =>
-      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useFormatter: () => actual.createFormatter({ locale: "en", formats, timeZone }),
     useTranslations: () => (key: string) => key,
   };
 });
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }));
 vi.mock("next/link", () => ({
-  default: ({
-    children,
-    prefetch: _prefetch,
-    ...props
-  }: {
-    children: React.ReactNode;
-    prefetch?: boolean;
-  }) => {
+  default: ({ children, prefetch: _prefetch, ...props }: { children: React.ReactNode; prefetch?: boolean }) => {
     void _prefetch;
     return createElement("a", props, children);
   },
 }));
-vi.mock("../src/components/site-shell", () => ({
-  LoginButton: () => createElement("button", null, "signIn"),
-}));
+vi.mock("../src/components/site-shell", () => ({ LoginButton: () => createElement("button", null, "signIn") }));
 let root: Root, container: HTMLDivElement;
 beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
@@ -152,30 +123,19 @@ afterEach(async () => {
 });
 function Status() {
   const sync = useDraftSync();
-  return createElement(
-    "button",
-    { onClick: sync.retry },
-    `failed:${sync.failed.size}`,
-  );
+  return createElement("button", { onClick: sync.retry }, `failed:${sync.failed.size}`);
 }
 function renderSync() {
-  return createElement(
-    StrictMode,
-    null,
-    createElement(DraftSyncProvider, null, createElement(Status)),
-  );
+  return createElement(StrictMode, null, createElement(DraftSyncProvider, null, createElement(Status)));
 }
 it("toggles draft stars without navigation, reorders cards, and preserves the preference through edits and upload", async () => {
   const first = { ...newTeam(randomUUID()), name: "First" };
   const favorite = { ...newTeam(randomUUID()), name: "Favorite" };
   storeDraft(favorite);
   storeDraft(first);
-  const view = () =>
-    createElement(DraftSyncProvider, null, createElement(TeamLibrary));
+  const view = () => createElement(DraftSyncProvider, null, createElement(TeamLibrary));
   await act(async () => root.render(view()));
-  const star = container.querySelector<HTMLButtonElement>(
-    'button[aria-label="addFavorite Favorite"]',
-  )!;
+  const star = container.querySelector<HTMLButtonElement>('button[aria-label="addFavorite Favorite"]')!;
   expect(star.getAttribute("aria-pressed")).toBe("false");
   expect(star.querySelector("svg")?.classList.contains("fill-none")).toBe(true);
   await act(async () => star.click());
@@ -188,14 +148,10 @@ it("toggles draft stars without navigation, reorders cards, and preserves the pr
   });
   expect(readDraftFavorite(favorite.uuid)).toBe(true);
   expect(
-    container
-      .querySelector('button[aria-label="removeFavorite Edited favorite"]')
-      ?.getAttribute("aria-pressed"),
+    container.querySelector('button[aria-label="removeFavorite Edited favorite"]')?.getAttribute("aria-pressed"),
   ).toBe("true");
   const backend = convexTest(schema, import.meta.glob("../convex/**/*.ts"));
-  const id = await backend.run((ctx) =>
-    ctx.db.insert("users", { name: "Coach" }),
-  );
+  const id = await backend.run((ctx) => ctx.db.insert("users", { name: "Coach" }));
   const owner = backend.withIdentity({ subject: id });
   mocks.save.mockImplementation((args) => owner.mutation(api.teams.save, args));
   mocks.authenticated = true;
@@ -210,23 +166,14 @@ it("toggles draft stars without navigation, reorders cards, and preserves the pr
     await mocks.save.mock.results[1].value;
   });
   expect(readDrafts()).toEqual([]);
-  expect(
-    (await owner.query(api.teams.getByUuid, { uuid: favorite.uuid }))?.favorite,
-  ).toBe(true);
+  expect((await owner.query(api.teams.getByUuid, { uuid: favorite.uuid }))?.favorite).toBe(true);
   mocks.results = (
-    await owner.query(api.teams.listMine, {
-      archived: false,
-      paginationOpts: { cursor: null, numItems: 18 },
-    })
+    await owner.query(api.teams.listMine, { archived: false, paginationOpts: { cursor: null, numItems: 18 } })
   ).page;
   await act(async () => root.render(view()));
-  expect(container.querySelector("article h2")?.textContent).toBe(
-    "Edited favorite",
-  );
+  expect(container.querySelector("article h2")?.textContent).toBe("Edited favorite");
   expect(
-    container
-      .querySelector('button[aria-label="removeFavorite Edited favorite"]')
-      ?.getAttribute("aria-pressed"),
+    container.querySelector('button[aria-label="removeFavorite Edited favorite"]')?.getAttribute("aria-pressed"),
   ).toBe("true");
 });
 
@@ -234,14 +181,10 @@ it("blocks archive for a favorite with a focusable explanation, while keeping fa
   const team = { ...newTeam(randomUUID()), name: "Pinned" };
   mocks.authenticated = true;
   mocks.results = [{ team, favorite: true }];
-  mocks.archivedResults = [
-    { team: { ...team, uuid: randomUUID(), name: "Archived" } },
-  ];
+  mocks.archivedResults = [{ team: { ...team, uuid: randomUUID(), name: "Archived" } }];
   mocks.query.mockResolvedValue({ team, favorite: true });
   await act(async () => root.render(createElement(TeamLibrary)));
-  const archive = container.querySelector<HTMLButtonElement>(
-    'button[aria-label="archive Pinned"]',
-  )!;
+  const archive = container.querySelector<HTMLButtonElement>('button[aria-label="archive Pinned"]')!;
   expect(archive.getAttribute("aria-disabled")).toBe("true");
   await act(async () => archive.click());
   expect(document.querySelector('[role="alertdialog"]')).toBeNull();
@@ -251,24 +194,14 @@ it("blocks archive for a favorite with a focusable explanation, while keeping fa
   });
   expect(document.body.textContent).toContain("unfavoriteBeforeArchive");
   await act(async () =>
-    container
-      .querySelector<HTMLButtonElement>(
-        'button[aria-label="removeFavorite Pinned"]',
-      )!
-      .click(),
+    container.querySelector<HTMLButtonElement>('button[aria-label="removeFavorite Pinned"]')!.click(),
   );
   expect(mocks.save).toHaveBeenCalledWith({ uuid: team.uuid, favorite: false });
   mocks.results = [{ team, favorite: false }];
   await act(async () => root.render(createElement(TeamLibrary)));
   expect(archive.getAttribute("aria-disabled")).not.toBe("true");
-  await act(async () =>
-    container
-      .querySelector<HTMLButtonElement>('[aria-controls="team-archive"]')!
-      .click(),
-  );
-  expect(
-    container.querySelector("#team-archive button[aria-pressed]"),
-  ).toBeNull();
+  await act(async () => container.querySelector<HTMLButtonElement>('[aria-controls="team-archive"]')!.click());
+  expect(container.querySelector("#team-archive button[aria-pressed]")).toBeNull();
 });
 
 it("waits for an in-flight upload before applying a draft favorite to the saved team", async () => {
@@ -287,11 +220,7 @@ it("waits for an in-flight upload before applying a draft favorite to the saved 
   mocks.query.mockResolvedValue({ team });
   await act(async () => root.render(createElement(TeamLibrary)));
   await act(async () =>
-    container
-      .querySelector<HTMLButtonElement>(
-        'button[aria-label="addFavorite Uploading"]',
-      )!
-      .click(),
+    container.querySelector<HTMLButtonElement>('button[aria-label="addFavorite Uploading"]')!.click(),
   );
   expect(mocks.save).not.toHaveBeenCalled();
   await act(async () => {
@@ -307,13 +236,7 @@ it("unfavorites a guest draft and retains its preference across normalization", 
   storeDraft(team);
   setDraftFavorite(team.uuid, true);
   await act(async () => root.render(createElement(TeamLibrary)));
-  await act(async () =>
-    container
-      .querySelector<HTMLButtonElement>(
-        'button[aria-label^="removeFavorite "]',
-      )!
-      .click(),
-  );
+  await act(async () => container.querySelector<HTMLButtonElement>('button[aria-label^="removeFavorite "]')!.click());
   normalizeStoredDrafts();
   expect(readDraftFavorite(team.uuid)).toBe(false);
 });
@@ -330,14 +253,9 @@ it("loads matching favorites before regular search pages and deduplicates overla
   ];
   mocks.favoriteStatus = "CanLoadMore";
   await act(async () => root.render(createElement(TeamLibrary)));
-  const search = container.querySelector<HTMLInputElement>(
-    'input[aria-label="searchMyTeams"]',
-  )!;
+  const search = container.querySelector<HTMLInputElement>('input[aria-label="searchMyTeams"]')!;
   await act(async () => {
-    Object.getOwnPropertyDescriptor(
-      HTMLInputElement.prototype,
-      "value",
-    )!.set!.call(search, "Humans");
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(search, "Humans");
     search.dispatchEvent(new Event("input", { bubbles: true }));
   });
   expect(container.querySelectorAll("article")).toHaveLength(2);
@@ -350,9 +268,7 @@ it("loads matching favorites before regular search pages and deduplicates overla
   expect(mocks.loadFavorites).toHaveBeenCalledWith(18);
   mocks.favoriteStatus = "Exhausted";
   await act(async () => root.render(createElement(TeamLibrary)));
-  const names = Array.from(container.querySelectorAll("article h2")).map(
-    (node) => node.textContent,
-  );
+  const names = Array.from(container.querySelectorAll("article h2")).map((node) => node.textContent);
   expect(names).toHaveLength(3);
   expect(names[2]).toBe("Regular Humans");
 });
@@ -376,11 +292,7 @@ it("waits for an upload in another tab before resolving whether a favorite belon
     },
   });
   await act(async () => root.render(createElement(TeamLibrary)));
-  await act(async () =>
-    container
-      .querySelector<HTMLButtonElement>('button[aria-label^="addFavorite"]')!
-      .click(),
-  );
+  await act(async () => container.querySelector<HTMLButtonElement>('button[aria-label^="addFavorite"]')!.click());
   expect(mocks.query).not.toHaveBeenCalled();
   await act(async () => {
     await saveCloudDraft(team, 0, async () => ({ revision: 1 }));
@@ -395,10 +307,7 @@ async function tick() {
 }
 
 it("uploads every guest draft after sign-in, including incomplete rosters, and clears acknowledged local copies", async () => {
-  const teams = [
-    newTeam(randomUUID(), "goblin"),
-    newTeam(randomUUID(), "dwarf"),
-  ];
+  const teams = [newTeam(randomUUID(), "goblin"), newTeam(randomUUID(), "dwarf")];
   teams.forEach((team) => storeDraft(team));
   await act(async () => root.render(renderSync()));
   await tick();
@@ -409,9 +318,7 @@ it("uploads every guest draft after sign-in, including incomplete rosters, and c
   await tick();
   await tick();
   expect(mocks.save).toHaveBeenCalledTimes(2);
-  expect(mocks.save.mock.calls.map(([args]) => args.team.uuid).sort()).toEqual(
-    teams.map((team) => team.uuid).sort(),
-  );
+  expect(mocks.save.mock.calls.map(([args]) => args.team.uuid).sort()).toEqual(teams.map((team) => team.uuid).sort());
   expect(readDrafts()).toEqual([]);
   expect(teams.map((team) => readRevision(team.uuid))).toEqual([1, 1]);
 });
@@ -446,10 +353,7 @@ it("never uploads another account's recovery work when signing in or switching a
   await act(async () => root.render(renderSync()));
   await tick();
   await tick();
-  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({
-    team: guest,
-    expectedRevision: 0,
-  });
+  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({ team: guest, expectedRevision: 0 });
   expect(readDrafts()).toEqual([privateTeam]);
   mocks.account = "account-a";
   await act(async () => root.render(renderSync()));
@@ -478,10 +382,7 @@ it("does not rebase a recovery snapshot written by another tab during an upload"
   await act(async () => complete({ revision: 1 }));
   expect(readDrafts()).toEqual([changed]);
   await tick();
-  expect(mocks.save.mock.calls[1][0]).toEqual({
-    team: changed,
-    expectedRevision: 0,
-  });
+  expect(mocks.save.mock.calls[1][0]).toEqual({ team: changed, expectedRevision: 0 });
   expect(readDrafts()).toEqual([]);
 });
 it("deduplicates overlapping library/editor uploads and serializes a different snapshot", async () => {
@@ -553,9 +454,7 @@ it("acknowledges the same draft regardless of object property order", async () =
 });
 it("syncs a renamed guest Black Orc team through sign-in and subsequent edits against the real save handler", async () => {
   const backend = convexTest(schema, import.meta.glob("../convex/**/*.ts"));
-  const userId = await backend.run((ctx) =>
-    ctx.db.insert("users", { name: "Coach" }),
-  );
+  const userId = await backend.run((ctx) => ctx.db.insert("users", { name: "Coach" }));
   const coach = backend.withIdentity({ subject: userId });
   mocks.save.mockImplementation((args) => coach.mutation(api.teams.save, args));
   const { name, ...fields } = newTeam(randomUUID(), "black-orc");
@@ -587,9 +486,7 @@ it("syncs a renamed guest Black Orc team through sign-in and subsequent edits ag
   });
   expect(mocks.save.mock.calls[1][0].expectedRevision).toBe(1);
   expect(readDrafts()).toEqual([]);
-  expect(
-    await coach.query(api.teams.getByUuid, { uuid: team.uuid }),
-  ).toMatchObject({ team: edited, revision: 2 });
+  expect(await coach.query(api.teams.getByUuid, { uuid: team.uuid })).toMatchObject({ team: edited, revision: 2 });
 });
 it("shows one card per team when a local recovery copy overlaps a cloud team", async () => {
   const team = newTeam(randomUUID());
@@ -597,40 +494,25 @@ it("shows one card per team when a local recovery copy overlaps a cloud team", a
   mocks.authenticated = true;
   mocks.account = "account-a";
   mocks.results = [{ team }];
-  await act(async () =>
-    root.render(
-      createElement(DraftSyncProvider, null, createElement(TeamLibrary)),
-    ),
-  );
+  await act(async () => root.render(createElement(DraftSyncProvider, null, createElement(TeamLibrary))));
   expect(container.querySelectorAll("article")).toHaveLength(1);
-  expect(container.querySelector("article a")?.getAttribute("href")).toBe(
-    `/teams/${team.uuid}`,
-  );
+  expect(container.querySelector("article a")?.getAttribute("href")).toBe(`/teams/${team.uuid}`);
   await tick();
   expect(container.querySelectorAll("article")).toHaveLength(1);
-  expect(container.querySelector("article a")?.getAttribute("href")).toBe(
-    `/teams/${team.uuid}`,
-  );
+  expect(container.querySelector("article a")?.getAttribute("href")).toBe(`/teams/${team.uuid}`);
 });
 it("filters the guest library by search and roster and lets the coach clear an empty result", async () => {
   const goblin = { ...newTeam(randomUUID(), "goblin"), name: "Green Grinders" };
   storeDraft(goblin);
   storeDraft(newTeam(randomUUID(), "dwarf"));
   await act(async () => root.render(createElement(TeamLibrary)));
-  const search = container.querySelector<HTMLInputElement>(
-    'input[aria-label="searchMyTeams"]',
-  )!;
+  const search = container.querySelector<HTMLInputElement>('input[aria-label="searchMyTeams"]')!;
   await act(async () => {
-    Object.getOwnPropertyDescriptor(
-      HTMLInputElement.prototype,
-      "value",
-    )!.set!.call(search, "Green");
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(search, "Green");
     search.dispatchEvent(new Event("input", { bubbles: true }));
   });
   expect(container.querySelectorAll("article")).toHaveLength(1);
-  const roster = container.querySelector<HTMLSelectElement>(
-    'select[aria-label="roster"]',
-  )!;
+  const roster = container.querySelector<HTMLSelectElement>('select[aria-label="roster"]')!;
   await act(async () => {
     roster.value = "dwarf";
     roster.dispatchEvent(new Event("change", { bubbles: true }));
@@ -649,8 +531,7 @@ it("keeps settled team cards visible while a new search loads", async () => {
   mocks.authenticated = true;
   mocks.account = "account-a";
   mocks.results = [{ team: first }];
-  const view = () =>
-    createElement(DraftSyncProvider, null, createElement(TeamLibrary));
+  const view = () => createElement(DraftSyncProvider, null, createElement(TeamLibrary));
   await act(async () => root.render(view()));
   await tick();
   expect(container.textContent).toContain("First team");
@@ -669,16 +550,8 @@ it("keeps settled team cards visible while a new search loads", async () => {
 });
 it("matches team names and ruleset prefixes without ignoring combined filters", () => {
   const team = { ...newTeam(randomUUID(), "goblin"), name: "Олександр" };
-  expect(
-    libraryMatches(team, {
-      search: "Олекс",
-      rosterId: "goblin",
-      rulesetId: team.rulesetId,
-    }),
-  ).toBe(true);
-  expect(
-    libraryMatches(team, { search: "Олекс", rosterId: "dwarf", rulesetId: "" }),
-  ).toBe(false);
+  expect(libraryMatches(team, { search: "Олекс", rosterId: "goblin", rulesetId: team.rulesetId })).toBe(true);
+  expect(libraryMatches(team, { search: "Олекс", rosterId: "dwarf", rulesetId: "" })).toBe(false);
 });
 it("limits name edits without helper text and keeps maximum-length copies valid", async () => {
   let value = "Orcs";
@@ -699,10 +572,10 @@ it("limits name edits without helper text and keeps maximum-length copies valid"
   expect(name.maxLength).toBe(TEAM_NAME_MAX_LENGTH);
   await act(async () => name.focus());
   await act(async () => {
-    Object.getOwnPropertyDescriptor(
-      HTMLInputElement.prototype,
-      "value",
-    )!.set!.call(name, "W".repeat(TEAM_NAME_MAX_LENGTH + 1));
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(
+      name,
+      "W".repeat(TEAM_NAME_MAX_LENGTH + 1),
+    );
     name.dispatchEvent(new Event("input", { bubbles: true }));
   });
   expect(value).toHaveLength(TEAM_NAME_MAX_LENGTH);
@@ -727,37 +600,21 @@ it("finishes name editing with Enter, restores it with Escape, and stays single-
     render();
   });
   const render = () =>
-    root.render(
-      createElement(TeamName, {
-        value,
-        placeholder: "Untitled",
-        label: "Name",
-        onChange: change,
-      }),
-    );
+    root.render(createElement(TeamName, { value, placeholder: "Untitled", label: "Name", onChange: change }));
   await act(async () => render());
   const name = container.querySelector("input")!;
   await act(async () => {
     name.focus();
-    Object.getOwnPropertyDescriptor(
-      HTMLInputElement.prototype,
-      "value",
-    )!.set!.call(name, "Changed\nname");
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(name, "Changed\nname");
     name.dispatchEvent(new Event("input", { bubbles: true }));
   });
   expect(value).toBe("Changedname");
-  await act(async () =>
-    name.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
-    ),
-  );
+  await act(async () => name.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })));
   expect(value).toBe("Original team");
   expect(document.activeElement).not.toBe(name);
   await act(async () => {
     name.focus();
-    name.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Enter", bubbles: true }),
-    );
+    name.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
   });
   expect(document.activeElement).not.toBe(name);
 });
@@ -776,12 +633,8 @@ it("stores a selected roster before navigating directly to its UUID editor", asy
     expect(draft.rosterId).toBe("goblin");
     expect(path).toBe(`/teams/${draft.uuid}`);
   });
-  await act(async () =>
-    root.render(createElement(CreateTeamButton, { rosterId: "goblin" })),
-  );
-  await act(async () =>
-    (container.querySelector("button") as HTMLButtonElement).click(),
-  );
+  await act(async () => root.render(createElement(CreateTeamButton, { rosterId: "goblin" })));
+  await act(async () => (container.querySelector("button") as HTMLButtonElement).click());
   expect(mocks.push).toHaveBeenCalledTimes(1);
   expect(readDrafts()).toHaveLength(1);
 });
@@ -811,50 +664,34 @@ it("keeps queued cloud work protected after leaving the editor, and stops warnin
   expect(protectedByBrowser()).toBe(false);
 });
 
-it.each(["Enter", "blur"])(
-  "selects the whole name on focus and restores an empty edit on %s",
-  async (finish) => {
-    let value = "Original team";
-    const change = vi.fn((next: string) => {
-      value = next;
-      render();
-    });
-    const render = () =>
-      root.render(
-        createElement(TeamName, {
-          value,
-          placeholder: "Untitled",
-          label: "Name",
-          onChange: change,
-        }),
-      );
-    await act(async () => render());
-    const name = container.querySelector("input")!;
-    await act(async () => name.focus());
-    expect(name.selectionStart).toBe(0);
-    expect(name.selectionEnd).toBe(value.length);
-    await act(async () => {
-      Object.getOwnPropertyDescriptor(
-        HTMLInputElement.prototype,
-        "value",
-      )!.set!.call(name, "");
-      name.dispatchEvent(new Event("input", { bubbles: true }));
-    });
-    expect(name.value).toBe("");
-    expect(name.placeholder).toBe("");
-    expect(value).toBe("Original team");
-    expect(change).not.toHaveBeenCalled();
-    await act(async () => {
-      if (finish === "Enter")
-        name.dispatchEvent(
-          new KeyboardEvent("keydown", { key: "Enter", bubbles: true }),
-        );
-      else name.blur();
-    });
-    expect(name.value).toBe("Original team");
-    expect(change).not.toHaveBeenCalled();
-  },
-);
+it.each(["Enter", "blur"])("selects the whole name on focus and restores an empty edit on %s", async (finish) => {
+  let value = "Original team";
+  const change = vi.fn((next: string) => {
+    value = next;
+    render();
+  });
+  const render = () =>
+    root.render(createElement(TeamName, { value, placeholder: "Untitled", label: "Name", onChange: change }));
+  await act(async () => render());
+  const name = container.querySelector("input")!;
+  await act(async () => name.focus());
+  expect(name.selectionStart).toBe(0);
+  expect(name.selectionEnd).toBe(value.length);
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(name, "");
+    name.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  expect(name.value).toBe("");
+  expect(name.placeholder).toBe("");
+  expect(value).toBe("Original team");
+  expect(change).not.toHaveBeenCalled();
+  await act(async () => {
+    if (finish === "Enter") name.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    else name.blur();
+  });
+  expect(name.value).toBe("Original team");
+  expect(change).not.toHaveBeenCalled();
+});
 
 it("restores the focus-time name when a changed name is cleared to whitespace", async () => {
   let value = "Original team";
@@ -863,22 +700,12 @@ it("restores the focus-time name when a changed name is cleared to whitespace", 
     render();
   });
   const render = () =>
-    root.render(
-      createElement(TeamName, {
-        value,
-        placeholder: "Untitled",
-        label: "Name",
-        onChange: change,
-      }),
-    );
+    root.render(createElement(TeamName, { value, placeholder: "Untitled", label: "Name", onChange: change }));
   await act(async () => render());
   const name = container.querySelector("input")!;
   await act(async () => name.focus());
   const input = (next: string) => {
-    Object.getOwnPropertyDescriptor(
-      HTMLInputElement.prototype,
-      "value",
-    )!.set!.call(name, next);
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(name, next);
     name.dispatchEvent(new Event("input", { bubbles: true }));
   };
   await act(async () => input("Changed name"));
@@ -889,24 +716,16 @@ it("restores the focus-time name when a changed name is cleared to whitespace", 
   await act(async () => name.blur());
   expect(value).toBe("Original team");
   expect(name.value).toBe("Original team");
-  expect(change.mock.calls.map(([next]) => next)).toEqual([
-    "Changed name",
-    "Original team",
-  ]);
+  expect(change.mock.calls.map(([next]) => next)).toEqual(["Changed name", "Original team"]);
 });
 
 it("removes obsolete fields from local draft data while retaining roster selections", () => {
   const team = newTeam(randomUUID(), "goblin");
   team.staff.rerolls = 2;
-  localStorage.setItem(
-    DRAFTS_KEY,
-    JSON.stringify([{ ...team, coach: "Obsolete private name" }]),
-  );
+  localStorage.setItem(DRAFTS_KEY, JSON.stringify([{ ...team, coach: "Obsolete private name" }]));
   normalizeStoredDrafts();
   expect(readDrafts()).toEqual([team]);
-  expect(JSON.parse(localStorage.getItem(DRAFTS_KEY)!)).toEqual([
-    { ...team, baseRevision: 0, draftOwner: null },
-  ]);
+  expect(JSON.parse(localStorage.getItem(DRAFTS_KEY)!)).toEqual([{ ...team, baseRevision: 0, draftOwner: null }]);
 });
 
 it("binds recovery to its exact base and owner even when another tab acknowledges a newer revision", async () => {
@@ -923,12 +742,7 @@ it("binds recovery to its exact base and owner even when another tab acknowledge
 it("updates a focused idle name field from the cloud without writing its old buffer back", async () => {
   const change = vi.fn();
   const render = (value: string) =>
-    createElement(TeamName, {
-      value,
-      onChange: change,
-      placeholder: "Untitled",
-      label: "Name",
-    });
+    createElement(TeamName, { value, onChange: change, placeholder: "Untitled", label: "Name" });
   await act(async () => root.render(render("Original")));
   const name = container.querySelector("input")!;
   await act(async () => name.focus());
@@ -945,9 +759,7 @@ it("does not turn cloud success into failure when recovery cleanup is blocked", 
     throw new Error("blocked");
   });
   try {
-    await expect(saveCloudDraft(team, 2, mocks.save)).resolves.toEqual({
-      revision: 1,
-    });
+    await expect(saveCloudDraft(team, 2, mocks.save)).resolves.toEqual({ revision: 1 });
     expect(mocks.save).toHaveBeenCalledTimes(1);
   } finally {
     blocked.mockRestore();
@@ -961,28 +773,16 @@ it("lets a signed-in coach discard a failed recovery draft and reveal the cloud 
   mocks.account = "account-a";
   mocks.results = [{ team }];
   mocks.save.mockRejectedValue(new Error("CONFLICT"));
-  await act(async () =>
-    root.render(
-      createElement(DraftSyncProvider, null, createElement(TeamLibrary)),
-    ),
-  );
+  await act(async () => root.render(createElement(DraftSyncProvider, null, createElement(TeamLibrary))));
   await tick();
-  const discard = container.querySelector<HTMLButtonElement>(
-    'button[aria-label="discardDraft Failed recovery"]',
-  )!;
+  const discard = container.querySelector<HTMLButtonElement>('button[aria-label="discardDraft Failed recovery"]')!;
   expect(discard).not.toBeNull();
   await act(async () => discard.click());
   expect(readDrafts()).toHaveLength(1);
-  await act(async () =>
-    document
-      .querySelector<HTMLButtonElement>('[data-slot="team-confirm-action"]')!
-      .click(),
-  );
+  await act(async () => document.querySelector<HTMLButtonElement>('[data-slot="team-confirm-action"]')!.click());
   expect(readDrafts()).toEqual([]);
   expect(container.querySelectorAll("article")).toHaveLength(1);
-  expect(
-    container.querySelector('button[aria-label^="archive "]'),
-  ).not.toBeNull();
+  expect(container.querySelector('button[aria-label^="archive "]')).not.toBeNull();
   await tick();
   expect(mocks.save).toHaveBeenCalledTimes(1);
 });
@@ -992,54 +792,27 @@ it("loads the archive only when expanded and provides restore and confirmed perm
   mocks.authenticated = true;
   mocks.archivedResults = [{ team }];
   await act(async () => root.render(createElement(TeamLibrary)));
-  expect(mocks.libraryQueries.mock.calls.some(([args]) => args.archived)).toBe(
-    false,
-  );
-  const toggle = container.querySelector<HTMLButtonElement>(
-    '[aria-controls="team-archive"]',
-  )!;
+  expect(mocks.libraryQueries.mock.calls.some(([args]) => args.archived)).toBe(false);
+  const toggle = container.querySelector<HTMLButtonElement>('[aria-controls="team-archive"]')!;
   await act(async () => toggle.click());
-  expect(mocks.libraryQueries.mock.calls.some(([args]) => args.archived)).toBe(
-    true,
-  );
+  expect(mocks.libraryQueries.mock.calls.some(([args]) => args.archived)).toBe(true);
   const archive = container.querySelector("#team-archive")!;
   expect(archive.querySelector("article a")).toBeNull();
-  expect(
-    archive.querySelector("article footer [role='status']")?.textContent,
-  ).toBe("archived");
-  expect(archive.querySelector("article [data-team-status]")?.textContent).toBe(
-    "draft",
-  );
+  expect(archive.querySelector("article footer [role='status']")?.textContent).toBe("archived");
+  expect(archive.querySelector("article [data-team-status]")?.textContent).toBe("draft");
   expect(archive.querySelectorAll("article footer button")).toHaveLength(2);
   expect(
-    Array.from(archive.querySelectorAll("article footer button")).map(
-      (button) => button.getAttribute("aria-label"),
-    ),
+    Array.from(archive.querySelectorAll("article footer button")).map((button) => button.getAttribute("aria-label")),
   ).toEqual(["restore Archived team", "deletePermanently Archived team"]);
-  await act(async () =>
-    archive
-      .querySelector<HTMLButtonElement>('[aria-label="restore Archived team"]')!
-      .click(),
-  );
-  expect(mocks.save).toHaveBeenLastCalledWith({
-    uuid: team.uuid,
-    archived: false,
-  });
+  await act(async () => archive.querySelector<HTMLButtonElement>('[aria-label="restore Archived team"]')!.click());
+  expect(mocks.save).toHaveBeenLastCalledWith({ uuid: team.uuid, archived: false });
   mocks.save.mockClear();
   await act(async () =>
-    archive
-      .querySelector<HTMLButtonElement>(
-        '[aria-label="deletePermanently Archived team"]',
-      )!
-      .click(),
+    archive.querySelector<HTMLButtonElement>('[aria-label="deletePermanently Archived team"]')!.click(),
   );
   expect(mocks.save).not.toHaveBeenCalled();
   expect(document.body.textContent).toContain("confirmPermanentDeleteTeamHint");
-  await act(async () =>
-    document
-      .querySelector<HTMLButtonElement>('[data-slot="team-confirm-action"]')!
-      .click(),
-  );
+  await act(async () => document.querySelector<HTMLButtonElement>('[data-slot="team-confirm-action"]')!.click());
   expect(mocks.save).toHaveBeenCalledExactlyOnceWith({ uuid: team.uuid });
   await act(async () => toggle.click());
   expect(container.querySelector("#team-archive")).toBeNull();
@@ -1050,27 +823,14 @@ it("requires confirmation to archive and leaves the team unchanged on cancel", a
   mocks.authenticated = true;
   mocks.results = [{ team }];
   await act(async () => root.render(createElement(TeamLibrary)));
-  const archive = container.querySelector<HTMLButtonElement>(
-    'button[aria-label="archive Archive me"]',
-  )!;
+  const archive = container.querySelector<HTMLButtonElement>('button[aria-label="archive Archive me"]')!;
   await act(async () => archive.click());
   expect(mocks.save).not.toHaveBeenCalled();
-  await act(async () =>
-    document
-      .querySelector<HTMLButtonElement>('[data-slot="team-confirm-cancel"]')!
-      .click(),
-  );
+  await act(async () => document.querySelector<HTMLButtonElement>('[data-slot="team-confirm-cancel"]')!.click());
   expect(mocks.save).not.toHaveBeenCalled();
   await act(async () => archive.click());
-  await act(async () =>
-    document
-      .querySelector<HTMLButtonElement>('[data-slot="team-confirm-action"]')!
-      .click(),
-  );
-  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({
-    uuid: team.uuid,
-    archived: true,
-  });
+  await act(async () => document.querySelector<HTMLButtonElement>('[data-slot="team-confirm-action"]')!.click());
+  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({ uuid: team.uuid, archived: true });
 });
 
 it("disables archive for league-locked cloud teams and hides their recovery delete action", async () => {
@@ -1079,84 +839,39 @@ it("disables archive for league-locked cloud teams and hides their recovery dele
   mocks.authenticated = true;
   mocks.results = [{ team, leagueLocked: true }];
   await act(async () => root.render(createElement(TeamLibrary)));
-  expect(
-    container.querySelector<HTMLButtonElement>(
-      'button[aria-label="archive League team"]',
-    )!.disabled,
-  ).toBe(true);
-  expect(
-    container.querySelector('button[aria-label^="discardDraft"]'),
-  ).toBeNull();
+  expect(container.querySelector<HTMLButtonElement>('button[aria-label="archive League team"]')!.disabled).toBe(true);
+  expect(container.querySelector('button[aria-label^="discardDraft"]')).toBeNull();
   expect(mocks.save).not.toHaveBeenCalled();
 });
 
-it.each(["cancel", "backdrop", "escape"])(
-  "keeps a guest draft when deletion is dismissed with %s",
-  async (method) => {
-    const team = { ...newTeam(randomUUID()), name: "Keep me" };
-    storeDraft(team);
-    await act(async () => root.render(createElement(TeamLibrary)));
-    await act(async () =>
-      container
-        .querySelector<HTMLButtonElement>(
-          'button[aria-label="remove Keep me"]',
-        )!
-        .click(),
-    );
-    expect(readDrafts()).toHaveLength(1);
-    await act(async () => vi.advanceTimersByTimeAsync(100));
-    const popup = document.querySelector<HTMLElement>(
-      '[data-slot="dialog-content"]',
-    )!;
-    await act(async () => popup.click());
-    expect(
-      document.querySelector('[data-slot="dialog-content"][data-open]'),
-    ).not.toBeNull();
-    await act(async () => {
-      if (method === "cancel") {
-        document
-          .querySelector<HTMLButtonElement>(
-            '[data-slot="team-confirm-cancel"]',
-          )!
-          .click();
-      } else if (method === "escape") {
-        popup.dispatchEvent(
-          new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
-        );
-      } else {
-        const backdrop = document.querySelector<HTMLElement>(
-          '[data-slot="dialog-overlay"]',
-        )!;
-        backdrop.dispatchEvent(
-          new PointerEvent("pointerdown", {
-            bubbles: true,
-            button: 0,
-            pointerType: "mouse",
-          }),
-        );
-        backdrop.dispatchEvent(
-          new MouseEvent("mousedown", { bubbles: true, button: 0 }),
-        );
-        backdrop.dispatchEvent(
-          new PointerEvent("pointerup", {
-            bubbles: true,
-            button: 0,
-            pointerType: "mouse",
-          }),
-        );
-        backdrop.dispatchEvent(
-          new MouseEvent("mouseup", { bubbles: true, button: 0 }),
-        );
-        backdrop.click();
-      }
-    });
-    expect(
-      document.querySelector('[data-slot="dialog-content"][data-open]'),
-    ).toBeNull();
-    expect(readDrafts()).toHaveLength(1);
-    expect(mocks.save).not.toHaveBeenCalled();
-  },
-);
+it.each(["cancel", "backdrop", "escape"])("keeps a guest draft when deletion is dismissed with %s", async (method) => {
+  const team = { ...newTeam(randomUUID()), name: "Keep me" };
+  storeDraft(team);
+  await act(async () => root.render(createElement(TeamLibrary)));
+  await act(async () => container.querySelector<HTMLButtonElement>('button[aria-label="remove Keep me"]')!.click());
+  expect(readDrafts()).toHaveLength(1);
+  await act(async () => vi.advanceTimersByTimeAsync(100));
+  const popup = document.querySelector<HTMLElement>('[data-slot="dialog-content"]')!;
+  await act(async () => popup.click());
+  expect(document.querySelector('[data-slot="dialog-content"][data-open]')).not.toBeNull();
+  await act(async () => {
+    if (method === "cancel") {
+      document.querySelector<HTMLButtonElement>('[data-slot="team-confirm-cancel"]')!.click();
+    } else if (method === "escape") {
+      popup.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    } else {
+      const backdrop = document.querySelector<HTMLElement>('[data-slot="dialog-overlay"]')!;
+      backdrop.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0, pointerType: "mouse" }));
+      backdrop.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, button: 0 }));
+      backdrop.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, button: 0, pointerType: "mouse" }));
+      backdrop.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, button: 0 }));
+      backdrop.click();
+    }
+  });
+  expect(document.querySelector('[data-slot="dialog-content"][data-open]')).toBeNull();
+  expect(readDrafts()).toHaveLength(1);
+  expect(mocks.save).not.toHaveBeenCalled();
+});
 
 it("disables confirmation while checking league status and when a team becomes locked", async () => {
   const team = { ...newTeam(randomUUID()), name: "Pending draft" };
@@ -1165,24 +880,12 @@ it("disables confirmation while checking league status and when a team becomes l
   mocks.selectedTeam = undefined;
   await act(async () => root.render(createElement(TeamLibrary)));
   await act(async () =>
-    container
-      .querySelector<HTMLButtonElement>(
-        'button[aria-label="discardDraft Pending draft"]',
-      )!
-      .click(),
+    container.querySelector<HTMLButtonElement>('button[aria-label="discardDraft Pending draft"]')!.click(),
   );
-  expect(
-    document.querySelector<HTMLButtonElement>(
-      '[data-slot="team-confirm-action"]',
-    )!.disabled,
-  ).toBe(true);
+  expect(document.querySelector<HTMLButtonElement>('[data-slot="team-confirm-action"]')!.disabled).toBe(true);
   mocks.selectedTeam = { leagueLocked: true };
   await act(async () => root.render(createElement(TeamLibrary)));
-  expect(
-    document.querySelector<HTMLButtonElement>(
-      '[data-slot="team-confirm-action"]',
-    )!.disabled,
-  ).toBe(true);
+  expect(document.querySelector<HTMLButtonElement>('[data-slot="team-confirm-action"]')!.disabled).toBe(true);
   expect(document.body.textContent).toContain("teamRemovalLocked");
   expect(readDrafts()).toHaveLength(1);
 });
@@ -1194,20 +897,10 @@ it("rechecks league status before deleting a draft absent from the current libra
   mocks.query.mockResolvedValue({ leagueLocked: true });
   await act(async () => root.render(createElement(TeamLibrary)));
   await act(async () =>
-    container
-      .querySelector<HTMLButtonElement>(
-        'button[aria-label="discardDraft Late lock"]',
-      )!
-      .click(),
+    container.querySelector<HTMLButtonElement>('button[aria-label="discardDraft Late lock"]')!.click(),
   );
-  await act(async () =>
-    document
-      .querySelector<HTMLButtonElement>('[data-slot="team-confirm-action"]')!
-      .click(),
-  );
-  expect(mocks.query).toHaveBeenCalledWith(api.teams.getByUuid, {
-    uuid: team.uuid,
-  });
+  await act(async () => document.querySelector<HTMLButtonElement>('[data-slot="team-confirm-action"]')!.click());
+  expect(mocks.query).toHaveBeenCalledWith(api.teams.getByUuid, { uuid: team.uuid });
   expect(readDrafts()).toHaveLength(1);
 });
 
@@ -1218,16 +911,10 @@ it("creates signed-in teams directly in Convex even when local storage is blocke
     throw new Error("blocked");
   });
   try {
-    await act(async () =>
-      root.render(createElement(CreateTeamButton, { rosterId: "goblin" })),
-    );
-    await act(async () =>
-      container.querySelector<HTMLButtonElement>("button")!.click(),
-    );
+    await act(async () => root.render(createElement(CreateTeamButton, { rosterId: "goblin" })));
+    await act(async () => container.querySelector<HTMLButtonElement>("button")!.click());
     expect(mocks.save).toHaveBeenCalledTimes(1);
-    expect(mocks.push).toHaveBeenCalledWith(
-      `/teams/${mocks.save.mock.calls[0][0].team.uuid}`,
-    );
+    expect(mocks.push).toHaveBeenCalledWith(`/teams/${mocks.save.mock.calls[0][0].team.uuid}`);
   } finally {
     blocked.mockRestore();
   }
@@ -1239,9 +926,7 @@ it("parks background uploads while another tab is editing, then resumes on relea
   mocks.authenticated = true;
   mocks.account = "account-a";
   let editorOpen = true;
-  const request = vi.fn(async (_name, _options, callback) =>
-    callback(editorOpen ? null : { mode: "exclusive" }),
-  );
+  const request = vi.fn(async (_name, _options, callback) => callback(editorOpen ? null : { mode: "exclusive" }));
   vi.stubGlobal("navigator", { locks: { request } });
   await act(async () => root.render(renderSync()));
   await tick();
@@ -1249,16 +934,9 @@ it("parks background uploads while another tab is editing, then resumes on relea
   expect(mocks.save).not.toHaveBeenCalled();
   expect(request).toHaveBeenCalledTimes(1);
   editorOpen = false;
-  await act(async () =>
-    window.dispatchEvent(
-      new StorageEvent("storage", { key: DRAFT_EDITOR_RELEASED }),
-    ),
-  );
+  await act(async () => window.dispatchEvent(new StorageEvent("storage", { key: DRAFT_EDITOR_RELEASED })));
   await tick();
-  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({
-    team,
-    expectedRevision: 1,
-  });
+  expect(mocks.save).toHaveBeenCalledExactlyOnceWith({ team, expectedRevision: 1 });
   expect(readDrafts()).toEqual([]);
 });
 
@@ -1293,13 +971,10 @@ it("does not loop background cloud saves when acknowledged recovery cleanup fail
 
 it("rejects a stale tab against Convex even after shared storage learns a newer revision", async () => {
   const backend = convexTest(schema, import.meta.glob("../convex/**/*.ts"));
-  const userId = await backend.run((ctx) =>
-    ctx.db.insert("users", { name: "Coach" }),
-  );
+  const userId = await backend.run((ctx) => ctx.db.insert("users", { name: "Coach" }));
   const coach = backend.withIdentity({ subject: userId });
   const team = newTeam(randomUUID());
-  const save = (args: { team: typeof team; expectedRevision: number }) =>
-    coach.mutation(api.teams.save, args);
+  const save = (args: { team: typeof team; expectedRevision: number }) => coach.mutation(api.teams.save, args);
   await saveCloudDraft(team, 0, save);
   const latest = { ...team, name: "Saved in tab A" };
   await saveCloudDraft(latest, 1, save);
@@ -1307,8 +982,6 @@ it("rejects a stale tab against Convex even after shared storage learns a newer 
   const stale = { ...team, name: "Stale tab B" };
   storeDraft(stale, userId, 1);
   await expect(saveCloudDraft(stale, 1, save)).rejects.toThrow("CONFLICT");
-  expect(
-    (await coach.query(api.teams.getByUuid, { uuid: team.uuid }))?.team.name,
-  ).toBe(latest.name);
+  expect((await coach.query(api.teams.getByUuid, { uuid: team.uuid }))?.team.name).toBe(latest.name);
   expect(readDrafts()).toEqual([stale]);
 });

@@ -2,13 +2,7 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import {
-  getRoster,
-  newTeam,
-  skillName,
-  starPairs,
-  stars,
-} from "../src/domain/catalog";
+import { getRoster, newTeam, skillName, starPairs, stars } from "../src/domain/catalog";
 import { PLAYER_NAME_MAX_LENGTH } from "../src/domain/player-name";
 import type { Team } from "../src/domain/types";
 import { PlayerDialog } from "../src/components/player-dialog";
@@ -19,18 +13,12 @@ vi.mock("next-intl", async (importOriginal) => {
   const { formats, timeZone } = await import("../src/i18n/config");
   return {
     ...actual,
-    useFormatter: () =>
-      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useFormatter: () => actual.createFormatter({ locale: "en", formats, timeZone }),
     useTranslations: () => (key: string) => key,
   };
 });
-vi.mock("../src/lib/player-name-generator", () => ({
-  generatePlayerName: vi.fn(),
-}));
-vi.mock("../src/components/player-icon", () => ({
-  PlayerIcon: () => null,
-  StarPlayerIcon: () => null,
-}));
+vi.mock("../src/lib/player-name-generator", () => ({ generatePlayerName: vi.fn() }));
+vi.mock("../src/components/player-icon", () => ({ PlayerIcon: () => null, StarPlayerIcon: () => null }));
 vi.mock("../src/components/skill-box", () => ({
   VeteranSkill: () => createElement("span", null, "sevensVeteran"),
   SkillBox: ({ id, onRemove }: { id: string; onRemove?: () => void }) =>
@@ -38,15 +26,9 @@ vi.mock("../src/components/skill-box", () => ({
       "span",
       null,
       id,
-      onRemove &&
-        createElement(
-          "button",
-          { "aria-label": "removeSkill · " + skillName(id), onClick: onRemove },
-          "×",
-        ),
+      onRemove && createElement("button", { "aria-label": "removeSkill · " + skillName(id), onClick: onRemove }, "×"),
     ),
-  SkillList: ({ ids }: { ids: string[] }) =>
-    createElement("span", null, ids.join(", ")),
+  SkillList: ({ ids }: { ids: string[] }) => createElement("span", null, ids.join(", ")),
 }));
 
 let root: Root;
@@ -65,14 +47,7 @@ beforeEach(() => {
   root = createRoot(container);
   team = newTeam(crypto.randomUUID(), "human");
   selected = crypto.randomUUID();
-  team.players = [
-    {
-      id: selected,
-      positionId: getRoster("human")!.players[0].id,
-      name: "",
-      skills: [],
-    },
-  ];
+  team.players = [{ id: selected, positionId: getRoster("human")!.players[0].id, name: "", skills: [] }];
   readOnly = false;
   onClose.mockClear();
   onChange.mockClear();
@@ -84,22 +59,11 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 async function render() {
-  await act(async () =>
-    root.render(
-      createElement(PlayerDialog, {
-        team,
-        selected,
-        readOnly,
-        onClose,
-        onChange,
-      }),
-    ),
-  );
+  await act(async () => root.render(createElement(PlayerDialog, { team, selected, readOnly, onClose, onChange })));
 }
 function button(label: string, scope: ParentNode = document) {
   return Array.from(scope.querySelectorAll<HTMLButtonElement>("button")).find(
-    (node) =>
-      node.getAttribute("aria-label") === label || node.textContent === label,
+    (node) => node.getAttribute("aria-label") === label || node.textContent === label,
   )!;
 }
 async function click(label: string, scope: ParentNode = document) {
@@ -109,27 +73,17 @@ function confirmation() {
   return Array.from(document.querySelectorAll('[role="dialog"]')).at(-1)!;
 }
 async function rename(value: string, label = "playerName") {
-  const input = document.querySelector<HTMLInputElement>(
-    `input[aria-label="${label}"]`,
-  )!;
+  const input = document.querySelector<HTMLInputElement>(`input[aria-label="${label}"]`)!;
   await act(async () => {
     input.focus();
-    Object.getOwnPropertyDescriptor(
-      window.HTMLInputElement.prototype,
-      "value",
-    )!.set!.call(input, value);
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")!.set!.call(input, value);
     input.dispatchEvent(new Event("input", { bubbles: true }));
   });
   return input;
 }
 
 it("rejects overlapping numbers and saves a number change in numeric roster order", async () => {
-  team.players.push({
-    id: crypto.randomUUID(),
-    positionId: team.players[0].positionId,
-    name: "Teammate",
-    skills: [],
-  });
+  team.players.push({ id: crypto.randomUUID(), positionId: team.players[0].positionId, name: "Teammate", skills: [] });
   await render();
   const input = await rename("2", "playerModal.number");
   expect(input.getAttribute("aria-invalid")).toBe("true");
@@ -150,9 +104,7 @@ it("restores the previous player number on Escape", async () => {
   await render();
   const input = await rename("09", "playerModal.number");
   await act(async () => {
-    input.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
-    );
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
   });
   expect(input.value).toBe("01");
   expect(button("playerModal.save").disabled).toBe(true);
@@ -166,15 +118,10 @@ it("stages name and skills, previews costs, and applies both only on Save", asyn
   await click("addSkill · Block");
   expect(onChange).not.toHaveBeenCalled();
   expect(team.players[0]).toMatchObject({ name: "", skills: [] });
-  expect(
-    document.querySelector(".player-dialog-profile")?.textContent,
-  ).toContain("80k GP");
+  expect(document.querySelector(".player-dialog-profile")?.textContent).toContain("80k GP");
   await click("playerModal.save");
   expect(onChange).toHaveBeenCalledOnce();
-  expect(team.players[0]).toMatchObject({
-    name: "Captain Example",
-    skills: ["block"],
-  });
+  expect(team.players[0]).toMatchObject({ name: "Captain Example", skills: ["block"] });
   expect(onClose).toHaveBeenCalledOnce();
 });
 
@@ -190,13 +137,9 @@ it("keeps added skills removable after filtering and recognises reverted edits",
 
 it("generates and rerolls draft names, applies only the final name on Save", async () => {
   team.players[0].name = "Original name";
-  vi.mocked(generatePlayerName)
-    .mockReturnValueOnce("Brave Bell")
-    .mockReturnValueOnce("Happy Hopper");
+  vi.mocked(generatePlayerName).mockReturnValueOnce("Brave Bell").mockReturnValueOnce("Happy Hopper");
   await render();
-  const input = document.querySelector<HTMLInputElement>(
-    'input[aria-label="playerName"]',
-  )!;
+  const input = document.querySelector<HTMLInputElement>('input[aria-label="playerName"]')!;
   await click("playerModal.randomizeName");
   expect(input.value).toBe("Brave Bell");
   await click("playerModal.randomizeName");
@@ -219,9 +162,7 @@ it("keeps generated names editable and discards them on Cancel", async () => {
 
 it("keeps the empty editor compact when focus moves to the generator", async () => {
   await render();
-  const input = document.querySelector<HTMLInputElement>(
-    'input[aria-label="playerName"]',
-  )!;
+  const input = document.querySelector<HTMLInputElement>('input[aria-label="playerName"]')!;
   await act(async () => input.focus());
   await act(async () => button("playerModal.randomizeName").focus());
   expect(input.placeholder).toBe("");
@@ -256,18 +197,10 @@ it("guards accidental closing, preserves edits on Keep editing, and discards exp
 it("Enter finishes name editing without saving, and Escape restores the name without closing", async () => {
   await render();
   let input = await rename("First draft");
-  await act(async () =>
-    input.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Enter", bubbles: true }),
-    ),
-  );
+  await act(async () => input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true })));
   expect(onChange).not.toHaveBeenCalled();
   input = await rename("Second draft");
-  await act(async () =>
-    input.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
-    ),
-  );
+  await act(async () => input.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })));
   expect(input.value).toBe("First draft");
   expect(onClose).not.toHaveBeenCalled();
   expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
@@ -294,9 +227,7 @@ it("explains star restrictions on demand without applying a blocked skill", asyn
   team.stars = ["griff-oberwald"];
   await render();
   expect(button("addSkill · Dodge")).toBeUndefined();
-  expect(
-    document.querySelector(".player-skill-results")?.textContent,
-  ).not.toContain("issues.starSkills");
+  expect(document.querySelector(".player-skill-results")?.textContent).not.toContain("issues.starSkills");
   await click("playerModal.unavailable · Dodge");
   expect(confirmation().textContent).toContain("playerModal.starSecondaryHint");
   expect(button("playerModal.replaceSkill", confirmation())).toBeUndefined();
@@ -323,9 +254,7 @@ it("replaces an existing primary skill locally and applies the replacement only 
   expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
   expect(button("removeSkill · Fend")).toBeDefined();
   expect(button("removeSkill · Block")).toBeUndefined();
-  await vi.waitFor(() =>
-    expect(document.activeElement?.closest(".player-dialog")).not.toBeNull(),
-  );
+  await vi.waitFor(() => expect(document.activeElement?.closest(".player-dialog")).not.toBeNull());
   expect(onChange).not.toHaveBeenCalled();
   expect(team.players[0].skills).toEqual(["block"]);
   await click("playerModal.save");
@@ -370,9 +299,7 @@ it("explains unsaved edits on removal without pretending they are saved details"
   await click("addSkill · Block");
   await click("removePlayer");
   expect(confirmation().textContent).toContain("playerModal.removeUnsaved");
-  expect(confirmation().textContent).not.toContain(
-    "playerModal.savedDetailsLost",
-  );
+  expect(confirmation().textContent).not.toContain("playerModal.savedDetailsLost");
   await click("removePlayer", confirmation());
   expect(team.players).toHaveLength(0);
   expect(onChange).toHaveBeenCalledOnce();
@@ -405,12 +332,8 @@ it("shows the Sevens veteran ability and clears the designation on player remova
   team.rulesetId = "kyiv-seven-sins-sevens";
   team.veteranId = selected;
   await render();
-  expect(
-    document.querySelector(".player-dialog-profile")?.textContent,
-  ).toContain("sevensVeteran");
-  expect(
-    document.querySelector(".player-dialog-profile")?.textContent,
-  ).not.toContain("sevensVeteranHelp");
+  expect(document.querySelector(".player-dialog-profile")?.textContent).toContain("sevensVeteran");
+  expect(document.querySelector(".player-dialog-profile")?.textContent).not.toContain("sevensVeteranHelp");
   await click("removePlayer");
   expect(confirmation().textContent).toContain("sevensVeteran");
   await click("removePlayer", confirmation());
@@ -422,12 +345,8 @@ it("shows no Sevens skill spend and gives a Tier 2 captain zero added-skill slot
   team.rulesetId = "kyiv-seven-sins-sevens";
   team.captainId = selected;
   await render();
-  expect(
-    document.querySelector(".player-dialog-profile")?.textContent,
-  ).not.toContain("playerModal.skillSpend");
-  expect(document.querySelector(".player-dialog")?.textContent).toContain(
-    "0/0",
-  );
+  expect(document.querySelector(".player-dialog-profile")?.textContent).not.toContain("playerModal.skillSpend");
+  expect(document.querySelector(".player-dialog")?.textContent).toContain("0/0");
   expect(button("addSkill · Block")).toBeUndefined();
 });
 
@@ -465,20 +384,14 @@ it("labels the name-edit tooltip and focuses the name field from its pencil", as
   const matches = edit.matches.bind(edit);
   const focusVisible = vi
     .spyOn(edit, "matches")
-    .mockImplementation(
-      (selector) => selector === ":focus-visible" || matches(selector),
-    );
+    .mockImplementation((selector) => selector === ":focus-visible" || matches(selector));
   await act(async () => edit.focus());
   await vi.waitFor(() =>
-    expect(
-      document.querySelector('[data-slot="tooltip-content"]')?.textContent,
-    ).toContain("playerModal.editName"),
+    expect(document.querySelector('[data-slot="tooltip-content"]')?.textContent).toContain("playerModal.editName"),
   );
   focusVisible.mockRestore();
   await act(async () => edit.click());
-  const input = document.querySelector<HTMLInputElement>(
-    'input[aria-label="playerName"]',
-  )!;
+  const input = document.querySelector<HTMLInputElement>('input[aria-label="playerName"]')!;
   expect(document.activeElement).toBe(input);
   expect(input.selectionStart).toBe(0);
   expect(input.selectionEnd).toBe("Captain".length);
@@ -489,9 +402,7 @@ it("limits new names in the modal and generated names to the shared maximum", as
   const input = await rename("A".repeat(PLAYER_NAME_MAX_LENGTH + 1));
   expect(input.maxLength).toBe(PLAYER_NAME_MAX_LENGTH);
   expect(input.value).toHaveLength(PLAYER_NAME_MAX_LENGTH);
-  vi.mocked(generatePlayerName).mockReturnValue(
-    "B".repeat(PLAYER_NAME_MAX_LENGTH + 1),
-  );
+  vi.mocked(generatePlayerName).mockReturnValue("B".repeat(PLAYER_NAME_MAX_LENGTH + 1));
   await click("playerModal.randomizeName");
   expect(input.value).toBe("B".repeat(PLAYER_NAME_MAX_LENGTH));
 });

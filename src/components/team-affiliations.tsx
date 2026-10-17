@@ -5,11 +5,7 @@ import { Fragment } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { affiliation } from "@/domain/rules";
-import {
-  leagueName,
-  leagueSlug,
-  specialRuleKey,
-} from "@/domain/team-reference";
+import { leagueName, leagueSlug, specialRuleKey } from "@/domain/team-reference";
 import type { Roster, Team } from "@/domain/types";
 import { RuleHelp } from "./rule-help";
 
@@ -26,10 +22,7 @@ export function LeagueLinks({ names }: { names: string[] }) {
             className="inline-flex items-baseline gap-0.5 underline decoration-border underline-offset-4 hover:decoration-current"
           >
             {leagueName(name)}
-            <ArrowUpRight
-              aria-hidden="true"
-              className="size-3 shrink-0 self-center text-muted-foreground"
-            />
+            <ArrowUpRight aria-hidden="true" className="size-3 shrink-0 self-center text-muted-foreground" />
           </Link>
         </Fragment>
       ))}
@@ -58,22 +51,12 @@ export function SpecialRules({ names }: { names: string[] }) {
   );
 }
 
-export function TeamAffiliations({
-  roster,
-  team,
-}: {
-  roster: Roster;
-  team?: Team;
-}) {
+export function TeamAffiliations({ roster, team }: { roster: Roster; team?: Team }) {
   const t = useTranslations();
-  const names =
-    team && roster.id === "norse" ? [team.norseLeague] : roster.leagues;
+  const names = team && roster.id === "norse" ? [team.norseLeague] : roster.leagues;
   const rules = team
     ? roster.specialRules.flatMap((name) => {
-        if (
-          name.startsWith("Favoured of") ||
-          name.startsWith("If Chaos Clash")
-        ) {
+        if (name.startsWith("Favoured of") || name.startsWith("If Chaos Clash")) {
           const chosen = affiliation(team);
           return chosen ? [chosen] : [];
         }
@@ -83,13 +66,11 @@ export function TeamAffiliations({
   return (
     <div className="space-y-1 text-xs leading-relaxed">
       <div>
-        <span className="text-muted-foreground">{t("leagues")}:</span>{" "}
-        <LeagueLinks names={names} />
+        <span className="text-muted-foreground">{t("leagues")}:</span> <LeagueLinks names={names} />
       </div>
       {rules.length > 0 && (
         <div>
-          <span className="text-muted-foreground">{t("specialRules")}:</span>{" "}
-          <SpecialRules names={rules} />
+          <span className="text-muted-foreground">{t("specialRules")}:</span> <SpecialRules names={rules} />
         </div>
       )}
     </div>

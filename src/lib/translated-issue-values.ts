@@ -8,16 +8,11 @@ export function translatedIssueValues(
   t: (key: `skillNames.${string}` | `inducementNames.${string}`) => string,
 ) {
   const values = { ...issue.values };
-  if (
-    ["skillAccess", "skillCompatibility", "eliteCopies"].includes(issue.code)
-  ) {
+  if (["skillAccess", "skillCompatibility", "eliteCopies"].includes(issue.code)) {
     const skill = skills.find((entry) => entry.name === values.skill);
     if (skill) values.skill = translatedSkillName(skill.id, t);
   }
-  if (
-    issue.code === "inducementEligibility" ||
-    issue.code === "inducementLimit"
-  ) {
+  if (issue.code === "inducementEligibility" || issue.code === "inducementLimit") {
     const item = inducements.find((entry) => entry.name === values.name);
     if (item) values.name = t(`inducementNames.${item.id}`);
   }

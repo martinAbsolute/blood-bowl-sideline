@@ -6,14 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useAction, useConvexAuth, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useAuthActions } from "@convex-dev/auth/react";
-import {
-  Languages,
-  PanelLeftClose,
-  PanelLeftOpen,
-  PanelRightClose,
-  PanelRightOpen,
-  Send,
-} from "lucide-react";
+import { Languages, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "./brand";
 import { toast } from "@/components/ui/toast";
@@ -23,23 +16,10 @@ import { AppNavigation } from "./app-navigation";
 import { SidebarTooltip } from "./sidebar-tooltip";
 import { SidebarAccountMenu } from "./sidebar-account-menu";
 import { UserPresence } from "./user-presence";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetTitle,
-  SheetTrigger,
-} from "./ui/sheet";
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { AccountLoading } from "./account-loading";
 import { DevAuthPanel } from "./dev-auth-panel";
-export function LoginButton({
-  className,
-  compact = false,
-}: {
-  className?: string;
-  compact?: boolean;
-}) {
+export function LoginButton({ className, compact = false }: { className?: string; compact?: boolean }) {
   const t = useTranslations(),
     { signIn } = useAuthActions(),
     isTelegramConfigured = useAction(api.auth.isTelegramConfigured),
@@ -69,10 +49,7 @@ export function LoginButton({
     }
   }
   return (
-    <SidebarTooltip
-      enabled={compact}
-      label={t(starting ? "loginPending" : "signIn")}
-    >
+    <SidebarTooltip enabled={compact} label={t(starting ? "loginPending" : "signIn")}>
       <Button
         variant={compact ? "ghost" : "outline"}
         className={className}
@@ -89,13 +66,7 @@ export function LoginButton({
     </SidebarTooltip>
   );
 }
-export function SiteShell({
-  children,
-  footer,
-}: {
-  children: React.ReactNode;
-  footer: React.ReactNode;
-}) {
+export function SiteShell({ children, footer }: { children: React.ReactNode; footer: React.ReactNode }) {
   const t = useTranslations(),
     locale = useLocale();
   const { isAuthenticated, isLoading } = useConvexAuth(),
@@ -138,78 +109,44 @@ export function SiteShell({
             className="sidebar-menu-button sidebar-login-button h-12 w-full rounded-lg"
           />
         )}
-        {!collapsed ? (
-          <DevAuthPanel
-            currentUserId={viewer?.id}
-            onSignedIn={() => setOpen(false)}
-          />
-        ) : null}
+        {!collapsed ? <DevAuthPanel currentUserId={viewer?.id} onSignedIn={() => setOpen(false)} /> : null}
       </div>
     );
   }
   const collapsed = !sidebarOpen;
   return (
     <>
-      {isAuthenticated && viewer ? (
-        <UserPresence key={viewer.id} userId={viewer.id} />
-      ) : null}
+      {isAuthenticated && viewer ? <UserPresence key={viewer.id} userId={viewer.id} /> : null}
       <ShellFrame
         footer={footer}
         sidebarOpen={sidebarOpen}
         header={
           <header className="site-header no-print">
             <div className="site-header-content flex h-full items-center justify-between gap-3">
-              <Link
-                href="/"
-                className="flex items-center text-primary"
-                aria-label={t("app")}
-              >
+              <Link href="/" className="flex items-center text-primary" aria-label={t("app")}>
                 <BrandLogo />
               </Link>
               <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger
                   render={
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-11 lg:hidden"
-                      aria-label={t("openMenu")}
-                    />
+                    <Button variant="ghost" size="icon" className="size-11 lg:hidden" aria-label={t("openMenu")} />
                   }
                 >
                   <PanelRightOpen aria-hidden="true" className="size-6" />
                 </SheetTrigger>
-                <SheetContent
-                  side="right"
-                  showCloseButton={false}
-                  className="w-[min(88vw,360px)]! gap-0 p-0"
-                >
+                <SheetContent side="right" showCloseButton={false} className="w-[min(88vw,360px)]! gap-0 p-0">
                   <div className="site-mobile-header flex shrink-0 items-center justify-between border-b">
-                    <SheetTitle className="text-base font-semibold">
-                      {t("menu")}
-                    </SheetTitle>
-                    <SheetDescription className="sr-only">
-                      {t("menuDescription")}
-                    </SheetDescription>
+                    <SheetTitle className="text-base font-semibold">{t("menu")}</SheetTitle>
+                    <SheetDescription className="sr-only">{t("menuDescription")}</SheetDescription>
                     <SheetClose
-                      render={
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-11"
-                          aria-label={t("closeMenu")}
-                        />
-                      }
+                      render={<Button variant="ghost" size="icon" className="size-11" aria-label={t("closeMenu")} />}
                     >
                       <PanelRightClose aria-hidden="true" className="size-6" />
                     </SheetClose>
                   </div>
                   <div className="site-mobile-body flex min-h-0 flex-1 flex-col gap-4 p-4">
                     <div className="min-h-0 flex-1 overflow-y-auto">
-                      <AppNavigation
-                        admin={viewer?.role === "admin"}
-                        onNavigate={() => setOpen(false)}
-                      />
+                      <AppNavigation admin={viewer?.role === "admin"} onNavigate={() => setOpen(false)} />
                     </div>
                     {accountControls(false, true)}
                   </div>
@@ -230,17 +167,12 @@ export function SiteShell({
                   <BrandLogo className="h-9" />
                 </Link>
               </SidebarTooltip>
-              <SidebarTooltip
-                enabled
-                label={t(collapsed ? "expandSidebar" : "collapseSidebar")}
-              >
+              <SidebarTooltip enabled label={t(collapsed ? "expandSidebar" : "collapseSidebar")}>
                 <Button
                   variant="ghost"
                   size="icon"
                   className="site-sidebar-toggle text-muted-foreground"
-                  aria-label={t(
-                    collapsed ? "expandSidebar" : "collapseSidebar",
-                  )}
+                  aria-label={t(collapsed ? "expandSidebar" : "collapseSidebar")}
                   aria-expanded={sidebarOpen}
                   aria-controls="site-sidebar"
                   onClick={() => setSidebarOpen((current) => !current)}
@@ -254,14 +186,9 @@ export function SiteShell({
               </SidebarTooltip>
             </div>
             <div className="site-sidebar-content min-h-0 flex-1 overflow-y-auto">
-              <AppNavigation
-                admin={viewer?.role === "admin"}
-                collapsed={collapsed}
-              />
+              <AppNavigation admin={viewer?.role === "admin"} collapsed={collapsed} />
             </div>
-            <div className="site-sidebar-footer">
-              {accountControls(collapsed)}
-            </div>
+            <div className="site-sidebar-footer">{accountControls(collapsed)}</div>
           </>
         }
       >
@@ -276,10 +203,7 @@ function LanguageSwitch({ compact = false }: { compact?: boolean }) {
     locale = useLocale();
   const [pending, startTransition] = useTransition();
   return (
-    <SidebarTooltip
-      enabled={compact}
-      label={t(locale === "uk" ? "switchToEnglish" : "switchToUkrainian")}
-    >
+    <SidebarTooltip enabled={compact} label={t(locale === "uk" ? "switchToEnglish" : "switchToUkrainian")}>
       <Button
         variant="ghost"
         aria-label={t("language")}
@@ -298,9 +222,7 @@ function LanguageSwitch({ compact = false }: { compact?: boolean }) {
         <span className="sidebar-button-label" aria-hidden={compact}>
           {t("language")}
         </span>
-        <span className="sidebar-language-code font-medium">
-          {locale === "uk" ? "UK" : "EN"}
-        </span>
+        <span className="sidebar-language-code font-medium">{locale === "uk" ? "UK" : "EN"}</span>
       </Button>
     </SidebarTooltip>
   );

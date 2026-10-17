@@ -7,10 +7,7 @@ import { devImpersonationProvider } from "./devAuth";
 export const isTelegramConfigured = action({
   args: {},
   returns: v.boolean(),
-  handler: async () =>
-    Boolean(
-      process.env.TELEGRAM_CLIENT_ID && process.env.TELEGRAM_CLIENT_SECRET,
-    ),
+  handler: async () => Boolean(process.env.TELEGRAM_CLIENT_ID && process.env.TELEGRAM_CLIENT_SECRET),
 });
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({

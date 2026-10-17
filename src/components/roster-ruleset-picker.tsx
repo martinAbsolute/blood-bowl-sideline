@@ -13,14 +13,9 @@ export function RosterRulesetPicker({ rulesetId }: { rulesetId: RulesetId }) {
         value={rulesetId}
         onChange={(event) => {
           const url = new URL(window.location.href);
-          if (event.target.value === "bb2025-default")
-            url.searchParams.delete("ruleset");
+          if (event.target.value === "bb2025-default") url.searchParams.delete("ruleset");
           else url.searchParams.set("ruleset", event.target.value);
-          window.history.replaceState(
-            null,
-            "",
-            `${url.pathname}${url.search}${url.hash}`,
-          );
+          window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
         }}
         className="h-11 sm:h-9"
       >

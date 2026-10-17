@@ -43,12 +43,8 @@ export function LeagueRecruitment({
   const selected = positions.find((position) => position.id === positionId);
   const blocked = (position: Roster["players"][number]) => {
     if (players.length >= 16) return t("leagueDesk.rosterFull");
-    if (blockedPositionIds.includes(position.id))
-      return t("leagueDesk.positionBlocked");
-    if (
-      players.filter((player) => player.positionId === position.id).length >=
-      Number(position.qty.split("-").at(-1))
-    )
+    if (blockedPositionIds.includes(position.id)) return t("leagueDesk.positionBlocked");
+    if (players.filter((player) => player.positionId === position.id).length >= Number(position.qty.split("-").at(-1)))
       return t("leagueDesk.positionFull");
     if (position.cost > treasury) return t("leagueDesk.notEnoughGold");
     return "";
@@ -62,16 +58,10 @@ export function LeagueRecruitment({
           </span>
           <div>
             <h2 className="text-sm font-semibold">{t("leagueUi.recruit")}</h2>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {t("leagueUi.recruitHint")}
-            </p>
+            <p className="mt-1 text-xs text-muted-foreground">{t("leagueUi.recruitHint")}</p>
           </div>
         </div>
-        <Button
-          className="min-h-11"
-          disabled={busy || players.length >= 16}
-          onClick={() => setOpen(true)}
-        >
+        <Button className="min-h-11" disabled={busy || players.length >= 16} onClick={() => setOpen(true)}>
           <Plus className="size-4" />
           {t("leagueUi.recruit")}
         </Button>
@@ -104,8 +94,7 @@ export function LeagueRecruitment({
               <div className="flex flex-wrap justify-between gap-3 rounded-lg border bg-secondary/25 p-3 text-xs">
                 <span className="flex items-center gap-2">
                   <Coins className="size-4" />
-                  {t("leagueUi.treasury")}:{" "}
-                  <strong className="font-mono">{treasury / 1000}k GP</strong>
+                  {t("leagueUi.treasury")}: <strong className="font-mono">{treasury / 1000}k GP</strong>
                 </span>
                 <span>
                   {players.length} / 16 {t("players")}
@@ -125,32 +114,17 @@ export function LeagueRecruitment({
                         onClick={() => setPositionId(position.id)}
                         className={`flex items-start gap-3 rounded-lg border p-3 text-left focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-55 ${chosen ? "border-primary bg-secondary" : "bg-card enabled:hover:bg-secondary/40"}`}
                       >
-                        <PlayerIcon
-                          positionId={position.id}
-                          className="size-9 shrink-0"
-                        />
+                        <PlayerIcon positionId={position.id} className="size-9 shrink-0" />
                         <span className="min-w-0 flex-1">
-                          <span className="block text-sm font-semibold">
-                            {positionLabel(position.position)}
-                          </span>
+                          <span className="block text-sm font-semibold">{positionLabel(position.position)}</span>
                           <span className="mt-1 block text-xs text-muted-foreground">
                             {position.cost / 1000}k GP ·{" "}
-                            {
-                              players.filter(
-                                (player) => player.positionId === position.id,
-                              ).length
-                            }
-                            /{position.qty.split("-").at(-1)}
+                            {players.filter((player) => player.positionId === position.id).length}/
+                            {position.qty.split("-").at(-1)}
                           </span>
-                          {reason && (
-                            <span className="mt-1 block text-[11px] text-destructive">
-                              {reason}
-                            </span>
-                          )}
+                          {reason && <span className="mt-1 block text-[11px] text-destructive">{reason}</span>}
                         </span>
-                        {chosen && (
-                          <Check className="size-4 shrink-0 text-primary" />
-                        )}
+                        {chosen && <Check className="size-4 shrink-0 text-primary" />}
                       </button>
                     );
                   })}
@@ -161,12 +135,8 @@ export function LeagueRecruitment({
                   <dl className="grid grid-cols-5 divide-x rounded-lg border bg-secondary/25 py-3 text-center">
                     {(["ma", "st", "ag", "pa", "av"] as const).map((stat) => (
                       <div key={stat}>
-                        <dt className="text-[10px] uppercase text-muted-foreground">
-                          {stat}
-                        </dt>
-                        <dd className="mt-1 font-mono text-base font-semibold">
-                          {selected[stat]}
-                        </dd>
+                        <dt className="text-[10px] uppercase text-muted-foreground">{stat}</dt>
+                        <dd className="mt-1 font-mono text-base font-semibold">{selected[stat]}</dd>
                       </div>
                     ))}
                   </dl>
@@ -183,9 +153,7 @@ export function LeagueRecruitment({
                   </LeagueField>
                   <p className="text-xs text-muted-foreground">
                     {t("leagueDesk.afterHire")}:{" "}
-                    <strong className="font-mono text-primary">
-                      {(treasury - selected.cost) / 1000}k GP
-                    </strong>
+                    <strong className="font-mono text-primary">{(treasury - selected.cost) / 1000}k GP</strong>
                   </p>
                   {blocked(selected) && (
                     <p role="status" className="text-xs text-destructive">
@@ -201,18 +169,10 @@ export function LeagueRecruitment({
               )}
             </LeagueDialogBody>
             <LeagueDialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={busy}
-                onClick={() => setOpen(false)}
-              >
+              <Button type="button" variant="outline" disabled={busy} onClick={() => setOpen(false)}>
                 {t("cancel")}
               </Button>
-              <Button
-                type="submit"
-                disabled={busy || !selected || !!blocked(selected)}
-              >
+              <Button type="submit" disabled={busy || !selected || !!blocked(selected)}>
                 <Plus className="size-4" />
                 {t("leagueUi.hire")}
                 {selected ? ` · ${selected.cost / 1000}k GP` : ""}

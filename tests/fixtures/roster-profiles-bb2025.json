@@ -13,10 +13,7 @@
       "primarySkills": ["G"],
       "secondarySkills": ["A", "S"],
       "skills": ["dodge"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Amazon/",
-        "https://bbtc.pl/roster/bb2025/amazon"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Amazon/", "https://bbtc.pl/roster/bb2025/amazon"]
     },
     {
       "id": "amazon-3",
@@ -30,10 +27,7 @@
       "primarySkills": ["G", "S"],
       "secondarySkills": ["A"],
       "skills": ["defensive", "dodge"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Amazon/",
-        "https://bbtc.pl/roster/bb2025/amazon"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Amazon/", "https://bbtc.pl/roster/bb2025/amazon"]
     },
     {
       "id": "amazon-2",
@@ -47,10 +41,7 @@
       "primarySkills": ["A", "G"],
       "secondarySkills": ["S"],
       "skills": ["dodge", "hit_and_run", "jump_up"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Amazon/",
-        "https://bbtc.pl/roster/bb2025/amazon"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Amazon/", "https://bbtc.pl/roster/bb2025/amazon"]
     },
     {
       "id": "amazon-1",
@@ -64,10 +55,7 @@
       "primarySkills": ["G", "P"],
       "secondarySkills": ["A", "S"],
       "skills": ["dodge", "on_the_ball", "pass", "safe_pass"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Amazon/",
-        "https://bbtc.pl/roster/bb2025/amazon"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Amazon/", "https://bbtc.pl/roster/bb2025/amazon"]
     },
     {
       "id": "black-orc-1",
@@ -81,10 +69,7 @@
       "primarySkills": ["G", "S"],
       "secondarySkills": ["A", "D"],
       "skills": ["brawler", "grab"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Black_Orc/",
-        "https://bbtc.pl/roster/bb2025/black-orc"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Black_Orc/", "https://bbtc.pl/roster/bb2025/black-orc"]
     },
     {
       "id": "black-orc-0",
@@ -98,10 +83,7 @@
       "primarySkills": ["A", "D"],
       "secondarySkills": ["G", "P", "S"],
       "skills": ["dodge", "right_stuff", "stunty", "thick_skull"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Black_Orc/",
-        "https://bbtc.pl/roster/bb2025/black-orc"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Black_Orc/", "https://bbtc.pl/roster/bb2025/black-orc"]
     },
     {
       "id": "black-orc-2",
@@ -122,10 +104,7 @@
         "regeneration",
         "throw_team_mate"
       ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Black_Orc/",
-        "https://bbtc.pl/roster/bb2025/black-orc"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Black_Orc/", "https://bbtc.pl/roster/bb2025/black-orc"]
     },
     {
       "id": "bretonnian-1",
@@ -139,10 +118,7 @@
       "primarySkills": ["A", "G"],
       "secondarySkills": ["S"],
       "skills": ["catch", "dauntless", "nerves_of_steel"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Bretonnian/",
-        "https://bbtc.pl/roster/bb2025/bretonnian"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Bretonnian/", "https://bbtc.pl/roster/bb2025/bretonnian"]
     },
     {
       "id": "bretonnian-2",
@@ -156,10 +132,7 @@
       "primarySkills": ["G", "P"],
       "secondarySkills": ["A", "S"],
       "skills": ["dauntless", "nerves_of_steel", "pass"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Bretonnian/",
-        "https://bbtc.pl/roster/bb2025/bretonnian"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Bretonnian/", "https://bbtc.pl/roster/bb2025/bretonnian"]
     },
     {
       "id": "bretonnian-0",
@@ -173,10 +146,7 @@
       "primarySkills": ["G"],
       "secondarySkills": ["A", "S"],
       "skills": ["wrestle"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Bretonnian/",
-        "https://bbtc.pl/roster/bb2025/bretonnian"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Bretonnian/", "https://bbtc.pl/roster/bb2025/bretonnian"]
     },
     {
       "id": "bretonnian-3",
@@ -190,10 +160,7 @@
       "primarySkills": ["G", "S"],
       "secondarySkills": ["A"],
       "skills": ["block", "dauntless", "steady_footing"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Bretonnian/",
-        "https://bbtc.pl/roster/bb2025/bretonnian"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Bretonnian/", "https://bbtc.pl/roster/bb2025/bretonnian"]
     },
     {
       "id": "chaos-chosen-0",
@@ -207,10 +174,7 @@
       "primarySkills": ["G", "M"],
       "secondarySkills": ["A", "D", "P", "S"],
       "skills": ["horns", "thick_skull"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Chaos_Chosen/",
-        "https://bbtc.pl/roster/bb2025/chaos-chosen"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Chaos_Chosen/", "https://bbtc.pl/roster/bb2025/chaos-chosen"]
     },
     {
       "id": "chaos-chosen-1",
@@ -224,10 +188,7 @@
       "primarySkills": ["G", "M", "S"],
       "secondarySkills": ["A", "D"],
       "skills": ["arm_bar"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Chaos_Chosen/",
-        "https://bbtc.pl/roster/bb2025/chaos-chosen"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Chaos_Chosen/", "https://bbtc.pl/roster/bb2025/chaos-chosen"]
     },
     {
       "id": "chaos-chosen-4",
@@ -240,18 +201,8 @@
       "av": "9+",
       "primarySkills": ["M", "S"],
       "secondarySkills": ["A", "G"],
-      "skills": [
-        "frenzy",
-        "horns",
-        "loner:4+",
-        "mighty_blow",
-        "thick_skull",
-        "unchannelled_fury"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Chaos_Chosen/",
-        "https://bbtc.pl/roster/bb2025/chaos-chosen"
-      ]
+      "skills": ["frenzy", "horns", "loner:4+", "mighty_blow", "thick_skull", "unchannelled_fury"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Chaos_Chosen/", "https://bbtc.pl/roster/bb2025/chaos-chosen"]
     },
     {
       "id": "chaos-chosen-3",
@@ -264,17 +215,8 @@
       "av": "10+",
       "primarySkills": ["M", "S"],
       "secondarySkills": ["A", "G"],
-      "skills": [
-        "bone_head",
-        "loner:4+",
-        "mighty_blow",
-        "thick_skull",
-        "throw_team_mate"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Chaos_Chosen/",
-        "https://bbtc.pl/roster/bb2025/chaos-chosen"
-      ]
+      "skills": ["bone_head", "loner:4+", "mighty_blow", "thick_skull", "throw_team_mate"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Chaos_Chosen/", "https://bbtc.pl/roster/bb2025/chaos-chosen"]
     },
     {
       "id": "chaos-chosen-2",
@@ -296,10 +238,7 @@
         "regeneration",
         "throw_team_mate"
       ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Chaos_Chosen/",
-        "https://bbtc.pl/roster/bb2025/chaos-chosen"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Chaos_Chosen/", "https://bbtc.pl/roster/bb2025/chaos-chosen"]
     },
     {
       "id": "chaos-dwarf-4",
@@ -313,10 +252,7 @@
       "primarySkills": ["G", "S"],
       "secondarySkills": ["A", "D", "M"],
       "skills": ["sprint", "sure_feet", "thick_skull", "unsteady"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Chaos_Dwarf/",
-        "https://bbtc.pl/roster/bb2025/chaos-dwarf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Chaos_Dwarf/", "https://bbtc.pl/roster/bb2025/chaos-dwarf"]
     },
     {
       "id": "chaos-dwarf-2",
@@ -330,10 +266,7 @@
       "primarySkills": ["G", "S"],
       "secondarySkills": ["A", "D", "M"],
       "skills": ["block", "iron_hard_skin", "thick_skull"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Chaos_Dwarf/",
-        "https://bbtc.pl/roster/bb2025/chaos-dwarf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Chaos_Dwarf/", "https://bbtc.pl/roster/bb2025/chaos-dwarf"]
     },
     {
       "id": "chaos-dwarf-3",
@@ -346,16 +279,8 @@
       "av": "10+",
       "primarySkills": ["G", "S"],
       "secondarySkills": ["A", "D", "M"],
-      "skills": [
-        "brawler",
-        "breathe_fire",
-        "disturbing_presence",
-        "thick_skull"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Chaos_Dwarf/",
-        "https://bbtc.pl/roster/bb2025/chaos-dwarf"
-      ]
+      "skills": ["brawler", "breathe_fire", "disturbing_presence", "thick_skull"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Chaos_Dwarf/", "https://bbtc.pl/roster/bb2025/chaos-dwarf"]
     },
     {
       "id": "chaos-dwarf-0",
@@ -369,10 +294,7 @@
       "primarySkills": ["D"],
       "secondarySkills": ["A", "G", "S"],
       "skills": [],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Chaos_Dwarf/",
-        "https://bbtc.pl/roster/bb2025/chaos-dwarf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Chaos_Dwarf/", "https://bbtc.pl/roster/bb2025/chaos-dwarf"]
     },
     {
       "id": "chaos-dwarf-1",
@@ -386,10 +308,7 @@
       "primarySkills": ["D", "G"],
       "secondarySkills": ["A", "S"],
       "skills": ["shadowing", "stab"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Chaos_Dwarf/",
-        "https://bbtc.pl/roster/bb2025/chaos-dwarf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Chaos_Dwarf/", "https://bbtc.pl/roster/bb2025/chaos-dwarf"]
     },
     {
       "id": "chaos-dwarf-5",
@@ -402,18 +321,8 @@
       "av": "9+",
       "primarySkills": ["M", "S"],
       "secondarySkills": ["A", "G"],
-      "skills": [
-        "frenzy",
-        "horns",
-        "loner:4+",
-        "mighty_blow",
-        "thick_skull",
-        "unchannelled_fury"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Chaos_Dwarf/",
-        "https://bbtc.pl/roster/bb2025/chaos-dwarf"
-      ]
+      "skills": ["frenzy", "horns", "loner:4+", "mighty_blow", "thick_skull", "unchannelled_fury"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Chaos_Dwarf/", "https://bbtc.pl/roster/bb2025/chaos-dwarf"]
     },
     {
       "id": "chaos-renegade-4",
@@ -528,14 +437,7 @@
       "av": "9+",
       "primarySkills": ["S"],
       "secondarySkills": ["A", "G", "M"],
-      "skills": [
-        "frenzy",
-        "horns",
-        "loner:4+",
-        "mighty_blow",
-        "thick_skull",
-        "unchannelled_fury"
-      ],
+      "skills": ["frenzy", "horns", "loner:4+", "mighty_blow", "thick_skull", "unchannelled_fury"],
       "sources": [
         "https://bloodbowlbase.ru/bb2025/teams/Chaos_Renegades/",
         "https://bbtc.pl/roster/bb2025/chaos-renegade"
@@ -552,13 +454,7 @@
       "av": "10+",
       "primarySkills": ["S"],
       "secondarySkills": ["A", "G", "M"],
-      "skills": [
-        "bone_head",
-        "loner:3+",
-        "mighty_blow",
-        "thick_skull",
-        "throw_team_mate"
-      ],
+      "skills": ["bone_head", "loner:3+", "mighty_blow", "thick_skull", "throw_team_mate"],
       "sources": [
         "https://bloodbowlbase.ru/bb2025/teams/Chaos_Renegades/",
         "https://bbtc.pl/roster/bb2025/chaos-renegade"
@@ -575,13 +471,7 @@
       "av": "9+",
       "primarySkills": ["S"],
       "secondarySkills": ["A", "G", "M"],
-      "skills": [
-        "animal_savagery",
-        "frenzy",
-        "loner:4+",
-        "mighty_blow",
-        "prehensile_tail"
-      ],
+      "skills": ["animal_savagery", "frenzy", "loner:4+", "mighty_blow", "prehensile_tail"],
       "sources": [
         "https://bloodbowlbase.ru/bb2025/teams/Chaos_Renegades/",
         "https://bbtc.pl/roster/bb2025/chaos-renegade"
@@ -624,10 +514,7 @@
       "primarySkills": ["A", "D"],
       "secondarySkills": ["G", "S"],
       "skills": ["hit_and_run", "shadowing", "stab"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Dark_Elf/",
-        "https://bbtc.pl/roster/bb2025/dark-elf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Dark_Elf/", "https://bbtc.pl/roster/bb2025/dark-elf"]
     },
     {
       "id": "dark-elf-3",
@@ -641,10 +528,7 @@
       "primarySkills": ["A", "G"],
       "secondarySkills": ["D", "P", "S"],
       "skills": ["block"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Dark_Elf/",
-        "https://bbtc.pl/roster/bb2025/dark-elf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Dark_Elf/", "https://bbtc.pl/roster/bb2025/dark-elf"]
     },
     {
       "id": "dark-elf-0",
@@ -658,10 +542,7 @@
       "primarySkills": ["A", "G"],
       "secondarySkills": ["D", "S"],
       "skills": [],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Dark_Elf/",
-        "https://bbtc.pl/roster/bb2025/dark-elf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Dark_Elf/", "https://bbtc.pl/roster/bb2025/dark-elf"]
     },
     {
       "id": "dark-elf-1",
@@ -675,10 +556,7 @@
       "primarySkills": ["A", "G", "P"],
       "secondarySkills": ["D", "S"],
       "skills": ["dump_off", "punt"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Dark_Elf/",
-        "https://bbtc.pl/roster/bb2025/dark-elf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Dark_Elf/", "https://bbtc.pl/roster/bb2025/dark-elf"]
     },
     {
       "id": "dark-elf-4",
@@ -692,10 +570,7 @@
       "primarySkills": ["A", "G"],
       "secondarySkills": ["D", "S"],
       "skills": ["dodge", "frenzy", "jump_up"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Dark_Elf/",
-        "https://bbtc.pl/roster/bb2025/dark-elf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Dark_Elf/", "https://bbtc.pl/roster/bb2025/dark-elf"]
     },
     {
       "id": "dwarf-2",
@@ -709,10 +584,7 @@
       "primarySkills": ["G", "S"],
       "secondarySkills": ["P"],
       "skills": ["block", "diving_tackle", "tackle", "thick_skull"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Dwarf/",
-        "https://bbtc.pl/roster/bb2025/dwarf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Dwarf/", "https://bbtc.pl/roster/bb2025/dwarf"]
     },
     {
       "id": "dwarf-0",
@@ -726,10 +598,7 @@
       "primarySkills": ["D", "G"],
       "secondarySkills": ["S"],
       "skills": ["block", "defensive", "thick_skull"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Dwarf/",
-        "https://bbtc.pl/roster/bb2025/dwarf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Dwarf/", "https://bbtc.pl/roster/bb2025/dwarf"]
     },
     {
       "id": "dwarf-1",
@@ -743,10 +612,7 @@
       "primarySkills": ["G", "P"],
       "secondarySkills": ["A", "S"],
       "skills": ["sprint", "sure_hands", "thick_skull"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Dwarf/",
-        "https://bbtc.pl/roster/bb2025/dwarf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Dwarf/", "https://bbtc.pl/roster/bb2025/dwarf"]
     },
     {
       "id": "dwarf-3",
@@ -760,10 +626,7 @@
       "primarySkills": ["G", "S"],
       "secondarySkills": ["D"],
       "skills": ["block", "dauntless", "frenzy", "hatred:Troll", "thick_skull"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Dwarf/",
-        "https://bbtc.pl/roster/bb2025/dwarf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Dwarf/", "https://bbtc.pl/roster/bb2025/dwarf"]
     },
     {
       "id": "dwarf-4",
@@ -786,10 +649,7 @@
         "secret_weapon",
         "stand_firm"
       ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Dwarf/",
-        "https://bbtc.pl/roster/bb2025/dwarf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Dwarf/", "https://bbtc.pl/roster/bb2025/dwarf"]
     },
     {
       "id": "elven-union-3",
@@ -803,10 +663,7 @@
       "primarySkills": ["A", "G"],
       "secondarySkills": ["P", "S"],
       "skills": ["block", "sidestep"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Elven_Union/",
-        "https://bbtc.pl/roster/bb2025/elven-union"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Elven_Union/", "https://bbtc.pl/roster/bb2025/elven-union"]
     },
     {
       "id": "elven-union-2",
@@ -820,10 +677,7 @@
       "primarySkills": ["A", "G"],
       "secondarySkills": ["S"],
       "skills": ["catch", "diving_catch", "nerves_of_steel"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Elven_Union/",
-        "https://bbtc.pl/roster/bb2025/elven-union"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Elven_Union/", "https://bbtc.pl/roster/bb2025/elven-union"]
     },
     {
       "id": "elven-union-0",
@@ -837,10 +691,7 @@
       "primarySkills": ["A", "G"],
       "secondarySkills": ["S"],
       "skills": ["fumblerooski"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Elven_Union/",
-        "https://bbtc.pl/roster/bb2025/elven-union"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Elven_Union/", "https://bbtc.pl/roster/bb2025/elven-union"]
     },
     {
       "id": "elven-union-1",
@@ -854,10 +705,7 @@
       "primarySkills": ["A", "G", "P"],
       "secondarySkills": ["S"],
       "skills": ["hail_mary_pass", "pass"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Elven_Union/",
-        "https://bbtc.pl/roster/bb2025/elven-union"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Elven_Union/", "https://bbtc.pl/roster/bb2025/elven-union"]
     },
     {
       "id": "gnome-3",
@@ -871,10 +719,7 @@
       "primarySkills": ["A"],
       "secondarySkills": ["D", "G", "S"],
       "skills": ["guard", "jump_up", "stunty", "wrestle"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Gnome/",
-        "https://bbtc.pl/roster/bb2025/gnome"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Gnome/", "https://bbtc.pl/roster/bb2025/gnome"]
     },
     {
       "id": "gnome-2",
@@ -888,10 +733,7 @@
       "primarySkills": ["A", "P"],
       "secondarySkills": ["D", "G"],
       "skills": ["jump_up", "stunty", "trickster", "wrestle"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Gnome/",
-        "https://bbtc.pl/roster/bb2025/gnome"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Gnome/", "https://bbtc.pl/roster/bb2025/gnome"]
     },
     {
       "id": "gnome-0",
@@ -905,10 +747,7 @@
       "primarySkills": ["A"],
       "secondarySkills": ["D", "G", "S"],
       "skills": ["jump_up", "right_stuff", "stunty", "wrestle"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Gnome/",
-        "https://bbtc.pl/roster/bb2025/gnome"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Gnome/", "https://bbtc.pl/roster/bb2025/gnome"]
     },
     {
       "id": "gnome-1",
@@ -922,10 +761,7 @@
       "primarySkills": [],
       "secondarySkills": ["A"],
       "skills": ["dodge", "my_ball", "sidestep", "stunty"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Gnome/",
-        "https://bbtc.pl/roster/bb2025/gnome"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Gnome/", "https://bbtc.pl/roster/bb2025/gnome"]
     },
     {
       "id": "gnome-4",
@@ -938,19 +774,8 @@
       "av": "11+",
       "primarySkills": ["S"],
       "secondarySkills": ["A", "G", "P"],
-      "skills": [
-        "mighty_blow",
-        "stand_firm",
-        "strong_arm",
-        "take_root",
-        "thick_skull",
-        "throw_team_mate",
-        "timmm_ber"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Gnome/",
-        "https://bbtc.pl/roster/bb2025/gnome"
-      ]
+      "skills": ["mighty_blow", "stand_firm", "strong_arm", "take_root", "thick_skull", "throw_team_mate", "timmm_ber"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Gnome/", "https://bbtc.pl/roster/bb2025/gnome"]
     },
     {
       "id": "goblin-3",
@@ -963,18 +788,8 @@
       "av": "8+",
       "primarySkills": ["A", "D"],
       "secondarySkills": ["G", "S"],
-      "skills": [
-        "dirty_player",
-        "disturbing_presence",
-        "dodge",
-        "right_stuff",
-        "stunty",
-        "taunt"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Goblin/",
-        "https://bbtc.pl/roster/bb2025/goblin"
-      ]
+      "skills": ["dirty_player", "disturbing_presence", "dodge", "right_stuff", "stunty", "taunt"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Goblin/", "https://bbtc.pl/roster/bb2025/goblin"]
     },
     {
       "id": "goblin-2",
@@ -988,10 +803,7 @@
       "primarySkills": ["D", "P"],
       "secondarySkills": ["A", "G", "S"],
       "skills": ["bombardier", "dodge", "secret_weapon", "stunty"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Goblin/",
-        "https://bbtc.pl/roster/bb2025/goblin"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Goblin/", "https://bbtc.pl/roster/bb2025/goblin"]
     },
     {
       "id": "goblin-4",
@@ -1005,10 +817,7 @@
       "primarySkills": ["A"],
       "secondarySkills": ["D", "G", "S"],
       "skills": ["dodge", "right_stuff", "stunty", "swoop"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Goblin/",
-        "https://bbtc.pl/roster/bb2025/goblin"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Goblin/", "https://bbtc.pl/roster/bb2025/goblin"]
     },
     {
       "id": "goblin-5",
@@ -1022,10 +831,7 @@
       "primarySkills": ["D", "S"],
       "secondarySkills": ["A", "G"],
       "skills": ["ball_and_chain", "no_ball", "secret_weapon", "stunty"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Goblin/",
-        "https://bbtc.pl/roster/bb2025/goblin"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Goblin/", "https://bbtc.pl/roster/bb2025/goblin"]
     },
     {
       "id": "goblin-0",
@@ -1039,10 +845,7 @@
       "primarySkills": ["A", "D"],
       "secondarySkills": ["G", "P", "S"],
       "skills": ["dodge", "right_stuff", "stunty"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Goblin/",
-        "https://bbtc.pl/roster/bb2025/goblin"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Goblin/", "https://bbtc.pl/roster/bb2025/goblin"]
     },
     {
       "id": "goblin-1",
@@ -1056,10 +859,7 @@
       "primarySkills": ["D"],
       "secondarySkills": ["A", "G", "S"],
       "skills": ["chainsaw", "no_ball", "secret_weapon", "stunty"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Goblin/",
-        "https://bbtc.pl/roster/bb2025/goblin"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Goblin/", "https://bbtc.pl/roster/bb2025/goblin"]
     },
     {
       "id": "goblin-6",
@@ -1073,10 +873,7 @@
       "primarySkills": ["A"],
       "secondarySkills": ["D", "G", "S"],
       "skills": ["dodge", "pogo", "stunty"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Goblin/",
-        "https://bbtc.pl/roster/bb2025/goblin"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Goblin/", "https://bbtc.pl/roster/bb2025/goblin"]
     },
     {
       "id": "goblin-7",
@@ -1097,10 +894,7 @@
         "regeneration",
         "throw_team_mate"
       ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Goblin/",
-        "https://bbtc.pl/roster/bb2025/goblin"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Goblin/", "https://bbtc.pl/roster/bb2025/goblin"]
     },
     {
       "id": "halfling-2",
@@ -1114,10 +908,7 @@
       "primarySkills": ["A"],
       "secondarySkills": ["D", "G", "S"],
       "skills": ["catch", "dodge", "right_stuff", "sprint", "stunty"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Halfling/",
-        "https://bbtc.pl/roster/bb2025/halfling"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Halfling/", "https://bbtc.pl/roster/bb2025/halfling"]
     },
     {
       "id": "halfling-1",
@@ -1131,10 +922,7 @@
       "primarySkills": ["A", "P"],
       "secondarySkills": ["D", "G", "S"],
       "skills": ["dodge", "fend", "stunty"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Halfling/",
-        "https://bbtc.pl/roster/bb2025/halfling"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Halfling/", "https://bbtc.pl/roster/bb2025/halfling"]
     },
     {
       "id": "halfling-0",
@@ -1148,10 +936,7 @@
       "primarySkills": ["A"],
       "secondarySkills": ["D", "G", "S"],
       "skills": ["dodge", "right_stuff", "stunty"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Halfling/",
-        "https://bbtc.pl/roster/bb2025/halfling"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Halfling/", "https://bbtc.pl/roster/bb2025/halfling"]
     },
     {
       "id": "halfling-3",
@@ -1164,19 +949,8 @@
       "av": "11+",
       "primarySkills": ["S"],
       "secondarySkills": ["A", "G", "P"],
-      "skills": [
-        "mighty_blow",
-        "stand_firm",
-        "strong_arm",
-        "take_root",
-        "thick_skull",
-        "throw_team_mate",
-        "timmm_ber"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Halfling/",
-        "https://bbtc.pl/roster/bb2025/halfling"
-      ]
+      "skills": ["mighty_blow", "stand_firm", "strong_arm", "take_root", "thick_skull", "throw_team_mate", "timmm_ber"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Halfling/", "https://bbtc.pl/roster/bb2025/halfling"]
     },
     {
       "id": "high-elf-3",
@@ -1190,10 +964,7 @@
       "primarySkills": ["A", "G"],
       "secondarySkills": ["S"],
       "skills": ["block", "my_ball", "steady_footing"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/High_Elf/",
-        "https://bbtc.pl/roster/bb2025/high-elf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/High_Elf/", "https://bbtc.pl/roster/bb2025/high-elf"]
     },
     {
       "id": "high-elf-0",
@@ -1207,10 +978,7 @@
       "primarySkills": ["A", "G"],
       "secondarySkills": ["S"],
       "skills": [],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/High_Elf/",
-        "https://bbtc.pl/roster/bb2025/high-elf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/High_Elf/", "https://bbtc.pl/roster/bb2025/high-elf"]
     },
     {
       "id": "high-elf-1",
@@ -1224,10 +992,7 @@
       "primarySkills": ["A", "G", "P"],
       "secondarySkills": ["S"],
       "skills": ["cloud_burster", "pass", "safe_pass"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/High_Elf/",
-        "https://bbtc.pl/roster/bb2025/high-elf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/High_Elf/", "https://bbtc.pl/roster/bb2025/high-elf"]
     },
     {
       "id": "high-elf-2",
@@ -1241,10 +1006,7 @@
       "primarySkills": ["A", "G"],
       "secondarySkills": ["P", "S"],
       "skills": ["claws", "wrestle"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/High_Elf/",
-        "https://bbtc.pl/roster/bb2025/high-elf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/High_Elf/", "https://bbtc.pl/roster/bb2025/high-elf"]
     },
     {
       "id": "human-1",
@@ -1258,10 +1020,7 @@
       "primarySkills": ["A"],
       "secondarySkills": ["D", "G", "S"],
       "skills": ["dodge", "right_stuff", "stunty"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Human/",
-        "https://bbtc.pl/roster/bb2025/human"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Human/", "https://bbtc.pl/roster/bb2025/human"]
     },
     {
       "id": "human-4",
@@ -1275,10 +1034,7 @@
       "primarySkills": ["G", "S"],
       "secondarySkills": ["A", "D"],
       "skills": ["block", "tackle"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Human/",
-        "https://bbtc.pl/roster/bb2025/human"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Human/", "https://bbtc.pl/roster/bb2025/human"]
     },
     {
       "id": "human-2",
@@ -1292,10 +1048,7 @@
       "primarySkills": ["A", "G"],
       "secondarySkills": ["D", "P", "S"],
       "skills": ["catch", "dodge"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Human/",
-        "https://bbtc.pl/roster/bb2025/human"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Human/", "https://bbtc.pl/roster/bb2025/human"]
     },
     {
       "id": "human-0",
@@ -1309,10 +1062,7 @@
       "primarySkills": ["G"],
       "secondarySkills": ["A", "D", "S"],
       "skills": [],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Human/",
-        "https://bbtc.pl/roster/bb2025/human"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Human/", "https://bbtc.pl/roster/bb2025/human"]
     },
     {
       "id": "human-3",
@@ -1326,10 +1076,7 @@
       "primarySkills": ["G", "P"],
       "secondarySkills": ["A", "D", "S"],
       "skills": ["pass", "sure_hands"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Human/",
-        "https://bbtc.pl/roster/bb2025/human"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Human/", "https://bbtc.pl/roster/bb2025/human"]
     },
     {
       "id": "human-5",
@@ -1342,17 +1089,8 @@
       "av": "10+",
       "primarySkills": ["S"],
       "secondarySkills": ["A", "G"],
-      "skills": [
-        "bone_head",
-        "loner:3+",
-        "mighty_blow",
-        "thick_skull",
-        "throw_team_mate"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Human/",
-        "https://bbtc.pl/roster/bb2025/human"
-      ]
+      "skills": ["bone_head", "loner:3+", "mighty_blow", "thick_skull", "throw_team_mate"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Human/", "https://bbtc.pl/roster/bb2025/human"]
     },
     {
       "id": "imperial-nobility-2",
@@ -1433,13 +1171,7 @@
       "av": "10+",
       "primarySkills": ["S"],
       "secondarySkills": ["A", "G"],
-      "skills": [
-        "bone_head",
-        "loner:3+",
-        "mighty_blow",
-        "thick_skull",
-        "throw_team_mate"
-      ],
+      "skills": ["bone_head", "loner:3+", "mighty_blow", "thick_skull", "throw_team_mate"],
       "sources": [
         "https://bloodbowlbase.ru/bb2025/teams/Imperial_Nobility/",
         "https://bbtc.pl/roster/bb2025/imperial-nobility"
@@ -1457,10 +1189,7 @@
       "primarySkills": ["G", "M"],
       "secondarySkills": ["A", "D", "S"],
       "skills": ["frenzy"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Khorne/",
-        "https://bbtc.pl/roster/bb2025/khorne"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Khorne/", "https://bbtc.pl/roster/bb2025/khorne"]
     },
     {
       "id": "khorne-2",
@@ -1474,10 +1203,7 @@
       "primarySkills": ["G", "M", "S"],
       "secondarySkills": ["A", "D"],
       "skills": ["frenzy"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Khorne/",
-        "https://bbtc.pl/roster/bb2025/khorne"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Khorne/", "https://bbtc.pl/roster/bb2025/khorne"]
     },
     {
       "id": "khorne-1",
@@ -1491,10 +1217,7 @@
       "primarySkills": ["G", "M", "S"],
       "secondarySkills": ["A", "D", "P"],
       "skills": ["horns", "juggernaut", "jump_up", "thick_skull"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Khorne/",
-        "https://bbtc.pl/roster/bb2025/khorne"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Khorne/", "https://bbtc.pl/roster/bb2025/khorne"]
     },
     {
       "id": "khorne-3",
@@ -1507,17 +1230,8 @@
       "av": "9+",
       "primarySkills": ["M", "S"],
       "secondarySkills": ["A", "G"],
-      "skills": [
-        "claws",
-        "frenzy",
-        "loner:4+",
-        "mighty_blow",
-        "unchannelled_fury"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Khorne/",
-        "https://bbtc.pl/roster/bb2025/khorne"
-      ]
+      "skills": ["claws", "frenzy", "loner:4+", "mighty_blow", "unchannelled_fury"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Khorne/", "https://bbtc.pl/roster/bb2025/khorne"]
     },
     {
       "id": "lizardmen-1",
@@ -1531,10 +1245,7 @@
       "primarySkills": ["A", "P"],
       "secondarySkills": ["D", "G", "S"],
       "skills": ["dodge", "on_the_ball", "shadowing", "stunty"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Lizardmen/",
-        "https://bbtc.pl/roster/bb2025/lizardmen"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Lizardmen/", "https://bbtc.pl/roster/bb2025/lizardmen"]
     },
     {
       "id": "lizardmen-2",
@@ -1548,10 +1259,7 @@
       "primarySkills": ["G", "S"],
       "secondarySkills": ["A"],
       "skills": ["juggernaut", "unsteady"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Lizardmen/",
-        "https://bbtc.pl/roster/bb2025/lizardmen"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Lizardmen/", "https://bbtc.pl/roster/bb2025/lizardmen"]
     },
     {
       "id": "lizardmen-0",
@@ -1565,10 +1273,7 @@
       "primarySkills": ["A"],
       "secondarySkills": ["D", "G", "P", "S"],
       "skills": ["dodge", "stunty"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Lizardmen/",
-        "https://bbtc.pl/roster/bb2025/lizardmen"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Lizardmen/", "https://bbtc.pl/roster/bb2025/lizardmen"]
     },
     {
       "id": "lizardmen-3",
@@ -1581,17 +1286,8 @@
       "av": "10+",
       "primarySkills": ["S"],
       "secondarySkills": ["A", "G"],
-      "skills": [
-        "bone_head",
-        "loner:4+",
-        "mighty_blow",
-        "prehensile_tail",
-        "thick_skull"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Lizardmen/",
-        "https://bbtc.pl/roster/bb2025/lizardmen"
-      ]
+      "skills": ["bone_head", "loner:4+", "mighty_blow", "prehensile_tail", "thick_skull"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Lizardmen/", "https://bbtc.pl/roster/bb2025/lizardmen"]
     },
     {
       "id": "necromantic-horror-3",
@@ -1655,13 +1351,7 @@
       "av": "9+",
       "primarySkills": ["G", "S"],
       "secondarySkills": ["A", "D"],
-      "skills": [
-        "block",
-        "foul_appearance",
-        "no_ball",
-        "regeneration",
-        "sidestep"
-      ],
+      "skills": ["block", "foul_appearance", "no_ball", "regeneration", "sidestep"],
       "sources": [
         "https://bloodbowlbase.ru/bb2025/teams/Necromantic_Horror/",
         "https://bbtc.pl/roster/bb2025/necromantic-horror"
@@ -1696,10 +1386,7 @@
       "primarySkills": [],
       "secondarySkills": ["A"],
       "skills": ["dodge", "no_ball", "pick_me_up", "stunty", "titchy"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Norse/",
-        "https://bbtc.pl/roster/bb2025/norse"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Norse/", "https://bbtc.pl/roster/bb2025/norse"]
     },
     {
       "id": "norse-2",
@@ -1713,10 +1400,7 @@
       "primarySkills": ["G", "S"],
       "secondarySkills": ["A", "P"],
       "skills": ["block", "frenzy", "jump_up"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Norse/",
-        "https://bbtc.pl/roster/bb2025/norse"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Norse/", "https://bbtc.pl/roster/bb2025/norse"]
     },
     {
       "id": "norse-0",
@@ -1730,10 +1414,7 @@
       "primarySkills": ["G"],
       "secondarySkills": ["A", "P", "S"],
       "skills": ["block", "drunkard", "thick_skull", "unsteady"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Norse/",
-        "https://bbtc.pl/roster/bb2025/norse"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Norse/", "https://bbtc.pl/roster/bb2025/norse"]
     },
     {
       "id": "norse-4",
@@ -1747,10 +1428,7 @@
       "primarySkills": ["G", "S"],
       "secondarySkills": ["A"],
       "skills": ["frenzy", "unsteady"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Norse/",
-        "https://bbtc.pl/roster/bb2025/norse"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Norse/", "https://bbtc.pl/roster/bb2025/norse"]
     },
     {
       "id": "norse-3",
@@ -1764,10 +1442,7 @@
       "primarySkills": ["A", "G", "P"],
       "secondarySkills": ["S"],
       "skills": ["catch", "dauntless", "pass", "strip_ball"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Norse/",
-        "https://bbtc.pl/roster/bb2025/norse"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Norse/", "https://bbtc.pl/roster/bb2025/norse"]
     },
     {
       "id": "norse-5",
@@ -1780,17 +1455,8 @@
       "av": "9+",
       "primarySkills": ["S"],
       "secondarySkills": ["A", "G"],
-      "skills": [
-        "claws",
-        "disturbing_presence",
-        "frenzy",
-        "loner:4+",
-        "unchannelled_fury"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Norse/",
-        "https://bbtc.pl/roster/bb2025/norse"
-      ]
+      "skills": ["claws", "disturbing_presence", "frenzy", "loner:4+", "unchannelled_fury"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Norse/", "https://bbtc.pl/roster/bb2025/norse"]
     },
     {
       "id": "nurgle-2",
@@ -1803,18 +1469,8 @@
       "av": "10+",
       "primarySkills": ["G", "M", "S"],
       "secondarySkills": ["A", "D"],
-      "skills": [
-        "disturbing_presence",
-        "foul_appearance",
-        "plague_ridden",
-        "regeneration",
-        "stand_firm",
-        "unsteady"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Nurgle/",
-        "https://bbtc.pl/roster/bb2025/nurgle"
-      ]
+      "skills": ["disturbing_presence", "foul_appearance", "plague_ridden", "regeneration", "stand_firm", "unsteady"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Nurgle/", "https://bbtc.pl/roster/bb2025/nurgle"]
     },
     {
       "id": "nurgle-1",
@@ -1827,17 +1483,8 @@
       "av": "9+",
       "primarySkills": ["G", "M", "S"],
       "secondarySkills": ["A", "D", "P"],
-      "skills": [
-        "horns",
-        "plague_ridden",
-        "regeneration",
-        "steady_footing",
-        "thick_skull"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Nurgle/",
-        "https://bbtc.pl/roster/bb2025/nurgle"
-      ]
+      "skills": ["horns", "plague_ridden", "regeneration", "steady_footing", "thick_skull"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Nurgle/", "https://bbtc.pl/roster/bb2025/nurgle"]
     },
     {
       "id": "nurgle-0",
@@ -1851,10 +1498,7 @@
       "primarySkills": ["D", "G", "M"],
       "secondarySkills": ["A", "S"],
       "skills": ["decay", "plague_ridden"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Nurgle/",
-        "https://bbtc.pl/roster/bb2025/nurgle"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Nurgle/", "https://bbtc.pl/roster/bb2025/nurgle"]
     },
     {
       "id": "nurgle-3",
@@ -1878,10 +1522,7 @@
         "regeneration",
         "tentacles"
       ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Nurgle/",
-        "https://bbtc.pl/roster/bb2025/nurgle"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Nurgle/", "https://bbtc.pl/roster/bb2025/nurgle"]
     },
     {
       "id": "ogre-0",
@@ -1895,10 +1536,7 @@
       "primarySkills": ["A", "D"],
       "secondarySkills": ["G"],
       "skills": ["dodge", "right_stuff", "sidestep", "stunty", "titchy"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Ogre/",
-        "https://bbtc.pl/roster/bb2025/ogre"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Ogre/", "https://bbtc.pl/roster/bb2025/ogre"]
     },
     {
       "id": "ogre-1",
@@ -1912,10 +1550,7 @@
       "primarySkills": ["S"],
       "secondarySkills": ["A", "D", "G", "P"],
       "skills": ["bone_head", "mighty_blow", "thick_skull", "throw_team_mate"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Ogre/",
-        "https://bbtc.pl/roster/bb2025/ogre"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Ogre/", "https://bbtc.pl/roster/bb2025/ogre"]
     },
     {
       "id": "ogre-2",
@@ -1929,10 +1564,7 @@
       "primarySkills": ["P", "S"],
       "secondarySkills": ["A", "D", "G"],
       "skills": ["bone_head", "kick_team_mate", "mighty_blow", "thick_skull"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Ogre/",
-        "https://bbtc.pl/roster/bb2025/ogre"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Ogre/", "https://bbtc.pl/roster/bb2025/ogre"]
     },
     {
       "id": "old-world-alliance-7",
@@ -2124,13 +1756,7 @@
       "av": "10+",
       "primarySkills": ["S"],
       "secondarySkills": ["A", "G"],
-      "skills": [
-        "bone_head",
-        "loner:3+",
-        "mighty_blow",
-        "thick_skull",
-        "throw_team_mate"
-      ],
+      "skills": ["bone_head", "loner:3+", "mighty_blow", "thick_skull", "throw_team_mate"],
       "sources": [
         "https://bloodbowlbase.ru/bb2025/teams/Old_World_Alliance/",
         "https://bbtc.pl/roster/bb2025/old-world-alliance"
@@ -2148,10 +1774,7 @@
       "primarySkills": ["G", "S"],
       "secondarySkills": ["A", "D"],
       "skills": ["mighty_blow", "taunt", "thick_skull", "unsteady"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Orc/",
-        "https://bbtc.pl/roster/bb2025/orc"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Orc/", "https://bbtc.pl/roster/bb2025/orc"]
     },
     {
       "id": "orc-1",
@@ -2165,10 +1788,7 @@
       "primarySkills": ["A", "D"],
       "secondarySkills": ["G", "P", "S"],
       "skills": ["dodge", "right_stuff", "stunty"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Orc/",
-        "https://bbtc.pl/roster/bb2025/orc"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Orc/", "https://bbtc.pl/roster/bb2025/orc"]
     },
     {
       "id": "orc-3",
@@ -2182,10 +1802,7 @@
       "primarySkills": ["G", "S"],
       "secondarySkills": ["A", "D"],
       "skills": ["block", "break_tackle"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Orc/",
-        "https://bbtc.pl/roster/bb2025/orc"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Orc/", "https://bbtc.pl/roster/bb2025/orc"]
     },
     {
       "id": "orc-0",
@@ -2199,10 +1816,7 @@
       "primarySkills": ["G", "S"],
       "secondarySkills": ["A", "D"],
       "skills": [],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Orc/",
-        "https://bbtc.pl/roster/bb2025/orc"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Orc/", "https://bbtc.pl/roster/bb2025/orc"]
     },
     {
       "id": "orc-2",
@@ -2216,10 +1830,7 @@
       "primarySkills": ["G", "P"],
       "secondarySkills": ["A", "D", "S"],
       "skills": ["pass", "sure_hands"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Orc/",
-        "https://bbtc.pl/roster/bb2025/orc"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Orc/", "https://bbtc.pl/roster/bb2025/orc"]
     },
     {
       "id": "orc-5",
@@ -2241,10 +1852,7 @@
         "regeneration",
         "throw_team_mate"
       ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Orc/",
-        "https://bbtc.pl/roster/bb2025/orc"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Orc/", "https://bbtc.pl/roster/bb2025/orc"]
     },
     {
       "id": "shambling-undead-2",
@@ -2343,10 +1951,7 @@
       "primarySkills": ["A", "D", "G"],
       "secondarySkills": ["M", "S"],
       "skills": ["dodge", "stab"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Skaven/",
-        "https://bbtc.pl/roster/bb2025/skaven"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Skaven/", "https://bbtc.pl/roster/bb2025/skaven"]
     },
     {
       "id": "skaven-3",
@@ -2360,10 +1965,7 @@
       "primarySkills": ["G", "S"],
       "secondarySkills": ["A", "D", "M"],
       "skills": ["block", "strip_ball"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Skaven/",
-        "https://bbtc.pl/roster/bb2025/skaven"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Skaven/", "https://bbtc.pl/roster/bb2025/skaven"]
     },
     {
       "id": "skaven-0",
@@ -2377,10 +1979,7 @@
       "primarySkills": ["D", "G"],
       "secondarySkills": ["A", "M", "S"],
       "skills": [],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Skaven/",
-        "https://bbtc.pl/roster/bb2025/skaven"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Skaven/", "https://bbtc.pl/roster/bb2025/skaven"]
     },
     {
       "id": "skaven-1",
@@ -2394,10 +1993,7 @@
       "primarySkills": ["G", "P"],
       "secondarySkills": ["A", "D", "M", "S"],
       "skills": ["pass", "sure_hands"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Skaven/",
-        "https://bbtc.pl/roster/bb2025/skaven"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Skaven/", "https://bbtc.pl/roster/bb2025/skaven"]
     },
     {
       "id": "skaven-4",
@@ -2410,17 +2006,8 @@
       "av": "9+",
       "primarySkills": ["S"],
       "secondarySkills": ["A", "G", "M"],
-      "skills": [
-        "animal_savagery",
-        "frenzy",
-        "loner:4+",
-        "mighty_blow",
-        "prehensile_tail"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Skaven/",
-        "https://bbtc.pl/roster/bb2025/skaven"
-      ]
+      "skills": ["animal_savagery", "frenzy", "loner:4+", "mighty_blow", "prehensile_tail"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Skaven/", "https://bbtc.pl/roster/bb2025/skaven"]
     },
     {
       "id": "slann-2",
@@ -2484,13 +2071,7 @@
       "av": "10+",
       "primarySkills": ["S"],
       "secondarySkills": ["A", "G"],
-      "skills": [
-        "bone_head",
-        "loner:4+",
-        "mighty_blow",
-        "prehensile_tail",
-        "thick_skull"
-      ],
+      "skills": ["bone_head", "loner:4+", "mighty_blow", "prehensile_tail", "thick_skull"],
       "sources": [
         "https://www.thenaf.net/tournaments/nafdocs/naf-regulations-for-tournaments/",
         "https://bbtc.pl/roster/bb2025/slann"
@@ -2508,10 +2089,7 @@
       "primarySkills": ["A", "D"],
       "secondarySkills": ["G"],
       "skills": ["dodge", "pogo", "right_stuff", "sidestep", "stunty"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Snotling/",
-        "https://bbtc.pl/roster/bb2025/snotling"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Snotling/", "https://bbtc.pl/roster/bb2025/snotling"]
     },
     {
       "id": "snotling-3",
@@ -2524,19 +2102,8 @@
       "av": "6+",
       "primarySkills": ["A", "D", "P"],
       "secondarySkills": ["G"],
-      "skills": [
-        "bombardier",
-        "dodge",
-        "right_stuff",
-        "secret_weapon",
-        "sidestep",
-        "stunty",
-        "titchy"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Snotling/",
-        "https://bbtc.pl/roster/bb2025/snotling"
-      ]
+      "skills": ["bombardier", "dodge", "right_stuff", "secret_weapon", "sidestep", "stunty", "titchy"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Snotling/", "https://bbtc.pl/roster/bb2025/snotling"]
     },
     {
       "id": "snotling-4",
@@ -2549,17 +2116,8 @@
       "av": "9+",
       "primarySkills": ["D", "S"],
       "secondarySkills": ["A", "G"],
-      "skills": [
-        "dirty_player",
-        "juggernaut",
-        "mighty_blow",
-        "really_stupid",
-        "stand_firm"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Snotling/",
-        "https://bbtc.pl/roster/bb2025/snotling"
-      ]
+      "skills": ["dirty_player", "juggernaut", "mighty_blow", "really_stupid", "stand_firm"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Snotling/", "https://bbtc.pl/roster/bb2025/snotling"]
     },
     {
       "id": "snotling-0",
@@ -2572,18 +2130,8 @@
       "av": "6+",
       "primarySkills": ["A", "D"],
       "secondarySkills": ["G"],
-      "skills": [
-        "dodge",
-        "insignificant",
-        "right_stuff",
-        "sidestep",
-        "stunty",
-        "titchy"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Snotling/",
-        "https://bbtc.pl/roster/bb2025/snotling"
-      ]
+      "skills": ["dodge", "insignificant", "right_stuff", "sidestep", "stunty", "titchy"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Snotling/", "https://bbtc.pl/roster/bb2025/snotling"]
     },
     {
       "id": "snotling-2",
@@ -2597,10 +2145,7 @@
       "primarySkills": ["A", "D"],
       "secondarySkills": ["G"],
       "skills": ["dodge", "right_stuff", "sidestep", "sprint", "stunty"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Snotling/",
-        "https://bbtc.pl/roster/bb2025/snotling"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Snotling/", "https://bbtc.pl/roster/bb2025/snotling"]
     },
     {
       "id": "snotling-5",
@@ -2621,10 +2166,7 @@
         "regeneration",
         "throw_team_mate"
       ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Snotling/",
-        "https://bbtc.pl/roster/bb2025/snotling"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Snotling/", "https://bbtc.pl/roster/bb2025/snotling"]
     },
     {
       "id": "tomb-kings-0",
@@ -2638,10 +2180,7 @@
       "primarySkills": ["G"],
       "secondarySkills": ["A", "D", "S"],
       "skills": ["regeneration", "thick_skull"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Tomb_Kings/",
-        "https://bbtc.pl/roster/bb2025/tomb-kings"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Tomb_Kings/", "https://bbtc.pl/roster/bb2025/tomb-kings"]
     },
     {
       "id": "tomb-kings-3",
@@ -2655,10 +2194,7 @@
       "primarySkills": ["S"],
       "secondarySkills": ["A", "G"],
       "skills": ["brawler", "decay", "regeneration"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Tomb_Kings/",
-        "https://bbtc.pl/roster/bb2025/tomb-kings"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Tomb_Kings/", "https://bbtc.pl/roster/bb2025/tomb-kings"]
     },
     {
       "id": "tomb-kings-2",
@@ -2672,10 +2208,7 @@
       "primarySkills": ["G", "S"],
       "secondarySkills": ["A", "D"],
       "skills": ["block", "regeneration", "thick_skull"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Tomb_Kings/",
-        "https://bbtc.pl/roster/bb2025/tomb-kings"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Tomb_Kings/", "https://bbtc.pl/roster/bb2025/tomb-kings"]
     },
     {
       "id": "tomb-kings-1",
@@ -2689,10 +2222,7 @@
       "primarySkills": ["G", "P"],
       "secondarySkills": ["A", "D", "S"],
       "skills": ["pass", "regeneration", "sure_hands", "thick_skull"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Tomb_Kings/",
-        "https://bbtc.pl/roster/bb2025/tomb-kings"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Tomb_Kings/", "https://bbtc.pl/roster/bb2025/tomb-kings"]
     },
     {
       "id": "underworld-denizens-0",
@@ -2790,14 +2320,7 @@
       "av": "6+",
       "primarySkills": ["A", "D", "M"],
       "secondarySkills": ["G"],
-      "skills": [
-        "dodge",
-        "insignificant",
-        "right_stuff",
-        "sidestep",
-        "stunty",
-        "titchy"
-      ],
+      "skills": ["dodge", "insignificant", "right_stuff", "sidestep", "stunty", "titchy"],
       "sources": [
         "https://bloodbowlbase.ru/bb2025/teams/Underworld_Denizens/",
         "https://bbtc.pl/roster/bb2025/underworld-denizens"
@@ -2814,13 +2337,7 @@
       "av": "9+",
       "primarySkills": ["M", "S"],
       "secondarySkills": ["A", "G"],
-      "skills": [
-        "animal_savagery",
-        "frenzy",
-        "loner:4+",
-        "mighty_blow",
-        "prehensile_tail"
-      ],
+      "skills": ["animal_savagery", "frenzy", "loner:4+", "mighty_blow", "prehensile_tail"],
       "sources": [
         "https://bloodbowlbase.ru/bb2025/teams/Underworld_Denizens/",
         "https://bbtc.pl/roster/bb2025/underworld-denizens"
@@ -2863,10 +2380,7 @@
       "primarySkills": ["G"],
       "secondarySkills": ["A", "S"],
       "skills": [],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Vampire/",
-        "https://bbtc.pl/roster/bb2025/vampire"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Vampire/", "https://bbtc.pl/roster/bb2025/vampire"]
     },
     {
       "id": "vampire-3",
@@ -2880,10 +2394,7 @@
       "primarySkills": ["A", "G", "S"],
       "secondarySkills": [],
       "skills": ["bloodlust:3+", "hypnotic_gaze", "juggernaut", "regeneration"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Vampire/",
-        "https://bbtc.pl/roster/bb2025/vampire"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Vampire/", "https://bbtc.pl/roster/bb2025/vampire"]
     },
     {
       "id": "vampire-1",
@@ -2897,10 +2408,7 @@
       "primarySkills": ["A", "G"],
       "secondarySkills": ["P", "S"],
       "skills": ["bloodlust:2+", "hypnotic_gaze", "regeneration"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Vampire/",
-        "https://bbtc.pl/roster/bb2025/vampire"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Vampire/", "https://bbtc.pl/roster/bb2025/vampire"]
     },
     {
       "id": "vampire-2",
@@ -2914,10 +2422,7 @@
       "primarySkills": ["A", "G", "P"],
       "secondarySkills": ["S"],
       "skills": ["bloodlust:2+", "hypnotic_gaze", "pass", "regeneration"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Vampire/",
-        "https://bbtc.pl/roster/bb2025/vampire"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Vampire/", "https://bbtc.pl/roster/bb2025/vampire"]
     },
     {
       "id": "vampire-4",
@@ -2931,10 +2436,7 @@
       "primarySkills": ["S"],
       "secondarySkills": ["A", "G"],
       "skills": ["bloodlust:3+", "claws", "frenzy", "loner:4+", "regeneration"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Vampire/",
-        "https://bbtc.pl/roster/bb2025/vampire"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Vampire/", "https://bbtc.pl/roster/bb2025/vampire"]
     },
     {
       "id": "wood-elf-3",
@@ -2948,10 +2450,7 @@
       "primarySkills": ["A", "G"],
       "secondarySkills": ["P", "S"],
       "skills": ["block", "dodge", "leap"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Wood_Elf/",
-        "https://bbtc.pl/roster/bb2025/wood-elf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Wood_Elf/", "https://bbtc.pl/roster/bb2025/wood-elf"]
     },
     {
       "id": "wood-elf-2",
@@ -2965,10 +2464,7 @@
       "primarySkills": ["A", "G"],
       "secondarySkills": ["P", "S"],
       "skills": ["catch", "dodge", "sprint"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Wood_Elf/",
-        "https://bbtc.pl/roster/bb2025/wood-elf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Wood_Elf/", "https://bbtc.pl/roster/bb2025/wood-elf"]
     },
     {
       "id": "wood-elf-0",
@@ -2982,10 +2478,7 @@
       "primarySkills": ["A", "G"],
       "secondarySkills": ["S"],
       "skills": [],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Wood_Elf/",
-        "https://bbtc.pl/roster/bb2025/wood-elf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Wood_Elf/", "https://bbtc.pl/roster/bb2025/wood-elf"]
     },
     {
       "id": "wood-elf-1",
@@ -2999,10 +2492,7 @@
       "primarySkills": ["A", "G", "P"],
       "secondarySkills": ["S"],
       "skills": ["pass", "safe_pair_of_hands"],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Wood_Elf/",
-        "https://bbtc.pl/roster/bb2025/wood-elf"
-      ]
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Wood_Elf/", "https://bbtc.pl/roster/bb2025/wood-elf"]
     },
     {
       "id": "wood-elf-4",
@@ -3015,298 +2505,194 @@
       "av": "11+",
       "primarySkills": ["S"],
       "secondarySkills": ["A", "G", "P"],
-      "skills": [
-        "loner:4+",
-        "mighty_blow",
-        "stand_firm",
-        "strong_arm",
-        "take_root",
-        "thick_skull",
-        "throw_team_mate"
-      ],
-      "sources": [
-        "https://bloodbowlbase.ru/bb2025/teams/Wood_Elf/",
-        "https://bbtc.pl/roster/bb2025/wood-elf"
-      ]
+      "skills": ["loner:4+", "mighty_blow", "stand_firm", "strong_arm", "take_root", "thick_skull", "throw_team_mate"],
+      "sources": ["https://bloodbowlbase.ru/bb2025/teams/Wood_Elf/", "https://bbtc.pl/roster/bb2025/wood-elf"]
     }
   ],
   "teamProfiles": [
     {
       "id": "amazon",
-      "rerolls": {
-        "cost": 60000,
-        "max": 8
-      },
+      "rerolls": { "cost": 60000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/amazon"
     },
     {
       "id": "black-orc",
-      "rerolls": {
-        "cost": 60000,
-        "max": 8
-      },
+      "rerolls": { "cost": 60000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/black-orc"
     },
     {
       "id": "bretonnian",
-      "rerolls": {
-        "cost": 60000,
-        "max": 8
-      },
+      "rerolls": { "cost": 60000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/bretonnian"
     },
     {
       "id": "chaos-chosen",
-      "rerolls": {
-        "cost": 50000,
-        "max": 8
-      },
+      "rerolls": { "cost": 50000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/chaos-chosen"
     },
     {
       "id": "chaos-dwarf",
-      "rerolls": {
-        "cost": 70000,
-        "max": 8
-      },
+      "rerolls": { "cost": 70000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/chaos-dwarf"
     },
     {
       "id": "chaos-renegade",
-      "rerolls": {
-        "cost": 70000,
-        "max": 8
-      },
+      "rerolls": { "cost": 70000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/chaos-renegade"
     },
     {
       "id": "dark-elf",
-      "rerolls": {
-        "cost": 50000,
-        "max": 8
-      },
+      "rerolls": { "cost": 50000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/dark-elf"
     },
     {
       "id": "dwarf",
-      "rerolls": {
-        "cost": 60000,
-        "max": 8
-      },
+      "rerolls": { "cost": 60000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/dwarf"
     },
     {
       "id": "elven-union",
-      "rerolls": {
-        "cost": 50000,
-        "max": 8
-      },
+      "rerolls": { "cost": 50000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/elven-union"
     },
     {
       "id": "gnome",
-      "rerolls": {
-        "cost": 50000,
-        "max": 8
-      },
+      "rerolls": { "cost": 50000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/gnome"
     },
     {
       "id": "goblin",
-      "rerolls": {
-        "cost": 60000,
-        "max": 8
-      },
+      "rerolls": { "cost": 60000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/goblin"
     },
     {
       "id": "halfling",
-      "rerolls": {
-        "cost": 60000,
-        "max": 8
-      },
+      "rerolls": { "cost": 60000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/halfling"
     },
     {
       "id": "high-elf",
-      "rerolls": {
-        "cost": 50000,
-        "max": 8
-      },
+      "rerolls": { "cost": 50000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/high-elf"
     },
     {
       "id": "human",
-      "rerolls": {
-        "cost": 50000,
-        "max": 8
-      },
+      "rerolls": { "cost": 50000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/human"
     },
     {
       "id": "imperial-nobility",
-      "rerolls": {
-        "cost": 60000,
-        "max": 8
-      },
+      "rerolls": { "cost": 60000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/imperial-nobility"
     },
     {
       "id": "khorne",
-      "rerolls": {
-        "cost": 60000,
-        "max": 8
-      },
+      "rerolls": { "cost": 60000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/khorne"
     },
     {
       "id": "lizardmen",
-      "rerolls": {
-        "cost": 70000,
-        "max": 8
-      },
+      "rerolls": { "cost": 70000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/lizardmen"
     },
     {
       "id": "necromantic-horror",
-      "rerolls": {
-        "cost": 70000,
-        "max": 8
-      },
+      "rerolls": { "cost": 70000, "max": 8 },
       "apothecary": false,
       "source": "https://bbtc.pl/roster/bb2025/necromantic-horror"
     },
     {
       "id": "norse",
-      "rerolls": {
-        "cost": 60000,
-        "max": 8
-      },
+      "rerolls": { "cost": 60000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/norse"
     },
     {
       "id": "nurgle",
-      "rerolls": {
-        "cost": 60000,
-        "max": 8
-      },
+      "rerolls": { "cost": 60000, "max": 8 },
       "apothecary": false,
       "source": "https://bbtc.pl/roster/bb2025/nurgle"
     },
     {
       "id": "ogre",
-      "rerolls": {
-        "cost": 70000,
-        "max": 8
-      },
+      "rerolls": { "cost": 70000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/ogre"
     },
     {
       "id": "old-world-alliance",
-      "rerolls": {
-        "cost": 70000,
-        "max": 8
-      },
+      "rerolls": { "cost": 70000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/old-world-alliance"
     },
     {
       "id": "orc",
-      "rerolls": {
-        "cost": 60000,
-        "max": 8
-      },
+      "rerolls": { "cost": 60000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/orc"
     },
     {
       "id": "shambling-undead",
-      "rerolls": {
-        "cost": 70000,
-        "max": 8
-      },
+      "rerolls": { "cost": 70000, "max": 8 },
       "apothecary": false,
       "source": "https://bbtc.pl/roster/bb2025/shambling-undead"
     },
     {
       "id": "skaven",
-      "rerolls": {
-        "cost": 50000,
-        "max": 8
-      },
+      "rerolls": { "cost": 50000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/skaven"
     },
     {
       "id": "slann",
-      "rerolls": {
-        "cost": 50000,
-        "max": 8
-      },
+      "rerolls": { "cost": 50000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/slann"
     },
     {
       "id": "snotling",
-      "rerolls": {
-        "cost": 70000,
-        "max": 8
-      },
+      "rerolls": { "cost": 70000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/snotling"
     },
     {
       "id": "tomb-kings",
-      "rerolls": {
-        "cost": 60000,
-        "max": 8
-      },
+      "rerolls": { "cost": 60000, "max": 8 },
       "apothecary": false,
       "source": "https://bbtc.pl/roster/bb2025/tomb-kings"
     },
     {
       "id": "underworld-denizens",
-      "rerolls": {
-        "cost": 70000,
-        "max": 8
-      },
+      "rerolls": { "cost": 70000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/underworld-denizens"
     },
     {
       "id": "vampire",
-      "rerolls": {
-        "cost": 60000,
-        "max": 8
-      },
+      "rerolls": { "cost": 60000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/vampire"
     },
     {
       "id": "wood-elf",
-      "rerolls": {
-        "cost": 50000,
-        "max": 8
-      },
+      "rerolls": { "cost": 50000, "max": 8 },
       "apothecary": true,
       "source": "https://bbtc.pl/roster/bb2025/wood-elf"
     }

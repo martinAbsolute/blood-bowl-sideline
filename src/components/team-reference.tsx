@@ -12,14 +12,7 @@ import { rosterReferenceHref } from "@/lib/roster-ruleset";
 import { useRosterRuleset } from "@/lib/use-roster-ruleset";
 import { isSevens } from "@/domain/rules";
 import { CreateTeamButton } from "./create-team-button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { RosterIcon, StarPlayerIcon } from "./player-icon";
 import { RosterFacts, RosterTable } from "./roster-reference";
 
@@ -47,9 +40,7 @@ export function TeamReference({
   const referenceInducements = [
     ...eligible.filter((item) => item.id !== "wizard-sports-wizard"),
     ...referenceOnlyInducements.filter(
-      (item) =>
-        team.rulesetId === "bb2025-default" &&
-        (item.id !== "star-players-inducement" || eligibleStars.length),
+      (item) => team.rulesetId === "bb2025-default" && (item.id !== "star-players-inducement" || eligibleStars.length),
     ),
     ...eligible.filter((item) => item.id === "wizard-sports-wizard"),
   ];
@@ -70,12 +61,7 @@ export function TeamReference({
             <h1 className="display-font text-3xl">{roster.name}</h1>
           </div>
         </div>
-        <CreateTeamButton
-          size="sm"
-          rosterId={roster.id}
-          rulesetId={rulesetId}
-          className="h-11 sm:h-9"
-        />
+        <CreateTeamButton size="sm" rosterId={roster.id} rulesetId={rulesetId} className="h-11 sm:h-9" />
       </div>
       <RosterRulesetPicker rulesetId={rulesetId} />
       <section className="overflow-hidden rounded-lg border bg-card">
@@ -86,9 +72,7 @@ export function TeamReference({
         className={`grid items-start gap-5 ${eligibleStars.length || !isSevens(team) ? "xl:grid-cols-[300px_minmax(0,1fr)]" : "sm:max-w-lg"}`}
       >
         <section className="overflow-hidden rounded-lg border bg-card">
-          <h2 className="border-b bg-secondary/40 px-3 py-2 text-base font-semibold">
-            {t("inducements")}
-          </h2>
+          <h2 className="border-b bg-secondary/40 px-3 py-2 text-base font-semibold">{t("inducements")}</h2>
           <Table className="reference-table">
             <TableHeader>
               <TableRow>
@@ -114,9 +98,7 @@ export function TeamReference({
                     >
                       {t(`inducementNames.${i.id}`)}
                     </RuleHelp>
-                    <p className="text-[11px] text-muted-foreground">
-                      0–{i.max}
-                    </p>
+                    <p className="text-[11px] text-muted-foreground">0–{i.max}</p>
                   </TableCell>
                   <TableCell className="text-right font-mono">
                     {i.cost === null ? t("priceVaries") : `${i.cost / 1000}k`}
@@ -128,9 +110,7 @@ export function TeamReference({
         </section>
         {(eligibleStars.length > 0 || !isSevens(team)) && (
           <section className="min-w-0 overflow-hidden rounded-lg border bg-card">
-            <h2 className="border-b bg-secondary/40 px-3 py-2 text-base font-semibold">
-              {t("starPlayers")}
-            </h2>
+            <h2 className="border-b bg-secondary/40 px-3 py-2 text-base font-semibold">{t("starPlayers")}</h2>
             <Table className="reference-table">
               <TableHeader>
                 <TableRow>
@@ -141,9 +121,7 @@ export function TeamReference({
                       {s}
                     </TableHead>
                   ))}
-                  <TableHead className="min-w-60">
-                    {t("builtInSkills")}
-                  </TableHead>
+                  <TableHead className="min-w-60">{t("builtInSkills")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -152,14 +130,10 @@ export function TeamReference({
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <StarPlayerIcon starId={s.id} className="size-8" />
-                        <span className="whitespace-normal font-medium">
-                          {s.name}
-                        </span>
+                        <span className="whitespace-normal font-medium">{s.name}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="font-mono">
-                      {s.cost / 1000}k
-                    </TableCell>
+                    <TableCell className="font-mono">{s.cost / 1000}k</TableCell>
                     {[s.ma, s.st, s.ag, s.pa, s.av].map((stat, i) => (
                       <TableCell key={i} className="text-center font-mono">
                         {stat}
@@ -172,11 +146,7 @@ export function TeamReference({
                 ))}
               </TableBody>
             </Table>
-            {!eligibleStars.length && (
-              <p className="p-3 text-xs text-muted-foreground">
-                {t("noStars")}
-              </p>
-            )}
+            {!eligibleStars.length && <p className="p-3 text-xs text-muted-foreground">{t("noStars")}</p>}
           </section>
         )}
       </div>

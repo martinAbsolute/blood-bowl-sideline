@@ -1,11 +1,7 @@
 import { SignJWT } from "jose";
 
 export type DevAuthEnvironment = "development" | "preview";
-export type FrontendDevAuthConfig = {
-  environment: DevAuthEnvironment;
-  deploymentName: string;
-  secret: string;
-};
+export type FrontendDevAuthConfig = { environment: DevAuthEnvironment; deploymentName: string; secret: string };
 
 /** Server-only configuration: no client argument may enable impersonation. */
 export function getFrontendDevAuthConfig(
@@ -22,16 +18,9 @@ export function getFrontendDevAuthConfig(
     return null;
 
   let frontendEnvironment: DevAuthEnvironment;
-  if (
-    environment.VERCEL_ENV === "development" ||
-    environment.VERCEL_ENV === "preview"
-  ) {
+  if (environment.VERCEL_ENV === "development" || environment.VERCEL_ENV === "preview") {
     frontendEnvironment = environment.VERCEL_ENV;
-  } else if (
-    environment.VERCEL_ENV === undefined &&
-    !environment.VERCEL &&
-    environment.NODE_ENV === "development"
-  ) {
+  } else if (environment.VERCEL_ENV === undefined && !environment.VERCEL && environment.NODE_ENV === "development") {
     frontendEnvironment = "development";
   } else return null;
 
@@ -55,31 +44,19 @@ export function getFrontendDevAuthConfig(
       cloud.search ||
       cloud.hash ||
       cloud.pathname !== "/" ||
-      ![`https://${cloud.hostname}`, `https://${cloud.hostname}/`].includes(
-        environment.NEXT_PUBLIC_CONVEX_URL!,
-      )
+      ![`https://${cloud.hostname}`, `https://${cloud.hostname}/`].includes(environment.NEXT_PUBLIC_CONVEX_URL!)
     )
       return null;
-    return {
-      environment: frontendEnvironment,
-      deploymentName,
-      secret: environment.DEV_AUTH_SECRET,
-    };
+    return { environment: frontendEnvironment, deploymentName, secret: environment.DEV_AUTH_SECRET };
   } catch {
     return null;
   }
 }
 
-export async function mintDevAuthToken(
-  userId: string,
-  config: FrontendDevAuthConfig,
-) {
+export async function mintDevAuthToken(userId: string, config: FrontendDevAuthConfig) {
   // A small backdate handles clock drift without accepting future or expired tokens.
   const now = Math.floor(Date.now() / 1000);
-  return new SignJWT({
-    environment: config.environment,
-    deploymentName: config.deploymentName,
-  })
+  return new SignJWT({ environment: config.environment, deploymentName: config.deploymentName })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setIssuer("sideline-dev-auth")
     .setAudience("dev-impersonation")

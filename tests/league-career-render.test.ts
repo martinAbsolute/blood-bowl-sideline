@@ -38,15 +38,11 @@ vi.mock("next-intl", async (importOriginal) => {
   const { formats, timeZone } = await import("../src/i18n/config");
   return {
     ...actual,
-    useFormatter: () =>
-      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useFormatter: () => actual.createFormatter({ locale: "en", formats, timeZone }),
     useTranslations: () => (key: string) => key,
   };
 });
-vi.mock("../src/components/player-icon", () => ({
-  PlayerIcon: () => null,
-  RosterIcon: () => null,
-}));
+vi.mock("../src/components/player-icon", () => ({ PlayerIcon: () => null, RosterIcon: () => null }));
 vi.mock("../src/components/skill-box", () => ({ SkillList: () => null }));
 vi.mock("../src/components/league-ui", async () => {
   const { createElement } = await import("react");
@@ -58,24 +54,9 @@ vi.mock("../src/components/league-ui", async () => {
     LeagueStatTable: () => null,
     LeagueStatus: () => null,
     DiceInput: () => null,
-    LeagueSection: ({
-      title,
-      children,
-    }: {
-      title: string;
-      children?: import("react").ReactNode;
-    }) =>
-      createElement(
-        "section",
-        null,
-        createElement("h2", null, title),
-        children,
-      ),
-    useLeagueAction: () => ({
-      busy: false,
-      error: null,
-      run: async () => true,
-    }),
+    LeagueSection: ({ title, children }: { title: string; children?: import("react").ReactNode }) =>
+      createElement("section", null, createElement("h2", null, title), children),
+    useLeagueAction: () => ({ busy: false, error: null, run: async () => true }),
   };
 });
 
@@ -87,48 +68,27 @@ it("keeps one open treasury dialog and refreshes its balance across career revis
   try {
     for (const revision of [1, 2, 3, 4]) {
       state.revision = revision;
-      await act(async () =>
-        root.render(
-          createElement(LeagueCareer, { leagueId: "league", entryId: "entry" }),
-        ),
-      );
-      const headings = [...container.querySelectorAll("h2")].map(
-        (heading) => heading.textContent,
-      );
-      expect(
-        headings.filter((heading) => heading === "leagueUi.correctTreasury"),
-      ).toHaveLength(1);
-      expect(
-        headings.filter((heading) => heading === "leagueUi.completePostgame"),
-      ).toHaveLength(1);
+      await act(async () => root.render(createElement(LeagueCareer, { leagueId: "league", entryId: "entry" })));
+      const headings = [...container.querySelectorAll("h2")].map((heading) => heading.textContent);
+      expect(headings.filter((heading) => heading === "leagueUi.correctTreasury")).toHaveLength(1);
+      expect(headings.filter((heading) => heading === "leagueUi.completePostgame")).toHaveLength(1);
       if (revision === 1) {
         await act(async () => {
           [...container.querySelectorAll<HTMLButtonElement>("button")]
-            .find(
-              (button) =>
-                button.textContent === "leagueUx.careerTab.commissioner",
-            )!
+            .find((button) => button.textContent === "leagueUx.careerTab.commissioner")!
             .click();
         });
         await act(async () => {
           [...container.querySelectorAll<HTMLButtonElement>("button")]
-            .find(
-              (button) => button.textContent === "leagueUi.correctTreasury",
-            )!
+            .find((button) => button.textContent === "leagueUi.correctTreasury")!
             .click();
         });
       }
       expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
-      const amount = document.querySelector<HTMLInputElement>(
-        'input[type="number"]',
-      );
+      const amount = document.querySelector<HTMLInputElement>('input[type="number"]');
       expect(amount?.value).toBe(String(revision * 5000));
     }
-    expect(
-      warnings.mock.calls.filter(([message]) =>
-        String(message).includes("same key"),
-      ),
-    ).toHaveLength(0);
+    expect(warnings.mock.calls.filter(([message]) => String(message).includes("same key"))).toHaveLength(0);
   } finally {
     await act(async () => root.unmount());
     warnings.mockRestore();

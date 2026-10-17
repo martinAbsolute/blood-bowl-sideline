@@ -2,16 +2,7 @@
 
 import { useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import {
-  CalendarDays,
-  Coins,
-  Flag,
-  History,
-  Search,
-  ShieldCheck,
-  TrendingUp,
-  Users,
-} from "lucide-react";
+import { CalendarDays, Coins, Flag, History, Search, ShieldCheck, TrendingUp, Users } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { LeagueSelect } from "./league-field";
@@ -36,8 +27,7 @@ export function auditFields(raw: string): { path: string[]; value: string }[] {
   const fields: { path: string[]; value: string }[] = [];
   function flatten(value: unknown, path: string[]) {
     if (value && typeof value === "object") {
-      for (const [key, nested] of Object.entries(value))
-        flatten(nested, [...path, key]);
+      for (const [key, nested] of Object.entries(value)) flatten(nested, [...path, key]);
     } else fields.push({ path, value: value === null ? "—" : String(value) });
   }
   flatten(parsed, []);
@@ -66,27 +56,14 @@ export function auditChanges(raw: string) {
       .filter((field) => ["after", "next"].includes(field.path[0]))
       .map((field) => [JSON.stringify(field.path.slice(1)), field.value]),
   );
-  const changes = [...new Set([...before.keys(), ...after.keys()])].flatMap(
-    (key) => {
-      const previous = before.get(key),
-        next = after.get(key);
-      return previous === next
-        ? []
-        : [
-            {
-              path: JSON.parse(key) as string[],
-              before: previous,
-              after: next,
-            },
-          ];
-    },
-  );
+  const changes = [...new Set([...before.keys(), ...after.keys()])].flatMap((key) => {
+    const previous = before.get(key),
+      next = after.get(key);
+    return previous === next ? [] : [{ path: JSON.parse(key) as string[], before: previous, after: next }];
+  });
   return {
     changes,
-    context: fields.filter(
-      (field) =>
-        !["before", "previous", "after", "next"].includes(field.path[0]),
-    ),
+    context: fields.filter((field) => !["before", "previous", "after", "next"].includes(field.path[0])),
   };
 }
 
@@ -124,20 +101,12 @@ function AuditDetails({ raw }: { raw: string }) {
   const fieldName = (path: string[]) =>
     path
       .map(
-        (key) =>
-          names[key] ??
-          key
-            .replace(/([a-z])([A-Z])/g, "$1 $2")
-            .replace(/^./, (letter) => letter.toUpperCase()),
+        (key) => names[key] ?? key.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/^./, (letter) => letter.toUpperCase()),
       )
       .join(" · ") || t("leagueUi.showChanges");
   const displayValue = (value: string | undefined, path: string[]) => {
     const key = path.at(-1) ?? "";
-    if (
-      ["startAt", "deadlineAt", "completedAt", "openedAt"].includes(key) &&
-      value &&
-      Number.isFinite(Number(value))
-    ) {
+    if (["startAt", "deadlineAt", "completedAt", "openedAt"].includes(key) && value && Number.isFinite(Number(value))) {
       return format.dateTime(Number(value), "dateTime");
     }
     if (
@@ -162,22 +131,16 @@ function AuditDetails({ raw }: { raw: string }) {
         <dl className="divide-y overflow-hidden rounded-lg border bg-card">
           {changes.map((change, index) => (
             <div key={index} className="px-3 py-3">
-              <dt className="mb-2 text-xs font-medium">
-                {fieldName(change.path)}
-              </dt>
+              <dt className="mb-2 text-xs font-medium">{fieldName(change.path)}</dt>
               <dd className="grid grid-cols-2 gap-3 text-xs">
                 <div className="min-w-0 rounded-md bg-secondary/25 px-2 py-2">
-                  <span className="mb-1 block text-[10px] text-muted-foreground">
-                    {t("leagueUi.before")}
-                  </span>
+                  <span className="mb-1 block text-[10px] text-muted-foreground">{t("leagueUi.before")}</span>
                   <span className="break-words [overflow-wrap:anywhere]">
                     {displayValue(change.before, change.path)}
                   </span>
                 </div>
                 <div className="min-w-0 rounded-md bg-primary/5 px-2 py-2">
-                  <span className="mb-1 block text-[10px] text-muted-foreground">
-                    {t("leagueUi.after")}
-                  </span>
+                  <span className="mb-1 block text-[10px] text-muted-foreground">{t("leagueUi.after")}</span>
                   <span className="break-words font-medium text-primary [overflow-wrap:anywhere]">
                     {displayValue(change.after, change.path)}
                   </span>
@@ -194,12 +157,8 @@ function AuditDetails({ raw }: { raw: string }) {
               key={index}
               className="grid gap-1 px-3 py-2.5 text-xs sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] sm:gap-4"
             >
-              <dt className="break-words text-muted-foreground">
-                {fieldName(path)}
-              </dt>
-              <dd className="break-words font-medium [overflow-wrap:anywhere]">
-                {displayValue(value, path)}
-              </dd>
+              <dt className="break-words text-muted-foreground">{fieldName(path)}</dt>
+              <dd className="break-words font-medium [overflow-wrap:anywhere]">{displayValue(value, path)}</dd>
             </div>
           ))}
         </dl>
@@ -261,10 +220,7 @@ export function LeagueHistory({ records }: { records: HistoryRecord[] }) {
         </LeagueSelect>
       </div>
       <p className="text-xs text-muted-foreground" role="status">
-        {t("leagueDesk.historyLoaded", {
-          shown: visible.length,
-          total: records.length,
-        })}
+        {t("leagueDesk.historyLoaded", { shown: visible.length, total: records.length })}
       </p>
       {!visible.length && (
         <LeagueEmptyState
@@ -294,8 +250,7 @@ export function LeagueHistory({ records }: { records: HistoryRecord[] }) {
             {events.map((record) => {
               const Icon = eventIcon(record.action);
               const details = auditChanges(record.details);
-              const changeCount =
-                details.changes.length + details.context.length;
+              const changeCount = details.changes.length + details.context.length;
               return (
                 <li key={record.id} className="flex gap-3">
                   <div className="flex shrink-0 flex-col items-center">
@@ -307,9 +262,7 @@ export function LeagueHistory({ records }: { records: HistoryRecord[] }) {
                   <article className="min-w-0 flex-1 overflow-hidden rounded-lg border bg-card">
                     <div className="px-4 py-3">
                       <div className="flex flex-wrap items-baseline justify-between gap-2">
-                        <h4 className="text-sm font-semibold">
-                          {t(`leagueUi.audit.${record.action}`)}
-                        </h4>
+                        <h4 className="text-sm font-semibold">{t(`leagueUi.audit.${record.action}`)}</h4>
                         <time
                           dateTime={new Date(record.createdAt).toISOString()}
                           className="text-[11px] text-muted-foreground"
@@ -317,9 +270,7 @@ export function LeagueHistory({ records }: { records: HistoryRecord[] }) {
                           {format.dateTime(record.createdAt, "time")}
                         </time>
                       </div>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {record.actorName}
-                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">{record.actorName}</p>
                       {record.reason && (
                         <blockquote className="mt-3 border-l-2 border-primary/25 pl-3 text-sm leading-relaxed">
                           <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -333,9 +284,7 @@ export function LeagueHistory({ records }: { records: HistoryRecord[] }) {
                       <details className="border-t bg-secondary/15">
                         <summary className="cursor-pointer px-4 py-2.5 text-xs font-medium text-primary focus-visible:outline-2 focus-visible:outline-ring">
                           {t("leagueUi.showChanges")}{" "}
-                          <span className="ml-1 text-muted-foreground">
-                            ({changeCount})
-                          </span>
+                          <span className="ml-1 text-muted-foreground">({changeCount})</span>
                         </summary>
                         <div className="max-h-80 overflow-y-auto px-3 pb-3">
                           <AuditDetails raw={record.details} />

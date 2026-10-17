@@ -16,8 +16,7 @@ function draft(rulesetId: RulesetId, rosterId = "human") {
   return team;
 }
 const star = (id: string) => stars.find((entry) => entry.id === id)!;
-const issues = (team: ReturnType<typeof draft>) =>
-  validateTeam(team).issues.map((issue) => issue.code);
+const issues = (team: ReturnType<typeof draft>) => validateTeam(team).issues.map((issue) => issue.code);
 
 describe("verified Star Player ruleset restrictions", () => {
   it.each(["bb2025-sevens", "kyiv-seven-sins-sevens"] as const)(

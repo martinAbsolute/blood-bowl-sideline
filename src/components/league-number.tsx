@@ -25,20 +25,15 @@ export function LeagueNumber({
   const t = useTranslations();
   const id = useId();
   const [draft, setDraft] = useState<string | null>(null);
-  const valid = (text: string) =>
-    /^\d+$/.test(text) && Number(text) >= min && Number(text) <= max;
+  const valid = (text: string) => /^\d+$/.test(text) && Number(text) >= min && Number(text) <= max;
   const change = (next: number) => {
     setDraft(null);
     onChange(Math.max(min, Math.min(max, next)));
   };
-  const current =
-    draft !== null && valid(draft) ? Number(draft) : (value ?? min);
+  const current = draft !== null && valid(draft) ? Number(draft) : (value ?? min);
   return (
     <div className="min-w-0 space-y-2">
-      <label
-        htmlFor={id}
-        className="block text-xs font-medium text-muted-foreground"
-      >
+      <label htmlFor={id} className="block text-xs font-medium text-muted-foreground">
         {label}
       </label>
       <div className="flex h-11 min-w-0 items-center overflow-hidden rounded-lg border bg-card focus-within:ring-2 focus-within:ring-ring">
@@ -60,9 +55,7 @@ export function LeagueNumber({
           aria-valuemin={min}
           aria-valuemax={max}
           aria-valuenow={value ?? undefined}
-          aria-invalid={
-            (draft !== null && draft !== "" && !valid(draft)) || undefined
-          }
+          aria-invalid={(draft !== null && draft !== "" && !valid(draft)) || undefined}
           disabled={disabled}
           value={draft ?? value ?? ""}
           className="h-full min-w-0 flex-1 rounded-none border-0 bg-transparent px-1 text-center font-mono text-base font-semibold shadow-none focus-visible:ring-0"

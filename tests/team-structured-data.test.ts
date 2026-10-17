@@ -1,10 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { expect, it } from "vitest";
 import { newTeam, rosters, rulesets, stars } from "../src/domain/catalog";
-import {
-  serializeTeamStructuredData,
-  teamStructuredData,
-} from "../src/lib/team-structured-data";
+import { serializeTeamStructuredData, teamStructuredData } from "../src/lib/team-structured-data";
 import type { Team } from "../src/domain/types";
 
 const saved = (team: Team) => ({
@@ -25,9 +22,7 @@ it("expands a saved roster with named skills, stats, staff, inducements and expl
   const team = newTeam(randomUUID(), "orc");
   team.name = "Orcland Raiders";
   team.notes = "Private recovery notes";
-  team.players = [
-    { id: randomUUID(), name: "Gruk", positionId: "orc-3", skills: ["guard"] },
-  ];
+  team.players = [{ id: randomUUID(), name: "Gruk", positionId: "orc-3", skills: ["guard"] }];
   team.captainId = team.players[0].id;
   team.staff.rerolls = 2;
   team.staff.apothecary = 1;
@@ -39,11 +34,7 @@ it("expands a saved roster with named skills, stats, staff, inducements and expl
   expect(result).toMatchObject({
     "@type": "WebPage",
     dateModified: "2026-10-09T00:00:00.000Z",
-    mainEntity: {
-      "@type": "SportsTeam",
-      identifier: team.uuid,
-      name: team.name,
-    },
+    mainEntity: { "@type": "SportsTeam", identifier: team.uuid, name: team.name },
   });
   expect(result.mainEntity.athlete).toHaveLength(2);
   expect(snapshot).toMatchObject({
@@ -72,10 +63,7 @@ it("expands a saved roster with named skills, stats, staff, inducements and expl
     advancementCost: { value: 30000, unit: "gold pieces" },
     cost: { value: 115000, unit: "gold pieces" },
   });
-  expect(snapshot.starPlayers[0]).toMatchObject({
-    number: 2,
-    name: stars[0].name,
-  });
+  expect(snapshot.starPlayers[0]).toMatchObject({ number: 2, name: stars[0].name });
   expect(snapshot.staff.find((s) => s.id === "rerolls")).toMatchObject({
     name: "Team re-rolls",
     count: 2,
@@ -102,16 +90,9 @@ it("expands a saved roster with named skills, stats, staff, inducements and expl
 
 it("includes the standalone treasury and uses the roster tier when the ruleset has no tiers", () => {
   const team = newTeam(randomUUID(), "orc");
-  team.players = [
-    { id: randomUUID(), name: "", positionId: "orc-3", skills: ["guard"] },
-  ];
-  const snapshot = teamStructuredData({
-    ...saved(team),
-    draftLeagueId: undefined,
-  }).mainEntity.teamSnapshot;
-  expect(snapshot.roster.tier).toBe(
-    rosters.find((roster) => roster.id === "orc")!.tier,
-  );
+  team.players = [{ id: randomUUID(), name: "", positionId: "orc-3", skills: ["guard"] }];
+  const snapshot = teamStructuredData({ ...saved(team), draftLeagueId: undefined }).mainEntity.teamSnapshot;
+  expect(snapshot.roster.tier).toBe(rosters.find((roster) => roster.id === "orc")!.tier);
   expect(snapshot.budgets).toEqual([
     {
       id: "team",
@@ -129,46 +110,30 @@ it.each([
   ["bb2025-matched-play", "SP"],
   ["world-cup-2027", "SPP"],
   ["kyiv-seven-sins-sevens", "skills"],
-] as const)(
-  "includes the editor's skill allowance and units for %s",
-  (rulesetId, unit) => {
-    const team = { ...newTeam(randomUUID(), "orc"), rulesetId };
-    const snapshot = teamStructuredData({
-      ...saved(team),
-      draftLeagueId: undefined,
-    }).mainEntity.teamSnapshot;
-    expect(
-      snapshot.budgets?.find((pool) => pool.id === "skills"),
-    ).toMatchObject({
-      allowance: rulesets.find((rules) => rules.id === rulesetId)!.tierBudgets[
-        snapshot.roster.tier
-      ].skillGold,
-      used: 0,
-      unit,
-      shared: false,
-    });
+] as const)("includes the editor's skill allowance and units for %s", (rulesetId, unit) => {
+  const team = { ...newTeam(randomUUID(), "orc"), rulesetId };
+  const snapshot = teamStructuredData({ ...saved(team), draftLeagueId: undefined }).mainEntity.teamSnapshot;
+  expect(snapshot.budgets?.find((pool) => pool.id === "skills")).toMatchObject({
+    allowance: rulesets.find((rules) => rules.id === rulesetId)!.tierBudgets[snapshot.roster.tier].skillGold,
+    used: 0,
+    unit,
+    shared: false,
+  });
+});
+
+it.each([{ draftLeagueId: "private-league" }, { leagueLocked: true }, { leagueExperienced: true }])(
+  "does not invent league allowances: %j",
+  (context) => {
+    const snapshot = teamStructuredData({ ...saved(newTeam(randomUUID())), draftLeagueId: undefined, ...context })
+      .mainEntity.teamSnapshot;
+    expect(snapshot.budgets).toBeNull();
   },
 );
-
-it.each([
-  { draftLeagueId: "private-league" },
-  { leagueLocked: true },
-  { leagueExperienced: true },
-])("does not invent league allowances: %j", (context) => {
-  const snapshot = teamStructuredData({
-    ...saved(newTeam(randomUUID())),
-    draftLeagueId: undefined,
-    ...context,
-  }).mainEntity.teamSnapshot;
-  expect(snapshot.budgets).toBeNull();
-});
 
 it("uses Sevens veteran movement and free dedicated fans, with SP separate from gold", () => {
   const team = newTeam(randomUUID(), "orc");
   team.rulesetId = "kyiv-seven-sins-sevens";
-  team.players = [
-    { id: randomUUID(), name: "", positionId: "orc-3", skills: ["guard"] },
-  ];
+  team.players = [{ id: randomUUID(), name: "", positionId: "orc-3", skills: ["guard"] }];
   team.veteranId = team.players[0].id;
   const snapshot = teamStructuredData(saved(team)).mainEntity.teamSnapshot;
   expect(snapshot.players[0]).toMatchObject({
@@ -188,46 +153,25 @@ it("resolves parameterized skills and escapes script termination without changin
   const team = newTeam(randomUUID(), "human");
   team.name = '</script><script>alert("team")</script> Київ & Co';
   team.players = [
-    {
-      id: randomUUID(),
-      name: "</script><img src=x onerror=alert(1)>",
-      positionId: "human-1",
-      skills: ["loner:4+"],
-    },
+    { id: randomUUID(), name: "</script><img src=x onerror=alert(1)>", positionId: "human-1", skills: ["loner:4+"] },
   ];
   const json = serializeTeamStructuredData(saved(team));
   expect(json).not.toContain("<");
   const parsed = JSON.parse(json);
   expect(parsed.mainEntity.name).toBe(team.name);
-  expect(parsed.mainEntity.teamSnapshot.players[0].name).toBe(
-    team.players[0].name,
-  );
-  expect(parsed.mainEntity.teamSnapshot.players[0].addedSkills).toEqual([
-    { id: "loner:4+", name: "Loner (4+)" },
-  ]);
+  expect(parsed.mainEntity.teamSnapshot.players[0].name).toBe(team.players[0].name);
+  expect(parsed.mainEntity.teamSnapshot.players[0].addedSkills).toEqual([{ id: "loner:4+", name: "Loner (4+)" }]);
 });
 
-it.each(rosters)(
-  "can describe $id under every ruleset, including empty drafts and stars",
-  (roster) => {
-    for (const ruleset of rulesets) {
-      const team = newTeam(randomUUID(), roster.id);
-      team.rulesetId = ruleset.id;
-      expect(teamStructuredData(saved(team)).mainEntity.athlete).toEqual([]);
-      team.players = roster.players.map((p) => ({
-        id: randomUUID(),
-        positionId: p.id,
-        name: "",
-        skills: [],
-      }));
-      team.stars = stars.map((s) => s.id);
-      const result = teamStructuredData(saved(team));
-      expect(result.mainEntity.athlete).toHaveLength(
-        roster.players.length + stars.length,
-      );
-      expect(serializeTeamStructuredData(saved(team))).not.toContain(
-        "undefined",
-      );
-    }
-  },
-);
+it.each(rosters)("can describe $id under every ruleset, including empty drafts and stars", (roster) => {
+  for (const ruleset of rulesets) {
+    const team = newTeam(randomUUID(), roster.id);
+    team.rulesetId = ruleset.id;
+    expect(teamStructuredData(saved(team)).mainEntity.athlete).toEqual([]);
+    team.players = roster.players.map((p) => ({ id: randomUUID(), positionId: p.id, name: "", skills: [] }));
+    team.stars = stars.map((s) => s.id);
+    const result = teamStructuredData(saved(team));
+    expect(result.mainEntity.athlete).toHaveLength(roster.players.length + stars.length);
+    expect(serializeTeamStructuredData(saved(team))).not.toContain("undefined");
+  }
+});

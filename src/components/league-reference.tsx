@@ -10,31 +10,14 @@ import { LeagueBack } from "./league-ui";
 import { LeagueSelect } from "./league-field";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import {
-  LeagueDialogBody,
-  LeagueDialogContent,
-  LeagueDialogFooter,
-  LeagueDialogHeader,
-} from "./league-dialog";
+import { LeagueDialogBody, LeagueDialogContent, LeagueDialogFooter, LeagueDialogHeader } from "./league-dialog";
 import { rosters, stars, starPairs } from "@/domain/catalog";
-import {
-  leagues,
-  leagueName,
-  leagueSlug,
-  starsForLeague,
-} from "@/domain/team-reference";
+import { leagues, leagueName, leagueSlug, starsForLeague } from "@/domain/team-reference";
 import { RosterIcon, StarPlayerIcon } from "./player-icon";
 import { SkillList } from "./skill-box";
 import { LeagueLinks, SpecialRules } from "./team-affiliations";
 import { Dialog } from "./dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 
 export function LeagueReference({ name }: { name: string }) {
   const t = useTranslations();
@@ -42,19 +25,13 @@ export function LeagueReference({ name }: { name: string }) {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = stars.find((star) => star.id === selectedId);
-  const partnerId =
-    selected &&
-    starPairs
-      .find((pair) => pair.includes(selected.id))
-      ?.find((id) => id !== selected.id);
+  const partnerId = selected && starPairs.find((pair) => pair.includes(selected.id))?.find((id) => id !== selected.id);
   const partner = stars.find((star) => star.id === partnerId);
   const players = starsForLeague(name);
   const visiblePlayers = players.filter((star) =>
     star.name.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()),
   );
-  const teams = rosters.filter((r) =>
-    r.leagues.some((l) => leagueName(l) === name),
-  );
+  const teams = rosters.filter((r) => r.leagues.some((l) => leagueName(l) === name));
   return (
     <div className="page-width space-y-5 py-6 sm:py-8">
       <LeagueBack href="/rosters">{t("allRosters")}</LeagueBack>
@@ -89,10 +66,7 @@ export function LeagueReference({ name }: { name: string }) {
               </option>
             ))}
           </LeagueSelect>
-          <nav
-            aria-label={t("leagueUx.affiliations")}
-            className="hidden flex-col gap-1 lg:flex"
-          >
+          <nav aria-label={t("leagueUx.affiliations")} className="hidden flex-col gap-1 lg:flex">
             {leagues.map((league) => (
               <Link
                 key={league}
@@ -109,9 +83,7 @@ export function LeagueReference({ name }: { name: string }) {
         </aside>
         <div className="min-w-0 space-y-5">
           <section className="overflow-hidden rounded-lg border bg-card">
-            <h2 className="border-b bg-secondary/40 px-4 py-3 text-sm font-semibold">
-              {t("rosters")}
-            </h2>
+            <h2 className="border-b bg-secondary/40 px-4 py-3 text-sm font-semibold">{t("rosters")}</h2>
             <div className="grid sm:grid-cols-2 xl:grid-cols-3">
               {teams.map((roster) => (
                 <Link
@@ -134,15 +106,10 @@ export function LeagueReference({ name }: { name: string }) {
               <h2 className="flex items-center gap-2 text-sm font-semibold">
                 <Star className="size-4 text-muted-foreground" />
                 {t("starPlayers")}
-                <span className="text-xs font-normal tabular-nums text-muted-foreground">
-                  {visiblePlayers.length}
-                </span>
+                <span className="text-xs font-normal tabular-nums text-muted-foreground">{visiblePlayers.length}</span>
               </h2>
               <label className="relative w-full sm:w-56">
-                <Search
-                  className="absolute left-3 top-2.5 size-4 text-muted-foreground"
-                  aria-hidden="true"
-                />
+                <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" aria-hidden="true" />
                 <Input
                   className="h-9 bg-card pl-9"
                   aria-label={t("leagueUx.searchStars")}
@@ -160,23 +127,13 @@ export function LeagueReference({ name }: { name: string }) {
                   onClick={() => setSelectedId(star.id)}
                   className="flex w-full items-center gap-3 p-4 text-left hover:bg-secondary/30 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
                 >
-                  <StarPlayerIcon
-                    starId={star.id}
-                    className="size-10 shrink-0"
-                  />
+                  <StarPlayerIcon starId={star.id} className="size-10 shrink-0" />
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold">
-                      {star.name}
-                    </span>
-                    <span className="mt-1 block text-xs text-muted-foreground">
-                      {star.playerType}
-                    </span>
+                    <span className="block text-sm font-semibold">{star.name}</span>
+                    <span className="mt-1 block text-xs text-muted-foreground">{star.playerType}</span>
                   </span>
                   <span className="font-mono text-sm">{star.cost / 1000}k</span>
-                  <ArrowUpRight
-                    className="size-4 shrink-0 text-muted-foreground"
-                    aria-hidden="true"
-                  />
+                  <ArrowUpRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                 </button>
               ))}
             </div>
@@ -191,9 +148,7 @@ export function LeagueReference({ name }: { name: string }) {
                         {stat}
                       </TableHead>
                     ))}
-                    <TableHead className="min-w-64">
-                      {t("builtInSkills")}
-                    </TableHead>
+                    <TableHead className="min-w-64">{t("builtInSkills")}</TableHead>
                     <TableHead className="min-w-40">{t("playsFor")}</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -212,16 +167,12 @@ export function LeagueReference({ name }: { name: string }) {
                           </button>
                         </div>
                       </TableCell>
-                      <TableCell className="font-mono">
-                        {star.cost / 1000}k
-                      </TableCell>
-                      {[star.ma, star.st, star.ag, star.pa, star.av].map(
-                        (stat, i) => (
-                          <TableCell key={i} className="text-center font-mono">
-                            {stat}
-                          </TableCell>
-                        ),
-                      )}
+                      <TableCell className="font-mono">{star.cost / 1000}k</TableCell>
+                      {[star.ma, star.st, star.ag, star.pa, star.av].map((stat, i) => (
+                        <TableCell key={i} className="text-center font-mono">
+                          {stat}
+                        </TableCell>
+                      ))}
                       <TableCell className="whitespace-normal">
                         <SkillList ids={star.skills} />
                       </TableCell>
@@ -234,10 +185,7 @@ export function LeagueReference({ name }: { name: string }) {
               </Table>
             </div>
             {!visiblePlayers.length && (
-              <LeagueEmptyState
-                icon={<Search className="size-6" />}
-                title={t("leagueUx.noSearchResults")}
-              />
+              <LeagueEmptyState icon={<Search className="size-6" />} title={t("leagueUx.noSearchResults")} />
             )}
           </section>
         </div>
@@ -254,9 +202,7 @@ export function LeagueReference({ name }: { name: string }) {
               <LeagueDialogHeader
                 title={selected.name}
                 description={`${selected.playerType} · ${selected.cost / 1000}k GP`}
-                icon={
-                  <StarPlayerIcon starId={selected.id} className="size-9" />
-                }
+                icon={<StarPlayerIcon starId={selected.id} className="size-9" />}
               />
               <LeagueDialogBody>
                 <dl className="grid grid-cols-5 gap-2 rounded-lg border bg-secondary/30 p-3">
@@ -264,45 +210,21 @@ export function LeagueReference({ name }: { name: string }) {
                     <div key={stat} className="text-center">
                       <dt className="text-xs text-muted-foreground">{stat}</dt>
                       <dd className="mt-1 font-mono">
-                        {
-                          [
-                            selected.ma,
-                            selected.st,
-                            selected.ag,
-                            selected.pa,
-                            selected.av,
-                          ][i]
-                        }
+                        {[selected.ma, selected.st, selected.ag, selected.pa, selected.av][i]}
                       </dd>
                     </div>
                   ))}
                 </dl>
                 <div>
-                  <p className="mb-2 text-xs text-muted-foreground">
-                    {t("builtInSkills")}
-                  </p>
+                  <p className="mb-2 text-xs text-muted-foreground">{t("builtInSkills")}</p>
                   <SkillList ids={selected.skills} />
                 </div>
                 <div className="text-sm">
-                  <p className="mb-2 text-xs text-muted-foreground">
-                    {t("playsFor")}
-                  </p>
-                  <LeagueLinks
-                    names={selected.playsFor.filter((name) =>
-                      leagues.includes(leagueName(name)),
-                    )}
-                  />
-                  <SpecialRules
-                    names={selected.playsFor.filter((name) =>
-                      name.startsWith("Favoured of"),
-                    )}
-                  />
+                  <p className="mb-2 text-xs text-muted-foreground">{t("playsFor")}</p>
+                  <LeagueLinks names={selected.playsFor.filter((name) => leagues.includes(leagueName(name)))} />
+                  <SpecialRules names={selected.playsFor.filter((name) => name.startsWith("Favoured of"))} />
                   {selected.playsFor
-                    .filter(
-                      (name) =>
-                        !leagues.includes(leagueName(name)) &&
-                        !name.startsWith("Favoured of"),
-                    )
+                    .filter((name) => !leagues.includes(leagueName(name)) && !name.startsWith("Favoured of"))
                     .map((name) => (
                       <p key={name}>{name}</p>
                     ))}

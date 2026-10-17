@@ -3,11 +3,7 @@ import { contentMetadata } from "@/lib/content-metadata";
 import { api } from "../../../../../convex/_generated/api";
 import type { Id } from "../../../../../convex/_generated/dataModel";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ leagueId: string }>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ leagueId: string }> }) {
   const { leagueId } = await params;
   return contentMetadata(
     api.leagues.get,
@@ -19,11 +15,7 @@ export async function generateMetadata({
   );
 }
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ leagueId: string }>;
-}) {
+export default async function Page({ params }: { params: Promise<{ leagueId: string }> }) {
   const { leagueId } = await params;
   return <LeagueWorkspace leagueId={leagueId} />;
 }

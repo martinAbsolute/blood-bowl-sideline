@@ -11,18 +11,8 @@ export const formats = {
     short: { day: "2-digit", month: "2-digit", year: "numeric" },
     medium: { day: "numeric", month: "short", year: "numeric" },
     long: { day: "numeric", month: "long", year: "numeric" },
-    dateTime: {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hourCycle: "h23",
-    },
+    dateTime: { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" },
     time: { hour: "2-digit", minute: "2-digit", hourCycle: "h23" },
   },
-  number: {
-    integer: { maximumFractionDigits: 0 },
-    gold: { maximumFractionDigits: 3 },
-  },
+  number: { integer: { maximumFractionDigits: 0 }, gold: { maximumFractionDigits: 3 } },
 } satisfies Formats;

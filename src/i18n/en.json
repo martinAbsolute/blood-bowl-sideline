@@ -828,11 +828,7 @@
   "leagueSaveFailed": "Could not save league changes",
   "leagueSingleRoundRobin": "Single round robin",
   "leagueOfficialRosters": "Official league rosters",
-  "leagueStatus": {
-    "registration": "Registration",
-    "active": "In progress",
-    "completed": "Completed"
-  },
+  "leagueStatus": { "registration": "Registration", "active": "In progress", "completed": "Completed" },
   "leagueUi": {
     "loadMore": "Load more",
     "undoAdvancement": "Undo latest advancement",
@@ -1267,11 +1263,7 @@
       "special": "Special action",
       "other": "Other / no opposing player"
     },
-    "regeneration": {
-      "not-used": "Not used",
-      "failed": "Regeneration failed",
-      "succeeded": "Regeneration succeeded"
-    },
+    "regeneration": { "not-used": "Not used", "failed": "Regeneration failed", "succeeded": "Regeneration succeeded" },
     "sentences": {
       "touchdown": "{actor} scored a touchdown",
       "completion": "{actor} completed a pass to {target}",

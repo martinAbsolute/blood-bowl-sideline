@@ -11,14 +11,12 @@ vi.mock("next-intl", async (importOriginal) => {
   const { formats, timeZone } = await import("../src/i18n/config");
   return {
     ...actual,
-    useFormatter: () =>
-      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useFormatter: () => actual.createFormatter({ locale: "en", formats, timeZone }),
     useTranslations: () => (key: string) => key,
   };
 });
 vi.mock("../src/components/skill-box", () => ({
-  SkillList: ({ ids }: { ids: string[] }) =>
-    createElement("span", null, ids.join(", ")),
+  SkillList: ({ ids }: { ids: string[] }) => createElement("span", null, ids.join(", ")),
 }));
 
 let root: Root;
@@ -32,14 +30,7 @@ beforeEach(() => {
   document.body.append(container);
   root = createRoot(container);
   team = newTeam("remove-test", "human");
-  team.players = [
-    {
-      id: "player",
-      positionId: getRoster("human")!.players[1].id,
-      name: "",
-      skills: [],
-    },
-  ];
+  team.players = [{ id: "player", positionId: getRoster("human")!.players[1].id, name: "", skills: [] }];
   onChange.mockClear();
   openPlayer.mockClear();
 });
@@ -54,20 +45,15 @@ async function render(selected = "player") {
       createElement(
         "div",
         { onClick: openPlayer },
-        createElement(RemovePlayerButton, {
-          team,
-          selected,
-          onChange,
-          compact: true,
-        }),
+        createElement(RemovePlayerButton, { team, selected, onChange, compact: true }),
       ),
     ),
   );
 }
 async function clickButton(scope: ParentNode, label?: string) {
-  const button = Array.from(
-    scope.querySelectorAll<HTMLButtonElement>("button"),
-  ).find((item) => !label || item.textContent === label)!;
+  const button = Array.from(scope.querySelectorAll<HTMLButtonElement>("button")).find(
+    (item) => !label || item.textContent === label,
+  )!;
   await act(async () => button.click());
 }
 it("removes an untouched player with starting skills immediately without opening their editor", async () => {
@@ -93,10 +79,7 @@ it.each(["name", "skills", "captain", "veteran"])(
     await clickButton(dialog, "cancel");
     expect(onChange).not.toHaveBeenCalled();
     await clickButton(container);
-    await clickButton(
-      document.querySelector('[role="dialog"]')!,
-      "removePlayer",
-    );
+    await clickButton(document.querySelector('[role="dialog"]')!, "removePlayer");
     const removed = onChange.mock.calls[0][0] as Team;
     expect(removed.players).toEqual([]);
     expect(removed.captainId).toBeUndefined();

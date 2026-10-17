@@ -24,10 +24,7 @@ export function TeamHeader({
         </div>
         <div className="team-header-tags">{children}</div>
       </div>
-      <div
-        className="team-header-actions no-print flex min-w-0 items-center gap-2"
-        data-title-actions
-      >
+      <div className="team-header-actions no-print flex min-w-0 items-center gap-2" data-title-actions>
         {actions}
       </div>
     </header>

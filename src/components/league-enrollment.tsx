@@ -31,10 +31,7 @@ export function LeagueEnrollment({
   const router = useRouter();
   const register = useMutation(api.leagues.register);
   const action = useLeagueAction();
-  const ready = canEnrollTeam(
-    { team, leagueExperienced: experienced },
-    league.startingTreasury,
-  );
+  const ready = canEnrollTeam({ team, leagueExperienced: experienced }, league.startingTreasury);
   const base = `/leagues/manage/${league._id}`;
   return (
     <section className="no-print mb-5 space-y-3 rounded-xl border border-primary/25 bg-primary/5 p-4">
@@ -47,10 +44,7 @@ export function LeagueEnrollment({
             </Link>
             <p className="mt-1 text-xs text-muted-foreground">
               {t("leagueUx.pickerHint", {
-                amount: format.number(
-                  league.startingTreasury ?? DEFAULT_LEAGUE_TREASURY,
-                  "integer",
-                ),
+                amount: format.number(league.startingTreasury ?? DEFAULT_LEAGUE_TREASURY, "integer"),
               })}
             </p>
           </div>
@@ -69,21 +63,13 @@ export function LeagueEnrollment({
             <ArrowRight className="size-4" />
           </Button>
         ) : (
-          <Button
-            nativeButton={false}
-            render={<Link href={base} />}
-            variant="outline"
-          >
+          <Button nativeButton={false} render={<Link href={base} />} variant="outline">
             {t("leagueUx.openLeague")}
           </Button>
         )}
       </div>
       {canRegister && !ready && (
-        <LeagueTeamIssues
-          team={team}
-          leagueExperienced={experienced}
-          startingTreasury={league.startingTreasury}
-        />
+        <LeagueTeamIssues team={team} leagueExperienced={experienced} startingTreasury={league.startingTreasury} />
       )}
       <LeagueError message={action.error} />
     </section>

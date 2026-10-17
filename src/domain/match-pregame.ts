@@ -8,8 +8,7 @@ export const WEATHER_RESULTS = [
 ] as const;
 
 export function weatherResult(roll?: number | null) {
-  if (roll == null || !Number.isInteger(roll) || roll < 2 || roll > 12)
-    return null;
+  if (roll == null || !Number.isInteger(roll) || roll < 2 || roll > 12) return null;
   return WEATHER_RESULTS.find(({ value }) => value === roll)?.value ?? 4;
 }
 
@@ -21,8 +20,7 @@ export function isPreGameComplete(match: {
   return (
     weatherResult(match.weather) !== null &&
     [match.homeFanRoll, match.awayFanRoll].every(
-      (roll) =>
-        roll != null && Number.isInteger(roll) && roll >= 1 && roll <= 3,
+      (roll) => roll != null && Number.isInteger(roll) && roll >= 1 && roll <= 3,
     )
   );
 }

@@ -2,8 +2,6 @@ allowBuilds:
   "@parcel/watcher": false
   "@swc/core": false
   esbuild: true
-  tree-sitter-python: true
-  unrs-resolver: true
 minimumReleaseAgeExclude:
   - "@shadcn/registry@0.1.4"
   - lucide-react@1.57.0

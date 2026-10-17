@@ -31,11 +31,7 @@ export const playEventValidator = v.object({
   apothecaryRoll: v.union(v.number(), v.null()),
   apothecaryLastingRoll: v.union(v.number(), v.null()),
   keepOriginal: v.boolean(),
-  regeneration: v.union(
-    v.literal("not-used"),
-    v.literal("failed"),
-    v.literal("succeeded"),
-  ),
+  regeneration: v.union(v.literal("not-used"), v.literal("failed"), v.literal("succeeded")),
   superb: v.boolean(),
   notes: v.string(),
 });
@@ -54,20 +50,14 @@ export const matchStatsValidator = v.object({
   inj: v.number(),
   dth: v.number(),
 });
-export const careerStatsValidator = matchStatsValidator.extend({
-  mp: v.number(),
-});
+export const careerStatsValidator = matchStatsValidator.extend({ mp: v.number() });
 export const playerStatusValidator = v.union(
   v.literal("active"),
   v.literal("missing-next-game"),
   v.literal("dead"),
   v.literal("retired"),
 );
-export const reportStatusValidator = v.union(
-  v.literal("active"),
-  v.literal("missing-next-game"),
-  v.literal("dead"),
-);
+export const reportStatusValidator = v.union(v.literal("active"), v.literal("missing-next-game"), v.literal("dead"));
 export const advancementValidator = v.object({
   skillId: v.string(),
   access: v.union(v.literal("primary"), v.literal("secondary")),
@@ -113,20 +103,8 @@ export const playerSnapshotValidator = v.object({
   nigglingInjuries: v.number(),
   characteristicReductions: reductionsValidator,
   injuryNotes: v.string(),
-  profile: v.object({
-    ma: v.number(),
-    st: v.number(),
-    ag: v.string(),
-    pa: v.string(),
-    av: v.string(),
-  }),
-  baseProfile: v.object({
-    ma: v.number(),
-    st: v.number(),
-    ag: v.string(),
-    pa: v.string(),
-    av: v.string(),
-  }),
+  profile: v.object({ ma: v.number(), st: v.number(), ag: v.string(), pa: v.string(), av: v.string() }),
+  baseProfile: v.object({ ma: v.number(), st: v.number(), ag: v.string(), pa: v.string(), av: v.string() }),
   sppRates: matchStatsValidator,
   baseCost: v.number(),
   positionName: v.string(),

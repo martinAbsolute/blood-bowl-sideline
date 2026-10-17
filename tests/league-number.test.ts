@@ -1,11 +1,5 @@
 // @vitest-environment happy-dom
-import {
-  act,
-  createElement,
-  useState,
-  type InputHTMLAttributes,
-  type ButtonHTMLAttributes,
-} from "react";
+import { act, createElement, useState, type InputHTMLAttributes, type ButtonHTMLAttributes } from "react";
 import { createRoot } from "react-dom/client";
 import { expect, it, vi } from "vitest";
 import { LeagueNumber } from "../src/components/league-number";
@@ -15,10 +9,8 @@ vi.mock("next-intl", async (importOriginal) => {
   const { formats, timeZone } = await import("../src/i18n/config");
   return {
     ...actual,
-    useFormatter: () =>
-      actual.createFormatter({ locale: "en", formats, timeZone }),
-    useTranslations: () => (key: string, args: { name: string }) =>
-      `${key} ${args.name}`,
+    useFormatter: () => actual.createFormatter({ locale: "en", formats, timeZone }),
+    useTranslations: () => (key: string, args: { name: string }) => `${key} ${args.name}`,
   };
 });
 vi.mock("../src/components/ui/input", () => ({
@@ -26,10 +18,7 @@ vi.mock("../src/components/ui/input", () => ({
     createElement("input", { ...props, onInput: props.onChange }),
 }));
 vi.mock("../src/components/ui/button", () => ({
-  Button: ({
-    variant: _variant,
-    ...props
-  }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: string }) => {
+  Button: ({ variant: _variant, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: string }) => {
     void _variant;
     return createElement("button", props);
   },
@@ -76,16 +65,10 @@ it("allows clearing and replacing a number without sending a spurious zero or in
     expect(input.value).toBe("1");
     await type("30");
     expect(container.querySelectorAll("button")[1].disabled).toBe(true);
-    await act(async () =>
-      input.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }),
-      ),
-    );
+    await act(async () => input.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })));
     expect(input.value).toBe("29");
     await type("");
-    await act(async () =>
-      input.dispatchEvent(new FocusEvent("focusout", { bubbles: true })),
-    );
+    await act(async () => input.dispatchEvent(new FocusEvent("focusout", { bubbles: true })));
     expect(input.value).toBe("29");
   } finally {
     await act(async () => root.unmount());

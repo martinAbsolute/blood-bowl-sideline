@@ -1,18 +1,9 @@
 "use client";
-import {
-  createContext,
-  useContext,
-  useMemo,
-  useRef,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useMemo, useRef, type ReactNode } from "react";
 import { signInReturnPath } from "@/lib/draft-sign-in";
 
 type Prepare = () => string;
-type DraftSignIn = {
-  register: (prepare: Prepare) => () => void;
-  prepare: () => string;
-};
+type DraftSignIn = { register: (prepare: Prepare) => () => void; prepare: () => string };
 const Context = createContext<DraftSignIn | null>(null);
 
 export function DraftSignInProvider({ children }: { children: ReactNode }) {

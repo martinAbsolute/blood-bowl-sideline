@@ -13,10 +13,8 @@ import uk from "../src/i18n/uk.json";
 function translator(dictionary: typeof en) {
   return (key: string): string => {
     let value: unknown = dictionary;
-    for (const part of key.split("."))
-      value = (value as Record<string, unknown>)[part];
-    if (typeof value !== "string")
-      throw new Error(`Missing translation: ${key}`);
+    for (const part of key.split(".")) value = (value as Record<string, unknown>)[part];
+    if (typeof value !== "string") throw new Error(`Missing translation: ${key}`);
     return value;
   };
 }
@@ -25,9 +23,7 @@ it("duplicates independent player identities while preserving the captain and al
   const team = newTeam(randomUUID(), "orc");
   team.name = "A".repeat(TEAM_NAME_MAX_LENGTH);
   const captain = randomUUID();
-  team.players = [
-    { id: captain, positionId: "orc-0", name: "Captain", skills: ["block"] },
-  ];
+  team.players = [{ id: captain, positionId: "orc-0", name: "Captain", skills: ["block"] }];
   team.captainId = captain;
   team.staff.rerolls = 3;
   team.notes = "A game plan";
@@ -47,17 +43,10 @@ it("duplicates independent player identities while preserving the captain and al
 it("prints regular, additional and captain skills distinctly and escapes coach-entered text", () => {
   const team = newTeam(randomUUID(), "orc");
   team.name = "<script>alert('team')</script>";
-  const player = {
-    id: randomUUID(),
-    positionId: "orc-3",
-    name: "<img src=x>",
-    skills: ["tackle", "guard"],
-  };
+  const player = { id: randomUUID(), positionId: "orc-3", name: "<img src=x>", skills: ["tackle", "guard"] };
   team.players = [player];
   team.captainId = player.id;
-  const html = renderToStaticMarkup(
-    createElement(TeamPrint, { team, t: translator(en) }),
-  );
+  const html = renderToStaticMarkup(createElement(TeamPrint, { team, t: translator(en) }));
   expect(html).toContain("<span>Block</span>");
   expect(html).toContain('<span class="added">Guard</span>');
   expect(html.indexOf('<span class="added">Guard</span>')).toBeLessThan(
@@ -71,17 +60,13 @@ it("prints regular, additional and captain skills distinctly and escapes coach-e
   expect(html).not.toMatch(/<script|<img|<button|<input/);
   expect(html).toContain("&lt;script&gt;");
   expect(html).toContain(en.skillDescriptions.guard);
-  expect(html).toContain(
-    renderToStaticMarkup(createElement("p", null, en.skillDescriptions.pro)),
-  );
+  expect(html).toContain(renderToStaticMarkup(createElement("p", null, en.skillDescriptions.pro)));
 });
 
 it("omits owner names and obsolete notes from printouts in both languages", () => {
   const team = { ...newTeam(randomUUID()), notes: "Obsolete notes" };
   for (const dictionary of [en, uk]) {
-    const html = renderToStaticMarkup(
-      createElement(TeamPrint, { team, t: translator(dictionary) }),
-    );
+    const html = renderToStaticMarkup(createElement(TeamPrint, { team, t: translator(dictionary) }));
     expect(html).not.toContain("Obsolete notes");
     expect(html).not.toContain("Coach name");
     expect(html).not.toContain("Ім’я тренера");
@@ -105,23 +90,10 @@ describe.each([
       team.stars = stars.map((star) => star.id);
       const html = renderToStaticMarkup(createElement(TeamPrint, { team, t }));
       expect(html).not.toContain("undefined");
-      for (const id of new Set([
-        ...roster.players.flatMap((p) => p.skills),
-        ...stars.flatMap((s) => s.skills),
-      ])) {
+      for (const id of new Set([...roster.players.flatMap((p) => p.skills), ...stars.flatMap((s) => s.skills)])) {
+        expect(html).toContain(renderToStaticMarkup(createElement("strong", null, translatedSkillName(id, t))));
         expect(html).toContain(
-          renderToStaticMarkup(
-            createElement("strong", null, translatedSkillName(id, t)),
-          ),
-        );
-        expect(html).toContain(
-          renderToStaticMarkup(
-            createElement(
-              "p",
-              null,
-              t(`skillDescriptions.${id.split(":")[0]}`),
-            ),
-          ),
+          renderToStaticMarkup(createElement("p", null, t(`skillDescriptions.${id.split(":")[0]}`))),
         );
       }
     }
@@ -130,9 +102,7 @@ describe.each([
 
 it("omits empty panels and the skill legend, and puts team rules below the roster", () => {
   const t = translator(en);
-  const amazon = renderToStaticMarkup(
-    createElement(TeamPrint, { team: newTeam(randomUUID(), "amazon"), t }),
-  );
+  const amazon = renderToStaticMarkup(createElement(TeamPrint, { team: newTeam(randomUUID(), "amazon"), t }));
   expect(amazon).not.toContain(`<h3>${t("inducements")}</h3>`);
   expect(amazon).not.toContain(`<h3>${t("specialRules")}</h3>`);
   expect(amazon).not.toContain(t("printRules"));
@@ -148,18 +118,14 @@ it("omits empty panels and the skill legend, and puts team rules below the roste
   expect(orc).toContain("1 ×");
   expect(orc).not.toContain(`<h3>${t("specialRules")}</h3>`);
   expect(orc).not.toContain(t("printRules"));
-  expect(orc.indexOf('class="team-rules"')).toBeGreaterThan(
-    orc.indexOf("</table>"),
-  );
+  expect(orc.indexOf('class="team-rules"')).toBeGreaterThan(orc.indexOf("</table>"));
   expect(orc).toContain(en.teamSpecialRules.captain);
   expect(orc.split(en.teamSpecialRules.captain)).toHaveLength(2);
 });
 
 it("prints staff and inducement counts without their rules and limits the appendix to skills", () => {
   const team = newTeam(randomUUID(), "orc");
-  team.players = [
-    { id: randomUUID(), positionId: "orc-3", name: "", skills: ["guard"] },
-  ];
+  team.players = [{ id: randomUUID(), positionId: "orc-3", name: "", skills: ["guard"] }];
   team.staff.rerolls = 3;
   team.staff.apothecary = 1;
   team.inducements["blitzers-best-kegs"] = 1;
@@ -178,19 +144,14 @@ it("prints staff and inducement counts without their rules and limits the append
       ...Object.values(dictionary.staffDescriptions),
       ...Object.values(dictionary.inducementDescriptions),
     ]) {
-      expect(html).not.toContain(
-        renderToStaticMarkup(createElement("p", null, description)),
-      );
+      expect(html).not.toContain(renderToStaticMarkup(createElement("p", null, description)));
     }
   }
 });
 
 it("omits an empty skill appendix", () => {
   const html = renderToStaticMarkup(
-    createElement(TeamPrint, {
-      team: newTeam(randomUUID(), "amazon"),
-      t: translator(en),
-    }),
+    createElement(TeamPrint, { team: newTeam(randomUUID(), "amazon"), t: translator(en) }),
   );
   expect(html).not.toContain('class="reference"');
 });
@@ -202,63 +163,37 @@ it("uses A4, starts skills on a new page, and controls print margins in both ori
     expect(printStyles(orientation)).toContain("break-before: page");
     expect(printStyles(orientation)).toContain('@top-left { content: ""; }');
     expect(printStyles(orientation)).toContain('@top-right { content: ""; }');
-    expect(printStyles(orientation)).toContain(
-      'content: "sideline.com.ua | Blood Bowl Sideline."',
-    );
-    expect(printStyles(orientation)).toContain(
-      "border-collapse: separate; border-spacing: 0; border: 0.75pt solid;",
-    );
-    expect(printStyles(orientation)).toContain(
-      "border-right: 0.75pt solid; border-bottom: 0.75pt solid;",
-    );
+    expect(printStyles(orientation)).toContain('content: "sideline.com.ua | Blood Bowl Sideline."');
+    expect(printStyles(orientation)).toContain("border-collapse: separate; border-spacing: 0; border: 0.75pt solid;");
+    expect(printStyles(orientation)).toContain("border-right: 0.75pt solid; border-bottom: 0.75pt solid;");
     expect(printStyles(orientation)).toContain(
       ".rule { margin-bottom: 3mm; break-inside: avoid; page-break-inside: avoid; }",
     );
   }
-  expect(printStyles("landscape")).toContain(
-    "font-size: 9pt; line-height: 1.3;",
-  );
+  expect(printStyles("landscape")).toContain("font-size: 9pt; line-height: 1.3;");
 });
 
 it("prints star special rules before ordinary skills in both the roster and appendix", () => {
   const team = newTeam(randomUUID());
-  team.stars = [
-    stars.find((star) => star.skills.includes("mesmerising_dance"))!.id,
-  ];
-  const html = renderToStaticMarkup(
-    createElement(TeamPrint, { team, t: translator(en) }),
-  );
-  const row = html.slice(
-    html.indexOf("Eldril Sidewinder"),
-    html.indexOf("</tr>", html.indexOf("Eldril Sidewinder")),
-  );
+  team.stars = [stars.find((star) => star.skills.includes("mesmerising_dance"))!.id];
+  const html = renderToStaticMarkup(createElement(TeamPrint, { team, t: translator(en) }));
+  const row = html.slice(html.indexOf("Eldril Sidewinder"), html.indexOf("</tr>", html.indexOf("Eldril Sidewinder")));
   expect(row.indexOf("Mesmerising Dance")).toBeLessThan(row.indexOf(">Dodge<"));
   const appendix = html.slice(html.indexOf('class="reference"'));
-  expect(appendix.indexOf("Mesmerising Dance")).toBeLessThan(
-    appendix.indexOf(">Dodge<"),
-  );
+  expect(appendix.indexOf("Mesmerising Dance")).toBeLessThan(appendix.indexOf(">Dodge<"));
 });
 
-it.each(["portrait", "landscape"] as const)(
-  "prints names above muted designations in %s",
-  (orientation) => {
-    const team = newTeam(randomUUID(), "human");
-    team.players = ["Captain", "", "Human Lineman"].map((name) => ({
-      id: randomUUID(),
-      positionId: "human-0",
-      name,
-      skills: [],
-    }));
-    const html = renderToStaticMarkup(
-      createElement(TeamPrint, { team, t: translator(en) }),
-    );
-    expect(html).toContain(
-      '<div class="player-name">Captain</div><div class="player-designation">Human Lineman</div>',
-    );
-    expect(html.match(/class="player-designation"/g)).toHaveLength(1);
-    expect(printStyles(orientation)).toMatch(
-      /\.player-designation\s*\{[^}]*color: #777/,
-    );
-    expect(printStyles(orientation)).toContain("print-color-adjust: exact");
-  },
-);
+it.each(["portrait", "landscape"] as const)("prints names above muted designations in %s", (orientation) => {
+  const team = newTeam(randomUUID(), "human");
+  team.players = ["Captain", "", "Human Lineman"].map((name) => ({
+    id: randomUUID(),
+    positionId: "human-0",
+    name,
+    skills: [],
+  }));
+  const html = renderToStaticMarkup(createElement(TeamPrint, { team, t: translator(en) }));
+  expect(html).toContain('<div class="player-name">Captain</div><div class="player-designation">Human Lineman</div>');
+  expect(html.match(/class="player-designation"/g)).toHaveLength(1);
+  expect(printStyles(orientation)).toMatch(/\.player-designation\s*\{[^}]*color: #777/);
+  expect(printStyles(orientation)).toContain("print-color-adjust: exact");
+});

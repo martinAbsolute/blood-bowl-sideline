@@ -2,12 +2,7 @@
   "title": "Blood Bowl Термінологія – Draft 1.0",
   "url": "https://docs.google.com/spreadsheets/d/1bz-S0B6Il8RVcZUBpVBBQwDPgk9uAmfRwKPDLTz7ox0/edit",
   "retrievedOn": "2026-10-11",
-  "authors": [
-    "Михайло Чепель",
-    "Андрій Савич",
-    "Владислав Зінченко",
-    "Тарас Кашук"
-  ],
+  "authors": ["Михайло Чепель", "Андрій Савич", "Владислав Зінченко", "Тарас Кашук"],
   "snapshot": "community-glossary.json",
   "snapshotFormat": "All non-empty cells from all four sheets, including the disclaimer and contextual duplicates. Cell addresses and original spelling are preserved.",
   "termRows": 418,

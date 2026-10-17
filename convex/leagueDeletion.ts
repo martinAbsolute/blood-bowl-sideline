@@ -6,10 +6,7 @@ const BATCH_SIZE = 16;
 
 /** The parent league is removed first, so no new league writes can race this sweep. */
 export const sweep = internalMutation({
-  args: {
-    leagueId: v.id("leagues"),
-    teamIds: v.array(v.id("teams")),
-  },
+  args: { leagueId: v.id("leagues"), teamIds: v.array(v.id("teams")) },
   returns: v.null(),
   handler: async (ctx, args): Promise<null> => {
     const continueSweep = async () => {
@@ -26,8 +23,7 @@ export const sweep = internalMutation({
         .withIndex("by_matchId", (q) => q.eq("matchId", match._id))
         .take(BATCH_SIZE);
       if (playEvents.length) {
-        for (const row of playEvents)
-          await ctx.db.delete("leaguePlayEvents", row._id);
+        for (const row of playEvents) await ctx.db.delete("leaguePlayEvents", row._id);
         return continueSweep();
       }
       const matchPlayers = await ctx.db
@@ -35,8 +31,7 @@ export const sweep = internalMutation({
         .withIndex("by_matchId", (q) => q.eq("matchId", match._id))
         .take(BATCH_SIZE);
       if (matchPlayers.length) {
-        for (const row of matchPlayers)
-          await ctx.db.delete("leagueMatchPlayers", row._id);
+        for (const row of matchPlayers) await ctx.db.delete("leagueMatchPlayers", row._id);
         return continueSweep();
       }
       const matchEvents = await ctx.db
@@ -44,8 +39,7 @@ export const sweep = internalMutation({
         .withIndex("by_matchId", (q) => q.eq("matchId", match._id))
         .take(BATCH_SIZE);
       if (matchEvents.length) {
-        for (const row of matchEvents)
-          await ctx.db.delete("leagueMatchEvents", row._id);
+        for (const row of matchEvents) await ctx.db.delete("leagueMatchEvents", row._id);
         return continueSweep();
       }
       await ctx.db.delete("leagueMatches", match._id);
@@ -86,13 +80,10 @@ export const sweep = internalMutation({
     }
     const drafts = await ctx.db
       .query("teams")
-      .withIndex("by_draftLeagueId", (q) =>
-        q.eq("draftLeagueId", args.leagueId),
-      )
+      .withIndex("by_draftLeagueId", (q) => q.eq("draftLeagueId", args.leagueId))
       .take(BATCH_SIZE);
     if (drafts.length) {
-      for (const row of drafts)
-        await ctx.db.patch("teams", row._id, { draftLeagueId: undefined });
+      for (const row of drafts) await ctx.db.patch("teams", row._id, { draftLeagueId: undefined });
       return continueSweep();
     }
     for (const teamId of args.teamIds) {
@@ -101,9 +92,7 @@ export const sweep = internalMutation({
         .query("leagueTeams")
         .withIndex("by_teamId", (q) => q.eq("teamId", teamId))
         .first();
-      await ctx.db.patch("teams", teamId, {
-        leagueExperienced: otherEntry !== null,
-      });
+      await ctx.db.patch("teams", teamId, { leagueExperienced: otherEntry !== null });
     }
     return null;
   },

@@ -22,20 +22,14 @@ beforeEach(() => {
   vi.stubEnv("SITE_URL", "https://app.test");
   vi.stubEnv(
     "JWT_PRIVATE_KEY",
-    signingKey.privateKey
-      .export({ type: "pkcs8", format: "pem" })
-      .trimEnd()
-      .replace(/\n/g, " "),
+    signingKey.privateKey.export({ type: "pkcs8", format: "pem" }).trimEnd().replace(/\n/g, " "),
   );
 });
 afterEach(() => vi.unstubAllEnvs());
 
 async function signedSubject(subject: string) {
   const now = Math.floor(Date.now() / 1000);
-  return new SignJWT({
-    environment: "development",
-    deploymentName: "test-deployment-123",
-  })
+  return new SignJWT({ environment: "development", deploymentName: "test-deployment-123" })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuer("sideline-dev-auth")
     .setAudience("dev-impersonation")
@@ -51,16 +45,11 @@ describe("development impersonation backend", () => {
     const diagnostic = vi.fn();
     const importer = vi
       .spyOn(crypto.subtle, "importKey")
-      .mockRejectedValueOnce(
-        new DOMException(
-          `Private token ${token} and key ${secret}`,
-          "NotSupportedError",
-        ),
-      );
+      .mockRejectedValueOnce(new DOMException(`Private token ${token} and key ${secret}`, "NotSupportedError"));
     try {
-      await expect(
-        verifyDevImpersonationToken(token, process.env, diagnostic),
-      ).rejects.toMatchObject({ data: "INVALID_DEV_AUTH_TOKEN" });
+      await expect(verifyDevImpersonationToken(token, process.env, diagnostic)).rejects.toMatchObject({
+        data: "INVALID_DEV_AUTH_TOKEN",
+      });
       expect(diagnostic).toHaveBeenCalledExactlyOnceWith({
         name: "NotSupportedError",
         code: "DEV_AUTH_VERIFICATION_FAILED",
@@ -85,36 +74,24 @@ describe("development impersonation backend", () => {
       deploymentName: "test-deployment-123",
     });
     const first = await t.mutation(api.devAuth.ensureTestUsers, {});
-    expect(first.users.map((user) => user.name)).toEqual([
-      "Dev Coach A",
-      "Dev Coach B",
-    ]);
+    expect(first.users.map((user) => user.name)).toEqual(["Dev Coach A", "Dev Coach B"]);
     expect(await t.mutation(api.devAuth.ensureTestUsers, {})).toEqual(first);
     const stored = await t.run((ctx) => ctx.db.query("users").collect());
     expect(stored).toHaveLength(3);
     expect(
-      stored
-        .filter((user) => first.users.some((coach) => coach.id === user._id))
-        .every((user) => user.role === "user"),
+      stored.filter((user) => first.users.some((coach) => coach.id === user._id)).every((user) => user.role === "user"),
     ).toBe(true);
-    const firstPage = await t.query(api.devAuth.listUsers, {
-      paginationOpts: { numItems: 2, cursor: null },
-    });
+    const firstPage = await t.query(api.devAuth.listUsers, { paginationOpts: { numItems: 2, cursor: null } });
     const nextPage = await t.query(api.devAuth.listUsers, {
       paginationOpts: { numItems: 2, cursor: firstPage.continueCursor },
     });
     expect(firstPage.page).toHaveLength(2);
     expect([...firstPage.page, ...nextPage.page]).toHaveLength(3);
-    for (const user of [...firstPage.page, ...nextPage.page])
-      expect(Object.keys(user).sort()).toEqual(["id", "name"]);
-    await expect(
-      t.query(api.devAuth.listUsers, {
-        paginationOpts: { numItems: 31, cursor: null },
-      }),
-    ).rejects.toThrow("INVALID_INPUT");
-    expect(
-      await t.run((ctx) => ctx.db.query("authAccounts").collect()),
-    ).toHaveLength(0);
+    for (const user of [...firstPage.page, ...nextPage.page]) expect(Object.keys(user).sort()).toEqual(["id", "name"]);
+    await expect(t.query(api.devAuth.listUsers, { paginationOpts: { numItems: 31, cursor: null } })).rejects.toThrow(
+      "INVALID_INPUT",
+    );
+    expect(await t.run((ctx) => ctx.db.query("authAccounts").collect())).toHaveLength(0);
   });
 
   it.each(["disabled", "production", "wrong-deployment"])(
@@ -122,38 +99,25 @@ describe("development impersonation backend", () => {
     async (scenario) => {
       const t = convexTest(schema, modules);
       if (scenario === "disabled") vi.stubEnv("DEV_AUTH_ENABLED", "false");
-      if (scenario === "production")
-        vi.stubEnv("DEV_AUTH_DEPLOYMENT_TYPE", "prod");
-      if (scenario === "wrong-deployment")
-        vi.stubEnv(
-          "CONVEX_CLOUD_URL",
-          "https://production-target.convex.cloud",
-        );
+      if (scenario === "production") vi.stubEnv("DEV_AUTH_DEPLOYMENT_TYPE", "prod");
+      if (scenario === "wrong-deployment") vi.stubEnv("CONVEX_CLOUD_URL", "https://production-target.convex.cloud");
       expect(await t.query(api.devAuth.status, {})).toEqual({
         enabled: false,
         environment: null,
         deploymentName: null,
       });
-      await expect(
-        t.query(api.devAuth.listUsers, {
-          paginationOpts: { numItems: 10, cursor: null },
-        }),
-      ).rejects.toThrow("DEV_AUTH_DISABLED");
-      await expect(t.mutation(api.devAuth.ensureTestUsers, {})).rejects.toThrow(
+      await expect(t.query(api.devAuth.listUsers, { paginationOpts: { numItems: 10, cursor: null } })).rejects.toThrow(
         "DEV_AUTH_DISABLED",
       );
+      await expect(t.mutation(api.devAuth.ensureTestUsers, {})).rejects.toThrow("DEV_AUTH_DISABLED");
       await expect(
         t.action(api.auth.signIn, {
           provider: "dev-impersonation",
           params: { token: await signedSubject("untrusted-user") },
         }),
       ).rejects.toThrow("DEV_AUTH_DISABLED");
-      expect(
-        await t.run((ctx) => ctx.db.query("users").collect()),
-      ).toHaveLength(0);
-      expect(
-        await t.run((ctx) => ctx.db.query("authSessions").collect()),
-      ).toHaveLength(0);
+      expect(await t.run((ctx) => ctx.db.query("users").collect())).toHaveLength(0);
+      expect(await t.run((ctx) => ctx.db.query("authSessions").collect())).toHaveLength(0);
     },
   );
 
@@ -164,11 +128,7 @@ describe("development impersonation backend", () => {
     for (const user of users) {
       const result = await t.action(api.auth.signIn, {
         provider: "dev-impersonation",
-        params: {
-          token: await signedSubject(user.id),
-          userId: users[0].id,
-          role: "admin",
-        },
+        params: { token: await signedSubject(user.id), userId: users[0].id, role: "admin" },
       });
       expect(result.tokens?.token).toBeTruthy();
       expect(result.tokens?.refreshToken).toBeTruthy();
@@ -176,53 +136,29 @@ describe("development impersonation backend", () => {
       expect(claims.sub?.split("|")[0]).toBe(user.id);
       signedIn.push(t.withIdentity({ subject: claims.sub! }));
     }
-    expect(await signedIn[0].query(api.users.viewer, {})).toMatchObject({
-      id: users[0].id,
-      role: "user",
-    });
-    expect(await signedIn[1].query(api.users.viewer, {})).toMatchObject({
-      id: users[1].id,
-      role: "user",
-    });
+    expect(await signedIn[0].query(api.users.viewer, {})).toMatchObject({ id: users[0].id, role: "user" });
+    expect(await signedIn[1].query(api.users.viewer, {})).toMatchObject({ id: users[1].id, role: "user" });
     const team = newTeam(randomUUID());
     team.name = "Coach A team";
     await signedIn[0].mutation(api.teams.save, { team, expectedRevision: 0 });
-    expect(
-      await signedIn[0].query(api.teams.getByUuid, { uuid: team.uuid }),
-    ).toMatchObject({ canEdit: true });
-    expect(
-      await signedIn[1].query(api.teams.getByUuid, { uuid: team.uuid }),
-    ).toMatchObject({ canEdit: false });
+    expect(await signedIn[0].query(api.teams.getByUuid, { uuid: team.uuid })).toMatchObject({ canEdit: true });
+    expect(await signedIn[1].query(api.teams.getByUuid, { uuid: team.uuid })).toMatchObject({ canEdit: false });
     await expect(
-      signedIn[1].mutation(api.teams.save, {
-        team: { ...team, name: "Unauthorized edit" },
-        expectedRevision: 1,
-      }),
+      signedIn[1].mutation(api.teams.save, { team: { ...team, name: "Unauthorized edit" }, expectedRevision: 1 }),
     ).rejects.toThrow("FORBIDDEN");
-    const sessions = await t.run((ctx) =>
-      ctx.db.query("authSessions").collect(),
-    );
+    const sessions = await t.run((ctx) => ctx.db.query("authSessions").collect());
     expect(sessions).toHaveLength(2);
-    expect(new Set(sessions.map((session) => session.userId))).toEqual(
-      new Set(users.map((user) => user.id)),
-    );
+    expect(new Set(sessions.map((session) => session.userId))).toEqual(new Set(users.map((user) => user.id)));
     await signedIn[0].action(api.auth.signOut, {});
-    expect(
-      await t.run((ctx) => ctx.db.query("authSessions").collect()),
-    ).toHaveLength(1);
-    expect(await signedIn[1].query(api.users.viewer, {})).toMatchObject({
-      id: users[1].id,
-    });
+    expect(await t.run((ctx) => ctx.db.query("authSessions").collect())).toHaveLength(1);
+    expect(await signedIn[1].query(api.users.viewer, {})).toMatchObject({ id: users[1].id });
   });
 
   it("refuses unsigned actor overrides and nonexistent signed subjects without creating a session", async () => {
     const t = convexTest(schema, modules);
     const { users } = await t.mutation(api.devAuth.ensureTestUsers, {});
     await expect(
-      t.action(api.auth.signIn, {
-        provider: "dev-impersonation",
-        params: { userId: users[0].id, role: "admin" },
-      }),
+      t.action(api.auth.signIn, { provider: "dev-impersonation", params: { userId: users[0].id, role: "admin" } }),
     ).rejects.toThrow("INVALID_DEV_AUTH_TOKEN");
     await expect(
       t.action(api.auth.signIn, {
@@ -236,13 +172,8 @@ describe("development impersonation backend", () => {
       return id;
     });
     await expect(
-      t.action(api.auth.signIn, {
-        provider: "dev-impersonation",
-        params: { token: await signedSubject(removed) },
-      }),
+      t.action(api.auth.signIn, { provider: "dev-impersonation", params: { token: await signedSubject(removed) } }),
     ).rejects.toThrow("DEV_AUTH_USER_NOT_FOUND");
-    expect(
-      await t.run((ctx) => ctx.db.query("authSessions").collect()),
-    ).toHaveLength(0);
+    expect(await t.run((ctx) => ctx.db.query("authSessions").collect())).toHaveLength(0);
   });
 });

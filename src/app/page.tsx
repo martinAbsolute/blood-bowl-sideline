@@ -1,11 +1,7 @@
 import { TeamLibrary } from "@/components/team-library";
 import { homeTitle, pageMetadata, siteDescription } from "@/lib/site-metadata";
 
-const homeMetadata = pageMetadata(
-  "Blood Bowl Team Builder",
-  "/",
-  siteDescription,
-);
+const homeMetadata = pageMetadata("Blood Bowl Team Builder", "/", siteDescription);
 export const metadata = {
   ...homeMetadata,
   title: { absolute: homeTitle },

@@ -22,11 +22,7 @@ export function pageTitle(title: string) {
   return `${title.trim().replace(/[.。]+$/, "")}. ${siteName}`;
 }
 
-export function pageMetadata(
-  title: string,
-  path: string | undefined,
-  description: string,
-): Metadata {
+export function pageMetadata(title: string, path: string | undefined, description: string): Metadata {
   const shareTitle = pageTitle(title);
   return {
     title: title.trim().replace(/[.。]+$/, ""),
@@ -42,11 +38,6 @@ export function pageMetadata(
       alternateLocale: ["uk_UA"],
       images: [shareImage],
     },
-    twitter: {
-      card: "summary_large_image",
-      title: shareTitle,
-      description,
-      images: [shareImage],
-    },
+    twitter: { card: "summary_large_image", title: shareTitle, description, images: [shareImage] },
   };
 }

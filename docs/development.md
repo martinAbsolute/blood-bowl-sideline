@@ -33,20 +33,23 @@ Run it with `enabled: false` to restore the user role. This mutation is internal
 
 Next.js App Router, React, TypeScript, Tailwind CSS, shadcn/ui, and Magic UI power the frontend. Convex provides authentication and reactive persistence; `next-intl` provides local English and Ukrainian messages, ICU pluralization, and locale-aware formatting. The `bbs_locale` cookie stores the language preference; routes are shared across languages. Vercel Web Analytics and Speed Insights are mounted in the root layout.
 
-| Directory               | Purpose                                                             |
-| ----------------------- | ------------------------------------------------------------------- |
-| `src/app/`              | Routes, metadata, sitemap, robots, and application icons            |
-| `src/components/`       | Application UI and installed vendor components                      |
-| `src/domain/`           | Shared factual catalogs, costs, and roster validation               |
-| `src/lib/`              | Browser drafts, account synchronization, and utilities              |
-| `src/i18n/`             | English and Ukrainian dictionaries                                  |
-| `convex/`               | Telegram authentication, owner-scoped writes, and public team views |
-| `tests/`                | Rules, authentication, ownership, translations, and team flows      |
-| `docs/`                 | Rules provenance and component notes                                |
-| `public/brand/`         | Brand artwork                                                       |
-| `public/assets/fumbbl/` | Player artwork, source manifest, and attribution                    |
+| Directory         | Purpose                                                             |
+| ----------------- | ------------------------------------------------------------------- |
+| `src/app/`        | Routes, metadata, sitemap, robots, and application icons            |
+| `src/components/` | Application UI and installed vendor components                      |
+| `src/domain/`     | Shared factual catalogs, costs, and roster validation               |
+| `src/lib/`        | Browser drafts, account synchronization, and utilities              |
+| `src/i18n/`       | English and Ukrainian dictionaries                                  |
+| `convex/`         | Telegram authentication, owner-scoped writes, and public team views |
+| `tests/`          | Rules, authentication, ownership, translations, and team flows      |
+| `docs/`           | Rules provenance and component notes                                |
+| `public/brand/`   | Brand artwork                                                       |
+| `public/players/` | Player sprites                                                      |
+| `public/teams/`   | Team icons                                                          |
 
 Both the browser and backend compute costs and validate teams from the same catalog. Cloud writes require authenticated ownership. Public UUID views omit owner IDs and authentication records; archived teams hide their public links. Read [rules provenance](rules-sources.md) before changing factual data and [backend notes](../convex/README.md) before changing persistence.
+
+Keep temporary downloads, screenshots, and experiments in `.tmp/` and remove them when finished. Build and test caches are disposable; retain `.env.local`, `.vercel/`, and installed dependencies for local development.
 
 ## Deployment
 
@@ -68,7 +71,7 @@ Preview builds deploy an isolated Convex preview backend for the Git branch. Set
 
 Enable **Web Analytics** and **Speed Insights** for the Vercel project in its dashboard; the application already includes both SDKs. See Vercel's [Analytics setup](https://vercel.com/docs/analytics/quickstart) and [Speed Insights setup](https://vercel.com/docs/speed-insights/quickstart).
 
-GitHub Actions runs formatting, type checking, linting, tests, and a frontend build. To release, bump the version in `package.json` (shown in the footer), run the local checks, and push to `main`:
+GitHub Actions checks formatting, types, lint, and tests on pull requests and pushes to `main`. It uses Node.js 24 and the pnpm version pinned in `package.json`, caches dependencies, and cancels superseded runs. Tests use four workers locally and in CI. Vercel handles the build and Convex deployment; GitHub Actions needs no deployment credentials or production URLs. To release, bump the version in `package.json` (shown in the footer), run the local checks, and push to `main`:
 
 ```sh
 pnpm format:check

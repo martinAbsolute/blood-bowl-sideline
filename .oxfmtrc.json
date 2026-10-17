@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 120,
+  "objectWrap": "collapse",
+  "proseWrap": "never",
+  "ignorePatterns": [
+    ".agents/**",
+    ".codex/**",
+    "convex/_generated/**",
+    "src/components/ui/**",
+    "src/components/magic-ui/**",
+    "public/**",
+    "pnpm-lock.yaml",
+    "skills-lock.json",
+    "AGENTS.md"
+  ]
+}

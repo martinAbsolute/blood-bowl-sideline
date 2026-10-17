@@ -12,9 +12,7 @@ describe("verified BB2025 regular player profiles", () => {
   it("covers all 163 positions across all 31 rosters exactly once", () => {
     expect(rosters).toHaveLength(31);
     expect(audit.profiles).toHaveLength(163);
-    expect(audit.profiles.map((profile) => profile.id).sort()).toEqual(
-      players.map((player) => player.id).sort(),
-    );
+    expect(audit.profiles.map((profile) => profile.id).sort()).toEqual(players.map((player) => player.id).sort());
   });
 
   it.each(audit.profiles)(
@@ -35,14 +33,7 @@ describe("verified BB2025 regular player profiles", () => {
         .filter((player) => player.pa === "-")
         .map((player) => player.id)
         .sort(),
-    ).toEqual([
-      "dwarf-4",
-      "gnome-1",
-      "goblin-1",
-      "goblin-5",
-      "necromantic-horror-2",
-      "norse-1",
-    ]);
+    ).toEqual(["dwarf-4", "gnome-1", "goblin-1", "goblin-5", "necromantic-horror-2", "norse-1"]);
   });
 
   it("requires an armour target for every regular position", () => {
@@ -52,14 +43,10 @@ describe("verified BB2025 regular player profiles", () => {
   });
 
   it("matches independently captured reroll costs and apothecary access for every roster", () => {
-    expect(audit.teamProfiles.map(({ id }) => id).sort()).toEqual(
-      rosters.map(({ id }) => id).sort(),
-    );
+    expect(audit.teamProfiles.map(({ id }) => id).sort()).toEqual(rosters.map(({ id }) => id).sort());
     for (const { source, ...expected } of audit.teamProfiles) {
       expect(source).toMatch(/^https:\/\/bbtc.pl\/roster\/bb2025\//);
-      expect(rosters.find(({ id }) => id === expected.id)).toMatchObject(
-        expected,
-      );
+      expect(rosters.find(({ id }) => id === expected.id)).toMatchObject(expected);
     }
     expect(fumbbl.teamProfiles.map(({ id }) => id).sort()).toEqual(
       rosters
@@ -77,9 +64,7 @@ describe("verified BB2025 regular player profiles", () => {
   });
 
   it("covers all 159 FUMBBL positions and explicitly resolves every disagreement", () => {
-    const standardPlayers = players.filter(
-      (player) => !player.id.startsWith("slann-"),
-    );
+    const standardPlayers = players.filter((player) => !player.id.startsWith("slann-"));
     expect(fumbbl.profiles.map((profile) => profile.id).sort()).toEqual(
       standardPlayers.map((player) => player.id).sort(),
     );
@@ -90,9 +75,7 @@ describe("verified BB2025 regular player profiles", () => {
       for (const [field, value] of Object.entries(observed)) {
         const actual = player[field as keyof typeof player];
         const normalized = Array.isArray(actual) ? [...actual].sort() : actual;
-        const resolution = fumbbl.resolutions.find(
-          (entry) => entry.id === id && entry.field === field,
-        );
+        const resolution = fumbbl.resolutions.find((entry) => entry.id === id && entry.field === field);
         if (resolution) {
           expect(value).toEqual(resolution.observed);
           expect(normalized).toEqual(resolution.accepted);
@@ -104,9 +87,7 @@ describe("verified BB2025 regular player profiles", () => {
         }
       }
     }
-    expect(disagreements.sort()).toEqual(
-      fumbbl.resolutions.map(({ id, field }) => `${id}:${field}`).sort(),
-    );
+    expect(disagreements.sort()).toEqual(fumbbl.resolutions.map(({ id, field }) => `${id}:${field}`).sort());
     expect(disagreements).toHaveLength(12);
   });
 });

@@ -3,13 +3,7 @@
   "style": "base-nova",
   "rsc": true,
   "tsx": true,
-  "tailwind": {
-    "config": "",
-    "css": "src/app/globals.css",
-    "baseColor": "stone",
-    "cssVariables": true,
-    "prefix": ""
-  },
+  "tailwind": { "config": "", "css": "src/app/globals.css", "baseColor": "stone", "cssVariables": true, "prefix": "" },
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",

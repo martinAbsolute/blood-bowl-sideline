@@ -2,20 +2,14 @@ import type { OIDCConfig } from "@auth/core/providers";
 import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from "jose";
 import { z } from "zod";
 export const TELEGRAM_ISSUER = "https://oauth.telegram.org";
-const telegramKeys = createRemoteJWKSet(
-  new URL(`${TELEGRAM_ISSUER}/.well-known/jwks.json`),
-);
+const telegramKeys = createRemoteJWKSet(new URL(`${TELEGRAM_ISSUER}/.well-known/jwks.json`));
 const profileSchema = z.object({
   sub: z.string().min(1).max(200),
   name: z.string().max(200).optional(),
   preferred_username: z.string().optional(),
   picture: z.url().optional(),
 });
-export async function verifyTelegramIdToken(
-  token: string,
-  clientId: string,
-  keySet: JWTVerifyGetKey = telegramKeys,
-) {
+export async function verifyTelegramIdToken(token: string, clientId: string, keySet: JWTVerifyGetKey = telegramKeys) {
   const { payload } = await jwtVerify(token, keySet, {
     issuer: TELEGRAM_ISSUER,
     audience: clientId,
@@ -28,9 +22,7 @@ export async function verifyTelegramIdToken(
   return {
     id: p.sub,
     name: p.name ?? "Telegram coach",
-    ...(username && /^[A-Za-z0-9_]{1,32}$/.test(username)
-      ? { telegramUsername: username }
-      : {}),
+    ...(username && /^[A-Za-z0-9_]{1,32}$/.test(username) ? { telegramUsername: username } : {}),
     ...(p.picture ? { image: p.picture } : {}),
   };
 }
@@ -52,10 +44,7 @@ export function telegramProvider(): OIDCConfig<Record<string, unknown>> {
         throw new Error("Telegram OIDC credentials are not configured");
       // Convex Auth checks the code, PKCE, state, and OIDC claims. Independently
       // verify Telegram's signature before projecting any profile into a user.
-      return verifyTelegramIdToken(
-        tokens.id_token,
-        process.env.TELEGRAM_CLIENT_ID,
-      );
+      return verifyTelegramIdToken(tokens.id_token, process.env.TELEGRAM_CLIENT_ID);
     },
   };
 }

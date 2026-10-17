@@ -35,32 +35,21 @@ import { LoginButton } from "./site-shell";
 import { LeagueError, LeagueStatus, useLeagueAction } from "./league-ui";
 import { Dialog } from "./dialog";
 
-import {
-  LeagueDialogBody,
-  LeagueDialogContent,
-  LeagueDialogFooter,
-  LeagueDialogHeader,
-} from "./league-dialog";
+import { LeagueDialogBody, LeagueDialogContent, LeagueDialogFooter, LeagueDialogHeader } from "./league-dialog";
 
 export function LeaguesPage() {
   const t = useTranslations();
   const format = useFormatter();
   const router = useRouter();
   const { isAuthenticated, isLoading } = useConvexAuth();
-  const { results, status, loadMore } = usePaginatedQuery(
-    api.leagues.list,
-    {},
-    { initialNumItems: 12 },
-  );
+  const { results, status, loadMore } = usePaginatedQuery(api.leagues.list, {}, { initialNumItems: 12 });
   const create = useMutation(api.leagues.create);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const visible = results.filter(
     (league) =>
       (filter === "all" || league.status === filter) &&
-      `${league.name} ${league.commissionerName}`
-        .toLocaleLowerCase()
-        .includes(search.trim().toLocaleLowerCase()),
+      `${league.name} ${league.commissionerName}`.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()),
   );
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
@@ -69,8 +58,7 @@ export function LeaguesPage() {
   const [roundDays, setRoundDays] = useState(14);
   const action = useLeagueAction();
   const busy = action.busy;
-  const treasuryValid =
-    treasury >= 100_000 && treasury <= 10_000_000 && treasury % 5_000 === 0;
+  const treasuryValid = treasury >= 100_000 && treasury <= 10_000_000 && treasury % 5_000 === 0;
   async function createLeague(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!name.trim() || !treasuryValid) return;
@@ -116,10 +104,7 @@ export function LeaguesPage() {
             description={t("leagueUx.createNext")}
             icon={<Trophy className="size-5" />}
           />
-          <form
-            onSubmit={createLeague}
-            className="flex min-h-0 flex-1 flex-col"
-          >
+          <form onSubmit={createLeague} className="flex min-h-0 flex-1 flex-col">
             <LeagueDialogBody>
               <LeagueField>
                 {t("leagueName")}
@@ -137,11 +122,7 @@ export function LeaguesPage() {
               <LeagueError message={action.error} />
               <fieldset disabled={busy} className="space-y-4">
                 <div className="grid items-end gap-4 sm:grid-cols-2">
-                  <LeagueDatePicker
-                    value={startDate}
-                    onChange={setStartDate}
-                    disabled={busy}
-                  />
+                  <LeagueDatePicker value={startDate} onChange={setStartDate} disabled={busy} />
                   <LeagueNumber
                     label={t("leagueRoundDays")}
                     min={1}
@@ -169,10 +150,7 @@ export function LeaguesPage() {
                         const formatted = input.value;
                         let cursor = 0;
                         let seen = 0;
-                        while (
-                          cursor < formatted.length &&
-                          seen < digitsBeforeCursor
-                        ) {
+                        while (cursor < formatted.length && seen < digitsBeforeCursor) {
                           if (/\d/.test(formatted[cursor])) seen++;
                           cursor++;
                         }
@@ -184,32 +162,17 @@ export function LeaguesPage() {
                     aria-describedby="treasury-hint"
                   />
                 </LeagueField>
-                <p
-                  id="treasury-hint"
-                  className="-mt-3 text-xs leading-relaxed text-muted-foreground"
-                >
+                <p id="treasury-hint" className="-mt-3 text-xs leading-relaxed text-muted-foreground">
                   {t("leagueUx.treasuryHint")}
                 </p>
               </fieldset>
             </LeagueDialogBody>
             <LeagueDialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={busy}
-                onClick={() => setCreating(false)}
-              >
+              <Button type="button" variant="outline" disabled={busy} onClick={() => setCreating(false)}>
                 {t("cancel")}
               </Button>
-              <Button
-                type="submit"
-                disabled={busy || !name.trim() || !treasuryValid}
-              >
-                {busy ? (
-                  <LoaderCircle className="size-4 animate-spin" />
-                ) : (
-                  <Plus className="size-4" />
-                )}
+              <Button type="submit" disabled={busy || !name.trim() || !treasuryValid}>
+                {busy ? <LoaderCircle className="size-4 animate-spin" /> : <Plus className="size-4" />}
                 {t("leagueCreate")}
               </Button>
             </LeagueDialogFooter>
@@ -237,51 +200,22 @@ export function LeaguesPage() {
             value={filter}
             onChange={setFilter}
             items={[
-              {
-                value: "all",
-                label: t("leagueUx.allSeasons"),
-                icon: LayoutList,
-              },
-              {
-                value: "registration",
-                label: t("leagueStatus.registration"),
-                icon: Flag,
-              },
-              {
-                value: "active",
-                label: t("leagueStatus.active"),
-                icon: Trophy,
-              },
-              {
-                value: "completed",
-                label: t("leagueStatus.completed"),
-                icon: Archive,
-              },
+              { value: "all", label: t("leagueUx.allSeasons"), icon: LayoutList },
+              { value: "registration", label: t("leagueStatus.registration"), icon: Flag },
+              { value: "active", label: t("leagueStatus.active"), icon: Trophy },
+              { value: "completed", label: t("leagueStatus.completed"), icon: Archive },
             ]}
           />
           <div className="hidden border-t pt-4 lg:block">
-            <p className="text-xs font-medium">
-              {t("leagueUx.gettingStarted")}
-            </p>
+            <p className="text-xs font-medium">{t("leagueUx.gettingStarted")}</p>
             <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              {t(
-                isAuthenticated
-                  ? "leagueUx.directoryHint"
-                  : "leagueUx.directorySignIn",
-              )}
+              {t(isAuthenticated ? "leagueUx.directoryHint" : "leagueUx.directorySignIn")}
             </p>
           </div>
           <details className="border-t pt-4">
-            <summary className="cursor-pointer text-xs font-medium">
-              {t("leagueUx.affiliations")}
-            </summary>
-            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              {t("leagueUx.affiliationsHint")}
-            </p>
-            <nav
-              aria-label={t("leagueUx.affiliations")}
-              className="mt-2 flex flex-col gap-1"
-            >
+            <summary className="cursor-pointer text-xs font-medium">{t("leagueUx.affiliations")}</summary>
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{t("leagueUx.affiliationsHint")}</p>
+            <nav aria-label={t("leagueUx.affiliations")} className="mt-2 flex flex-col gap-1">
               {leagues.map((league) => (
                 <Link
                   key={league}
@@ -298,17 +232,10 @@ export function LeaguesPage() {
         <section aria-labelledby="league-directory-title" className="min-w-0">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h2 id="league-directory-title" className="text-sm font-semibold">
-              {t(
-                filter === "all"
-                  ? "leagueUx.directoryTitle"
-                  : `leagueStatus.${filter}`,
-              )}
+              {t(filter === "all" ? "leagueUx.directoryTitle" : `leagueStatus.${filter}`)}
             </h2>
             {status !== "LoadingFirstPage" && (
-              <span
-                role="status"
-                className="text-xs tabular-nums text-muted-foreground"
-              >
+              <span role="status" className="text-xs tabular-nums text-muted-foreground">
                 {t("leagueUx.leaguesShown", { count: visible.length })}
               </span>
             )}
@@ -334,10 +261,7 @@ export function LeaguesPage() {
           ) : (
             <div className="grid gap-4 xl:grid-cols-2">
               {visible.map((league) => (
-                <article
-                  key={league._id}
-                  className="overflow-hidden rounded-lg border bg-card"
-                >
+                <article key={league._id} className="overflow-hidden rounded-lg border bg-card">
                   <Link
                     href={`/leagues/manage/${league._id}`}
                     className="group block min-w-0 transition-colors hover:bg-secondary/20 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
@@ -351,13 +275,9 @@ export function LeaguesPage() {
                         <Trophy className="size-5" aria-hidden="true" />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <h3 className="display-font break-words text-xl leading-tight">
-                          {league.name}
-                        </h3>
+                        <h3 className="display-font break-words text-xl leading-tight">{league.name}</h3>
                         <p className="mt-1 text-xs text-white/75">
-                          {t("leagueUx.organizedBy", {
-                            name: league.commissionerName,
-                          })}
+                          {t("leagueUx.organizedBy", { name: league.commissionerName })}
                         </p>
                         <div className="mt-3 w-fit rounded-md bg-card">
                           <LeagueStatus status={league.status} />
@@ -371,30 +291,19 @@ export function LeaguesPage() {
                     <dl className="flex flex-wrap gap-x-5 gap-y-2 border-t bg-secondary/25 px-4 py-2.5 text-xs text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <CalendarDays className="size-4 text-muted-foreground" />
-                        <dt className="sr-only">
-                          {t("leagueUx.plannedStart")}
-                        </dt>
+                        <dt className="sr-only">{t("leagueUx.plannedStart")}</dt>
                         <dd>{format.dateTime(league.startAt, "medium")}</dd>
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock3 className="size-4 text-muted-foreground" />
                         <dt className="sr-only">{t("leagueRoundDays")}</dt>
-                        <dd>
-                          {t("leagueUx.roundDuration", {
-                            days: league.roundDays,
-                          })}
-                        </dd>
+                        <dd>{t("leagueUx.roundDuration", { days: league.roundDays })}</dd>
                       </div>
                       <div className="flex items-center gap-2">
                         <Coins className="size-4 text-muted-foreground" />
-                        <dt className="text-muted-foreground">
-                          {t("leagueUi.treasury")}
-                        </dt>
+                        <dt className="text-muted-foreground">{t("leagueUi.treasury")}</dt>
                         <dd>
-                          {format.number(
-                            league.startingTreasury ?? DEFAULT_LEAGUE_TREASURY,
-                            "integer",
-                          )}{" "}
+                          {format.number(league.startingTreasury ?? DEFAULT_LEAGUE_TREASURY, "integer")}{" "}
                           {t("leagueUx.goldUnit")}
                         </dd>
                       </div>
@@ -407,11 +316,7 @@ export function LeaguesPage() {
                   <LeagueEmptyState
                     icon={<Search className="size-6" />}
                     title={t("leagueUx.noSearchResults")}
-                    description={
-                      status !== "Exhausted"
-                        ? t("leagueUx.loadedSeasonsHint")
-                        : undefined
-                    }
+                    description={status !== "Exhausted" ? t("leagueUx.loadedSeasonsHint") : undefined}
                     action={
                       <Button
                         variant="outline"
@@ -429,23 +334,12 @@ export function LeaguesPage() {
             </div>
           )}
           {(search || filter !== "all") && status !== "Exhausted" && (
-            <p className="mt-3 text-xs text-muted-foreground">
-              {t("leagueUx.loadedSeasonsHint")}
-            </p>
+            <p className="mt-3 text-xs text-muted-foreground">{t("leagueUx.loadedSeasonsHint")}</p>
           )}
           {status === "CanLoadMore" || status === "LoadingMore" ? (
             <div className="mt-6 text-center">
-              <Button
-                variant="outline"
-                disabled={status === "LoadingMore"}
-                onClick={() => loadMore(12)}
-              >
-                {status === "LoadingMore" && (
-                  <LoaderCircle
-                    className="size-4 animate-spin"
-                    aria-hidden="true"
-                  />
-                )}
+              <Button variant="outline" disabled={status === "LoadingMore"} onClick={() => loadMore(12)}>
+                {status === "LoadingMore" && <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />}
                 {t(status === "LoadingMore" ? "loading" : "leagueUi.loadMore")}
               </Button>
             </div>

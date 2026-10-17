@@ -8,19 +8,13 @@ describe("switching team type", () => {
     const empty = newTeam(uuid);
     expect(hasTeamProgress(empty)).toBe(false);
     expect(hasTeamProgress({ ...empty, notes: "Obsolete notes" })).toBe(false);
-    expect(hasTeamProgress({ ...empty, rulesetId: "eurobowl-2026" })).toBe(
-      false,
-    );
+    expect(hasTeamProgress({ ...empty, rulesetId: "eurobowl-2026" })).toBe(false);
     for (const update of [
       { name: "My team" },
       { staff: { ...empty.staff, rerolls: 1 } },
       { inducements: { bribes: 1 } },
       { stars: ["akhorne"] },
-      {
-        players: [
-          { id: uuid, positionId: "human-lineman", name: "", skills: [] },
-        ],
-      },
+      { players: [{ id: uuid, positionId: "human-lineman", name: "", skills: [] }] },
       { favouredOf: "Nurgle" as const },
     ])
       expect(hasTeamProgress({ ...empty, ...update })).toBe(true);
@@ -32,22 +26,12 @@ describe("switching team type", () => {
       notes: "Notes",
       rulesetId: "eurobowl-2026" as const,
       captainId: uuid,
-      players: [
-        {
-          id: uuid,
-          positionId: "human-lineman",
-          name: "Captain",
-          skills: ["block"],
-        },
-      ],
+      players: [{ id: uuid, positionId: "human-lineman", name: "Captain", skills: ["block"] }],
       stars: ["akhorne"],
       inducements: { bribes: 1 },
       staff: { ...newTeam(uuid).staff, rerolls: 2 },
     };
-    expect(resetTeamRoster(team, "goblin")).toEqual({
-      ...newTeam(uuid, "goblin"),
-      rulesetId: team.rulesetId,
-    });
+    expect(resetTeamRoster(team, "goblin")).toEqual({ ...newTeam(uuid, "goblin"), rulesetId: team.rulesetId });
     const newUuid = "a64d2f78-0c09-41ec-bf40-e3ad14c5fb1a";
     expect(resetTeamRoster(team, "goblin", newUuid).uuid).toBe(newUuid);
     expect(team.uuid).toBe(uuid);

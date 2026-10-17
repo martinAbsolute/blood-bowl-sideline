@@ -3,17 +3,7 @@
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { FunctionReturnType } from "convex/server";
-import {
-  ChevronRight,
-  Plus,
-  Pencil,
-  Trash2,
-  Check,
-  ListOrdered,
-  Users,
-  HeartPulse,
-  X,
-} from "lucide-react";
+import { ChevronRight, Plus, Pencil, Trash2, Check, ListOrdered, Users, HeartPulse, X } from "lucide-react";
 import { api } from "../../convex/_generated/api";
 import { casualtyOutcome } from "@/domain/league-rules";
 import {
@@ -25,45 +15,20 @@ import {
   sortMatchEvents,
   type MatchEvent,
 } from "@/domain/match-events";
-import {
-  snapshotPlayerNumber,
-  leaguePlayerLabel,
-} from "@/lib/league-player-label";
+import { snapshotPlayerNumber, leaguePlayerLabel } from "@/lib/league-player-label";
 import { useBeforeUnload } from "@/lib/use-before-unload";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "./dialog";
-import {
-  LeagueDialogBody,
-  LeagueDialogContent,
-  LeagueDialogFooter,
-  LeagueDialogHeader,
-} from "./league-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./dialog";
+import { LeagueDialogBody, LeagueDialogContent, LeagueDialogFooter, LeagueDialogHeader } from "./league-dialog";
 import { LeagueField, LeagueSelect } from "./league-field";
 import { PlayerIcon } from "./player-icon";
 import { TableSkills, SkillList } from "./skill-box";
 import { positionLabel } from "./position-name";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "./ui/table";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "./ui/table";
 
 type Data = FunctionReturnType<typeof api.leagues.getMatch>;
-type Save = (
-  event: MatchEvent,
-  version: number,
-  deleted?: boolean,
-) => Promise<boolean>;
+type Save = (event: MatchEvent, version: number, deleted?: boolean) => Promise<boolean>;
 
 export function LeagueEvents({
   data,
@@ -84,47 +49,32 @@ export function LeagueEvents({
 }) {
   const t = useTranslations();
   const [tab, setTab] = useState<"timeline" | "roster">("timeline");
-  const [side, setSide] = useState(
-    data.away?.coachId === data.viewerId ? data.away._id : data.home._id,
-  );
+  const [side, setSide] = useState(data.away?.coachId === data.viewerId ? data.away._id : data.home._id);
   const [search, setSearch] = useState("");
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
-  const [editing, setEditing] = useState<{
-    event: MatchEvent;
-    version: number;
-  } | null>(null);
+  const [editing, setEditing] = useState<{ event: MatchEvent; version: number } | null>(null);
   const selected = data.players.find((row) => row.playerId === selectedPlayer);
   const ledger = data.playEvents;
   const events = sortMatchEvents(ledger.map((row) => row.event));
   const label = (id: string) => {
     const row = data.players.find((player) => player.playerId === id);
     if (!row) return t("player");
-    const teammates = data.players.filter(
-      (player) => player.entryId === row.entryId,
-    );
+    const teammates = data.players.filter((player) => player.entryId === row.entryId);
     return leaguePlayerLabel(
       row.name,
       positionLabel(row.snapshot.positionName),
       snapshotPlayerNumber(
         row.sourcePlayerId,
-        row.entryId === data.home._id
-          ? data.match.homeSnapshot?.players
-          : data.match.awaySnapshot?.players,
+        row.entryId === data.home._id ? data.match.homeSnapshot?.players : data.match.awaySnapshot?.players,
         teammates.indexOf(row) + 1,
       ),
     );
   };
   function open(
-    event = newMatchEvent(
-      data.players.find((row) => row.entryId === side && row.participated)
-        ?.playerId,
-    ),
+    event = newMatchEvent(data.players.find((row) => row.entryId === side && row.participated)?.playerId),
     version = 0,
   ) {
-    setEditing({
-      event: { ...event, id: event.id || crypto.randomUUID() },
-      version,
-    });
+    setEditing({ event: { ...event, id: event.id || crypto.randomUUID() }, version });
     onDraftChange(true);
   }
   function close() {
@@ -134,9 +84,7 @@ export function LeagueEvents({
   const spp = (id: string) => {
     const row = data.players.find((player) => player.playerId === id)!;
     return Object.entries(row.stats).reduce(
-      (sum, [key, count]) =>
-        sum +
-        count * (row.snapshot.sppRates?.[key as keyof typeof row.stats] ?? 0),
+      (sum, [key, count]) => sum + count * (row.snapshot.sppRates?.[key as keyof typeof row.stats] ?? 0),
       0,
     );
   };
@@ -144,28 +92,15 @@ export function LeagueEvents({
     const actor = label(event.playerId),
       target = event.targetId ? label(event.targetId) : "";
     if (event.kind === "casualty") {
-      const original = casualtyOutcome(
-        event.casualtyRoll!,
-        event.lastingRoll ?? undefined,
-      );
+      const original = casualtyOutcome(event.casualtyRoll!, event.lastingRoll ?? undefined);
       return event.targetId
-        ? t("matchEvents.sentences.casualty", {
-            actor,
-            target,
-            injury: t(`matchEvents.injuries.${original.result}`),
-          })
-        : t("matchEvents.sentences.injury", {
-            actor,
-            injury: t(`matchEvents.injuries.${original.result}`),
-          });
+        ? t("matchEvents.sentences.casualty", { actor, target, injury: t(`matchEvents.injuries.${original.result}`) })
+        : t("matchEvents.sentences.injury", { actor, injury: t(`matchEvents.injuries.${original.result}`) });
     }
     return t(`matchEvents.sentences.${event.kind}`, { actor, target });
   };
   return (
-    <section
-      className="overflow-hidden rounded-lg border bg-card"
-      aria-label={t("matchEvents.timeline")}
-    >
+    <section className="overflow-hidden rounded-lg border bg-card" aria-label={t("matchEvents.timeline")}>
       <div className="flex flex-wrap items-center justify-between gap-2 border-b bg-secondary/35 px-4 py-3">
         {review ? (
           <h2 className="text-sm font-semibold">{t("matchEvents.review")}</h2>
@@ -179,16 +114,10 @@ export function LeagueEvents({
                 aria-pressed={tab === value}
                 onClick={() => setTab(value)}
               >
-                {value === "timeline" ? (
-                  <ListOrdered className="size-4" />
-                ) : (
-                  <Users className="size-4" />
-                )}
+                {value === "timeline" ? <ListOrdered className="size-4" /> : <Users className="size-4" />}
                 {t(`matchEvents.${value}`)}
                 {value === "timeline" && (
-                  <span className="font-mono text-xs text-muted-foreground">
-                    {events.length}
-                  </span>
+                  <span className="font-mono text-xs text-muted-foreground">{events.length}</span>
                 )}
               </Button>
             ))}
@@ -205,26 +134,21 @@ export function LeagueEvents({
         <div className="grid grid-cols-1 divide-y border-b sm:grid-cols-2 sm:divide-x sm:divide-y-0">
           {[data.home, data.away].map((entry) => {
             if (!entry) return null;
-            const players = data.players.filter(
-              (row) => row.entryId === entry._id,
-            );
+            const players = data.players.filter((row) => row.entryId === entry._id);
             const mvp = players.find((row) => row.stats.mvp);
             return (
               <div key={entry._id} className="space-y-1 px-3 py-2 text-xs">
                 <p className="font-semibold">{entry.team.name}</p>
                 <p className="flex flex-wrap gap-x-3 text-muted-foreground">
                   <span className="font-mono text-primary">
-                    +{players.reduce((sum, row) => sum + spp(row.playerId), 0)}{" "}
-                    SPP
+                    +{players.reduce((sum, row) => sum + spp(row.playerId), 0)} SPP
                   </span>
                   <span>
-                    {t("leagueUi.stats.sppCas")}:{" "}
-                    {players.reduce((sum, row) => sum + row.stats.sppCas, 0)}
+                    {t("leagueUi.stats.sppCas")}: {players.reduce((sum, row) => sum + row.stats.sppCas, 0)}
                   </span>
                 </p>
                 <p className={mvp ? "text-muted-foreground" : "text-amber-700"}>
-                  MVP ·{" "}
-                  {mvp ? label(mvp.playerId) : t("matchEvents.notRecorded")}
+                  MVP · {mvp ? label(mvp.playerId) : t("matchEvents.notRecorded")}
                 </p>
               </div>
             );
@@ -240,9 +164,7 @@ export function LeagueEvents({
             <div className="flex flex-col items-center gap-3 px-4 py-10 text-center">
               <ListOrdered className="size-7 text-muted-foreground" />
               <p className="text-sm font-medium">{t("matchEvents.empty")}</p>
-              <p className="max-w-sm text-xs text-muted-foreground">
-                {t("matchEvents.emptyHint")}
-              </p>
+              <p className="max-w-sm text-xs text-muted-foreground">{t("matchEvents.emptyHint")}</p>
               {editable && (
                 <Button size="sm" variant="outline" onClick={() => open()}>
                   {t("matchEvents.addFirst")}
@@ -253,11 +175,8 @@ export function LeagueEvents({
             <ol className="space-y-3 p-3 sm:p-4">
               {events.map((event, index) => {
                 const row = ledger.find((row) => row.event.id === event.id)!;
-                const player = data.players.find(
-                  (player) => player.playerId === event.playerId,
-                )!;
-                const injury =
-                  event.kind === "casualty" ? resolvedCasualty(event) : null;
+                const player = data.players.find((player) => player.playerId === event.playerId)!;
+                const injury = event.kind === "casualty" ? resolvedCasualty(event) : null;
                 const rate = player.snapshot.sppRates;
                 const earned =
                   event.kind === "touchdown"
@@ -274,10 +193,7 @@ export function LeagueEvents({
                               ? rate?.superbThrows
                               : 0;
                 return (
-                  <li
-                    key={event.id}
-                    className="flex items-start gap-3 rounded-lg border bg-secondary/10 p-3"
-                  >
+                  <li key={event.id} className="flex items-start gap-3 rounded-lg border bg-secondary/10 p-3">
                     <span
                       className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md border bg-card font-mono text-[10px] text-muted-foreground"
                       title={t("matchEvents.order")}
@@ -289,11 +205,7 @@ export function LeagueEvents({
                         <span className="font-semibold uppercase tracking-wide">
                           {t(`matchEvents.kinds.${event.kind}`)}
                         </span>
-                        <span>
-                          {player.entryId === data.home._id
-                            ? data.home.team.name
-                            : data.away?.team.name}
-                        </span>
+                        <span>{player.entryId === data.home._id ? data.home.team.name : data.away?.team.name}</span>
                         <span>
                           {event.kind === "mvp"
                             ? t("matchEvents.fullTime")
@@ -302,46 +214,26 @@ export function LeagueEvents({
                               : `${t("matchEvents.half")} ${event.half}${event.turn === null ? "" : ` · ${t("matchEvents.turn")} ${event.turn}`}`}
                         </span>
                       </div>
-                      <p className="break-words text-sm font-medium leading-5">
-                        {description(event)}
-                      </p>
+                      <p className="break-words text-sm font-medium leading-5">{description(event)}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                        {!!earned && (
-                          <span className="font-mono font-semibold text-primary">
-                            +{earned} SPP
-                          </span>
-                        )}
+                        {!!earned && <span className="font-mono font-semibold text-primary">+{earned} SPP</span>}
                         {event.kind === "throw-team-mate" && (
                           <span className="text-primary">
                             {label(event.targetId!)} +1 SPP ·{" "}
-                            {t(
-                              event.superb
-                                ? "matchEvents.superb"
-                                : "matchEvents.notSuperb",
-                            )}
+                            {t(event.superb ? "matchEvents.superb" : "matchEvents.notSuperb")}
                           </span>
                         )}
                         {injury && (
                           <span className="contents">
                             <span>
-                              {t(`matchEvents.causes.${event.cause}`)} ·{" "}
-                              {t("matchEvents.roll")} {event.casualtyRoll}
+                              {t(`matchEvents.causes.${event.cause}`)} · {t("matchEvents.roll")} {event.casualtyRoll}
                             </span>
-                            <span
-                              className={
-                                injury.outcome.dead && !injury.recovered
-                                  ? "text-destructive"
-                                  : ""
-                              }
-                            >
+                            <span className={injury.outcome.dead && !injury.recovered ? "text-destructive" : ""}>
                               {t("matchEvents.finalOutcome")}:{" "}
                               {injury.recovered
                                 ? t("matchEvents.recovered")
-                                : t(
-                                    `matchEvents.injuries.${injury.outcome.result}`,
-                                  )}
-                              {!injury.recovered &&
-                              injury.outcome.characteristicReduction
+                                : t(`matchEvents.injuries.${injury.outcome.result}`)}
+                              {!injury.recovered && injury.outcome.characteristicReduction
                                 ? ` · ${injury.outcome.characteristicReduction.toUpperCase()}`
                                 : ""}
                             </span>
@@ -354,26 +246,13 @@ export function LeagueEvents({
                               : t("matchEvents.noApothecary")}
                           </span>
                         )}
-                        {event.kind === "knockout" && event.apothecary && (
-                          <span>{t("matchEvents.koApothecary")}</span>
-                        )}
+                        {event.kind === "knockout" && event.apothecary && <span>{t("matchEvents.koApothecary")}</span>}
                         {event.regeneration !== "not-used" && (
-                          <span>
-                            {t(
-                              `matchEvents.regeneration.${event.regeneration}`,
-                            )}
-                          </span>
+                          <span>{t(`matchEvents.regeneration.${event.regeneration}`)}</span>
                         )}
-                        {event.kind === "casualty" &&
-                          event.cause !== "block" && (
-                            <span>{t("matchEvents.noSpp")}</span>
-                          )}
+                        {event.kind === "casualty" && event.cause !== "block" && <span>{t("matchEvents.noSpp")}</span>}
                       </div>
-                      {event.notes && (
-                        <p className="mt-1 break-words text-xs text-muted-foreground">
-                          {event.notes}
-                        </p>
-                      )}
+                      {event.notes && <p className="mt-1 break-words text-xs text-muted-foreground">{event.notes}</p>}
                       <p className="mt-1 text-[10px] text-muted-foreground">
                         {t("matchEvents.recordedBy", { name: row.actorName })}
                       </p>
@@ -420,29 +299,19 @@ export function LeagueEvents({
               onChange={(event) => setSearch(event.target.value)}
             />
           </div>
-          <Table
-            aria-label={t("players")}
-            className="player-table min-w-[740px] table-auto md:table-fixed"
-          >
+          <Table aria-label={t("players")} className="player-table min-w-[740px] table-auto md:table-fixed">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-10 pl-3">#</TableHead>
                 <TableHead className="w-48">{t("player")}</TableHead>
                 {["MA", "ST", "AG", "PA", "AV"].map((stat) => (
-                  <TableHead
-                    key={stat}
-                    className="w-8 text-center font-mono text-xs"
-                  >
+                  <TableHead key={stat} className="w-8 text-center font-mono text-xs">
                     {stat}
                   </TableHead>
                 ))}
                 <TableHead>{t("skills")}</TableHead>
-                <TableHead className="w-10 text-center font-mono text-xs">
-                  TD
-                </TableHead>
-                <TableHead className="w-12 text-center font-mono text-xs">
-                  SPP
-                </TableHead>
+                <TableHead className="w-10 text-center font-mono text-xs">TD</TableHead>
+                <TableHead className="w-12 text-center font-mono text-xs">SPP</TableHead>
                 <TableHead className="w-10">
                   <span className="sr-only">{t("managePlayer")}</span>
                 </TableHead>
@@ -464,14 +333,10 @@ export function LeagueEvents({
                     aria-label={`${t("managePlayer")} · ${label(row.playerId)}`}
                     className="group cursor-pointer focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-[-2px]"
                     onClick={(event) => {
-                      if (!(event.target as HTMLElement).closest("button, a"))
-                        setSelectedPlayer(row.playerId);
+                      if (!(event.target as HTMLElement).closest("button, a")) setSelectedPlayer(row.playerId);
                     }}
                     onKeyDown={(event) => {
-                      if (
-                        event.target === event.currentTarget &&
-                        ["Enter", " "].includes(event.key)
-                      ) {
+                      if (event.target === event.currentTarget && ["Enter", " "].includes(event.key)) {
                         event.preventDefault();
                         setSelectedPlayer(row.playerId);
                       }
@@ -490,11 +355,7 @@ export function LeagueEvents({
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <PlayerIcon
-                          positionId={row.positionId}
-                          variant={index}
-                          className="size-8 shrink-0"
-                        />
+                        <PlayerIcon positionId={row.positionId} className="size-8 shrink-0" />
                         <div className="min-w-0">
                           <button
                             type="button"
@@ -502,43 +363,32 @@ export function LeagueEvents({
                             className="text-left text-sm font-semibold text-primary hover:underline"
                             onClick={() => setSelectedPlayer(row.playerId)}
                           >
-                            {row.name.trim() ||
-                              positionLabel(row.snapshot.positionName)}
+                            {row.name.trim() || positionLabel(row.snapshot.positionName)}
                           </button>
                           <p className="mt-0.5 text-xs text-muted-foreground">
                             {positionLabel(row.snapshot.positionName)}
                           </p>
-                          {(!row.participated ||
-                            row.statusAfter !== "active") && (
+                          {(!row.participated || row.statusAfter !== "active") && (
                             <span className="text-xs text-destructive">
-                              {t(
-                                `leagueUi.status.${row.participated ? row.statusAfter : row.snapshot.status}`,
-                              )}
+                              {t(`leagueUi.status.${row.participated ? row.statusAfter : row.snapshot.status}`)}
                             </span>
                           )}
                         </div>
                       </div>
                     </TableCell>
                     {(["ma", "st", "ag", "pa", "av"] as const).map((stat) => (
-                      <TableCell
-                        key={stat}
-                        className="text-center font-mono text-xs"
-                      >
+                      <TableCell key={stat} className="text-center font-mono text-xs">
                         {row.snapshot.profile[stat]}
                       </TableCell>
                     ))}
                     <TableCell>
                       <TableSkills
                         ids={row.snapshot.baseSkills}
-                        additionalIds={row.skills.filter(
-                          (id) => !row.snapshot.baseSkills.includes(id),
-                        )}
+                        additionalIds={row.skills.filter((id) => !row.snapshot.baseSkills.includes(id))}
                         label={t("skills")}
                       />
                     </TableCell>
-                    <TableCell className="text-center font-mono text-xs">
-                      {row.stats.td || "—"}
-                    </TableCell>
+                    <TableCell className="text-center font-mono text-xs">{row.stats.td || "—"}</TableCell>
                     <TableCell className="text-center font-mono text-xs font-semibold text-primary">
                       {spp(row.playerId) || "—"}
                     </TableCell>
@@ -558,10 +408,7 @@ export function LeagueEvents({
                     .includes(search.trim().toLocaleLowerCase()),
               ) && (
                 <TableRow>
-                  <TableCell
-                    colSpan={11}
-                    className="py-8 text-center text-sm text-muted-foreground"
-                  >
+                  <TableCell colSpan={11} className="py-8 text-center text-sm text-muted-foreground">
                     {t("noResults")}
                   </TableCell>
                 </TableRow>
@@ -623,9 +470,7 @@ function MatchPlayerDialog({
 }) {
   const t = useTranslations();
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const addedSkills = player.skills.filter(
-    (id) => !player.snapshot.baseSkills.includes(id),
-  );
+  const addedSkills = player.skills.filter((id) => !player.snapshot.baseSkills.includes(id));
   return (
     <Dialog
       open
@@ -633,18 +478,11 @@ function MatchPlayerDialog({
         if (!open) onClose();
       }}
     >
-      <DialogContent
-        className="player-dialog player-dialog-view"
-        initialFocus={titleRef}
-        showCloseButton={false}
-      >
+      <DialogContent className="player-dialog player-dialog-view" initialFocus={titleRef} showCloseButton={false}>
         <DialogHeader className="player-dialog-header">
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex size-14 shrink-0 items-center justify-center rounded-lg border bg-card sm:size-12">
-              <PlayerIcon
-                positionId={player.positionId}
-                className="size-12 sm:size-10"
-              />
+              <PlayerIcon positionId={player.positionId} className="size-12 sm:size-10" />
             </div>
             <div className="min-w-0 flex-1">
               <DialogDescription className="mb-1 text-xs">
@@ -670,19 +508,12 @@ function MatchPlayerDialog({
           </div>
         </DialogHeader>
         <div className="player-dialog-body">
-          <section
-            className="player-dialog-profile"
-            aria-label={t("leagueUx.reportPlayerProfile")}
-          >
+          <section className="player-dialog-profile" aria-label={t("leagueUx.reportPlayerProfile")}>
             <dl className="grid grid-cols-5 divide-x overflow-hidden rounded-lg border bg-card text-center">
               {(["ma", "st", "ag", "pa", "av"] as const).map((stat) => (
                 <div key={stat} className="py-2.5">
-                  <dt className="font-mono text-[10px] text-muted-foreground">
-                    {stat.toUpperCase()}
-                  </dt>
-                  <dd className="mt-1 font-mono text-base font-semibold">
-                    {player.snapshot.profile[stat]}
-                  </dd>
+                  <dt className="font-mono text-[10px] text-muted-foreground">{stat.toUpperCase()}</dt>
+                  <dd className="mt-1 font-mono text-base font-semibold">{player.snapshot.profile[stat]}</dd>
                 </div>
               ))}
             </dl>
@@ -690,66 +521,39 @@ function MatchPlayerDialog({
               <div className="flex justify-between gap-3">
                 <dt className="text-muted-foreground">{t("cost")}</dt>
                 <dd className="font-mono font-medium">
-                  {(player.snapshot.baseCost + player.snapshot.valueIncrease) /
-                    1000}
+                  {(player.snapshot.baseCost + player.snapshot.valueIncrease) / 1000}
                   k GP
                 </dd>
               </div>
               <div className="flex justify-between gap-3">
-                <dt className="text-muted-foreground">
-                  {t("leagueUi.playerStatus")}
-                </dt>
-                <dd>
-                  {t(
-                    `leagueUi.status.${player.participated ? player.statusAfter : player.snapshot.status}`,
-                  )}
-                </dd>
+                <dt className="text-muted-foreground">{t("leagueUi.playerStatus")}</dt>
+                <dd>{t(`leagueUi.status.${player.participated ? player.statusAfter : player.snapshot.status}`)}</dd>
               </div>
             </dl>
             <div className="space-y-3 border-t pt-4">
               <h3 className="text-xs font-semibold">{t("skills")}</h3>
               <div className="flex flex-wrap gap-1.5">
-                {player.snapshot.baseSkills.length > 0 && (
-                  <SkillList ids={player.snapshot.baseSkills} />
-                )}
-                {addedSkills.length > 0 && (
-                  <SkillList ids={addedSkills} added />
-                )}
+                {player.snapshot.baseSkills.length > 0 && <SkillList ids={player.snapshot.baseSkills} />}
+                {addedSkills.length > 0 && <SkillList ids={addedSkills} added />}
                 {!player.snapshot.baseSkills.length && !addedSkills.length && (
-                  <span className="text-xs text-muted-foreground">
-                    {t("noSkills")}
-                  </span>
+                  <span className="text-xs text-muted-foreground">{t("noSkills")}</span>
                 )}
               </div>
             </div>
             <div className="space-y-3 border-t pt-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-semibold">
-                  {t("leagueUx.reportGame")}
-                </h3>
-                <span className="font-mono text-sm font-semibold text-primary">
-                  +{earned} SPP
-                </span>
+                <h3 className="text-xs font-semibold">{t("leagueUx.reportGame")}</h3>
+                <span className="font-mono text-sm font-semibold text-primary">+{earned} SPP</span>
               </div>
               <dl className="grid grid-cols-3 gap-3 text-center">
-                {(["td", "sppCas", "com", "int", "mvp", "inj"] as const).map(
-                  (stat) => (
-                    <div key={stat}>
-                      <dt className="text-[10px] text-muted-foreground">
-                        {t(`leagueUi.stats.${stat}`)}
-                      </dt>
-                      <dd className="mt-1 font-mono text-base font-semibold">
-                        {player.stats[stat]}
-                      </dd>
-                    </div>
-                  ),
-                )}
+                {(["td", "sppCas", "com", "int", "mvp", "inj"] as const).map((stat) => (
+                  <div key={stat}>
+                    <dt className="text-[10px] text-muted-foreground">{t(`leagueUi.stats.${stat}`)}</dt>
+                    <dd className="mt-1 font-mono text-base font-semibold">{player.stats[stat]}</dd>
+                  </div>
+                ))}
               </dl>
-              {player.injuryNotes && (
-                <p className="text-xs text-muted-foreground">
-                  {player.injuryNotes}
-                </p>
-              )}
+              {player.injuryNotes && <p className="text-xs text-muted-foreground">{player.injuryNotes}</p>}
             </div>
           </section>
         </div>
@@ -791,12 +595,10 @@ function EventEditor({
   const [busy, setBusy] = useState(false);
   const [remove, setRemove] = useState(false);
   useBeforeUnload(true);
-  const change = (patch: Partial<MatchEvent>) =>
-    setEvent((current) => ({ ...current, ...patch }));
+  const change = (patch: Partial<MatchEvent>) => setEvent((current) => ({ ...current, ...patch }));
   const linked =
     ["completion", "interception", "throw-team-mate"].includes(event.kind) ||
-    (event.kind === "casualty" &&
-      ["block", "foul", "special"].includes(event.cause));
+    (event.kind === "casualty" && ["block", "foul", "special"].includes(event.cause));
   const teammate = ["completion", "throw-team-mate"].includes(event.kind);
   const actor = data.players.find((row) => row.playerId === event.playerId);
   const available = data.players.filter((row) => row.participated);
@@ -804,19 +606,11 @@ function EventEditor({
   try {
     projectMatchEvents(
       data.players,
-      [
-        ...(data.playEvents ?? [])
-          .filter((row) => row.event.id !== event.id)
-          .map((row) => row.event),
-        event,
-      ],
+      [...(data.playEvents ?? []).filter((row) => row.event.id !== event.id).map((row) => row.event), event],
       data.home._id,
     );
   } catch (cause) {
-    const code =
-      cause instanceof Error && /^[A-Z_]+$/.test(cause.message)
-        ? cause.message
-        : "INVALID_DICE";
+    const code = cause instanceof Error && /^[A-Z_]+$/.test(cause.message) ? cause.message : "INVALID_DICE";
     validation = t(`leagueUi.errors.${code}`);
   }
   const current = data.playEvents?.find((row) => row.event.id === event.id);
@@ -845,9 +639,7 @@ function EventEditor({
       <LeagueSelect
         value={(target ? event.targetId : event.playerId) ?? ""}
         onChange={(e) =>
-          target
-            ? change({ targetId: e.target.value || null })
-            : change({ playerId: e.target.value, targetId: null })
+          target ? change({ targetId: e.target.value || null }) : change({ playerId: e.target.value, targetId: null })
         }
       >
         <option value="">{t("matchEvents.choosePlayer")}</option>
@@ -861,9 +653,7 @@ function EventEditor({
                       row.entryId === entry._id &&
                       (!target ||
                         (row.playerId !== event.playerId &&
-                          (teammate
-                            ? row.entryId === actor?.entryId
-                            : row.entryId !== actor?.entryId))),
+                          (teammate ? row.entryId === actor?.entryId : row.entryId !== actor?.entryId))),
                   )
                   .map((row) => (
                     <option key={row.playerId} value={row.playerId}>
@@ -889,12 +679,7 @@ function EventEditor({
             min={1}
             max={99}
             value={roll ?? ""}
-            onChange={(e) =>
-              change({
-                [rollKey]: e.target.value ? Number(e.target.value) : null,
-                [lastingKey]: null,
-              })
-            }
+            onChange={(e) => change({ [rollKey]: e.target.value ? Number(e.target.value) : null, [lastingKey]: null })}
           />
         </LeagueField>
         {roll !== null && roll >= 13 && roll <= 14 ? (
@@ -902,11 +687,7 @@ function EventEditor({
             {t("leagueUi.lastingRoll")}
             <LeagueSelect
               value={event[lastingKey] ?? ""}
-              onChange={(e) =>
-                change({
-                  [lastingKey]: e.target.value ? Number(e.target.value) : null,
-                })
-              }
+              onChange={(e) => change({ [lastingKey]: e.target.value ? Number(e.target.value) : null })}
             >
               <option value="">—</option>
               {[1, 2, 3, 4, 5, 6].map((value) => (
@@ -969,12 +750,7 @@ function EventEditor({
                 {t("matchEvents.cause")}
                 <LeagueSelect
                   value={event.cause}
-                  onChange={(e) =>
-                    change({
-                      cause: e.target.value as MatchEvent["cause"],
-                      targetId: null,
-                    })
-                  }
+                  onChange={(e) => change({ cause: e.target.value as MatchEvent["cause"], targetId: null })}
                 >
                   {casualtyCauses.map((cause) => (
                     <option key={cause} value={cause}>
@@ -1017,18 +793,10 @@ function EventEditor({
                       {t("matchEvents.keepResult")}
                       <LeagueSelect
                         value={event.keepOriginal ? "original" : "reroll"}
-                        onChange={(e) =>
-                          change({
-                            keepOriginal: e.target.value === "original",
-                          })
-                        }
+                        onChange={(e) => change({ keepOriginal: e.target.value === "original" })}
                       >
-                        <option value="reroll">
-                          {t("matchEvents.usedReroll")}
-                        </option>
-                        <option value="original">
-                          {t("matchEvents.keptOriginal")}
-                        </option>
+                        <option value="reroll">{t("matchEvents.usedReroll")}</option>
+                        <option value="original">{t("matchEvents.keptOriginal")}</option>
                       </LeagueSelect>
                     </LeagueField>
                   </>
@@ -1037,28 +805,17 @@ function EventEditor({
                   {t("matchEvents.regenerationLabel")}
                   <LeagueSelect
                     value={event.regeneration}
-                    onChange={(e) =>
-                      change({
-                        regeneration: e.target
-                          .value as MatchEvent["regeneration"],
-                      })
-                    }
+                    onChange={(e) => change({ regeneration: e.target.value as MatchEvent["regeneration"] })}
                   >
-                    {(["not-used", "failed", "succeeded"] as const).map(
-                      (value) => (
-                        <option key={value} value={value}>
-                          {t(`matchEvents.regeneration.${value}`)}
-                        </option>
-                      ),
-                    )}
+                    {(["not-used", "failed", "succeeded"] as const).map((value) => (
+                      <option key={value} value={value}>
+                        {t(`matchEvents.regeneration.${value}`)}
+                      </option>
+                    ))}
                   </LeagueSelect>
                 </LeagueField>
                 <p className="text-xs text-muted-foreground">
-                  {t(
-                    event.cause === "block"
-                      ? "matchEvents.blockSppHint"
-                      : "matchEvents.noSppHint",
-                  )}
+                  {t(event.cause === "block" ? "matchEvents.blockSppHint" : "matchEvents.noSppHint")}
                 </p>
               </div>
             )}
@@ -1082,9 +839,7 @@ function EventEditor({
                   />
                   {t("matchEvents.superb")}
                 </label>
-                <p className="text-xs text-muted-foreground">
-                  {t("matchEvents.throwHint")}
-                </p>
+                <p className="text-xs text-muted-foreground">{t("matchEvents.throwHint")}</p>
               </div>
             )}
             {event.kind !== "mvp" && (
@@ -1093,19 +848,12 @@ function EventEditor({
                   {t("matchEvents.halfOptional")}
                   <LeagueSelect
                     value={event.half ?? ""}
-                    onChange={(e) =>
-                      change({
-                        half: e.target.value ? Number(e.target.value) : null,
-                        turn: null,
-                      })
-                    }
+                    onChange={(e) => change({ half: e.target.value ? Number(e.target.value) : null, turn: null })}
                   >
                     <option value="">{t("matchEvents.notRecorded")}</option>
                     {[1, 2, 3].map((half) => (
                       <option key={half} value={half}>
-                        {half === 3
-                          ? t("matchEvents.extraTime")
-                          : `${t("matchEvents.half")} ${half}`}
+                        {half === 3 ? t("matchEvents.extraTime") : `${t("matchEvents.half")} ${half}`}
                       </option>
                     ))}
                   </LeagueSelect>
@@ -1115,11 +863,7 @@ function EventEditor({
                   <LeagueSelect
                     disabled={event.half === null}
                     value={event.turn ?? ""}
-                    onChange={(e) =>
-                      change({
-                        turn: e.target.value ? Number(e.target.value) : null,
-                      })
-                    }
+                    onChange={(e) => change({ turn: e.target.value ? Number(e.target.value) : null })}
                   >
                     <option value="">{t("matchEvents.notRecorded")}</option>
                     {[1, 2, 3, 4, 5, 6, 7, 8].map((turn) => (
@@ -1131,11 +875,7 @@ function EventEditor({
             )}
             <LeagueField>
               {t("matchEvents.notes")}
-              <Input
-                maxLength={500}
-                value={event.notes}
-                onChange={(e) => change({ notes: e.target.value })}
-              />
+              <Input maxLength={500} value={event.notes} onChange={(e) => change({ notes: e.target.value })} />
             </LeagueField>
             {error && (
               <p role="alert" className="text-xs text-destructive">
@@ -1163,21 +903,10 @@ function EventEditor({
               {t("matchEvents.remove")}
             </Button>
           )}
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            className="ml-auto"
-            disabled={busy}
-            onClick={onClose}
-          >
+          <Button type="button" size="sm" variant="outline" className="ml-auto" disabled={busy} onClick={onClose}>
             {t("cancel")}
           </Button>
-          <Button
-            type="submit"
-            size="sm"
-            disabled={busy || stale || !!validation}
-          >
+          <Button type="submit" size="sm" disabled={busy || stale || !!validation}>
             <Check className="size-4" />
             {t(busy ? "matchEvents.saving" : "matchEvents.save")}
           </Button>
@@ -1194,13 +923,7 @@ function EventEditor({
             >
               {t("matchEvents.remove")}
             </Button>
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              aria-label={t("cancel")}
-              onClick={() => setRemove(false)}
-            >
+            <Button type="button" size="icon" variant="ghost" aria-label={t("cancel")} onClick={() => setRemove(false)}>
               <X className="size-3" />
             </Button>
           </div>

@@ -10,20 +10,11 @@ export const metadata = pageMetadata(
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{
-    roster?: string;
-    draft?: string;
-    new?: string;
-    ruleset?: string | string[];
-  }>;
+  searchParams: Promise<{ roster?: string; draft?: string; new?: string; ruleset?: string | string[] }>;
 }) {
   const params = await searchParams;
   return params.roster || params.draft || params.new === "1" ? (
-    <BuilderStart
-      roster={params.roster}
-      draft={params.draft}
-      fresh={params.new === "1"}
-    />
+    <BuilderStart roster={params.roster} draft={params.draft} fresh={params.new === "1"} />
   ) : (
     <TeamCatalog rulesetId={rosterRuleset(params.ruleset)} />
   );

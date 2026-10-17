@@ -3,11 +3,7 @@ import { TEAM_NAME_MAX_LENGTH } from "@/domain/team-name";
 
 export function duplicateTeam(team: Team, suffix: string): Team {
   const ending = ` (${suffix})`;
-  const players = team.players.map((player) => ({
-    ...player,
-    id: crypto.randomUUID(),
-    skills: [...player.skills],
-  }));
+  const players = team.players.map((player) => ({ ...player, id: crypto.randomUUID(), skills: [...player.skills] }));
   const captainIndex = team.players.findIndex((p) => p.id === team.captainId);
   const veteranIndex = team.players.findIndex((p) => p.id === team.veteranId);
   return {

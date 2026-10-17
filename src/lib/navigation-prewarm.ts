@@ -18,20 +18,13 @@ export function createNavigationPrewarmer(
     const key = `${authenticated}:${path}${url.search}`;
     if (now - (warmed.get(key) ?? -Infinity) < lifetime) return;
     const team = path.match(/^\/teams\/([\da-f-]{36})\/?$/i);
-    const league = path.match(
-      /^\/leagues\/manage\/([^/]+)(?:\/(teams|matches)\/([^/]+))?\/?$/,
-    );
+    const league = path.match(/^\/leagues\/manage\/([^/]+)(?:\/(teams|matches)\/([^/]+))?\/?$/);
     if (!team && (!league || !authenticated)) return;
     warmed.set(key, now);
     prefetch(`${path}${url.search}`, () => warmed.delete(key));
-    for (const [key, time] of warmed)
-      if (now - time >= lifetime || warmed.size > 32) warmed.delete(key);
+    for (const [key, time] of warmed) if (now - time >= lifetime || warmed.size > 32) warmed.delete(key);
     if (team) {
-      client.prewarmQuery({
-        query: api.teams.getByUuid,
-        args: { uuid: team[1] },
-        extendSubscriptionFor: lifetime,
-      });
+      client.prewarmQuery({ query: api.teams.getByUuid, args: { uuid: team[1] }, extendSubscriptionFor: lifetime });
       client.prewarmQuery({
         query: api.leagues.listTeamCareers,
         args: { teamUuid: team[1] },
@@ -53,9 +46,7 @@ export function createNavigationPrewarmer(
         else {
           // Start the dependent query as soon as the team arrives, before
           // TeamPage mounts and gates its editor on the league context.
-          const watch = client.watchQuery(api.teams.getByUuid, {
-            uuid: team[1],
-          });
+          const watch = client.watchQuery(api.teams.getByUuid, { uuid: team[1] });
           const onUpdate = () => {
             try {
               warmLeague(watch.localQueryResult()?.draftLeagueId);

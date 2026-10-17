@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ComponentProps,
-  type ReactNode,
-} from "react";
+import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from "react";
 import { Check, Loader2, X } from "lucide-react";
 import { cn } from "cn";
 import { Button } from "./ui/button";
@@ -77,8 +71,7 @@ export function ActionButton({
       }, 1500);
   }
 
-  const feedback =
-    state === "success" ? successLabel : state === "error" ? errorLabel : "";
+  const feedback = state === "success" ? successLabel : state === "error" ? errorLabel : "";
   return (
     <Button
       {...props}
@@ -89,13 +82,8 @@ export function ActionButton({
       data-action-state={state}
       title={feedback || props.title}
     >
-      <span
-        aria-hidden="true"
-        className="relative inline-flex size-4 shrink-0 items-center justify-center"
-      >
-        <IconTransition show={state === "idle" || state === "pending"}>
-          {icon}
-        </IconTransition>
+      <span aria-hidden="true" className="relative inline-flex size-4 shrink-0 items-center justify-center">
+        <IconTransition show={state === "idle" || state === "pending"}>{icon}</IconTransition>
         <IconTransition show={state === "loading"}>
           <Loader2 className="size-4 animate-spin motion-reduce:animate-none" />
         </IconTransition>

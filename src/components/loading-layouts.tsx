@@ -18,10 +18,7 @@ import { ArrowLeft, Copy, Printer, ChevronDown, Ellipsis } from "lucide-react";
 import { BookOpen, Flag, Shield, Trophy } from "lucide-react";
 import type { ReactNode } from "react";
 import { UsersLoading } from "./list-loading";
-import {
-  LeagueContentLoading,
-  LeagueDirectoryLoading,
-} from "./league-content-loading";
+import { LeagueContentLoading, LeagueDirectoryLoading } from "./league-content-loading";
 import { rosterChoices } from "@/lib/roster-ruleset";
 
 export type LoadingVariant =
@@ -44,13 +41,7 @@ export function LibraryCardsLoading({ label }: { label: string }) {
       {[0, 1, 2].map((index) => (
         <TeamCardSkeleton
           key={index}
-          className={
-            index === 1
-              ? "hidden sm:block"
-              : index === 2
-                ? "hidden xl:block"
-                : ""
-          }
+          className={index === 1 ? "hidden sm:block" : index === 2 ? "hidden xl:block" : ""}
         />
       ))}
     </div>
@@ -68,23 +59,14 @@ function RulesetPickerLoading() {
   );
 }
 
-function RosterTableLoading({
-  rows,
-  framed = true,
-}: {
-  rows: number;
-  framed?: boolean;
-}) {
+function RosterTableLoading({ rows, framed = true }: { rows: number; framed?: boolean }) {
   return (
     <div className={framed ? "overflow-hidden rounded-lg border bg-card" : ""}>
       <div className="overflow-hidden">
         <div className="min-w-[856px]">
           <Skeleton className="h-[34px] w-full rounded-none" />
           {Array.from({ length: rows }, (_, index) => (
-            <div
-              key={index}
-              className="flex min-h-[49px] items-center gap-3 border-t px-2.5 py-[7px]"
-            >
+            <div key={index} className="flex min-h-[49px] items-center gap-3 border-t px-2.5 py-[7px]">
               <Skeleton className="size-8 shrink-0" />
               <div className="w-40 space-y-1">
                 <Skeleton className="h-4 w-32" />
@@ -124,9 +106,7 @@ function TableLoading({
   text?: Translate;
 }) {
   return (
-    <div
-      className={`overflow-hidden bg-card ${framed ? "rounded-lg border" : ""}`}
-    >
+    <div className={`overflow-hidden bg-card ${framed ? "rounded-lg border" : ""}`}>
       {title && (
         <div
           className={`flex items-center justify-between border-b bg-secondary/40 px-4 ${compact ? "h-[44px]" : "h-[54px]"}`}
@@ -148,9 +128,7 @@ function TableLoading({
           className={`flex items-center gap-3 border-b px-4 last:border-0 ${empty ? "min-h-[68px] justify-center py-6" : "h-12"}`}
         >
           {empty ? (
-            <p className="text-center text-xs leading-relaxed text-muted-foreground">
-              {text?.("emptyRosterHint")}
-            </p>
+            <p className="text-center text-xs leading-relaxed text-muted-foreground">{text?.("emptyRosterHint")}</p>
           ) : (
             <>
               <Skeleton className="size-8 shrink-0" />
@@ -187,12 +165,7 @@ export function LoadingLayout({
 }) {
   if (variant === "page")
     return (
-      <div
-        className="page-width py-8 sm:py-10"
-        data-loading-layout="page"
-        role="status"
-        aria-label={label}
-      >
+      <div className="page-width py-8 sm:py-10" data-loading-layout="page" role="status" aria-label={label}>
         <span className="sr-only">{label}</span>
         <Skeleton aria-hidden="true" className="h-1 w-full" />
       </div>
@@ -213,25 +186,14 @@ export function LoadingLayout({
   const supportRows = team
     ? [
         Object.keys(staffInfo(team)).length,
-        inducements.filter(
-          (item) =>
-            inducementInfo(team, item).allowed ||
-            (team.inducements[item.id] ?? 0) > 0,
-        ).length,
+        inducements.filter((item) => inducementInfo(team, item).allowed || (team.inducements[item.id] ?? 0) > 0).length,
       ]
     : [5, 6];
   const catalogChoices = variant === "catalog" ? rosterChoices(rulesetId) : [];
-  const catalogTiers = [
-    ...new Set(catalogChoices.map(({ tier }) => tier)),
-  ].filter((tier) => tier > 0);
+  const catalogTiers = [...new Set(catalogChoices.map(({ tier }) => tier))].filter((tier) => tier > 0);
   if (variant === "reference")
     return (
-      <div
-        className="page-width space-y-5 py-6"
-        role="status"
-        data-loading-layout={variant}
-        aria-label={label}
-      >
+      <div className="page-width space-y-5 py-6" role="status" data-loading-layout={variant} aria-label={label}>
         <span className="sr-only">{label}</span>
         <div aria-hidden="true" className="space-y-5">
           <Skeleton className="h-11 w-24 sm:h-4" />
@@ -260,12 +222,7 @@ export function LoadingLayout({
     return <LeagueContentLoading variant={variant} label={label} />;
   if (variant === "editor")
     return (
-      <div
-        className="page-width team-builder py-3"
-        data-loading-layout={variant}
-        role="status"
-        aria-label={label}
-      >
+      <div className="page-width team-builder py-3" data-loading-layout={variant} role="status" aria-label={label}>
         <span className="sr-only">{label}</span>
         <div aria-hidden="true">
           <TeamHeader
@@ -277,9 +234,7 @@ export function LoadingLayout({
             }
             title={
               <div className="page-heading team-heading min-w-0 truncate py-1">
-                {team?.name || (
-                  <Skeleton className="h-[1.2em] w-60 max-w-full" />
-                )}
+                {team?.name || <Skeleton className="h-[1.2em] w-60 max-w-full" />}
               </div>
             }
             status={<Skeleton className="h-3 w-16" />}
@@ -304,16 +259,10 @@ export function LoadingLayout({
             <div className="flex min-h-6 flex-wrap gap-2">
               {team ? (
                 <>
-                  <Badge
-                    variant="outline"
-                    className="h-auto min-h-6 max-w-full whitespace-normal text-left"
-                  >
+                  <Badge variant="outline" className="h-auto min-h-6 max-w-full whitespace-normal text-left">
                     {getRoster(team.rosterId)?.name}
                   </Badge>
-                  <Badge
-                    variant="outline"
-                    className="h-auto min-h-6 max-w-full whitespace-normal text-left"
-                  >
+                  <Badge variant="outline" className="h-auto min-h-6 max-w-full whitespace-normal text-left">
                     {getRuleset(team.rulesetId).name}
                   </Badge>
                 </>
@@ -345,18 +294,14 @@ export function LoadingLayout({
                   text={text}
                 />
                 <div className="-mt-px flex h-12 justify-end rounded-b-lg border bg-card p-2">
-                  <span className="flex h-7 items-center px-2 text-xs font-medium">
-                    {text?.("addStar")}
-                  </span>
+                  <span className="flex h-7 items-center px-2 text-xs font-medium">{text?.("addStar")}</span>
                 </div>
               </div>
               <div className="grid items-start gap-4 @min-[780px]:grid-cols-2">
                 {supportRows.map((count, sectionIndex) => (
                   <section key={sectionIndex}>
                     <div className="mb-2 flex h-6 items-center justify-between px-1">
-                      <h2 className="section-title">
-                        {text?.(sectionIndex === 0 ? "staff" : "inducements")}
-                      </h2>
+                      <h2 className="section-title">{text?.(sectionIndex === 0 ? "staff" : "inducements")}</h2>
                       <Skeleton className="h-3 w-12" />
                     </div>
                     <div className="space-y-1.5">
@@ -382,30 +327,18 @@ export function LoadingLayout({
             <aside className="budget-side space-y-3">
               <section className="rounded-lg border bg-card p-3">
                 <div className="grid gap-3">
-                  {(team &&
-                  ["chaos-chosen", "chaos-renegade", "norse"].includes(
-                    team.rosterId,
-                  )
+                  {(team && ["chaos-chosen", "chaos-renegade", "norse"].includes(team.rosterId)
                     ? [0, 1, 2]
                     : [0, 1]
                   ).map((index) => (
-                    <div
-                      key={index}
-                      className={`space-y-1 ${index === 2 ? "max-[900px]:col-start-2" : ""}`}
-                    >
+                    <div key={index} className={`space-y-1 ${index === 2 ? "max-[900px]:col-start-2" : ""}`}>
                       <div className="text-xs font-medium text-muted-foreground">
-                        {index < 2 ? (
-                          text?.(index === 0 ? "ruleset" : "roster")
-                        ) : (
-                          <Skeleton className="h-4 w-16" />
-                        )}
+                        {index < 2 ? text?.(index === 0 ? "ruleset" : "roster") : <Skeleton className="h-4 w-16" />}
                       </div>
                       {team && index < 2 ? (
                         <div className="flex h-9 items-center justify-between gap-2 rounded-lg border bg-background px-3 text-sm">
                           <span className="truncate">
-                            {index === 0
-                              ? getRuleset(team.rulesetId).name
-                              : getRoster(team.rosterId)?.name}
+                            {index === 0 ? getRuleset(team.rulesetId).name : getRoster(team.rosterId)?.name}
                           </span>
                           <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
                         </div>
@@ -425,9 +358,7 @@ export function LoadingLayout({
               <section className="rounded-lg border bg-card">
                 <div className="p-3">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-medium">
-                      {text?.("treasury")}
-                    </span>
+                    <span className="text-xs font-medium">{text?.("treasury")}</span>
                     <Skeleton className="h-4 w-24" />
                   </div>
                   <Skeleton className="mt-1.5 h-1 w-full" />
@@ -451,8 +382,7 @@ export function LoadingLayout({
                             <Skeleton className="h-3 w-12" />
                           </div>
                         ))}
-                        {budget.counts.primary + budget.counts.secondary >
-                          0 && (
+                        {budget.counts.primary + budget.counts.secondary > 0 && (
                           <div className="flex h-[22px] items-end justify-between">
                             <Skeleton className="h-3 w-20" />
                             <Skeleton className="h-3 w-12" />
@@ -472,11 +402,7 @@ export function LoadingLayout({
         </div>
       </div>
     );
-  if (
-    variant === "leagues" ||
-    variant === "league" ||
-    variant === "league-reference"
-  )
+  if (variant === "leagues" || variant === "league" || variant === "league-reference")
     return (
       <LeagueDirectoryLoading
         label={label}
@@ -494,9 +420,7 @@ export function LoadingLayout({
       >
         <div className="space-y-2">
           <Skeleton className="h-[30px] w-40 sm:h-[37.5px]" />
-          {variant !== "catalog" && (
-            <Skeleton className="h-5 w-80 max-w-full" />
-          )}
+          {variant !== "catalog" && <Skeleton className="h-5 w-80 max-w-full" />}
         </div>
         {variant === "catalog" ? (
           <div className="flex max-w-full flex-wrap items-end gap-x-4 gap-y-2">
@@ -509,9 +433,7 @@ export function LoadingLayout({
             )}
             <div className="flex min-w-0 items-end gap-1">
               <RulesetPickerLoading />
-              {rulesetId !== "bb2025-default" && (
-                <Skeleton className="mb-0.5 size-8 shrink-0" />
-              )}
+              {rulesetId !== "bb2025-default" && <Skeleton className="mb-0.5 size-8 shrink-0" />}
             </div>
           </div>
         ) : (
@@ -532,10 +454,7 @@ export function LoadingLayout({
                   className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded px-2 py-1.5 lg:min-h-0 lg:py-1"
                 >
                   <Skeleton className="size-4 shrink-0" />
-                  <Skeleton
-                    className="h-4"
-                    style={{ width: Math.min(150, roster.name.length * 6) }}
-                  />
+                  <Skeleton className="h-4" style={{ width: Math.min(150, roster.name.length * 6) }} />
                 </div>
               ))}
             </div>
@@ -559,10 +478,7 @@ export function LoadingLayout({
                 </div>
                 {index < 3 && (
                   <div className="hidden md:block">
-                    <RosterTableLoading
-                      rows={roster.players.length}
-                      framed={false}
-                    />
+                    <RosterTableLoading rows={roster.players.length} framed={false} />
                   </div>
                 )}
               </div>
@@ -573,10 +489,7 @@ export function LoadingLayout({
         <UsersLoading label={label} />
       ) : (
         <>
-          <div
-            aria-hidden="true"
-            className="mb-7 grid grid-cols-2 gap-3 lg:grid-cols-[minmax(200px,1fr)_180px_210px]"
-          >
+          <div aria-hidden="true" className="mb-7 grid grid-cols-2 gap-3 lg:grid-cols-[minmax(200px,1fr)_180px_210px]">
             <Skeleton className="col-span-2 h-10 lg:col-span-1" />
             <Skeleton className="h-10" />
             <Skeleton className="h-10" />
@@ -605,10 +518,7 @@ export function ShellLoading({ children }: { children?: ReactNode }) {
       }
       sidebar={
         <>
-          <div
-            className="site-sidebar-header flex h-16 shrink-0 items-center"
-            aria-hidden="true"
-          >
+          <div className="site-sidebar-header flex h-16 shrink-0 items-center" aria-hidden="true">
             <div className="site-sidebar-logo flex h-11 items-center overflow-hidden">
               <BrandLogo className="h-9" />
             </div>
@@ -616,10 +526,7 @@ export function ShellLoading({ children }: { children?: ReactNode }) {
               <PanelLeftClose className="size-4" />
             </div>
           </div>
-          <div
-            className="site-sidebar-content min-h-0 flex-1 space-y-1 overflow-y-auto"
-            aria-hidden="true"
-          >
+          <div className="site-sidebar-content min-h-0 flex-1 space-y-1 overflow-y-auto" aria-hidden="true">
             {[Shield, BookOpen, Flag, Trophy].map((Icon, index) => (
               <div key={index} className="flex h-11 items-center gap-3 px-3">
                 <Icon className="size-4 shrink-0 text-muted-foreground" />

@@ -9,8 +9,7 @@ vi.mock("next-intl", async (importOriginal) => {
   const { formats, timeZone } = await import("../src/i18n/config");
   return {
     ...actual,
-    useFormatter: () =>
-      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useFormatter: () => actual.createFormatter({ locale: "en", formats, timeZone }),
     useTranslations: () => (key: string) => key,
   };
 });
@@ -25,9 +24,7 @@ beforeEach(async () => {
   vi.useFakeTimers();
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   mobile = false;
-  vi.spyOn(window, "matchMedia").mockImplementation(
-    () => ({ matches: mobile }) as MediaQueryList,
-  );
+  vi.spyOn(window, "matchMedia").mockImplementation(() => ({ matches: mobile }) as MediaQueryList);
   vi.stubGlobal("navigator", { clipboard: { writeText }, share });
   writeText.mockReset().mockResolvedValue(undefined);
   share.mockReset().mockResolvedValue(undefined);
@@ -35,9 +32,7 @@ beforeEach(async () => {
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  await act(async () =>
-    root.render(createElement(ShareButton, { path: "/teams/123", onShared })),
-  );
+  await act(async () => root.render(createElement(ShareButton, { path: "/teams/123", onShared })));
 });
 afterEach(async () => {
   await act(async () => root.unmount());
@@ -56,18 +51,10 @@ async function advance(ms: number) {
 
 it("copies once, transitions to a check, and resets", async () => {
   await click();
-  expect(writeText).toHaveBeenCalledExactlyOnceWith(
-    `${window.location.origin}/teams/123`,
-  );
+  expect(writeText).toHaveBeenCalledExactlyOnceWith(`${window.location.origin}/teams/123`);
   expect(button().dataset.actionState).toBe("success");
-  expect(container.querySelector('[role="status"]')?.textContent).toBe(
-    "shareSucceeded",
-  );
-  expect(
-    container
-      .querySelector(".lucide-check")
-      ?.parentElement?.getAttribute("aria-hidden"),
-  ).toBe("false");
+  expect(container.querySelector('[role="status"]')?.textContent).toBe("shareSucceeded");
+  expect(container.querySelector(".lucide-check")?.parentElement?.getAttribute("aria-hidden")).toBe("false");
   await click();
   expect(writeText).toHaveBeenCalledTimes(1);
   await advance(1500);
@@ -79,14 +66,8 @@ it("shows a cross on failure and permits retry", async () => {
   writeText.mockRejectedValueOnce(new Error("Clipboard unavailable"));
   await click();
   expect(button().dataset.actionState).toBe("error");
-  expect(
-    container
-      .querySelector(".lucide-x")
-      ?.parentElement?.getAttribute("aria-hidden"),
-  ).toBe("false");
-  expect(container.querySelector('[role="status"]')?.textContent).toBe(
-    "copyFailed",
-  );
+  expect(container.querySelector(".lucide-x")?.parentElement?.getAttribute("aria-hidden")).toBe("false");
+  expect(container.querySelector('[role="status"]')?.textContent).toBe("copyFailed");
   expect(onShared).not.toHaveBeenCalled();
   await advance(1500);
   await click();

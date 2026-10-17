@@ -6,11 +6,7 @@ import { pageMetadata } from "@/lib/site-metadata";
 export function generateStaticParams() {
   return leagues.map((name) => ({ league: leagueSlug(name) }));
 }
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ league: string }>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ league: string }> }) {
   const { league } = await params;
   const name = leagues.find((name) => leagueSlug(name) === league);
   return name
@@ -21,11 +17,7 @@ export async function generateMetadata({
       )
     : {};
 }
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ league: string }>;
-}) {
+export default async function Page({ params }: { params: Promise<{ league: string }> }) {
   const { league } = await params;
   const name = leagues.find((name) => leagueSlug(name) === league);
   if (!name) notFound();

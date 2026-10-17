@@ -25,19 +25,13 @@ export function TeamLeagueLinks({
     : "leagueUi.experiencedTeamHint";
   return (
     <aside
-      aria-label={t(
-        careers.length ? "leagueOfficialRosters" : "leagueUi.experiencedTeam",
-      )}
+      aria-label={t(careers.length ? "leagueOfficialRosters" : "leagueUi.experiencedTeam")}
       className="mt-2 mb-2 print:hidden"
     >
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
         <p className="flex items-center gap-2 text-sm font-semibold">
           <Flag aria-hidden="true" className="size-4 shrink-0" />
-          {t(
-            careers.length
-              ? "leagueOfficialRosters"
-              : "leagueUi.experiencedTeam",
-          )}
+          {t(careers.length ? "leagueOfficialRosters" : "leagueUi.experiencedTeam")}
         </p>
         <p className="mt-1 text-sm text-muted-foreground">{t(hint)}</p>
         {!!careers?.length && (
@@ -49,10 +43,7 @@ export function TeamLeagueLinks({
                 href={`/leagues/manage/${career.leagueId}/teams/${career.entryId}`}
               >
                 <span className="min-w-0 break-words">{career.leagueName}</span>
-                <ArrowUpRight
-                  aria-hidden="true"
-                  className="size-3.5 shrink-0"
-                />
+                <ArrowUpRight aria-hidden="true" className="size-3.5 shrink-0" />
               </Link>
             ))}
           </div>

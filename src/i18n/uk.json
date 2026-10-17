@@ -216,13 +216,7 @@
     "reportEmptyStats": "Подій ще немає",
     "rosterScrollHint": "Гортайте, щоб побачити всі характеристики та навички.",
     "rulesHelp": "Правила ліги",
-    "profileHelp": {
-      "ma": "Дальність руху",
-      "st": "Сила",
-      "ag": "Спритність",
-      "pa": "Пас",
-      "av": "Броня"
-    },
+    "profileHelp": { "ma": "Дальність руху", "st": "Сила", "ag": "Спритність", "pa": "Пас", "av": "Броня" },
     "chooseRuling": "Оберіть результат…",
     "rosterLocked": "Склад закрито на час відкритого матчу.",
     "continueReport": "Продовжити звіт",
@@ -828,11 +822,7 @@
   "leagueSaveFailed": "Не вдалося зберегти зміни ліги",
   "leagueSingleRoundRobin": "Одноколовий турнір",
   "leagueOfficialRosters": "Офіційні ростери ліги",
-  "leagueStatus": {
-    "registration": "Реєстрація",
-    "active": "Триває",
-    "completed": "Завершена"
-  },
+  "leagueStatus": { "registration": "Реєстрація", "active": "Триває", "completed": "Завершена" },
   "leagueUi": {
     "loadMore": "Завантажити ще",
     "undoAdvancement": "Скасувати останнє покращення",

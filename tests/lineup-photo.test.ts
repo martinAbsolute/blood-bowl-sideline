@@ -11,19 +11,14 @@ it.each(Array.from({ length: 16 }, (_, index) => index + 1))(
     expect(slots[0].top).toBe(Math.max(...slots.map((slot) => slot.top)));
     expect(slots[0].zIndex).toBe(Math.max(...slots.map((slot) => slot.zIndex)));
     expect(new Set(slots.map((slot) => slot.top)).size).toBeLessThanOrEqual(2);
-    expect(
-      new Set(slots.map((slot) => `${slot.row}:${slot.offset}`)).size,
-    ).toBe(count);
+    expect(new Set(slots.map((slot) => `${slot.row}:${slot.offset}`)).size).toBe(count);
     for (const row of ["front", "back"]) {
       const members = slots.filter((slot) => slot.row === row);
       expect(members.reduce((sum, slot) => sum + slot.offset, 0)).toBe(0);
     }
     for (const slot of slots) {
-      expect(Math.abs(slot.offset) * 34 + 18).toBeLessThanOrEqual(
-        slot.width / 2,
-      );
-      if (slot.row === "back")
-        expect(slot.zIndex).toBeLessThan(slots[0].zIndex);
+      expect(Math.abs(slot.offset) * 34 + 18).toBeLessThanOrEqual(slot.width / 2);
+      if (slot.row === "back") expect(slot.zIndex).toBeLessThan(slots[0].zIndex);
     }
   },
 );

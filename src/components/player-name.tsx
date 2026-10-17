@@ -27,15 +27,11 @@ export function PlayerName({
     <span
       className="player-name-editor flex w-max max-w-full items-baseline gap-2"
       onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget))
-          setEditing(false);
+        if (!event.currentTarget.contains(event.relatedTarget)) setEditing(false);
       }}
     >
       <span className="relative grid min-w-0 max-w-full grid-cols-[minmax(0,1fr)]">
-        <span
-          aria-hidden="true"
-          className="invisible min-w-0 overflow-hidden whitespace-pre"
-        >
+        <span aria-hidden="true" className="invisible min-w-0 overflow-hidden whitespace-pre">
           {value || (editing ? "" : placeholder)}
           {"\u200b"}
         </span>
@@ -55,9 +51,7 @@ export function PlayerName({
             setEditing(true);
             event.currentTarget.select();
           }}
-          onChange={(event) =>
-            onChange(event.target.value.slice(0, PLAYER_NAME_MAX_LENGTH))
-          }
+          onChange={(event) => onChange(event.target.value.slice(0, PLAYER_NAME_MAX_LENGTH))}
           onKeyDown={(event) => {
             if (event.nativeEvent.isComposing) return;
             if (event.key === "Enter" || event.key === "Escape") {
@@ -87,9 +81,7 @@ export function PlayerName({
             type="button"
             aria-label={t("playerModal.randomizeName")}
             className="absolute left-1/2 top-1/2 inline-flex size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-secondary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 after:absolute after:-inset-1.5 sm:after:inset-0"
-            onClick={() =>
-              onChange(generatePlayerName().slice(0, PLAYER_NAME_MAX_LENGTH))
-            }
+            onClick={() => onChange(generatePlayerName().slice(0, PLAYER_NAME_MAX_LENGTH))}
           >
             <Dice5 aria-hidden="true" className="size-3.5" />
           </TooltipTrigger>
@@ -131,10 +123,7 @@ export function InlinePlayerName({
   return (
     <div className="min-w-0 max-w-full">
       <span className="relative grid w-max min-w-[1ch] max-w-full grid-cols-[minmax(0,1fr)] text-sm font-semibold">
-        <span
-          aria-hidden="true"
-          className="invisible min-w-0 overflow-hidden whitespace-pre"
-        >
+        <span aria-hidden="true" className="invisible min-w-0 overflow-hidden whitespace-pre">
           {displayed || designation}
           {"\u200b"}
         </span>
@@ -154,9 +143,7 @@ export function InlinePlayerName({
             selectOnFocus.current = true;
             setDraft(value || designation);
           }}
-          onChange={(event) =>
-            setDraft(event.target.value.slice(0, PLAYER_NAME_MAX_LENGTH))
-          }
+          onChange={(event) => setDraft(event.target.value.slice(0, PLAYER_NAME_MAX_LENGTH))}
           onBlur={() => {
             if (!cancelled.current && draft !== null) {
               const name = draft.trim() === designation ? "" : draft.trim();
@@ -175,9 +162,7 @@ export function InlinePlayerName({
           }}
         />
       </span>
-      {hasPlayerName(value, designation) && (
-        <p className="mt-0.5 text-xs text-muted-foreground">{designation}</p>
-      )}
+      {hasPlayerName(value, designation) && <p className="mt-0.5 text-xs text-muted-foreground">{designation}</p>}
     </div>
   );
 }

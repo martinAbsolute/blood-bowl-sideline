@@ -4,23 +4,8 @@ import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useConvexAuth } from "convex/react";
-import {
-  getRoster,
-  getRuleset,
-  rosters,
-  rulesets,
-  stars,
-  starPairs,
-  starChoices,
-} from "@/domain/catalog";
-import {
-  isLineman,
-  isSevens,
-  playerMovement,
-  playerSkillCost,
-  starEligible,
-  summarize,
-} from "@/domain/rules";
+import { getRoster, getRuleset, rosters, rulesets, stars, starPairs, starChoices } from "@/domain/catalog";
+import { isLineman, isSevens, playerMovement, playerSkillCost, starEligible, summarize } from "@/domain/rules";
 import type { Team } from "@/domain/types";
 import { hasPlayerName } from "@/domain/player-name";
 import { numberedPlayers } from "@/domain/player-number";
@@ -44,30 +29,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "./ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "./ui/dropdown-menu";
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
 import { RosterIcon } from "./player-icon";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "./dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { PlayerRecruitment } from "./player-recruitment";
 import { TableSkills } from "./skill-box";
 import { TeamAffiliations, SpecialRules } from "./team-affiliations";
@@ -152,11 +119,7 @@ export function TeamEditor({
   const requiresCaptain = roster.specialRules.includes("Team Captain");
   async function switchRoster(rosterId: string) {
     if (switchingRoster) return;
-    const next = resetTeamRoster(
-      team,
-      rosterId,
-      revision > 0 ? crypto.randomUUID() : team.uuid,
-    );
+    const next = resetTeamRoster(team, rosterId, revision > 0 ? crypto.randomUUID() : team.uuid);
     // A saved team keeps its identity; switching creates a separate team.
     if (revision > 0) {
       setSwitchingRoster(true);
@@ -166,10 +129,7 @@ export function TeamEditor({
         router.replace(`/teams/${next.uuid}`, { scroll: false });
         setPendingRoster(null);
       } catch {
-        toast.add({
-          type: "error",
-          title: t(isAuthenticated ? "saveFailed" : "storageError"),
-        });
+        toast.add({ type: "error", title: t(isAuthenticated ? "saveFailed" : "storageError") });
       } finally {
         setSwitchingRoster(false);
       }
@@ -189,10 +149,7 @@ export function TeamEditor({
       else storeDraft(duplicate, null, 0);
       router.push(`/teams/${duplicate.uuid}`);
     } catch {
-      toast.add({
-        type: "error",
-        title: t(isAuthenticated ? "saveFailed" : "storageError"),
-      });
+      toast.add({ type: "error", title: t(isAuthenticated ? "saveFailed" : "storageError") });
       if (isAuthenticated) {
         try {
           storeDraft(duplicate, draftSync.account, 0);
@@ -218,18 +175,13 @@ export function TeamEditor({
     const pairs = starPairs;
     const pair = pairs.find((p) => p.includes(id)) ?? [id],
       add = pair.filter((s) => !team.stars.includes(s));
-    if (
-      starChoices([...team.stars, ...add]).length > 2 ||
-      totals.playerCount + add.length > 16
-    )
-      return;
+    if (starChoices([...team.stars, ...add]).length > 2 || totals.playerCount + add.length > 16) return;
     change({ ...team, stars: [...team.stars, ...add] });
     setDialog(null);
   }
   const allowedStars = stars.filter(
     (s) =>
-      (!starPairs.some((p) => p.includes(s.id)) ||
-        starPairs.find((p) => p.includes(s.id))?.[0] === s.id) &&
+      (!starPairs.some((p) => p.includes(s.id)) || starPairs.find((p) => p.includes(s.id))?.[0] === s.id) &&
       starEligible(team, s) &&
       !team.stars.includes(s.id) &&
       s.name.toLowerCase().includes(search.toLowerCase()),
@@ -249,14 +201,7 @@ export function TeamEditor({
             {leagueNotice}
           </>
         }
-        status={
-          !readOnly && (
-            <TeamSaveStatus
-              state={autosave}
-              isAuthenticated={isAuthenticated}
-            />
-          )
-        }
+        status={!readOnly && <TeamSaveStatus state={autosave} isAuthenticated={isAuthenticated} />}
         actions={
           <>
             <Button
@@ -278,45 +223,24 @@ export function TeamEditor({
               />
             )}
             <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button
-                    size="sm"
-                    className="h-11 flex-1 sm:h-9 sm:flex-none"
-                  />
-                }
-              >
+              <DropdownMenuTrigger render={<Button size="sm" className="h-11 flex-1 sm:h-9 sm:flex-none" />}>
                 <Printer className="size-4" />
                 {t("print")}
                 <ChevronDown className="size-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-44">
-                <DropdownMenuItem
-                  className="min-h-11 sm:min-h-8"
-                  onClick={() => void print("portrait")}
-                >
+                <DropdownMenuItem className="min-h-11 sm:min-h-8" onClick={() => void print("portrait")}>
                   <RectangleVertical aria-hidden="true" className="size-4" />
                   {t("verticalPdf")}
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="min-h-11 sm:min-h-8"
-                  onClick={() => void print("landscape")}
-                >
+                <DropdownMenuItem className="min-h-11 sm:min-h-8" onClick={() => void print("landscape")}>
                   <RectangleHorizontal aria-hidden="true" className="size-4" />
                   {t("horizontalPdf")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-11 flex-1 sm:hidden"
-                  />
-                }
-              >
+              <DropdownMenuTrigger render={<Button variant="outline" size="sm" className="h-11 flex-1 sm:hidden" />}>
                 <Ellipsis className="size-4" />
                 {t("teamActions")}
               </DropdownMenuTrigger>
@@ -334,10 +258,7 @@ export function TeamEditor({
           </>
         }
         title={
-          <h1
-            className="page-heading team-heading min-w-0 truncate"
-            title={team.name || t("untitled")}
-          >
+          <h1 className="page-heading team-heading min-w-0 truncate" title={team.name || t("untitled")}>
             {readOnly ? (
               team.name || t("untitled")
             ) : (
@@ -355,17 +276,12 @@ export function TeamEditor({
           <Badge
             variant="outline"
             className="h-auto min-h-6 max-w-full whitespace-normal text-left"
-            render={
-              <Link href={`/rosters/${roster.id}?ruleset=${team.rulesetId}`} />
-            }
+            render={<Link href={`/rosters/${roster.id}?ruleset=${team.rulesetId}`} />}
           >
             <RosterIcon rosterId={roster.id} className="size-4" />
             {roster.name}
           </Badge>
-          <Badge
-            variant="outline"
-            className="h-auto min-h-6 max-w-full whitespace-normal text-left"
-          >
+          <Badge variant="outline" className="h-auto min-h-6 max-w-full whitespace-normal text-left">
             {rules.name}
           </Badge>
           {readOnly && <Badge variant="outline">{t("viewOnly")}</Badge>}
@@ -376,24 +292,13 @@ export function TeamEditor({
           league={leagueContext.league}
           canRegister={leagueContext.canRegister}
           team={team}
-          pending={
-            autosave.cloudPending ||
-            autosave.dirty ||
-            autosave.saving ||
-            revision === 0
-          }
+          pending={autosave.cloudPending || autosave.dirty || autosave.saving || revision === 0}
           experienced={server?.leagueExperienced}
         />
       )}
       <div className="budget-grid">
         <div className="@container space-y-5">
-          {!readOnly && (
-            <PlayerRecruitment
-              key={`${team.uuid}:${team.rosterId}`}
-              team={team}
-              onChange={change}
-            />
-          )}
+          {!readOnly && <PlayerRecruitment key={`${team.uuid}:${team.rosterId}`} team={team} onChange={change} />}
           <section aria-labelledby="players-title" className="min-w-0">
             <div className="mb-2 flex items-center justify-between gap-3 px-1">
               <h2 id="players-title" className="section-title">
@@ -409,21 +314,13 @@ export function TeamEditor({
                   {t("emptyRosterHint")}
                 </p>
               ) : (
-                <Table
-                  aria-label={t("players")}
-                  className="player-table min-w-[740px] table-auto lg:table-fixed"
-                >
+                <Table aria-label={t("players")} className="player-table min-w-[740px] table-auto lg:table-fixed">
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-10 px-2 text-left">#</TableHead>
-                      <TableHead className="w-48 lg:w-64">
-                        {t("player")}
-                      </TableHead>
+                      <TableHead className="w-48 lg:w-64">{t("player")}</TableHead>
                       {["MA", "ST", "AG", "PA", "AV"].map((x) => (
-                        <TableHead
-                          key={x}
-                          className="w-8 text-center font-mono text-xs"
-                        >
+                        <TableHead key={x} className="w-8 text-center font-mono text-xs">
                           {x}
                         </TableHead>
                       ))}
@@ -433,9 +330,7 @@ export function TeamEditor({
                           <RuleHelp
                             title={t("teamCaptain")}
                             description={t("teamSpecialRules.captain")}
-                            label={t("explainRule", {
-                              name: t("teamCaptain"),
-                            })}
+                            label={t("explainRule", { name: t("teamCaptain") })}
                             fullDescription
                             className="inline-flex items-center justify-center hover:text-primary"
                           >
@@ -450,9 +345,7 @@ export function TeamEditor({
                           <RuleHelp
                             title={t("sevensVeteran")}
                             description={t("sevensVeteranHelp")}
-                            label={t("explainRule", {
-                              name: t("sevensVeteran"),
-                            })}
+                            label={t("explainRule", { name: t("sevensVeteran") })}
                             fullDescription
                             className="inline-flex items-center justify-center hover:text-primary"
                           >
@@ -462,19 +355,15 @@ export function TeamEditor({
                           </RuleHelp>
                         </TableHead>
                       )}
-                      <TableHead className="w-12 px-1 text-right text-xs">
-                        {t("cost")}
-                      </TableHead>
+                      <TableHead className="w-12 px-1 text-right text-xs">{t("cost")}</TableHead>
                       <TableHead className="no-print w-8 px-1">
                         <span className="sr-only">{t("managePlayer")}</span>
                       </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {numberedPlayers(team.players).map((p, index) => {
-                      const pos = roster.players.find(
-                        (x) => x.id === p.positionId,
-                      );
+                    {numberedPlayers(team.players).map((p) => {
+                      const pos = roster.players.find((x) => x.id === p.positionId);
                       if (!pos) return null;
                       return (
                         <TableRow
@@ -483,19 +372,11 @@ export function TeamEditor({
                           tabIndex={0}
                           aria-label={`${t("managePlayer")} · ${p.name || positionLabel(pos.position)}`}
                           onClick={(event) => {
-                            if (
-                              (event.target as HTMLElement).closest(
-                                "button, a, input, [role=checkbox]",
-                              )
-                            )
-                              return;
+                            if ((event.target as HTMLElement).closest("button, a, input, [role=checkbox]")) return;
                             setSelected(p.id);
                           }}
                           onKeyDown={(event) => {
-                            if (
-                              event.target === event.currentTarget &&
-                              ["Enter", " "].includes(event.key)
-                            ) {
+                            if (event.target === event.currentTarget && ["Enter", " "].includes(event.key)) {
                               event.preventDefault();
                               setSelected(p.id);
                             }
@@ -506,31 +387,19 @@ export function TeamEditor({
                               p.number
                             ) : (
                               <>
-                                <span className="hidden print:inline">
-                                  {p.number}
-                                </span>
+                                <span className="hidden print:inline">{p.number}</span>
                                 <span className="no-print">
-                                  <InlinePlayerNumber
-                                    team={team}
-                                    playerId={p.id}
-                                    onChange={change}
-                                  />
+                                  <InlinePlayerNumber team={team} playerId={p.id} onChange={change} />
                                 </span>
                               </>
                             )}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              <PlayerIcon
-                                positionId={pos.id}
-                                variant={index}
-                                className="size-8"
-                              />
+                              <PlayerIcon positionId={pos.id} className="size-8" />
                               <div className="lg:min-w-0">
                                 {readOnly ? (
-                                  <strong className="text-sm">
-                                    {p.name || positionLabel(pos.position)}
-                                  </strong>
+                                  <strong className="text-sm">{p.name || positionLabel(pos.position)}</strong>
                                 ) : (
                                   <>
                                     <strong className="hidden text-sm print:block">
@@ -539,39 +408,25 @@ export function TeamEditor({
                                     <div className="no-print inline-flex items-start gap-1 lg:max-w-full">
                                       <InlinePlayerName
                                         value={p.name}
-                                        designation={positionLabel(
-                                          pos.position,
-                                        )}
+                                        designation={positionLabel(pos.position)}
                                         label={t("playerName")}
                                         onChange={(name) =>
                                           change({
                                             ...team,
-                                            players: team.players.map(
-                                              (player) =>
-                                                player.id === p.id
-                                                  ? { ...player, name }
-                                                  : player,
+                                            players: team.players.map((player) =>
+                                              player.id === p.id ? { ...player, name } : player,
                                             ),
                                           })
                                         }
                                       />
-                                      <RemovePlayerButton
-                                        team={team}
-                                        selected={p.id}
-                                        onChange={change}
-                                        compact
-                                      />
+                                      <RemovePlayerButton team={team} selected={p.id} onChange={change} compact />
                                     </div>
                                   </>
                                 )}
-                                {hasPlayerName(
-                                  p.name,
-                                  positionLabel(pos.position),
-                                ) && (
+                                {hasPlayerName(p.name, positionLabel(pos.position)) && (
                                   <p
                                     className={
-                                      (readOnly ? "" : "hidden print:block ") +
-                                      "mt-0.5 text-xs text-muted-foreground"
+                                      (readOnly ? "" : "hidden print:block ") + "mt-0.5 text-xs text-muted-foreground"
                                     }
                                   >
                                     {positionLabel(pos.position)}
@@ -580,17 +435,8 @@ export function TeamEditor({
                               </div>
                             </div>
                           </TableCell>
-                          {[
-                            playerMovement(team, p.id, pos),
-                            pos.st,
-                            pos.ag,
-                            pos.pa,
-                            pos.av,
-                          ].map((x, i) => (
-                            <TableCell
-                              key={i}
-                              className="text-center font-mono text-xs"
-                            >
+                          {[playerMovement(team, p.id, pos), pos.st, pos.ag, pos.pa, pos.av].map((x, i) => (
+                            <TableCell key={i} className="text-center font-mono text-xs">
                               {x}
                             </TableCell>
                           ))}
@@ -606,20 +452,13 @@ export function TeamEditor({
                                         ...team,
                                         players: team.players.map((player) =>
                                           player.id === p.id
-                                            ? {
-                                                ...player,
-                                                skills: player.skills.filter(
-                                                  (id) => id !== skillId,
-                                                ),
-                                              }
+                                            ? { ...player, skills: player.skills.filter((id) => id !== skillId) }
                                             : player,
                                         ),
                                       })
                               }
                               captain={team.captainId === p.id}
-                              veteran={
-                                isSevens(team) && team.veteranId === p.id
-                              }
+                              veteran={isSevens(team) && team.veteranId === p.id}
                               label={t("skills")}
                             />
                           </TableCell>
@@ -635,19 +474,18 @@ export function TeamEditor({
                                   <Tooltip
                                     disabled={
                                       !(
-                                        team.rulesetId ===
-                                          "kyiv-seven-sins-sevens" &&
+                                        team.rulesetId === "kyiv-seven-sins-sevens" &&
                                         totals.tier === 2 &&
                                         p.skills.length > 0
                                       )
                                     }
                                   >
                                     <TooltipTrigger
+                                      // The rendered label wraps the Checkbox below, which supplies its accessible name.
+                                      // oxlint-disable-next-line jsx-a11y/label-has-associated-control
                                       render={<label />}
                                       className="inline-flex size-8 items-center justify-center"
-                                      onClick={(event) =>
-                                        event.stopPropagation()
-                                      }
+                                      onClick={(event) => event.stopPropagation()}
                                     >
                                       <Checkbox
                                         checked={team.captainId === p.id}
@@ -658,27 +496,17 @@ export function TeamEditor({
                                           if (checked) {
                                             next.captainId = p.id;
                                             if (!isSevens(team))
-                                              next.players = team.players.map(
-                                                (player) =>
-                                                  player.id === p.id
-                                                    ? {
-                                                        ...player,
-                                                        skills:
-                                                          player.skills.filter(
-                                                            (id) =>
-                                                              id !== "pro",
-                                                          ),
-                                                      }
-                                                    : player,
+                                              next.players = team.players.map((player) =>
+                                                player.id === p.id
+                                                  ? { ...player, skills: player.skills.filter((id) => id !== "pro") }
+                                                  : player,
                                               );
                                           } else delete next.captainId;
                                           change(next);
                                         }}
                                       />
                                     </TooltipTrigger>
-                                    <TooltipContent>
-                                      {t("sevensCaptainSkillConflict")}
-                                    </TooltipContent>
+                                    <TooltipContent>{t("sevensCaptainSkillConflict")}</TooltipContent>
                                   </Tooltip>
                                 )}
                             </TableCell>
@@ -686,6 +514,8 @@ export function TeamEditor({
                           {isSevens(team) && (
                             <TableCell className="px-1 text-center [&:has([role=checkbox])]:pr-1">
                               {isLineman(pos) && (
+                                // The Checkbox has its own accessible name and keyboard handling; only stop row clicks here.
+                                // oxlint-disable-next-line jsx-a11y/label-has-associated-control, jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
                                 <label
                                   className="inline-flex size-8 items-center justify-center"
                                   onClick={(event) => event.stopPropagation()}
@@ -707,10 +537,7 @@ export function TeamEditor({
                           )}
                           <TableCell className="px-1 text-right font-mono text-xs tabular-nums">
                             {gold(
-                              pos.cost +
-                                (rules.id === "bb2025-default"
-                                  ? playerSkillCost(team, pos, p.skills)
-                                  : 0),
+                              pos.cost + (rules.id === "bb2025-default" ? playerSkillCost(team, pos, p.skills) : 0),
                             )}
                           </TableCell>
                           <TableCell className="no-print px-1">
@@ -732,18 +559,10 @@ export function TeamEditor({
                             tabIndex={0}
                             aria-label={`${t("managePlayer")} · ${s.name}`}
                             onClick={(event) => {
-                              if (
-                                !(event.target as HTMLElement).closest(
-                                  "button, a",
-                                )
-                              )
-                                setSelected(id);
+                              if (!(event.target as HTMLElement).closest("button, a")) setSelected(id);
                             }}
                             onKeyDown={(event) => {
-                              if (
-                                event.target === event.currentTarget &&
-                                ["Enter", " "].includes(event.key)
-                              ) {
+                              if (event.target === event.currentTarget && ["Enter", " "].includes(event.key)) {
                                 event.preventDefault();
                                 setSelected(id);
                               }
@@ -754,13 +573,8 @@ export function TeamEditor({
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
-                                <StarPlayerIcon
-                                  starId={s.id}
-                                  className="size-10"
-                                />
-                                <strong className="hidden text-sm print:block">
-                                  {s.name}
-                                </strong>
+                                <StarPlayerIcon starId={s.id} className="size-10" />
+                                <strong className="hidden text-sm print:block">{s.name}</strong>
                                 <div className="no-print inline-flex items-center gap-1 lg:min-w-0">
                                   <button
                                     className="text-left text-sm font-semibold lg:min-w-0 lg:truncate"
@@ -770,21 +584,13 @@ export function TeamEditor({
                                     {s.name}
                                   </button>
                                   {!readOnly && (
-                                    <RemovePlayerButton
-                                      team={team}
-                                      selected={id}
-                                      onChange={change}
-                                      compact
-                                    />
+                                    <RemovePlayerButton team={team} selected={id} onChange={change} compact />
                                   )}
                                 </div>
                               </div>
                             </TableCell>
                             {[s.ma, s.st, s.ag, s.pa, s.av].map((x, i) => (
-                              <TableCell
-                                key={i}
-                                className="text-center font-mono text-xs"
-                              >
+                              <TableCell key={i} className="text-center font-mono text-xs">
                                 {x}
                               </TableCell>
                             ))}
@@ -818,8 +624,7 @@ export function TeamEditor({
                       disabled={
                         starChoices(team.stars).length >= 2 ||
                         totals.playerCount >= 16 ||
-                        (rules.id === "world-cup-2027" &&
-                          team.players.length < 11)
+                        (rules.id === "world-cup-2027" && team.players.length < 11)
                       }
                       onClick={() => {
                         setDialog("stars");
@@ -830,9 +635,7 @@ export function TeamEditor({
                       {t("addStar")}
                     </Button>
                   ) : (
-                    <p className="py-1 text-xs text-muted-foreground">
-                      {t("noStars")}
-                    </p>
+                    <p className="py-1 text-xs text-muted-foreground">{t("noStars")}</p>
                   )}
                 </div>
               )}
@@ -849,20 +652,13 @@ export function TeamEditor({
                   <EditorSelect
                     value={team.rulesetId}
                     onChange={(e) => {
-                      const next = {
-                        ...team,
-                        rulesetId: e.target.value as Team["rulesetId"],
-                      };
+                      const next = { ...team, rulesetId: e.target.value as Team["rulesetId"] };
                       if (!isSevens(next)) delete next.veteranId;
                       change(next);
                     }}
                   >
                     {rulesets.map((r) => (
-                      <option
-                        key={r.id}
-                        value={r.id}
-                        disabled={r.excludedRosters?.includes(team.rosterId)}
-                      >
+                      <option key={r.id} value={r.id} disabled={r.excludedRosters?.includes(team.rosterId)}>
                         {r.name}
                       </option>
                     ))}
@@ -893,20 +689,9 @@ export function TeamEditor({
                     <SpecialRules names={["Favoured of…"]} />
                     <EditorSelect
                       value={team.favouredOf}
-                      onChange={(e) =>
-                        change({
-                          ...team,
-                          favouredOf: e.target.value as Team["favouredOf"],
-                        })
-                      }
+                      onChange={(e) => change({ ...team, favouredOf: e.target.value as Team["favouredOf"] })}
                     >
-                      {[
-                        "Undivided",
-                        "Khorne",
-                        "Nurgle",
-                        "Slaanesh",
-                        "Tzeentch",
-                      ].map((x) => (
+                      {["Undivided", "Khorne", "Nurgle", "Slaanesh", "Tzeentch"].map((x) => (
                         <option key={x}>{x}</option>
                       ))}
                     </EditorSelect>
@@ -917,12 +702,7 @@ export function TeamEditor({
                     {t("norseLeague")}
                     <EditorSelect
                       value={team.norseLeague}
-                      onChange={(e) =>
-                        change({
-                          ...team,
-                          norseLeague: e.target.value as Team["norseLeague"],
-                        })
-                      }
+                      onChange={(e) => change({ ...team, norseLeague: e.target.value as Team["norseLeague"] })}
                     >
                       <option>Old World Classic</option>
                       <option>Chaos Clash</option>
@@ -941,15 +721,8 @@ export function TeamEditor({
             </section>
           )}
 
-          <TeamBudget
-            team={team}
-            floating={!readOnly}
-            startingTreasury={leagueContext?.league.startingTreasury}
-          />
-          <TeamReadiness
-            team={team}
-            startingTreasury={leagueContext?.league.startingTreasury}
-          />
+          <TeamBudget team={team} floating={!readOnly} startingTreasury={leagueContext?.league.startingTreasury} />
+          <TeamReadiness team={team} startingTreasury={leagueContext?.league.startingTreasury} />
         </aside>
       </div>
       <Dialog
@@ -962,9 +735,7 @@ export function TeamEditor({
           <DialogHeader>
             <DialogTitle>{t("switchTeamTitle")}</DialogTitle>
             <DialogDescription>
-              {t("switchTeamWarning", {
-                team: getRoster(pendingRoster ?? "")?.name ?? "",
-              })}
+              {t("switchTeamWarning", { team: getRoster(pendingRoster ?? "")?.name ?? "" })}
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2">
@@ -991,9 +762,7 @@ export function TeamEditor({
       >
         <DialogContent className="star-recruitment flex max-h-[85dvh] flex-col overflow-hidden sm:max-w-5xl">
           <DialogHeader>
-            <DialogTitle className="display-font text-3xl">
-              {t("addStar")}
-            </DialogTitle>
+            <DialogTitle className="display-font text-3xl">{t("addStar")}</DialogTitle>
             <DialogDescription>{t("starHint")}</DialogDescription>
           </DialogHeader>
           <>
@@ -1003,29 +772,18 @@ export function TeamEditor({
               placeholder={t("searchRosters")}
               aria-label={t("starPlayers")}
             />
-            <div
-              className="min-h-0 overflow-auto rounded-lg border bg-card"
-              data-star-player-list
-            >
-              <Table
-                className="min-w-[740px] table-auto md:table-fixed"
-                aria-label={t("starPlayers")}
-              >
+            <div className="min-h-0 overflow-auto rounded-lg border bg-card" data-star-player-list>
+              <Table className="min-w-[740px] table-auto md:table-fixed" aria-label={t("starPlayers")}>
                 <TableHeader className="sticky top-0 z-10 bg-card">
                   <TableRow>
                     <TableHead className="w-48 pl-3">{t("player")}</TableHead>
                     {["MA", "ST", "AG", "PA", "AV"].map((stat) => (
-                      <TableHead
-                        key={stat}
-                        className="w-8 text-center font-mono text-xs"
-                      >
+                      <TableHead key={stat} className="w-8 text-center font-mono text-xs">
                         {stat}
                       </TableHead>
                     ))}
                     <TableHead>{t("skills")}</TableHead>
-                    <TableHead className="w-14 text-right">
-                      {t("cost")}
-                    </TableHead>
+                    <TableHead className="w-14 text-right">{t("cost")}</TableHead>
                     <TableHead className="sticky right-0 w-14 bg-card pr-3">
                       <span className="sr-only">{t("addStar")}</span>
                     </TableHead>
@@ -1033,60 +791,33 @@ export function TeamEditor({
                 </TableHeader>
                 <TableBody>
                   {allowedStars.flatMap((choice) => {
-                    const pair = starPairs.find((pair) =>
-                      pair.includes(choice.id),
-                    ) ?? [choice.id];
-                    const members = pair.map((id) =>
-                      stars.find((star) => star.id === id)!,
-                    );
+                    const pair = starPairs.find((pair) => pair.includes(choice.id)) ?? [choice.id];
+                    const members = pair.map((id) => stars.find((star) => star.id === id)!);
                     return members.map((star, index) => (
                       <TableRow key={star.id} className="h-12">
                         <TableCell className="pl-3">
                           <div className="flex items-center gap-2">
-                            <StarPlayerIcon
-                              starId={star.id}
-                              className="size-8"
-                            />
-                            <strong
-                              className="truncate text-sm"
-                              title={star.name}
-                            >
+                            <StarPlayerIcon starId={star.id} className="size-8" />
+                            <strong className="truncate text-sm" title={star.name}>
                               {star.name}
                             </strong>
                           </div>
                         </TableCell>
-                        {[star.ma, star.st, star.ag, star.pa, star.av].map(
-                          (stat, i) => (
-                            <TableCell
-                              key={i}
-                              className="text-center font-mono text-xs"
-                            >
-                              {stat}
-                            </TableCell>
-                          ),
-                        )}
+                        {[star.ma, star.st, star.ag, star.pa, star.av].map((stat, i) => (
+                          <TableCell key={i} className="text-center font-mono text-xs">
+                            {stat}
+                          </TableCell>
+                        ))}
                         <TableCell>
-                          <TableSkills
-                            ids={star.skills}
-                            label={t("skills") + " · " + star.name}
-                          />
+                          <TableSkills ids={star.skills} label={t("skills") + " · " + star.name} />
                         </TableCell>
-                        <TableCell className="text-right font-mono text-xs">
-                          {star.cost / 1000}k
-                        </TableCell>
+                        <TableCell className="text-right font-mono text-xs">{star.cost / 1000}k</TableCell>
                         {index === 0 && (
-                          <TableCell
-                            rowSpan={members.length}
-                            className="sticky right-0 bg-card pr-3 text-right"
-                          >
+                          <TableCell rowSpan={members.length} className="sticky right-0 bg-card pr-3 text-right">
                             <Button
                               size="icon"
                               className="size-8"
-                              aria-label={t("hireStarPlayer", {
-                                player: members
-                                  .map((star) => star.name)
-                                  .join(" & "),
-                              })}
+                              aria-label={t("hireStarPlayer", { player: members.map((star) => star.name).join(" & ") })}
                               onClick={() => hireStar(choice.id)}
                             >
                               <Plus className="size-4" />
@@ -1098,10 +829,7 @@ export function TeamEditor({
                   })}
                   {!allowedStars.length && (
                     <TableRow>
-                      <TableCell
-                        colSpan={9}
-                        className="py-6 text-center text-sm text-muted-foreground"
-                      >
+                      <TableCell colSpan={9} className="py-6 text-center text-sm text-muted-foreground">
                         {t("noStars")}
                       </TableCell>
                     </TableRow>
@@ -1115,18 +843,11 @@ export function TeamEditor({
           </Button>
         </DialogContent>
       </Dialog>
-      <AlertDialog
-        open={copyConfirmationOpen}
-        onOpenChange={setCopyConfirmationOpen}
-      >
+      <AlertDialog open={copyConfirmationOpen} onOpenChange={setCopyConfirmationOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {t("confirmCopyTeam", { name: team.name || t("untitled") })}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("confirmCopyTeamHint")}
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t("confirmCopyTeam", { name: team.name || t("untitled") })}</AlertDialogTitle>
+            <AlertDialogDescription>{t("confirmCopyTeamHint")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>

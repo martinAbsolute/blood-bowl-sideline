@@ -6,11 +6,7 @@ export function HistoryLoading({ label }: { label: string }) {
     <div role="status" aria-label={label} className="space-y-4">
       <span className="sr-only">{label}</span>
       {[0, 1, 2].map((index) => (
-        <div
-          key={index}
-          aria-hidden="true"
-          className="space-y-2 border-b pb-4 last:border-0"
-        >
+        <div key={index} aria-hidden="true" className="space-y-2 border-b pb-4 last:border-0">
           <Skeleton className="h-4 w-3/4" />
           <Skeleton className="h-3 w-40 max-w-full" />
         </div>
@@ -24,11 +20,7 @@ export function LeagueCardsLoading({ label }: { label: string }) {
     <div role="status" className="grid gap-4 xl:grid-cols-2">
       <span className="sr-only">{label}</span>
       {[0, 1, 2].map((index) => (
-        <Card
-          key={index}
-          aria-hidden="true"
-          className="gap-0 overflow-hidden rounded-lg py-0 shadow-none"
-        >
+        <Card key={index} aria-hidden="true" className="gap-0 overflow-hidden rounded-lg py-0 shadow-none">
           <div className="flex items-start gap-3 bg-primary p-4 [&_[data-slot=skeleton]]:bg-white/15">
             <Skeleton className="size-10 shrink-0 rounded-lg" />
             <div className="min-w-0 flex-1 space-y-2">
@@ -51,10 +43,7 @@ export function LeagueCardsLoading({ label }: { label: string }) {
 
 export function UsersLoading({ label }: { label: string }) {
   return (
-    <div
-      role="status"
-      className="divide-y overflow-hidden rounded-xl border bg-card"
-    >
+    <div role="status" className="divide-y overflow-hidden rounded-xl border bg-card">
       <span className="sr-only">{label}</span>
       {[0, 1, 2].map((index) => (
         <div key={index} aria-hidden="true" className="p-4 sm:px-5">

@@ -15,9 +15,7 @@ afterEach(() => {
 it.each(["http://localhost:3000", "https://app.test", "https://app.test/"])(
   "completes code + PKCE + state + signed ID-token exchange with auth origin %s",
   async (siteUrl) => {
-    const authOrigin = siteUrl.startsWith("https://")
-      ? new URL(siteUrl).origin
-      : "https://test.convex.site";
+    const authOrigin = siteUrl.startsWith("https://") ? new URL(siteUrl).origin : "https://test.convex.site";
     const clientId = "8809799343",
       signer = generateKeyPairSync("rsa", { modulusLength: 2048 }),
       telegram = await telegramSigningKey;
@@ -25,22 +23,11 @@ it.each(["http://localhost:3000", "https://app.test", "https://app.test/"])(
     vi.stubEnv("TELEGRAM_CLIENT_SECRET", "test-secret");
     vi.stubEnv(
       "JWT_PRIVATE_KEY",
-      signer.privateKey
-        .export({ type: "pkcs8", format: "pem" })
-        .trimEnd()
-        .replace(/\n/g, " "),
+      signer.privateKey.export({ type: "pkcs8", format: "pem" }).trimEnd().replace(/\n/g, " "),
     );
     vi.stubEnv("CONVEX_SITE_URL", "https://test.convex.site");
     vi.stubEnv("SITE_URL", siteUrl);
-    const jwks = {
-      keys: [
-        {
-          ...(await exportJWK(telegram.publicKey)),
-          kid: "flow-test",
-          alg: "RS256",
-        },
-      ],
-    };
+    const jwks = { keys: [{ ...(await exportJWK(telegram.publicKey)), kid: "flow-test", alg: "RS256" }] };
     const idToken = await new SignJWT({ name: "OIDC test coach" })
       .setProtectedHeader({ alg: "RS256", kid: "flow-test" })
       .setSubject("fixture-subject")
@@ -70,14 +57,8 @@ it.each(["http://localhost:3000", "https://app.test", "https://app.test/"])(
         if (url.endsWith("/token")) {
           tokenCalls++;
           const body = new URLSearchParams(String(init?.body));
-          expect(body.get("redirect_uri")).toBe(
-            `${authOrigin}/api/auth/callback/telegram`,
-          );
-          expect(
-            createHash("sha256")
-              .update(body.get("code_verifier")!)
-              .digest("base64url"),
-          ).toBe(challenge);
+          expect(body.get("redirect_uri")).toBe(`${authOrigin}/api/auth/callback/telegram`);
+          expect(createHash("sha256").update(body.get("code_verifier")!).digest("base64url")).toBe(challenge);
           expect(new Headers(init?.headers).get("Authorization")).toBe(
             `Basic ${Buffer.from(`${clientId}:test-secret`).toString("base64")}`,
           );
@@ -92,19 +73,14 @@ it.each(["http://localhost:3000", "https://app.test", "https://app.test/"])(
       }),
     );
     const t = convexTest(schema, modules);
-    const beginning = await t.action(api.auth.signIn, {
-      provider: "telegram",
-      params: { redirectTo: "/builder" },
-    });
+    const beginning = await t.action(api.auth.signIn, { provider: "telegram", params: { redirectTo: "/builder" } });
     const redirect = new URL(beginning.redirect!);
     expect(redirect.origin).toBe(authOrigin);
     const signin = await t.fetch(redirect.pathname + redirect.search);
     expect(signin.status).toBe(302);
     const authorization = new URL(signin.headers.get("Location")!);
     expect(authorization.origin).toBe(TELEGRAM_ISSUER);
-    expect(authorization.searchParams.get("code_challenge_method")).toBe(
-      "S256",
-    );
+    expect(authorization.searchParams.get("code_challenge_method")).toBe("S256");
     expect(authorization.searchParams.get("scope")).toBe("openid profile");
     challenge = authorization.searchParams.get("code_challenge")!;
     const cookies = signin.headers
@@ -112,16 +88,14 @@ it.each(["http://localhost:3000", "https://app.test", "https://app.test/"])(
       .map((c) => c.split(";")[0])
       .join("; ");
     const state = authorization.searchParams.get("state")!;
-    const invalid = await t.fetch(
-      `/api/auth/callback/telegram?code=fixture-code&state=invalid`,
-      { headers: { Cookie: cookies } },
-    );
+    const invalid = await t.fetch(`/api/auth/callback/telegram?code=fixture-code&state=invalid`, {
+      headers: { Cookie: cookies },
+    });
     expect(invalid.status).toBe(302);
     expect(tokenCalls).toBe(0);
-    const callback = await t.fetch(
-      `/api/auth/callback/telegram?code=fixture-code&state=${encodeURIComponent(state)}`,
-      { headers: { Cookie: cookies } },
-    );
+    const callback = await t.fetch(`/api/auth/callback/telegram?code=fixture-code&state=${encodeURIComponent(state)}`, {
+      headers: { Cookie: cookies },
+    });
     expect(callback.status).toBe(302);
     expect(tokenCalls).toBe(1);
     const completion = new URL(callback.headers.get("Location")!);
@@ -129,14 +103,9 @@ it.each(["http://localhost:3000", "https://app.test", "https://app.test/"])(
     expect(completion.pathname).toBe("/builder");
     const code = completion.searchParams.get("code");
     expect(code).toBeTruthy();
-    const session = await t.action(api.auth.signIn, {
-      params: { code: code! },
-      verifier: beginning.verifier,
-    });
+    const session = await t.action(api.auth.signIn, { params: { code: code! }, verifier: beginning.verifier });
     expect(session.tokens?.token).toBeTruthy();
-    expect(
-      await t.run((ctx) => ctx.db.query("authAccounts").collect()),
-    ).toHaveLength(1);
+    expect(await t.run((ctx) => ctx.db.query("authAccounts").collect())).toHaveLength(1);
   },
 );
 
@@ -144,12 +113,9 @@ it.each([
   [undefined, undefined, false],
   ["client-id", undefined, false],
   ["client-id", "client-secret", true],
-])(
-  "reports Telegram readiness from backend credentials",
-  async (clientId, clientSecret, configured) => {
-    vi.stubEnv("TELEGRAM_CLIENT_ID", clientId);
-    vi.stubEnv("TELEGRAM_CLIENT_SECRET", clientSecret);
-    const t = convexTest(schema, modules);
-    expect(await t.action(api.auth.isTelegramConfigured, {})).toBe(configured);
-  },
-);
+])("reports Telegram readiness from backend credentials", async (clientId, clientSecret, configured) => {
+  vi.stubEnv("TELEGRAM_CLIENT_ID", clientId);
+  vi.stubEnv("TELEGRAM_CLIENT_SECRET", clientSecret);
+  const t = convexTest(schema, modules);
+  expect(await t.action(api.auth.isTelegramConfigured, {})).toBe(configured);
+});

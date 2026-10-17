@@ -1,35 +1,23 @@
 import Image from "next/image";
 import { Shield, Star, Users } from "lucide-react";
-import {
-  getPositionArtwork,
-  getStarArtwork,
-  type PlayerArtwork,
-} from "@/domain/player-icons";
+import { getPositionArtwork, getStarArtwork, getRosterIconSrc, type PlayerArtwork } from "@/domain/player-icons";
 import { getRoster } from "@/domain/catalog";
 import { cn } from "@/lib/utils";
 
 function Artwork({
   artwork,
-  variant = 0,
   className,
   fallback: Fallback,
 }: {
   artwork?: PlayerArtwork;
-  variant?: number;
   className?: string;
   fallback: typeof Users;
 }) {
   return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        "inline-flex size-12 shrink-0 items-center justify-center",
-        className,
-      )}
-    >
+    <span aria-hidden="true" className={cn("inline-flex size-12 shrink-0 items-center justify-center", className)}>
       {artwork ? (
         <Image
-          src={artwork.variants[Math.abs(variant) % artwork.variants.length]}
+          src={artwork.src}
           width={artwork.width}
           height={artwork.height}
           alt=""
@@ -43,40 +31,13 @@ function Artwork({
     </span>
   );
 }
-export function PlayerIcon({
-  positionId,
-  variant,
-  className,
-}: {
-  positionId: string;
-  variant?: number;
-  className?: string;
-}) {
-  return (
-    <Artwork
-      artwork={getPositionArtwork(positionId)}
-      variant={variant}
-      className={className}
-      fallback={Users}
-    />
-  );
+export function PlayerIcon({ positionId, className }: { positionId: string; className?: string }) {
+  return <Artwork artwork={getPositionArtwork(positionId)} className={className} fallback={Users} />;
 }
-export function RosterIcon({
-  rosterId,
-  className,
-}: {
-  rosterId: string;
-  className?: string;
-}) {
-  const iconUrl = `/assets/team-icons/${rosterId}.svg`;
+export function RosterIcon({ rosterId, className }: { rosterId: string; className?: string }) {
+  const iconUrl = getRosterIconSrc(rosterId);
   return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        "inline-flex size-12 shrink-0 items-center justify-center",
-        className,
-      )}
-    >
+    <span aria-hidden="true" className={cn("inline-flex size-12 shrink-0 items-center justify-center", className)}>
       {getRoster(rosterId) ? (
         <span
           className="block size-full bg-current"
@@ -94,18 +55,6 @@ export function RosterIcon({
     </span>
   );
 }
-export function StarPlayerIcon({
-  starId,
-  className,
-}: {
-  starId: string;
-  className?: string;
-}) {
-  return (
-    <Artwork
-      artwork={getStarArtwork(starId)}
-      className={className}
-      fallback={Star}
-    />
-  );
+export function StarPlayerIcon({ starId, className }: { starId: string; className?: string }) {
+  return <Artwork artwork={getStarArtwork(starId)} className={className} fallback={Star} />;
 }

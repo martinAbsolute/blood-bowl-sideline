@@ -2,28 +2,13 @@
 
 import { translatedIssueValues } from "@/lib/translated-issue-values";
 
-import {
-  translatedSkillName,
-  skillSearchText,
-} from "@/lib/translated-skill-name";
+import { translatedSkillName, skillSearchText } from "@/lib/translated-skill-name";
 
 import { useDeferredValue, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Check, LockKeyhole, Plus, Search, X } from "lucide-react";
-import {
-  categories,
-  getRuleset,
-  getRoster,
-  skills,
-  sortSkillIds,
-} from "@/domain/catalog";
-import {
-  budgetFor,
-  playerSkillCost,
-  skillAccess,
-  teamSaveIssues,
-  tierFor,
-} from "@/domain/rules";
+import { categories, getRuleset, getRoster, skills, sortSkillIds } from "@/domain/catalog";
+import { budgetFor, playerSkillCost, skillAccess, teamSaveIssues, tierFor } from "@/domain/rules";
 import type { Position, Team } from "@/domain/types";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -63,26 +48,14 @@ export function PlayerSkillPicker({
   const otherPlayers = team.players.filter((player) => player.id !== playerId);
   const slotsRemaining = Math.max(
     0,
-    allowance -
-      otherPlayers.reduce((sum, player) => sum + player.skills.length, 0) -
-      selected.length,
+    allowance - otherPlayers.reduce((sum, player) => sum + player.skills.length, 0) - selected.length,
   );
-  const secondaryMax =
-    rules.maxSecondaryByTier?.[tier] ?? rules.maxSecondaryPerTeam;
+  const secondaryMax = rules.maxSecondaryByTier?.[tier] ?? rules.maxSecondaryPerTeam;
   const secondaryUsed =
     otherPlayers.reduce((sum, player) => {
-      const otherPosition = getRoster(team.rosterId)?.players.find(
-        (item) => item.id === player.positionId,
-      );
-      return (
-        sum +
-        player.skills.filter(
-          (id) =>
-            otherPosition && skillAccess(otherPosition, id) === "secondary",
-        ).length
-      );
-    }, 0) +
-    selected.filter((id) => skillAccess(position, id) === "secondary").length;
+      const otherPosition = getRoster(team.rosterId)?.players.find((item) => item.id === player.positionId);
+      return sum + player.skills.filter((id) => otherPosition && skillAccess(otherPosition, id) === "secondary").length;
+    }, 0) + selected.filter((id) => skillAccess(position, id) === "secondary").length;
   const secondaryRemaining = Math.max(0, secondaryMax - secondaryUsed);
   const guidance =
     kyiv &&
@@ -94,27 +67,17 @@ export function PlayerSkillPicker({
           ? "playerModal.sevensFull"
           : undefined);
   const unit = rules.skillCurrency ? t(rules.skillCurrency) : "GP";
-  const formatCost = (cost: number) =>
-    rules.skillCurrency ? `${cost} ${unit}` : `${cost / 1000}k GP`;
+  const formatCost = (cost: number) => (rules.skillCurrency ? `${cost} ${unit}` : `${cost / 1000}k GP`);
   const cost = playerSkillCost(team, position, selected);
   const full = selected.length >= max;
   const baseIssues = teamSaveIssues(team);
   function blocked(next: string[]) {
     return teamSaveIssues({
       ...team,
-      players: team.players.map((player) =>
-        player.id === playerId ? { ...player, skills: next } : player,
-      ),
-    }).find(
-      (issue) =>
-        !baseIssues.some(
-          (existing) => JSON.stringify(existing) === JSON.stringify(issue),
-        ),
-    );
+      players: team.players.map((player) => (player.id === playerId ? { ...player, skills: next } : player)),
+    }).find((issue) => !baseIssues.some((existing) => JSON.stringify(existing) === JSON.stringify(issue)));
   }
-  const available = [
-    ...new Set([...orderedSkills, ...(kyiv ? selected : [])]),
-  ].filter(
+  const available = [...new Set([...orderedSkills, ...(kyiv ? selected : [])])].filter(
     (id) =>
       (kyiv && selected.includes(id)) ||
       (skillAccess(position, id) &&
@@ -124,23 +87,17 @@ export function PlayerSkillPicker({
           (!guidance &&
             !full &&
             id !== "leader" &&
-            (skillAccess(position, id) !== "secondary" ||
-              secondaryRemaining > 0) &&
+            (skillAccess(position, id) !== "secondary" || secondaryRemaining > 0) &&
             !blocked([...selected, id]))) &&
         (category === "all" || skillsById.get(id)?.category === category) &&
         skillSearchText(id, t).includes(deferredSearch)),
   );
   const availableCategories = Object.entries(categories).filter(
-    ([, code]) =>
-      position.primarySkills.includes(code) ||
-      position.secondarySkills.includes(code),
+    ([, code]) => position.primarySkills.includes(code) || position.secondarySkills.includes(code),
   );
 
   return (
-    <section
-      className="player-skill-browser"
-      aria-label={t("playerModal.browseSkills")}
-    >
+    <section className="player-skill-browser" aria-label={t("playerModal.browseSkills")}>
       <div className="player-skill-toolbar">
         {rules.sevens && (
           <p className="mb-3 text-xs text-muted-foreground">
@@ -148,24 +105,13 @@ export function PlayerSkillPicker({
           </p>
         )}
         {kyiv && (
-          <div
-            role="status"
-            className="mb-3 space-y-1 rounded-md bg-secondary/50 p-3 text-sm"
-          >
+          <div role="status" className="mb-3 space-y-1 rounded-md bg-secondary/50 p-3 text-sm">
             {!guidance && !full && (
-              <p>
-                {t("playerModal.sevensSlots", {
-                  remaining: slotsRemaining,
-                  total: allowance,
-                })}
-              </p>
+              <p>{t("playerModal.sevensSlots", { remaining: slotsRemaining, total: allowance })}</p>
             )}
             {!guidance && !full && secondaryMax > 0 && slotsRemaining > 0 && (
               <p className="text-xs text-muted-foreground">
-                {t("playerModal.sevensSecondary", {
-                  remaining: secondaryRemaining,
-                  total: secondaryMax,
-                })}
+                {t("playerModal.sevensSecondary", { remaining: secondaryRemaining, total: secondaryMax })}
               </p>
             )}
             {guidance && <p className="font-medium">{t(guidance)}</p>}
@@ -179,12 +125,8 @@ export function PlayerSkillPicker({
         {(!kyiv || (!guidance && !full)) && (
           <>
             <div className="mb-3 flex items-center justify-between gap-3">
-              <h3 className="text-sm font-semibold">
-                {t("playerModal.browseSkills")}
-              </h3>
-              <span className="font-mono text-xs text-muted-foreground">
-                {available.length}
-              </span>
+              <h3 className="text-sm font-semibold">{t("playerModal.browseSkills")}</h3>
+              <span className="font-mono text-xs text-muted-foreground">{available.length}</span>
             </div>
             <div className="relative">
               <Search
@@ -218,11 +160,7 @@ export function PlayerSkillPicker({
                 </Button>
               )}
             </div>
-            <div
-              className="mt-3 flex flex-wrap gap-1.5"
-              role="group"
-              aria-label={t("playerModal.filterCategory")}
-            >
+            <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label={t("playerModal.filterCategory")}>
               {[["all", ""], ...availableCategories].map(([id]) => (
                 <button
                   key={id}
@@ -234,14 +172,8 @@ export function PlayerSkillPicker({
                     if (listRef.current) listRef.current.scrollTop = 0;
                   }}
                 >
-                  {id !== "all" && (
-                    <span className="player-skill-dot" aria-hidden="true" />
-                  )}
-                  {t(
-                    id === "all"
-                      ? "playerModal.allSkills"
-                      : `skillCategories.${id}`,
-                  )}
+                  {id !== "all" && <span className="player-skill-dot" aria-hidden="true" />}
+                  {t(id === "all" ? "playerModal.allSkills" : `skillCategories.${id}`)}
                 </button>
               ))}
             </div>
@@ -260,11 +192,7 @@ export function PlayerSkillPicker({
         {available.map((id) => {
           const skill = skillsById.get(id);
           const chosen = selected.includes(id);
-          const next = sortSkillIds(
-            chosen
-              ? selected.filter((value) => value !== id)
-              : [...selected, id],
-          );
+          const next = sortSkillIds(chosen ? selected.filter((value) => value !== id) : [...selected, id]);
           const issue = chosen || full ? undefined : blocked(next);
           const canReplace =
             issue?.code === "starSkills" &&
@@ -280,11 +208,8 @@ export function PlayerSkillPicker({
                     current: translatedSkillName(selected[0], t),
                     next: translatedSkillName(id, t),
                   })
-                : issue?.code === "starSkills" &&
-                    skillAccess(position, id) === "secondary"
-                  ? t("playerModal.starSecondaryHint", {
-                      skill: translatedSkillName(id, t),
-                    })
+                : issue?.code === "starSkills" && skillAccess(position, id) === "secondary"
+                  ? t("playerModal.starSecondaryHint", { skill: translatedSkillName(id, t) })
                   : issue
                     ? t(`issues.${issue.code}`, translatedIssueValues(issue, t))
                     : undefined;
@@ -317,16 +242,12 @@ export function PlayerSkillPicker({
                   action={
                     canReplace
                       ? {
-                          label: t("playerModal.replaceSkill", {
-                            skill: translatedSkillName(id, t),
-                          }),
+                          label: t("playerModal.replaceSkill", { skill: translatedSkillName(id, t) }),
                           onClick: () => {
                             if (!blocked([id])) onChange([id]);
                           },
                           finalFocus: () =>
-                            listRef.current?.querySelector<HTMLElement>(
-                              `[data-skill-row="${id}"]`,
-                            ) ?? null,
+                            listRef.current?.querySelector<HTMLElement>(`[data-skill-row="${id}"]`) ?? null,
                         }
                       : undefined
                   }

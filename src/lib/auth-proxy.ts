@@ -31,10 +31,7 @@ export async function proxyTelegramAuth(request: Request) {
     }
     responseHeaders.set("cache-control", "no-store");
     responseHeaders.set("referrer-policy", "no-referrer");
-    return new Response(upstream.body, {
-      status: upstream.status,
-      headers: responseHeaders,
-    });
+    return new Response(upstream.body, { status: upstream.status, headers: responseHeaders });
   } catch {
     // Never log OAuth URLs, codes, cookies, or provider response bodies.
     console.error("Telegram authentication upstream unavailable");

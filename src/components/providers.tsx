@@ -9,9 +9,7 @@ import { DraftSyncProvider } from "./draft-sync-provider";
 import { NavigationPrewarm } from "./navigation-prewarm";
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [client] = useState(
-    () => new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!),
-  );
+  const [client] = useState(() => new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!));
   return (
     <ConvexAuthProvider client={client}>
       <NavigationPrewarm />

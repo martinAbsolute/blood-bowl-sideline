@@ -2,16 +2,8 @@
 import { act, createElement, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
-import {
-  LeagueStatTable,
-  sortLeagueRows,
-  type LeagueStatRow,
-} from "../src/components/league-statistics";
-import {
-  auditChanges,
-  auditFields,
-  LeagueHistory,
-} from "../src/components/league-history";
+import { LeagueStatTable, sortLeagueRows, type LeagueStatRow } from "../src/components/league-statistics";
+import { auditChanges, auditFields, LeagueHistory } from "../src/components/league-history";
 import { LeagueRecruitment } from "../src/components/league-recruitment";
 import { getRoster } from "../src/domain/catalog";
 
@@ -20,20 +12,16 @@ vi.mock("next-intl", async (importOriginal) => {
   const { formats, timeZone } = await import("../src/i18n/config");
   return {
     ...actual,
-    useFormatter: () =>
-      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useFormatter: () => actual.createFormatter({ locale: "en", formats, timeZone }),
     useTranslations: () => (key: string) => key,
   };
 });
 vi.mock("next/link", () => ({
-  default: ({ children, ...props }: { children: ReactNode; href: string }) =>
-    createElement("a", props, children),
+  default: ({ children, ...props }: { children: ReactNode; href: string }) => createElement("a", props, children),
 }));
 vi.mock("../src/components/player-icon", () => ({ PlayerIcon: () => null }));
 vi.mock("../src/components/skill-box", () => ({ SkillList: () => null }));
-vi.mock("../src/components/league-help", () => ({
-  LeagueHelp: ({ stat }: { stat: string }) => stat,
-}));
+vi.mock("../src/components/league-help", () => ({ LeagueHelp: ({ stat }: { stat: string }) => stat }));
 
 let cleanup: (() => Promise<void>) | undefined;
 afterEach(async () => {
@@ -57,52 +45,25 @@ async function mount(node: ReactNode) {
 }
 async function fill(input: HTMLInputElement, value: string) {
   await act(async () => {
-    Object.getOwnPropertyDescriptor(
-      HTMLInputElement.prototype,
-      "value",
-    )!.set!.call(input, value);
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(input, value);
     input.dispatchEvent(new Event("input", { bubbles: true }));
   });
 }
 const rows: LeagueStatRow[] = [
-  {
-    id: "b",
-    name: "Bears",
-    detail: "Coach B",
-    values: { rank: 2, pts: 9, td: "12:6" },
-  },
-  {
-    id: "a",
-    name: "Aces",
-    detail: "Coach A",
-    values: { rank: 1, pts: 9, td: "8:3" },
-  },
+  { id: "b", name: "Bears", detail: "Coach B", values: { rank: 2, pts: 9, td: "12:6" } },
+  { id: "a", name: "Aces", detail: "Coach A", values: { rank: 1, pts: 9, td: "8:3" } },
 ];
 
 it("preserves official rank for tied points and sorts score pairs numerically", () => {
-  expect(sortLeagueRows(rows, "pts", false).map((row) => row.id)).toEqual([
-    "a",
-    "b",
-  ]);
-  expect(sortLeagueRows(rows, "td", false).map((row) => row.id)).toEqual([
-    "b",
-    "a",
-  ]);
-  expect(sortLeagueRows(rows, "td", true).map((row) => row.id)).toEqual([
-    "a",
-    "b",
-  ]);
+  expect(sortLeagueRows(rows, "pts", false).map((row) => row.id)).toEqual(["a", "b"]);
+  expect(sortLeagueRows(rows, "td", false).map((row) => row.id)).toEqual(["b", "a"]);
+  expect(sortLeagueRows(rows, "td", true).map((row) => row.id)).toEqual(["a", "b"]);
   expect(rows.map((row) => row.id)).toEqual(["b", "a"]);
 });
 
 it("keeps mobile cards and table results aligned when sorting and searching", async () => {
   const { container } = await mount(
-    createElement(LeagueStatTable, {
-      rows,
-      columns: ["pts", "td"],
-      firstLabel: "Teams",
-      showRank: true,
-    }),
+    createElement(LeagueStatTable, { rows, columns: ["pts", "td"], firstLabel: "Teams", showRank: true }),
   );
   const select = container.querySelector("select")!;
   await act(async () => {
@@ -118,27 +79,21 @@ it("keeps mobile cards and table results aligned when sorting and searching", as
   await fill(container.querySelector("input")!, "Missing");
   expect(container.textContent).toContain("leagueUx.noSearchResults");
   expect(
-    [...container.querySelectorAll<HTMLButtonElement>("button")].find(
-      (button) => button.textContent?.includes("leagueUi.downloadCsv"),
+    [...container.querySelectorAll<HTMLButtonElement>("button")].find((button) =>
+      button.textContent?.includes("leagueUi.downloadCsv"),
     )?.disabled,
   ).toBe(true);
 });
 
 it("preserves nested history changes and safely handles text details", () => {
-  expect(
-    auditFields('{"before":{"treasury":0},"after":{"treasury":5000}}'),
-  ).toEqual([
+  expect(auditFields('{"before":{"treasury":0},"after":{"treasury":5000}}')).toEqual([
     { path: ["before", "treasury"], value: "0" },
     { path: ["after", "treasury"], value: "5000" },
   ]);
-  expect(auditFields("A manual explanation")).toEqual([
-    { path: [], value: "A manual explanation" },
-  ]);
+  expect(auditFields("A manual explanation")).toEqual([{ path: [], value: "A manual explanation" }]);
   expect(auditFields("{}")).toEqual([]);
   expect(
-    auditChanges(
-      '{"before":{"treasury":0,"name":"Same"},"after":{"treasury":5000,"name":"Same"},"reason":"Winnings"}',
-    ),
+    auditChanges('{"before":{"treasury":0,"name":"Same"},"after":{"treasury":5000,"name":"Same"},"reason":"Winnings"}'),
   ).toEqual({
     changes: [{ path: ["treasury"], before: "0", after: "5000" }],
     context: [{ path: ["reason"], value: "Winnings" }],
@@ -157,22 +112,13 @@ it("combines activity and author filters on the loaded history", async () => {
           reason: "Corrected winnings",
           details: '{"treasury":5000}',
         },
-        {
-          id: "2",
-          action: "team-registered",
-          actorName: "Morgan",
-          createdAt: 2000,
-          reason: "",
-          details: "{}",
-        },
+        { id: "2", action: "team-registered", actorName: "Morgan", createdAt: 2000, reason: "", details: "{}" },
       ],
     }),
   );
   await fill(container.querySelector("input")!, "Alex");
   expect(container.querySelectorAll("li")).toHaveLength(1);
-  expect(container.querySelector("li")?.textContent).toContain(
-    "Corrected winnings",
-  );
+  expect(container.querySelector("li")?.textContent).toContain("Corrected winnings");
   const select = container.querySelector("select")!;
   await act(async () => {
     select.value = "team-registered";
@@ -200,34 +146,15 @@ it("revalidates the selected recruit when treasury or position availability chan
     error: "",
     onHire: hire,
   };
-  const { container, render } = await mount(
-    createElement(LeagueRecruitment, props),
-  );
-  await act(async () =>
-    container.querySelector<HTMLButtonElement>("button")!.click(),
-  );
+  const { container, render } = await mount(createElement(LeagueRecruitment, props));
+  await act(async () => container.querySelector<HTMLButtonElement>("button")!.click());
   const dialog = () => document.querySelector('[role="dialog"]')!;
-  await act(async () =>
-    dialog()
-      .querySelector<HTMLButtonElement>('button[aria-pressed="false"]')!
-      .click(),
-  );
-  expect(
-    dialog().querySelector<HTMLButtonElement>('button[type="submit"]')!
-      .disabled,
-  ).toBe(false);
+  await act(async () => dialog().querySelector<HTMLButtonElement>('button[aria-pressed="false"]')!.click());
+  expect(dialog().querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled).toBe(false);
   await render(createElement(LeagueRecruitment, { ...props, treasury: 0 }));
   expect(dialog().textContent).toContain("leagueDesk.notEnoughGold");
-  expect(
-    dialog().querySelector<HTMLButtonElement>('button[type="submit"]')!
-      .disabled,
-  ).toBe(true);
-  await render(
-    createElement(LeagueRecruitment, {
-      ...props,
-      blockedPositionIds: [position.id],
-    }),
-  );
+  expect(dialog().querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled).toBe(true);
+  await render(createElement(LeagueRecruitment, { ...props, blockedPositionIds: [position.id] }));
   expect(dialog().textContent).toContain("leagueDesk.positionBlocked");
   await act(async () =>
     dialog()

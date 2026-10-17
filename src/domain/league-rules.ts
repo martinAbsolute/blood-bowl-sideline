@@ -39,20 +39,13 @@ export function emptyPlayerStats(): PlayerMatchStats {
 }
 
 export function validatePlayerStats(stats: PlayerMatchStats): void {
-  for (const key of Object.keys(
-    emptyPlayerStats(),
-  ) as (keyof PlayerMatchStats)[]) {
-    if (!Number.isSafeInteger(stats[key]) || stats[key] < 0)
-      throw new Error(`Invalid player statistic: ${key}`);
+  for (const key of Object.keys(emptyPlayerStats()) as (keyof PlayerMatchStats)[]) {
+    if (!Number.isSafeInteger(stats[key]) || stats[key] < 0) throw new Error(`Invalid player statistic: ${key}`);
   }
-  if (stats.sppCas > stats.cas)
-    throw new Error("SPP-eligible casualties cannot exceed total casualties");
+  if (stats.sppCas > stats.cas) throw new Error("SPP-eligible casualties cannot exceed total casualties");
 }
 
-export function calculateSpp(
-  rosterId: string,
-  stats: PlayerMatchStats,
-): number {
+export function calculateSpp(rosterId: string, stats: PlayerMatchStats): number {
   const roster = getRoster(rosterId);
   if (!roster) throw new Error("Unknown roster");
   validatePlayerStats(stats);
@@ -77,26 +70,16 @@ export const leagueAdvancementCosts = {
 } as const;
 
 /** Zero-based advancement index, preserving the order in which skills were gained. */
-export function advancementCost(
-  advancementIndex: number,
-  access: SkillAccess,
-  elite: boolean,
-): number {
-  if (
-    !Number.isInteger(advancementIndex) ||
-    advancementIndex < 0 ||
-    advancementIndex > 5
-  )
+export function advancementCost(advancementIndex: number, access: SkillAccess, elite: boolean): number {
+  if (!Number.isInteger(advancementIndex) || advancementIndex < 0 || advancementIndex > 5)
     throw new Error("A player can have at most six advancements");
-  if (!["primary", "secondary"].includes(access) || typeof elite !== "boolean")
-    throw new Error("Invalid advancement");
+  if (!["primary", "secondary"].includes(access) || typeof elite !== "boolean") throw new Error("Invalid advancement");
   // Elite changes current value only; tournament elite SPP taxes do not apply.
   return leagueAdvancementCosts[access][advancementIndex];
 }
 
 export function advancementValue(access: SkillAccess, elite: boolean): number {
-  if (!["primary", "secondary"].includes(access) || typeof elite !== "boolean")
-    throw new Error("Invalid advancement");
+  if (!["primary", "secondary"].includes(access) || typeof elite !== "boolean") throw new Error("Invalid advancement");
   return (access === "primary" ? 20000 : 40000) + (elite ? 10000 : 0);
 }
 
@@ -119,16 +102,11 @@ export function advancementChoices(
     integerInRange(advancementCount, 0, 6, "advancement count");
     if (advancementCount === 6) return [];
   }
-  const known = new Set(
-    [...position.skills, ...existingSkills].map((id) => id.split(":")[0]),
-  );
+  const known = new Set([...position.skills, ...existingSkills].map((id) => id.split(":")[0]));
   return sortSkillIds(skills.map((skill) => skill.id)).flatMap((skillId) => {
     const access = skillAccess(position, skillId);
     const skill = getSkill(skillId)!;
-    return access &&
-      skill.category !== "trait" &&
-      !known.has(skillId) &&
-      skillCompatible(skillId, [...known])
+    return access && skill.category !== "trait" && !known.has(skillId) && skillCompatible(skillId, [...known])
       ? [{ skillId, access, elite: skill.isElite }]
       : [];
   });
@@ -137,28 +115,19 @@ export function advancementChoices(
 /** A league rookie must not import exhibition skills or permanent match inducements. */
 export const DEFAULT_LEAGUE_TREASURY = 1_000_000;
 
-export function rookieLeagueIssues(
-  team: Team,
-  treasury = DEFAULT_LEAGUE_TREASURY,
-): string[] {
+export function rookieLeagueIssues(team: Team, treasury = DEFAULT_LEAGUE_TREASURY): string[] {
   const issues = validateTeam(team, treasury).issues.map((issue) => issue.code);
   if (team.rulesetId !== "bb2025-default") issues.push("leagueRuleset");
-  if (team.players.some((player) => player.skills.length))
-    issues.push("rookieSkills");
+  if (team.players.some((player) => player.skills.length)) issues.push("rookieSkills");
   if (team.stars.length) issues.push("rookieStars");
-  if (Object.values(team.inducements).some((count) => count > 0))
-    issues.push("rookieInducements");
+  if (Object.values(team.inducements).some((count) => count > 0)) issues.push("rookieInducements");
   // The builder stores purchased increments; the initial free characteristic is 1.
   if (team.staff.dedicatedFans > 2) issues.push("rookieFans");
   return [...new Set(issues)];
 }
 
-export function startingTreasury(
-  team: Team,
-  treasury = DEFAULT_LEAGUE_TREASURY,
-): number {
-  if (rookieLeagueIssues(team, treasury).length)
-    throw new Error("A legal rookie roster is required");
+export function startingTreasury(team: Team, treasury = DEFAULT_LEAGUE_TREASURY): number {
+  if (rookieLeagueIssues(team, treasury).length) throw new Error("A legal rookie roster is required");
   return summarize(team, treasury).remaining;
 }
 
@@ -171,24 +140,18 @@ export interface LeaguePlayerValueState {
 /** Permanent Team Value includes injured roster members, but excludes departed players.
  * Dedicated Fans, treasury and match-only inducements are not part of this total.
  */
-export function leagueTeamValue(
-  team: Team,
-  playerStates: ReadonlyArray<LeaguePlayerValueState>,
-): number {
+export function leagueTeamValue(team: Team, playerStates: ReadonlyArray<LeaguePlayerValueState>): number {
   const roster = getRoster(team.rosterId);
   if (!roster) throw new Error("Unknown roster");
   const states = new Map<string, LeaguePlayerValueState>();
   for (const state of playerStates) {
-    if (states.has(state.playerId))
-      throw new Error("Duplicate player value state");
+    if (states.has(state.playerId)) throw new Error("Duplicate player value state");
     if (!Number.isSafeInteger(state.valueIncrease) || state.valueIncrease < 0)
       throw new Error("Invalid player value increase");
     states.set(state.playerId, state);
   }
   const playerValue = team.players.reduce((total, player) => {
-    const position = roster.players.find(
-      (item) => item.id === player.positionId,
-    );
+    const position = roster.players.find((item) => item.id === player.positionId);
     if (!position) throw new Error("Unknown roster position");
     const state = states.get(player.id);
     if (state?.status === "dead" || state?.status === "retired") return total;
@@ -203,67 +166,43 @@ export function leagueTeamValue(
 }
 
 /** CTV excludes unavailable players and discounts Low Cost Linemen base hiring fees. */
-export function leagueCurrentTeamValue(
-  team: Team,
-  playerStates: ReadonlyArray<LeaguePlayerValueState>,
-): number {
+export function leagueCurrentTeamValue(team: Team, playerStates: ReadonlyArray<LeaguePlayerValueState>): number {
   const total = leagueTeamValue(team, playerStates);
   const roster = getRoster(team.rosterId)!;
   const states = new Map(playerStates.map((state) => [state.playerId, state]));
   return team.players.reduce((current, player) => {
-    const position = roster.players.find(
-      (item) => item.id === player.positionId,
-    )!;
+    const position = roster.players.find((item) => item.id === player.positionId)!;
     const state = states.get(player.id);
     if (state?.status === "dead" || state?.status === "retired") return current;
-    if (state?.status === "missing-next-game")
-      return current - position.cost - (state.valueIncrease ?? 0);
-    if (
-      roster.specialRules.includes("Low Cost Linemen") &&
-      position.position.includes("Lineman")
-    )
+    if (state?.status === "missing-next-game") return current - position.cost - (state.valueIncrease ?? 0);
+    if (roster.specialRules.includes("Low Cost Linemen") && position.position.includes("Lineman"))
       return current - position.cost;
     return current;
   }, total);
 }
 
 function integerInRange(value: number, min: number, max: number, name: string) {
-  if (!Number.isSafeInteger(value) || value < min || value > max)
-    throw new Error(`Invalid ${name}`);
+  if (!Number.isSafeInteger(value) || value < min || value > max) throw new Error(`Invalid ${name}`);
 }
 
-export function calculateWinnings(
-  fanAttendance: number,
-  touchdowns: number,
-  stalled: boolean,
-): number {
+export function calculateWinnings(fanAttendance: number, touchdowns: number, stalled: boolean): number {
   integerInRange(fanAttendance, 4, 20, "fan attendance");
   integerInRange(touchdowns, 0, 99, "touchdowns");
   if (typeof stalled !== "boolean") throw new Error("Invalid stalling outcome");
   return (fanAttendance / 2 + touchdowns + (stalled ? 0 : 1)) * 10000;
 }
 
-export function updatedDedicatedFans(
-  current: number,
-  result: "win" | "draw" | "loss",
-  roll?: number,
-): number {
+export function updatedDedicatedFans(current: number, result: "win" | "draw" | "loss", roll?: number): number {
   integerInRange(current, 1, 7, "dedicated fans");
   if (result === "draw") return current;
-  if (result !== "win" && result !== "loss")
-    throw new Error("Invalid match result");
+  if (result !== "win" && result !== "loss") throw new Error("Invalid match result");
   integerInRange(roll!, 1, 6, "dedicated fans D6");
   if (result === "win" && roll! >= current) return Math.min(7, current + 1);
   if (result === "loss" && roll! < current) return Math.max(1, current - 1);
   return current;
 }
 
-export type ExpensiveMistakeKind =
-  | "none"
-  | "crisis-averted"
-  | "minor-incident"
-  | "major-incident"
-  | "catastrophe";
+export type ExpensiveMistakeKind = "none" | "crisis-averted" | "minor-incident" | "major-incident" | "catastrophe";
 export function expensiveMistake(
   treasury: number,
   roll?: number,
@@ -271,68 +210,23 @@ export function expensiveMistake(
   stashRolls?: [number, number],
 ): { kind: ExpensiveMistakeKind; treasury: number; lost: number } {
   integerInRange(treasury, 0, Number.MAX_SAFE_INTEGER, "treasury");
-  if (treasury % 5000)
-    throw new Error("Treasury must be a multiple of 5,000 GP");
+  if (treasury % 5000) throw new Error("Treasury must be a multiple of 5,000 GP");
   if (treasury < 100000) return { kind: "none", treasury, lost: 0 };
   integerInRange(roll!, 1, 6, "expensive mistakes D6");
   const columns: ExpensiveMistakeKind[][] = [
-    [
-      "minor-incident",
-      "crisis-averted",
-      "crisis-averted",
-      "crisis-averted",
-      "crisis-averted",
-      "crisis-averted",
-    ],
-    [
-      "minor-incident",
-      "minor-incident",
-      "crisis-averted",
-      "crisis-averted",
-      "crisis-averted",
-      "crisis-averted",
-    ],
-    [
-      "major-incident",
-      "minor-incident",
-      "minor-incident",
-      "crisis-averted",
-      "crisis-averted",
-      "crisis-averted",
-    ],
-    [
-      "major-incident",
-      "major-incident",
-      "minor-incident",
-      "minor-incident",
-      "crisis-averted",
-      "crisis-averted",
-    ],
-    [
-      "catastrophe",
-      "major-incident",
-      "major-incident",
-      "minor-incident",
-      "minor-incident",
-      "crisis-averted",
-    ],
-    [
-      "catastrophe",
-      "catastrophe",
-      "major-incident",
-      "major-incident",
-      "minor-incident",
-      "minor-incident",
-    ],
+    ["minor-incident", "crisis-averted", "crisis-averted", "crisis-averted", "crisis-averted", "crisis-averted"],
+    ["minor-incident", "minor-incident", "crisis-averted", "crisis-averted", "crisis-averted", "crisis-averted"],
+    ["major-incident", "minor-incident", "minor-incident", "crisis-averted", "crisis-averted", "crisis-averted"],
+    ["major-incident", "major-incident", "minor-incident", "minor-incident", "crisis-averted", "crisis-averted"],
+    ["catastrophe", "major-incident", "major-incident", "minor-incident", "minor-incident", "crisis-averted"],
+    ["catastrophe", "catastrophe", "major-incident", "major-incident", "minor-incident", "minor-incident"],
   ];
-  const kind =
-    columns[Math.min(5, Math.floor(treasury / 100000) - 1)][roll! - 1];
+  const kind = columns[Math.min(5, Math.floor(treasury / 100000) - 1)][roll! - 1];
   let remaining = treasury;
   if (kind === "minor-incident") {
     integerInRange(minorRoll!, 1, 3, "minor incident D3");
     remaining -= minorRoll! * 10000;
-  } else if (kind === "major-incident")
-    remaining = Math.floor(treasury / 2 / 5000) * 5000;
+  } else if (kind === "major-incident") remaining = Math.floor(treasury / 2 / 5000) * 5000;
   else if (kind === "catastrophe") {
     if (!stashRolls) throw new Error("Catastrophe requires two stash D6 rolls");
     integerInRange(stashRolls[0], 1, 6, "stash first D6");
@@ -353,14 +247,8 @@ export function applyCharacteristicReductions(
   reductions: Partial<Record<Characteristic, number>>,
 ): LeaguePlayerProfile {
   for (const [key, count] of Object.entries(reductions)) {
-    if (!["ma", "st", "ag", "pa", "av"].includes(key))
-      throw new Error("Unknown characteristic");
-    integerInRange(
-      count!,
-      0,
-      Number.MAX_SAFE_INTEGER,
-      "characteristic reductions",
-    );
+    if (!["ma", "st", "ag", "pa", "av"].includes(key)) throw new Error("Unknown characteristic");
+    integerInRange(count!, 0, Number.MAX_SAFE_INTEGER, "characteristic reductions");
   }
   integerInRange(profile.ma, 1, 9, "MA");
   integerInRange(profile.st, 1, 8, "ST");
@@ -382,12 +270,7 @@ export function applyCharacteristicReductions(
   };
 }
 
-export type CasualtyResult =
-  | "badly-hurt"
-  | "seriously-hurt"
-  | "serious-injury"
-  | "lasting-injury"
-  | "dead";
+export type CasualtyResult = "badly-hurt" | "seriously-hurt" | "serious-injury" | "lasting-injury" | "dead";
 export interface CasualtyOutcome {
   result: CasualtyResult;
   missNextGame: boolean;
@@ -402,10 +285,7 @@ export function lastingInjury(roll: number): Characteristic {
 }
 
 /** Accepts the final modified casualty roll; recovery is resolved by the coaches first. */
-export function casualtyOutcome(
-  modifiedRoll: number,
-  lastingRoll?: number,
-): CasualtyOutcome {
+export function casualtyOutcome(modifiedRoll: number, lastingRoll?: number): CasualtyOutcome {
   integerInRange(modifiedRoll, 1, 99, "modified casualty D16");
   const result: CasualtyResult =
     modifiedRoll <= 8
@@ -422,9 +302,7 @@ export function casualtyOutcome(
     missNextGame: result !== "badly-hurt" && result !== "dead",
     nigglingInjuries: result === "serious-injury" ? 1 : 0,
     dead: result === "dead",
-    ...(result === "lasting-injury"
-      ? { characteristicReduction: lastingInjury(lastingRoll!) }
-      : {}),
+    ...(result === "lasting-injury" ? { characteristicReduction: lastingInjury(lastingRoll!) } : {}),
   };
 }
 
@@ -446,14 +324,8 @@ export function roundRobin(entryIds: string[]): RoundRobinPairing[][] {
     for (let index = 0; index < ring.length / 2; index++) {
       const first = ring[index];
       const second = ring[ring.length - 1 - index];
-      if (first === null || second === null)
-        pairings.push({ home: first ?? second!, away: null });
-      else
-        pairings.push(
-          round % 2
-            ? { home: second, away: first }
-            : { home: first, away: second },
-        );
+      if (first === null || second === null) pairings.push({ home: first ?? second!, away: null });
+      else pairings.push(round % 2 ? { home: second, away: first } : { home: first, away: second });
     }
     rounds.push(pairings);
     ring.splice(1, 0, ring.pop()!);

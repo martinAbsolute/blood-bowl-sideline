@@ -35,11 +35,7 @@ export function SkillBox({
   const t = useTranslations();
   const skill = getSkill(id);
   const category = skill?.category ?? "trait";
-  const meta = [
-    t(`skillCategories.${category}`),
-    skill?.isElite ? t("elite") : "",
-    added ? t("addedSkills") : "",
-  ]
+  const meta = [t(`skillCategories.${category}`), skill?.isElite ? t("elite") : "", added ? t("addedSkills") : ""]
     .filter(Boolean)
     .join(" · ");
   const className = `skill-box skill-${category}${added || captain ? " skill-added" : ""}`;
@@ -100,11 +96,7 @@ export function SkillList({
           key={`added-${id}`}
           id={id}
           added
-          onRemove={
-            onRemoveAdditionalSkill
-              ? () => onRemoveAdditionalSkill(id)
-              : undefined
-          }
+          onRemove={onRemoveAdditionalSkill ? () => onRemoveAdditionalSkill(id) : undefined}
         />
       ))}
       {captain && <SkillBox id="pro" captain />}
@@ -115,9 +107,7 @@ export function SkillList({
   );
 }
 
-export function TableSkills(
-  props: Parameters<typeof SkillList>[0] & { label: string },
-) {
+export function TableSkills(props: Parameters<typeof SkillList>[0] & { label: string }) {
   const { label, ...skills } = props;
   return (
     <div

@@ -1,13 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import {
-  ArrowUpRight,
-  Coins,
-  Gavel,
-  ShieldCheck,
-  UserMinus,
-} from "lucide-react";
+import { ArrowUpRight, Coins, Gavel, ShieldCheck, UserMinus } from "lucide-react";
 import { useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
 import { api } from "../../convex/_generated/api";
@@ -18,12 +12,7 @@ import { Textarea } from "./ui/textarea";
 import { LeagueField, LeagueSelect } from "./league-field";
 import { LeagueError, LeagueSection, useLeagueAction } from "./league-ui";
 import { Dialog } from "./dialog";
-import {
-  LeagueDialogBody,
-  LeagueDialogContent,
-  LeagueDialogFooter,
-  LeagueDialogHeader,
-} from "./league-dialog";
+import { LeagueDialogBody, LeagueDialogContent, LeagueDialogFooter, LeagueDialogHeader } from "./league-dialog";
 
 function CommissionerAction({
   title,
@@ -54,14 +43,8 @@ function CommissionerAction({
           </span>
         }
       >
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          {description}
-        </p>
-        <Button
-          variant="outline"
-          className="mt-4 min-h-11"
-          onClick={() => onOpenChange(true)}
-        >
+        <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
+        <Button variant="outline" className="mt-4 min-h-11" onClick={() => onOpenChange(true)}>
           {title}
           <ArrowUpRight className="size-4" />
         </Button>
@@ -73,12 +56,7 @@ function CommissionerAction({
         }}
       >
         <LeagueDialogContent showCloseButton={!busy}>
-          <LeagueDialogHeader
-            title={title}
-            description={description}
-            icon={icon}
-            destructive={destructive}
-          />
+          <LeagueDialogHeader title={title} description={description} icon={icon} destructive={destructive} />
           {children}
         </LeagueDialogContent>
       </Dialog>
@@ -103,21 +81,13 @@ export function CommissionerAdvancementUndo({
       onSubmit={(event) => {
         event.preventDefault();
         void action
-          .run(() =>
-            undo({
-              playerId,
-              expectedRevision: revision,
-              reason: reason.trim(),
-            }),
-          )
+          .run(() => undo({ playerId, expectedRevision: revision, reason: reason.trim() }))
           .then((saved) => {
             if (saved) setReason("");
           });
       }}
     >
-      <p className="text-xs text-muted-foreground">
-        {t("leagueUi.undoAdvancementHint")}
-      </p>
+      <p className="text-xs text-muted-foreground">{t("leagueUi.undoAdvancementHint")}</p>
       <LeagueError message={action.error} />
       <Input
         aria-label={t("leagueUi.reason")}
@@ -128,32 +98,19 @@ export function CommissionerAdvancementUndo({
         value={reason}
         onChange={(event) => setReason(event.target.value)}
       />
-      <Button
-        type="submit"
-        variant="outline"
-        className="h-10"
-        disabled={action.busy || reason.trim().length < 3}
-      >
+      <Button type="submit" variant="outline" className="h-10" disabled={action.busy || reason.trim().length < 3}>
         {t("leagueUi.undoAdvancement")}
       </Button>
     </form>
   );
 }
 
-export function CommissionerRuling({
-  matchId,
-  revision,
-}: {
-  matchId: Id<"leagueMatches">;
-  revision: number;
-}) {
+export function CommissionerRuling({ matchId, revision }: { matchId: Id<"leagueMatches">; revision: number }) {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
   const adjudicate = useMutation(api.leagues.adjudicateMatch);
   const action = useLeagueAction();
-  const [outcome, setOutcome] = useState<
-    "home-win" | "away-win" | "draw" | "void" | ""
-  >("");
+  const [outcome, setOutcome] = useState<"home-win" | "away-win" | "draw" | "void" | "">("");
   const [reason, setReason] = useState("");
   return (
     <CommissionerAction
@@ -171,14 +128,7 @@ export function CommissionerRuling({
           event.preventDefault();
           if (action.busy || !outcome || reason.trim().length < 3) return;
           void action
-            .run(() =>
-              adjudicate({
-                matchId,
-                outcome,
-                reason: reason.trim(),
-                expectedRevision: revision,
-              }),
-            )
+            .run(() => adjudicate({ matchId, outcome, reason: reason.trim(), expectedRevision: revision }))
             .then((saved) => {
               if (saved) {
                 setReason("");
@@ -197,20 +147,16 @@ export function CommissionerRuling({
             aria-label={t("leagueUi.adjudicate")}
             disabled={action.busy}
             value={outcome}
-            onChange={(event) =>
-              setOutcome(event.target.value as typeof outcome)
-            }
+            onChange={(event) => setOutcome(event.target.value as typeof outcome)}
           >
             <option value="" disabled>
               {t("leagueUx.chooseRuling")}
             </option>
-            {(["home-win", "away-win", "draw", "void"] as const).map(
-              (value) => (
-                <option key={value} value={value}>
-                  {t(`leagueUi.${value}`)}
-                </option>
-              ),
-            )}
+            {(["home-win", "away-win", "draw", "void"] as const).map((value) => (
+              <option key={value} value={value}>
+                {t(`leagueUi.${value}`)}
+              </option>
+            ))}
           </LeagueSelect>
           <LeagueField>
             {t("leagueUi.reason")}
@@ -225,19 +171,10 @@ export function CommissionerRuling({
           </LeagueField>
         </LeagueDialogBody>
         <LeagueDialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={action.busy}
-            onClick={() => setOpen(false)}
-          >
+          <Button type="button" variant="outline" disabled={action.busy} onClick={() => setOpen(false)}>
             {t("cancel")}
           </Button>
-          <Button
-            className="h-11"
-            type="submit"
-            disabled={action.busy || !outcome || reason.trim().length < 3}
-          >
+          <Button className="h-11" type="submit" disabled={action.busy || !outcome || reason.trim().length < 3}>
             {t("leagueUi.saveRuling")}
           </Button>
         </LeagueDialogFooter>
@@ -249,11 +186,7 @@ export function CommissionerRuling({
 export function CommissionerWithdrawal({
   entries,
 }: {
-  entries: {
-    _id: Id<"leagueTeams">;
-    team: { name: string };
-    withdrawn: boolean;
-  }[];
+  entries: { _id: Id<"leagueTeams">; team: { name: string }; withdrawn: boolean }[];
 }) {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
@@ -277,19 +210,12 @@ export function CommissionerWithdrawal({
           event.preventDefault();
           if (
             action.busy ||
-            !entries.some(
-              (entry) => entry._id === entryId && !entry.withdrawn,
-            ) ||
+            !entries.some((entry) => entry._id === entryId && !entry.withdrawn) ||
             reason.trim().length < 3
           )
             return;
           void action
-            .run(() =>
-              withdraw({
-                entryId: entryId as Id<"leagueTeams">,
-                reason: reason.trim(),
-              }),
-            )
+            .run(() => withdraw({ entryId: entryId as Id<"leagueTeams">, reason: reason.trim() }))
             .then((saved) => {
               if (saved) {
                 setOpen(false);
@@ -333,12 +259,7 @@ export function CommissionerWithdrawal({
           </LeagueField>
         </LeagueDialogBody>
         <LeagueDialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={action.busy}
-            onClick={() => setOpen(false)}
-          >
+          <Button type="button" variant="outline" disabled={action.busy} onClick={() => setOpen(false)}>
             {t("cancel")}
           </Button>
           <Button
@@ -347,9 +268,7 @@ export function CommissionerWithdrawal({
             variant="destructive"
             disabled={
               action.busy ||
-              !entries.some(
-                (entry) => entry._id === entryId && !entry.withdrawn,
-              ) ||
+              !entries.some((entry) => entry._id === entryId && !entry.withdrawn) ||
               reason.trim().length < 3
             }
           >
@@ -374,15 +293,8 @@ export function CommissionerTreasury({
   const [open, setOpen] = useState(false);
   const correct = useMutation(api.leagues.correctCareer);
   const action = useLeagueAction();
-  const [draft, setDraft] = useState<{
-    revision: number;
-    amount: number;
-    reason: string;
-  } | null>(null);
-  const current =
-    draft?.revision === revision
-      ? draft
-      : { revision, amount: treasury, reason: "" };
+  const [draft, setDraft] = useState<{ revision: number; amount: number; reason: string } | null>(null);
+  const current = draft?.revision === revision ? draft : { revision, amount: treasury, reason: "" };
   return (
     <CommissionerAction
       title={t("leagueUi.correctTreasury")}
@@ -418,18 +330,12 @@ export function CommissionerTreasury({
           <LeagueError message={action.error} />
           <div className="grid grid-cols-2 divide-x rounded-lg border bg-card p-3 text-center">
             <div>
-              <p className="text-xs text-muted-foreground">
-                {t("leagueUi.before")}
-              </p>
+              <p className="text-xs text-muted-foreground">{t("leagueUi.before")}</p>
               <p className="mt-1 font-mono text-lg">{treasury / 1000}k GP</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">
-                {t("leagueUi.after")}
-              </p>
-              <p className="mt-1 font-mono text-lg text-primary">
-                {current.amount / 1000}k GP
-              </p>
+              <p className="text-xs text-muted-foreground">{t("leagueUi.after")}</p>
+              <p className="mt-1 font-mono text-lg text-primary">{current.amount / 1000}k GP</p>
             </div>
           </div>
           <p className="flex items-start gap-2 rounded-lg border bg-secondary/25 p-3 text-xs text-muted-foreground">
@@ -446,9 +352,7 @@ export function CommissionerTreasury({
               step={5000}
               value={current.amount}
               disabled={action.busy}
-              onChange={(event) =>
-                setDraft({ ...current, amount: Number(event.target.value) })
-              }
+              onChange={(event) => setDraft({ ...current, amount: Number(event.target.value) })}
             />
           </LeagueField>
           <LeagueField>
@@ -459,26 +363,15 @@ export function CommissionerTreasury({
               required
               value={current.reason}
               disabled={action.busy}
-              onChange={(event) =>
-                setDraft({ ...current, reason: event.target.value })
-              }
+              onChange={(event) => setDraft({ ...current, reason: event.target.value })}
             />
           </LeagueField>
         </LeagueDialogBody>
         <LeagueDialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={action.busy}
-            onClick={() => setOpen(false)}
-          >
+          <Button type="button" variant="outline" disabled={action.busy} onClick={() => setOpen(false)}>
             {t("cancel")}
           </Button>
-          <Button
-            type="submit"
-            className="h-11"
-            disabled={action.busy || current.reason.trim().length < 3}
-          >
+          <Button type="submit" className="h-11" disabled={action.busy || current.reason.trim().length < 3}>
             {t("leagueUi.saveCorrection")}
           </Button>
         </LeagueDialogFooter>

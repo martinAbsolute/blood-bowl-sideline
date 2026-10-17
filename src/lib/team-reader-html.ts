@@ -1,52 +1,34 @@
 import { pageTitle, shareImage } from "./site-metadata";
 import type { FunctionReturnType } from "convex/server";
 import type { api } from "../../convex/_generated/api";
-import {
-  serializeTeamJsonLd,
-  teamStructuredData,
-} from "./team-structured-data";
+import { serializeTeamJsonLd, teamStructuredData } from "./team-structured-data";
 
 const escapeHtml = (value: string | number) =>
   String(value).replace(
     /[&<>"']/g,
-    (character) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      })[character]!,
+    (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]!,
   );
-const amount = ({ value, unit }: { value: number; unit: string }) =>
-  `${value.toLocaleString("en")} ${unit}`;
+const amount = ({ value, unit }: { value: number; unit: string }) => `${value.toLocaleString("en")} ${unit}`;
 const definition = (name: string, value: string | number) =>
   `<dt>${escapeHtml(name)}</dt><dd>${escapeHtml(value)}</dd>`;
-const skills = (entries: { name: string }[]) =>
-  entries.map((entry) => entry.name).join(", ") || "None";
+const skills = (entries: { name: string }[]) => entries.map((entry) => entry.name).join(", ") || "None";
 
 /** Complete HTML, with no streaming containers or JavaScript needed to read it. */
-export function teamReaderHtml(
-  data: NonNullable<FunctionReturnType<typeof api.teams.getByUuid>>,
-) {
+export function teamReaderHtml(data: NonNullable<FunctionReturnType<typeof api.teams.getByUuid>>) {
   const structured = teamStructuredData(data);
   const snapshot = structured.mainEntity.teamSnapshot;
   const playerRows = snapshot.players.map((player) => {
     const skillText = [
       `Built-in: ${skills(player.builtInSkills)}`,
       `Added: ${skills(player.addedSkills)}`,
-      ...(player.captain
-        ? [`Team captain: ${skills(player.captainSkills)}`]
-        : []),
+      ...(player.captain ? [`Team captain: ${skills(player.captainSkills)}`] : []),
       ...(player.veteran ? ["Sevens veteran"] : []),
     ].join("; ");
     return `<tr><td>${player.number}</td><th scope="row">${escapeHtml(player.name || player.position.name)}</th><td>${escapeHtml(player.position.name)}</td>${Object.values(
       player.attributes,
     )
       .map((value) => `<td>${escapeHtml(value)}</td>`)
-      .join(
-        "",
-      )}<td>${escapeHtml(skillText)}</td><td>${escapeHtml(amount(player.cost))}</td></tr>`;
+      .join("")}<td>${escapeHtml(skillText)}</td><td>${escapeHtml(amount(player.cost))}</td></tr>`;
   });
   const starRows = snapshot.starPlayers.map(
     (star) =>
@@ -54,9 +36,7 @@ export function teamReaderHtml(
         star.attributes,
       )
         .map((value) => `<td>${escapeHtml(value)}</td>`)
-        .join(
-          "",
-        )}<td>${escapeHtml(skills(star.builtInSkills))}</td><td>${escapeHtml(amount(star.cost))}</td></tr>`,
+        .join("")}<td>${escapeHtml(skills(star.builtInSkills))}</td><td>${escapeHtml(amount(star.cost))}</td></tr>`,
   );
   const treasury =
     snapshot.budgets === null

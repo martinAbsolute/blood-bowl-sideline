@@ -29,10 +29,7 @@ export function TeamName({
   const displayed = editing ?? value;
   return (
     <span className="relative grid w-max min-w-[1ch] max-w-full grid-cols-[minmax(0,1fr)]">
-      <span
-        aria-hidden="true"
-        className="invisible min-w-0 overflow-hidden whitespace-pre py-1"
-      >
+      <span aria-hidden="true" className="invisible min-w-0 overflow-hidden whitespace-pre py-1">
         {displayed || (editing === null ? placeholder : "\u00a0")}
         {"\u200b"}
       </span>

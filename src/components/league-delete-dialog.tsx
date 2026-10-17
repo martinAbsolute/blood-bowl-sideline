@@ -12,20 +12,9 @@ import { Input } from "./ui/input";
 import { Dialog, DialogTrigger } from "./dialog";
 import { LeagueError, useLeagueAction } from "./league-ui";
 
-import {
-  LeagueDialogBody,
-  LeagueDialogContent,
-  LeagueDialogFooter,
-  LeagueDialogHeader,
-} from "./league-dialog";
+import { LeagueDialogBody, LeagueDialogContent, LeagueDialogFooter, LeagueDialogHeader } from "./league-dialog";
 
-export function LeagueDeleteDialog({
-  leagueId,
-  name,
-}: {
-  leagueId: Id<"leagues">;
-  name: string;
-}) {
+export function LeagueDeleteDialog({ leagueId, name }: { leagueId: Id<"leagues">; name: string }) {
   const t = useTranslations();
   const router = useRouter();
   const inputId = useId();
@@ -37,9 +26,7 @@ export function LeagueDeleteDialog({
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (confirmation !== name || action.busy) return;
-    const deleted = await action.run(() =>
-      remove({ leagueId, confirmationName: confirmation }),
-    );
+    const deleted = await action.run(() => remove({ leagueId, confirmationName: confirmation }));
     if (deleted) router.replace("/leagues");
   }
 
@@ -52,16 +39,11 @@ export function LeagueDeleteDialog({
         if (!next) setConfirmation("");
       }}
     >
-      <DialogTrigger
-        render={<Button variant="destructive" className="mt-4 h-10" />}
-      >
+      <DialogTrigger render={<Button variant="destructive" className="mt-4 h-10" />}>
         <Trash2 className="size-4" aria-hidden="true" />
         {t("leagueUx.deleteLeague")}
       </DialogTrigger>
-      <LeagueDialogContent
-        className="sm:max-w-md"
-        showCloseButton={!action.busy}
-      >
+      <LeagueDialogContent className="sm:max-w-md" showCloseButton={!action.busy}>
         <LeagueDialogHeader
           title={t("leagueUx.deleteLeague")}
           description={t("leagueUx.deleteLeagueHint")}
@@ -101,11 +83,7 @@ export function LeagueDeleteDialog({
             >
               {t("cancel")}
             </Button>
-            <Button
-              type="submit"
-              variant="destructive"
-              disabled={action.busy || confirmation !== name}
-            >
+            <Button type="submit" variant="destructive" disabled={action.busy || confirmation !== name}>
               <Trash2 className="size-4" aria-hidden="true" />
               {t("leagueUx.deleteLeague")}
             </Button>

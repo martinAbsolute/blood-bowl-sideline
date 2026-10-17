@@ -11,16 +11,12 @@ vi.mock("next-intl", async (importOriginal) => {
   const { formats, timeZone } = await import("../src/i18n/config");
   return {
     ...actual,
-    useFormatter: () =>
-      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useFormatter: () => actual.createFormatter({ locale: "en", formats, timeZone }),
     useTranslations: () => (key: string) => key,
   };
 });
 vi.mock("../src/components/player-icon", () => ({ PlayerIcon: () => null }));
-vi.mock("../src/components/skill-box", () => ({
-  SkillList: () => null,
-  TableSkills: () => null,
-}));
+vi.mock("../src/components/skill-box", () => ({ SkillList: () => null, TableSkills: () => null }));
 
 let root: Root;
 let container: HTMLDivElement;
@@ -62,9 +58,7 @@ async function render() {
   });
 }
 function trigger() {
-  return container.querySelector<HTMLButtonElement>(
-    '[data-slot="accordion-trigger"]',
-  )!;
+  return container.querySelector<HTMLButtonElement>('[data-slot="accordion-trigger"]')!;
 }
 
 it("opens a roster that needs players and closes a complete roster on entry", async () => {
@@ -84,11 +78,7 @@ it("keeps recruitment open while hiring the eleventh player", async () => {
   players(10);
   await render();
   await act(async () => {
-    container
-      .querySelector<HTMLButtonElement>(
-        'button[aria-label="increaseQuantity"]',
-      )!
-      .click();
+    container.querySelector<HTMLButtonElement>('button[aria-label="increaseQuantity"]')!.click();
   });
   expect(team.players).toHaveLength(11);
   expect(trigger().getAttribute("aria-expanded")).toBe("true");
@@ -115,45 +105,23 @@ it("offers recruitment when World Cup stars do not satisfy the regular-player mi
 
 it("blocks a fifth Sevens specialist while leaving Linemen available and reopens after removal", async () => {
   team.rulesetId = "kyiv-seven-sins-sevens";
-  team.players = ["human-2", "human-2", "human-3", "human-3"].map(
-    (positionId, index) => ({
-      id: `specialist-${index}`,
-      positionId,
-      name: "",
-      skills: [],
-    }),
-  );
+  team.players = ["human-2", "human-2", "human-3", "human-3"].map((positionId, index) => ({
+    id: `specialist-${index}`,
+    positionId,
+    name: "",
+    skills: [],
+  }));
   await render();
   const rows = () => Array.from(container.querySelectorAll("tbody tr"));
   const linemanRow = rows()[0];
   const specialistRow = rows()[2];
-  expect(
-    specialistRow.querySelector('[title="sevensSpecialistsFull"]'),
-  ).toBeNull();
-  const hint = specialistRow.querySelector<HTMLElement>(
-    '[data-slot="tooltip-trigger"]',
-  )!;
+  expect(specialistRow.querySelector('[title="sevensSpecialistsFull"]')).toBeNull();
+  const hint = specialistRow.querySelector<HTMLElement>('[data-slot="tooltip-trigger"]')!;
   expect(hint.tabIndex).toBe(0);
-  expect(
-    specialistRow.querySelector<HTMLButtonElement>(
-      'button[aria-label="increaseQuantity"]',
-    )!.disabled,
-  ).toBe(true);
-  expect(
-    linemanRow.querySelector<HTMLButtonElement>(
-      'button[aria-label="increaseQuantity"]',
-    )!.disabled,
-  ).toBe(false);
-  await act(async () =>
-    specialistRow
-      .querySelector<HTMLButtonElement>('[aria-label="decreaseQuantity"]')!
-      .click(),
-  );
-  expect(
-    rows()[2].querySelector<HTMLButtonElement>(
-      'button[aria-label="increaseQuantity"]',
-    )!.disabled,
-  ).toBe(false);
+  expect(specialistRow.querySelector<HTMLButtonElement>('button[aria-label="increaseQuantity"]')!.disabled).toBe(true);
+  expect(linemanRow.querySelector<HTMLButtonElement>('button[aria-label="increaseQuantity"]')!.disabled).toBe(false);
+  await act(async () => specialistRow.querySelector<HTMLButtonElement>('[aria-label="decreaseQuantity"]')!.click());
+  expect(rows()[2].querySelector<HTMLButtonElement>('button[aria-label="increaseQuantity"]')!.disabled).toBe(false);
 });
 
 it("caps Sevens recruitment at eleven and does not apply specialist limits to ordinary teams", async () => {
@@ -162,11 +130,7 @@ it("caps Sevens recruitment at eleven and does not apply specialist limits to or
   await render();
   await act(async () => trigger().click());
   const increases = () =>
-    Array.from(
-      container.querySelectorAll<HTMLButtonElement>(
-        'button[aria-label="increaseQuantity"]',
-      ),
-    );
+    Array.from(container.querySelectorAll<HTMLButtonElement>('button[aria-label="increaseQuantity"]'));
   expect(increases().every((button) => button.disabled)).toBe(true);
   team.rulesetId = "bb2025-default";
   await render();

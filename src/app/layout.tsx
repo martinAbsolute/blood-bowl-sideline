@@ -4,14 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import {
-  homeTitle,
-  isPreview,
-  siteDescription,
-  siteName,
-  siteUrl,
-  shareImage,
-} from "@/lib/site-metadata";
+import { homeTitle, isPreview, siteDescription, siteName, siteUrl, shareImage } from "@/lib/site-metadata";
 import { Providers } from "@/components/providers";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteShell } from "@/components/site-shell";
@@ -19,10 +12,7 @@ import { ShellLoading } from "@/components/loading-layouts";
 import { InitialLoading } from "@/components/initial-loading";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
 const display = Roboto_Condensed({
   subsets: ["latin", "cyrillic"],
@@ -33,17 +23,10 @@ const display = Roboto_Condensed({
 export const metadata: Metadata = {
   metadataBase: siteUrl,
   applicationName: siteName,
-  authors: [
-    { name: "Martin Bahniuk", url: "https://github.com/martinAbsolute/" },
-  ],
-  title: {
-    default: homeTitle,
-    template: `%s. ${siteName}`,
-  },
+  authors: [{ name: "Martin Bahniuk", url: "https://github.com/martinAbsolute/" }],
+  title: { default: homeTitle, template: `%s. ${siteName}` },
   description: siteDescription,
-  robots: isPreview
-    ? { index: false, follow: false }
-    : { index: true, follow: true },
+  robots: isPreview ? { index: false, follow: false } : { index: true, follow: true },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any", type: "image/x-icon" },
@@ -61,25 +44,12 @@ export const metadata: Metadata = {
     alternateLocale: ["uk_UA"],
     images: [shareImage],
   },
-  twitter: {
-    card: "summary_large_image",
-    title: homeTitle,
-    description: siteDescription,
-    images: [shareImage],
-  },
+  twitter: { card: "summary_large_image", title: homeTitle, description: siteDescription, images: [shareImage] },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      data-scroll-behavior="smooth"
-      className={`${geistSans.variable} ${display.variable}`}
-    >
+    <html lang="en" data-scroll-behavior="smooth" className={`${geistSans.variable} ${display.variable}`}>
       <body className="bg-background font-sans text-foreground antialiased">
         <Suspense
           fallback={

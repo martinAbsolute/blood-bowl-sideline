@@ -1,7 +1,5 @@
 /** Preserve canonical query order before a statistics table sorts its rows. */
-export function leaguePlayerNumbers(
-  players: readonly { id: string; entryId: string }[],
-) {
+export function leaguePlayerNumbers(players: readonly { id: string; entryId: string }[]) {
   const counts = new Map<string, number>();
   const numbers = new Map<string, number>();
   for (const player of players) {
@@ -18,15 +16,10 @@ export function snapshotPlayerNumber(
   players: readonly { id: string }[] | undefined,
   fallback: number,
 ) {
-  const index =
-    players?.findIndex((player) => player.id === sourcePlayerId) ?? -1;
+  const index = players?.findIndex((player) => player.id === sourcePlayerId) ?? -1;
   return index >= 0 ? index + 1 : fallback;
 }
 
-export function leaguePlayerLabel(
-  name: string,
-  position: string,
-  number: number,
-) {
+export function leaguePlayerLabel(name: string, position: string, number: number) {
   return name.trim() || `#${number} ${position}`;
 }

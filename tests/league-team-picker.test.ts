@@ -11,14 +11,12 @@ vi.mock("next-intl", async (importOriginal) => {
   const { formats, timeZone } = await import("../src/i18n/config");
   return {
     ...actual,
-    useFormatter: () =>
-      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useFormatter: () => actual.createFormatter({ locale: "en", formats, timeZone }),
     useTranslations: () => (key: string) => key,
   };
 });
 vi.mock("next/link", () => ({
-  default: ({ children, ...props }: { children: ReactNode; href: string }) =>
-    createElement("a", props, children),
+  default: ({ children, ...props }: { children: ReactNode; href: string }) => createElement("a", props, children),
 }));
 vi.mock("../src/components/player-icon", () => ({ RosterIcon: () => null }));
 
@@ -57,11 +55,7 @@ it("puts favorites first while preserving enrollment eligibility and never offer
   await act(async () =>
     root.render(
       createElement(LeagueTeamPicker, {
-        teams: [
-          { team: regular },
-          { team: ineligible, favorite: true },
-          { team: favorite, favorite: true },
-        ],
+        teams: [{ team: regular }, { team: ineligible, favorite: true }, { team: favorite, favorite: true }],
         value: "",
         onChange: vi.fn(),
         status: "Exhausted",
@@ -69,23 +63,13 @@ it("puts favorites first while preserving enrollment eligibility and never offer
       }),
     ),
   );
-  await act(async () =>
-    container.querySelector<HTMLButtonElement>("button")!.click(),
-  );
+  await act(async () => container.querySelector<HTMLButtonElement>("button")!.click());
   const dialog = document.querySelector('[role="dialog"]')!;
-  const choices = Array.from(
-    dialog.querySelectorAll<HTMLButtonElement>("button[aria-pressed]"),
-  );
-  expect(choices.map((button) => button.getAttribute("aria-label"))).toEqual([
-    "Favorite",
-    "Favorite draft",
-    "Regular",
-  ]);
+  const choices = Array.from(dialog.querySelectorAll<HTMLButtonElement>("button[aria-pressed]"));
+  expect(choices.map((button) => button.getAttribute("aria-label"))).toEqual(["Favorite", "Favorite draft", "Regular"]);
   expect(choices[1].disabled).toBe(true);
   expect(dialog.querySelector('button[aria-label^="addFavorite"]')).toBeNull();
-  expect(
-    dialog.querySelector('button[aria-label^="removeFavorite"]'),
-  ).toBeNull();
+  expect(dialog.querySelector('button[aria-label^="removeFavorite"]')).toBeNull();
 });
 
 it("shows illegal teams with reasons and selects only a legal rookie", async () => {
@@ -103,9 +87,7 @@ it("shows illegal teams with reasons and selects only a legal rookie", async () 
     root.render(
       createElement(LeagueTeamPicker, {
         teams: [
-          ...[eligible, excessiveFans, wrongRules, incomplete].map((team) => ({
-            team,
-          })),
+          ...[eligible, excessiveFans, wrongRules, incomplete].map((team) => ({ team })),
           { team: experienced, leagueExperienced: true },
         ],
         value: "",
@@ -115,14 +97,11 @@ it("shows illegal teams with reasons and selects only a legal rookie", async () 
       }),
     ),
   );
-  await act(async () =>
-    container.querySelector<HTMLButtonElement>("button")!.click(),
-  );
+  await act(async () => container.querySelector<HTMLButtonElement>("button")!.click());
   const dialog = document.querySelector('[role="dialog"]')!;
   expect(dialog).not.toBeNull();
   expect(dialog.querySelector("select")).toBeNull();
-  const card = (name: string) =>
-    dialog.querySelector<HTMLButtonElement>(`button[aria-label="${name}"]`)!;
+  const card = (name: string) => dialog.querySelector<HTMLButtonElement>(`button[aria-label="${name}"]`)!;
   expect(card(experienced.name).disabled).toBe(true);
   expect(dialog.textContent).toContain("leagueUi.experiencedTeamHint");
   expect(card(excessiveFans.name).disabled).toBe(true);
@@ -131,9 +110,7 @@ it("shows illegal teams with reasons and selects only a legal rookie", async () 
   expect(dialog.textContent).toContain("leagueUi.rookieIssues.rookieFans");
   expect(dialog.textContent).toContain("leagueUi.rookieIssues.leagueRuleset");
   expect(dialog.textContent).toContain("issues.minPlayers");
-  expect(
-    dialog.querySelector(`a[href="/teams/${excessiveFans.uuid}"]`),
-  ).not.toBeNull();
+  expect(dialog.querySelector(`a[href="/teams/${excessiveFans.uuid}"]`)).not.toBeNull();
   await act(async () => card(excessiveFans.name).click());
   expect(change).not.toHaveBeenCalled();
   await act(async () =>
@@ -162,18 +139,10 @@ it("excludes the current career team from replacement and marks the chosen card"
     ),
   );
   expect(container.textContent).toContain(replacement.name);
-  await act(async () =>
-    container.querySelector<HTMLButtonElement>("button")!.click(),
-  );
+  await act(async () => container.querySelector<HTMLButtonElement>("button")!.click());
   const dialog = document.querySelector('[role="dialog"]')!;
-  expect(
-    dialog.querySelector(`button[aria-label="${current.name}"]`),
-  ).toBeNull();
-  expect(
-    dialog
-      .querySelector(`button[aria-label="${replacement.name}"]`)
-      ?.getAttribute("aria-pressed"),
-  ).toBe("true");
+  expect(dialog.querySelector(`button[aria-label="${current.name}"]`)).toBeNull();
+  expect(dialog.querySelector(`button[aria-label="${replacement.name}"]`)?.getAttribute("aria-pressed")).toBe("true");
 });
 
 it("allows a roster above the standard allowance when this league funds it", async () => {
@@ -194,12 +163,8 @@ it("allows a roster above the standard allowance when this league funds it", asy
       }),
     ),
   );
-  await act(async () =>
-    container.querySelector<HTMLButtonElement>("button")!.click(),
-  );
-  const button = document.querySelector<HTMLButtonElement>(
-    `button[aria-label="${team.name}"]`,
-  )!;
+  await act(async () => container.querySelector<HTMLButtonElement>("button")!.click());
+  const button = document.querySelector<HTMLButtonElement>(`button[aria-label="${team.name}"]`)!;
   expect(button.disabled).toBe(false);
   await act(async () => button.click());
   expect(change).toHaveBeenCalledWith(team.uuid);

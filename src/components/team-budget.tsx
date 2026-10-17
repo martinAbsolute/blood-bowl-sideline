@@ -6,12 +6,7 @@ import type { Team } from "@/domain/types";
 import { budgetSummary } from "@/domain/budget";
 import { BudgetBreakdown, BudgetOverview } from "./budget-details";
 import { TeamReadiness } from "./team-readiness";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerTitle,
-} from "./ui/drawer";
+import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "./ui/drawer";
 
 export function TeamBudget({
   team,
@@ -26,9 +21,7 @@ export function TeamBudget({
   const summary = budgetSummary(team, startingTreasury);
   // Keep the same allowance in the header throughout opening and closing.
   const drawerPool =
-    summary.issues[0] ??
-    summary.pools.find((pool) => pool.id === "funds" && pool.used > 0) ??
-    summary.pools[0];
+    summary.issues[0] ?? summary.pools.find((pool) => pool.id === "funds" && pool.used > 0) ?? summary.pools[0];
   const section = useRef<HTMLElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const [aboveBudget, setAboveBudget] = useState(false);
@@ -42,9 +35,7 @@ export function TeamBudget({
     // Give the full card room to enter before withdrawing the bottom bar.
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const above =
-          mobile.matches &&
-          entry.boundingClientRect.top >= (entry.rootBounds?.bottom ?? 0);
+        const above = mobile.matches && entry.boundingClientRect.top >= (entry.rootBounds?.bottom ?? 0);
         setAboveBudget(above);
         if (!above) setExpanded(false);
       },
@@ -85,8 +76,7 @@ export function TeamBudget({
             if (event.isPrimary && event.button === 0) {
               swipeStart.current = { x: event.clientX, y: event.clientY };
               // Capture on the pressed control so a tap still clicks it.
-              if (event.target instanceof HTMLElement)
-                event.target.setPointerCapture(event.pointerId);
+              if (event.target instanceof HTMLElement) event.target.setPointerCapture(event.pointerId);
             }
           }}
           onPointerCancel={() => {
@@ -95,11 +85,7 @@ export function TeamBudget({
           onPointerUp={(event) => {
             const start = swipeStart.current;
             swipeStart.current = null;
-            if (
-              start &&
-              start.y - event.clientY > 30 &&
-              start.y - event.clientY > Math.abs(start.x - event.clientX)
-            )
+            if (start && start.y - event.clientY > 30 && start.y - event.clientY > Math.abs(start.x - event.clientX))
               setExpanded(true);
           }}
         >
@@ -142,16 +128,11 @@ export function TeamBudget({
             }
           >
             <DrawerTitle className="sr-only">{t("treasury")}</DrawerTitle>
-            <DrawerDescription className="sr-only">
-              {t("budgetBreakdown")}
-            </DrawerDescription>
+            <DrawerDescription className="sr-only">{t("budgetBreakdown")}</DrawerDescription>
             <div className="budget-drawer-breakdown min-h-0 overflow-y-auto overscroll-contain">
               <BudgetBreakdown summary={summary} drawerPool={drawerPool} />
               <div className="px-3 pb-3">
-                <TeamReadiness
-                  team={team}
-                  startingTreasury={startingTreasury}
-                />
+                <TeamReadiness team={team} startingTreasury={startingTreasury} />
               </div>
             </div>
           </DrawerContent>

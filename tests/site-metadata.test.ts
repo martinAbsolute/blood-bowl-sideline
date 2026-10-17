@@ -20,8 +20,7 @@ it("uses the production domain when Vercel defaults are absent", async () => {
 });
 
 it("uses the requested homepage title, description and period-separated social titles", async () => {
-  const { homeTitle, siteDescription, pageTitle, pageMetadata } =
-    await import("../src/lib/site-metadata");
+  const { homeTitle, siteDescription, pageTitle, pageMetadata } = await import("../src/lib/site-metadata");
   expect(homeTitle).toBe("Blood Bowl Sideline. Blood Bowl Team Builder");
   expect(siteDescription).toBe(
     "Build, save and share your Blood Bowl teams. Plan rosters and player advancements with BB2025 rules.",
@@ -30,12 +29,8 @@ it("uses the requested homepage title, description and period-separated social t
   expect(pageTitle("Orcs.")).toBe("Orcs. Blood Bowl Sideline.");
   const metadata = pageMetadata("Orcs.", "/teams/example", siteDescription);
   expect(metadata.title).toBe("Orcs");
-  expect(metadata.openGraph).toMatchObject({
-    title: "Orcs. Blood Bowl Sideline.",
-  });
-  expect(metadata.twitter).toMatchObject({
-    title: "Orcs. Blood Bowl Sideline.",
-  });
+  expect(metadata.openGraph).toMatchObject({ title: "Orcs. Blood Bowl Sideline." });
+  expect(metadata.twitter).toMatchObject({ title: "Orcs. Blood Bowl Sideline." });
   const { metadata: home } = await import("../src/app/page");
   expect(home.title).toEqual({ absolute: homeTitle });
   expect(home.alternates?.canonical).toBe("/");
@@ -53,8 +48,5 @@ it("includes the homepage and league directory in the sitemap and blocks preview
   vi.resetModules();
   vi.stubEnv("VERCEL_ENV", "preview");
   expect((await import("../src/app/sitemap")).default()).toEqual([]);
-  expect((await import("../src/app/robots")).default().rules).toEqual({
-    userAgent: "*",
-    disallow: "/",
-  });
+  expect((await import("../src/app/robots")).default().rules).toEqual({ userAgent: "*", disallow: "/" });
 });

@@ -2,13 +2,7 @@ import { translatedSkillName } from "@/lib/translated-skill-name";
 import { Fragment } from "react";
 import { createFormatter } from "next-intl";
 import { formats, timeZone, type AppLocale } from "@/i18n/config";
-import {
-  getRoster,
-  getRuleset,
-  inducements,
-  sortSkillIds,
-  stars,
-} from "@/domain/catalog";
+import { getRoster, getRuleset, inducements, sortSkillIds, stars } from "@/domain/catalog";
 import {
   affiliation,
   dedicatedFansBase,
@@ -87,14 +81,8 @@ function PrintedSkills({
   t: Translate;
 }) {
   const entries = [
-    ...sortSkillIds(builtIn).map((id) => ({
-      name: translatedSkillName(id, t),
-      className: undefined,
-    })),
-    ...sortSkillIds(added).map((id) => ({
-      name: translatedSkillName(id, t),
-      className: "added",
-    })),
+    ...sortSkillIds(builtIn).map((id) => ({ name: translatedSkillName(id, t), className: undefined })),
+    ...sortSkillIds(added).map((id) => ({ name: translatedSkillName(id, t), className: "added" })),
     ...(captain ? [{ name: t("proCaptain"), className: "captain" }] : []),
     ...(veteran ? [{ name: t("sevensVeteran"), className: "added" }] : []),
   ];
@@ -106,36 +94,21 @@ function PrintedSkills({
   ));
 }
 
-export function TeamPrint({
-  team,
-  t,
-  locale = "en",
-}: {
-  team: Team;
-  t: Translate;
-  locale?: AppLocale;
-}) {
+export function TeamPrint({ team, t, locale = "en" }: { team: Team; t: Translate; locale?: AppLocale }) {
   const format = createFormatter({ locale, formats, timeZone });
   const gold = (value: number) => `${format.number(value / 1000, "gold")}k`;
   const roster = getRoster(team.rosterId)!;
   const ruleset = getRuleset(team.rulesetId);
   const totals = summarize(team);
-  const selectedStars = team.stars.flatMap(
-    (id) => stars.find((star) => star.id === id) ?? [],
-  );
-  const selectedInducements = inducements.filter(
-    (item) => team.inducements[item.id] > 0,
-  );
+  const selectedStars = team.stars.flatMap((id) => stars.find((star) => star.id === id) ?? []);
+  const selectedInducements = inducements.filter((item) => team.inducements[item.id] > 0);
   const specialRules = roster.specialRules.flatMap((name) =>
-    name.startsWith("Favoured of") || name.startsWith("If Chaos Clash")
-      ? (affiliation(team) ?? [])
-      : name,
+    name.startsWith("Favoured of") || name.startsWith("If Chaos Clash") ? (affiliation(team) ?? []) : name,
   );
   const skillIds = sortSkillIds([
     ...new Set([
       ...team.players.flatMap((player) => [
-        ...(roster.players.find((p) => p.id === player.positionId)?.skills ??
-          []),
+        ...(roster.players.find((p) => p.id === player.positionId)?.skills ?? []),
         ...player.skills,
       ]),
       ...selectedStars.flatMap((star) => star.skills),
@@ -166,11 +139,7 @@ export function TeamPrint({
                 {Object.entries(team.staff).map(([key, count]) => (
                   <div key={key}>
                     <dt>{t(key as keyof Team["staff"])}</dt>
-                    <dd>
-                      {isSevens(team) && key === "dedicatedFans"
-                        ? count + dedicatedFansBase(team)
-                        : count}
-                    </dd>
+                    <dd>{isSevens(team) && key === "dedicatedFans" ? count + dedicatedFansBase(team) : count}</dd>
                   </div>
                 ))}
               </dl>
@@ -182,15 +151,9 @@ export function TeamPrint({
                   {selectedInducements.map((item) => (
                     <div key={item.id}>
                       <dt>
-                        {team.inducements[item.id]} ×{" "}
-                        {t(`inducementNames.${item.id}`)}
+                        {team.inducements[item.id]} × {t(`inducementNames.${item.id}`)}
                       </dt>
-                      <dd>
-                        {gold(
-                          inducementInfo(team, item).cost *
-                            team.inducements[item.id],
-                        )}
-                      </dd>
+                      <dd>{gold(inducementInfo(team, item).cost * team.inducements[item.id])}</dd>
                     </div>
                   ))}
                 </dl>
@@ -236,43 +199,29 @@ export function TeamPrint({
           </thead>
           <tbody>
             {numberedPlayers(team.players).map((player) => {
-              const position = roster.players.find(
-                (p) => p.id === player.positionId,
-              )!;
+              const position = roster.players.find((p) => p.id === player.positionId)!;
               const cost =
-                position.cost +
-                (ruleset.id === "bb2025-default"
-                  ? playerSkillCost(team, position, player.skills)
-                  : 0);
+                position.cost + (ruleset.id === "bb2025-default" ? playerSkillCost(team, position, player.skills) : 0);
               return (
                 <tr key={player.id}>
                   <td className="number">{player.number}</td>
                   <td>
-                    {hasPlayerName(
-                      player.name,
-                      positionLabel(position.position),
-                    ) ? (
+                    {hasPlayerName(player.name, positionLabel(position.position)) ? (
                       <>
                         <div className="player-name">{player.name}</div>
-                        <div className="player-designation">
-                          {positionLabel(position.position)}
-                        </div>
+                        <div className="player-designation">{positionLabel(position.position)}</div>
                       </>
                     ) : (
                       positionLabel(position.position)
                     )}
                   </td>
-                  {[
-                    playerMovement(team, player.id, position),
-                    position.st,
-                    position.ag,
-                    position.pa,
-                    position.av,
-                  ].map((stat, i) => (
-                    <td className="stat" key={i}>
-                      {stat}
-                    </td>
-                  ))}
+                  {[playerMovement(team, player.id, position), position.st, position.ag, position.pa, position.av].map(
+                    (stat, i) => (
+                      <td className="stat" key={i}>
+                        {stat}
+                      </td>
+                    ),
+                  )}
                   <td>
                     <PrintedSkills
                       builtIn={position.skills}
@@ -288,17 +237,13 @@ export function TeamPrint({
             })}
             {selectedStars.map((star, index) => (
               <tr key={star.id}>
-                <td className="number">
-                  {nextPlayerNumber(team.players, index)}
-                </td>
+                <td className="number">{nextPlayerNumber(team.players, index)}</td>
                 <td>{star.name}</td>
-                {[star.ma, star.st, star.ag, star.pa, star.av].map(
-                  (stat, i) => (
-                    <td className="stat" key={i}>
-                      {stat}
-                    </td>
-                  ),
-                )}
+                {[star.ma, star.st, star.ag, star.pa, star.av].map((stat, i) => (
+                  <td className="stat" key={i}>
+                    {stat}
+                  </td>
+                ))}
                 <td>
                   <PrintedSkills builtIn={star.skills} t={t} />
                 </td>
@@ -334,17 +279,12 @@ export function TeamPrint({
   );
 }
 
-export async function printTeam(
-  team: Team,
-  orientation: PrintOrientation,
-  t: Translate,
-  locale: AppLocale,
-) {
+export async function printTeam(team: Team, orientation: PrintOrientation, t: Translate, locale: AppLocale) {
   const { renderToStaticMarkup } = await import("react-dom/server");
   // This is a standalone iframe document, outside Next.js's page and head manager.
   const markup = renderToStaticMarkup(
     <html lang={locale}>
-      {/* eslint-disable-next-line @next/next/no-head-element */}
+      {/* oxlint-disable-next-line nextjs/no-head-element */}
       <head>
         <meta charSet="utf-8" />
         <title>{team.name}</title>
@@ -357,16 +297,13 @@ export async function printTeam(
   );
   const frame = document.createElement("iframe");
   frame.title = t("print");
-  frame.style.cssText =
-    "position:fixed;left:-10000px;top:0;width:1px;height:1px;border:0";
+  frame.style.cssText = "position:fixed;left:-10000px;top:0;width:1px;height:1px;border:0";
   await new Promise<void>((resolve, reject) => {
     frame.onload = () => {
       try {
         const target = frame.contentWindow;
         if (!target) throw new Error("Print window unavailable");
-        target.addEventListener("afterprint", () => frame.remove(), {
-          once: true,
-        });
+        target.addEventListener("afterprint", () => frame.remove(), { once: true });
         target.focus();
         target.print();
         resolve();

@@ -8,14 +8,8 @@ const updateSchema = z.object({
   message: z
     .object({
       text: z.string().max(4096).optional(),
-      chat: z.object({
-        id: z.number().int().positive().safe(),
-        type: z.literal("private"),
-      }),
-      from: z.object({
-        id: z.number().int().positive().safe(),
-        is_bot: z.boolean(),
-      }),
+      chat: z.object({ id: z.number().int().positive().safe(), type: z.literal("private") }),
+      from: z.object({ id: z.number().int().positive().safe(), is_bot: z.boolean() }),
     })
     .optional(),
 });
@@ -26,10 +20,7 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     const secret = process.env.TELEGRAM_WEBHOOK_SECRET;
-    if (
-      !secret ||
-      request.headers.get("X-Telegram-Bot-Api-Secret-Token") !== secret
-    )
+    if (!secret || request.headers.get("X-Telegram-Bot-Api-Secret-Token") !== secret)
       return new Response("Unauthorized", { status: 401 });
     const raw: unknown = await request.json().catch(() => null);
     const parsed = updateSchema.safeParse(raw);
@@ -41,9 +32,7 @@ http.route({
       message.from.id === message.chat.id
     ) {
       try {
-        await ctx.runAction(internal.telegram.sendLogin, {
-          chatId: message.chat.id,
-        });
+        await ctx.runAction(internal.telegram.sendLogin, { chatId: message.chat.id });
       } catch {
         return new Response("Login prompt unavailable", { status: 503 });
       }

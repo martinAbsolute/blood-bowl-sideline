@@ -4,12 +4,7 @@ import { useContentTitle } from "@/lib/use-content-title";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  useConvexAuth,
-  useMutation,
-  usePaginatedQuery,
-  useQuery,
-} from "convex/react";
+import { useConvexAuth, useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { useFormatter, useTranslations } from "next-intl";
 import {
   ArrowRight,
@@ -33,10 +28,7 @@ import { ShareButton } from "./share-button";
 import { DEFAULT_LEAGUE_TREASURY } from "@/domain/league-rules";
 import { getRoster } from "@/domain/catalog";
 import { canEnrollTeam } from "@/lib/league-team-eligibility";
-import {
-  leaguePlayerLabel,
-  leaguePlayerNumbers,
-} from "@/lib/league-player-label";
+import { leaguePlayerLabel, leaguePlayerNumbers } from "@/lib/league-player-label";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { LeagueField, LeagueSelect } from "./league-field";
@@ -58,18 +50,7 @@ import {
   useLeagueAction,
 } from "./league-ui";
 
-const teamColumns = [
-  "pts",
-  "mp",
-  "w",
-  "d",
-  "l",
-  "td",
-  "tdDiff",
-  "cas",
-  "casDiff",
-  "latest",
-] as const;
+const teamColumns = ["pts", "mp", "w", "d", "l", "td", "tdDiff", "cas", "casDiff", "latest"] as const;
 const playerColumns = [
   "sppEarned",
   "available",
@@ -92,24 +73,13 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
   const searchParams = useSearchParams();
   const { isAuthenticated, isLoading } = useConvexAuth();
   const id = leagueId as Id<"leagues">;
-  const data = useQuery(
-    api.leagues.get,
-    isAuthenticated ? { leagueId: id } : "skip",
-  );
+  const data = useQuery(api.leagues.get, isAuthenticated ? { leagueId: id } : "skip");
   useContentTitle(data?.league.name);
   const [teamUuid, setTeamUuid] = useState("");
   const [teamPickerOpen, setTeamPickerOpen] = useState(false);
   const requestedTab = searchParams.get("view") ?? "overview";
   const tab =
-    [
-      "overview",
-      "fixtures",
-      "standings",
-      "participants",
-      "players",
-      "history",
-      "manage",
-    ].includes(requestedTab) &&
+    ["overview", "fixtures", "standings", "participants", "players", "history", "manage"].includes(requestedTab) &&
     (requestedTab !== "manage" || data?.canCommission)
       ? requestedTab
       : "overview";
@@ -119,9 +89,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
     if (view === "overview") params.delete("view");
     else params.set("view", view);
     const query = params.toString();
-    router.replace(`/leagues/manage/${leagueId}${query ? `?${query}` : ""}`, {
-      scroll: false,
-    });
+    router.replace(`/leagues/manage/${leagueId}${query ? `?${query}` : ""}`, { scroll: false });
   };
   const [selectedRound, setSelectedRound] = useState("");
   const [detailedStats, setDetailedStats] = useState(false);
@@ -137,23 +105,16 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
       : "skip",
     { initialNumItems: 30 },
   );
-  const audit = usePaginatedQuery(
-    api.leagues.audit,
-    isAuthenticated && tab === "history" ? { leagueId: id } : "skip",
-    { initialNumItems: 15 },
-  );
+  const audit = usePaginatedQuery(api.leagues.audit, isAuthenticated && tab === "history" ? { leagueId: id } : "skip", {
+    initialNumItems: 15,
+  });
   const register = useMutation(api.leagues.register);
   const launch = useMutation(api.leagues.launch);
   const openRound = useMutation(api.leagues.openRound);
   const extendRound = useMutation(api.leagues.extendRound);
   const action = useLeagueAction();
   if (isLoading || !isAuthenticated || data === undefined)
-    return (
-      <LeagueGate
-        authenticated={isAuthenticated}
-        loading={isLoading || isAuthenticated}
-      />
-    );
+    return <LeagueGate authenticated={isAuthenticated} loading={isLoading || isAuthenticated} />;
   if (!data)
     return (
       <div className="page-width py-8">
@@ -169,21 +130,15 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
   const base = `/leagues/manage/${leagueId}`;
   const mine = entries.find((entry) => entry.coachId === data.viewerId);
   const selectedTeam = own.results.find(({ team }) => team.uuid === teamUuid);
-  const canJoin =
-    selectedTeam && canEnrollTeam(selectedTeam, league.startingTreasury);
+  const canJoin = selectedTeam && canEnrollTeam(selectedTeam, league.startingTreasury);
   const entryById = new Map(entries.map((entry) => [entry._id, entry]));
   const currentRound =
     rounds.find((round) => round.status === "open") ??
     rounds.find((round) => round.status === "pending") ??
     rounds.at(-1);
-  const visibleRound =
-    rounds.find((round) => round._id === selectedRound) ?? currentRound;
-  const roundMatches = matches.filter(
-    (match) => match.roundId === visibleRound?._id,
-  );
-  const finished = matches.filter((match) =>
-    ["completed", "bye", "void"].includes(match.status),
-  ).length;
+  const visibleRound = rounds.find((round) => round._id === selectedRound) ?? currentRound;
+  const roundMatches = matches.filter((match) => match.roundId === visibleRound?._id);
+  const finished = matches.filter((match) => ["completed", "bye", "void"].includes(match.status)).length;
   const nextMatch =
     mine &&
     !mine.withdrawn &&
@@ -194,23 +149,16 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
         !["completed", "bye", "void"].includes(match.status),
     );
   const activeEntries = entries.filter((entry) => !entry.withdrawn);
-  const pendingPostgame = activeEntries.filter(
-    (entry) => entry.postGamePending,
-  );
+  const pendingPostgame = activeEntries.filter((entry) => entry.postGamePending);
   const unresolved = matches.filter(
     (match) =>
       !["completed", "bye", "void"].includes(match.status) &&
       rounds.find((round) => round._id === match.roundId)?.status === "open",
   );
-  const waitingReports = unresolved.filter(
-    (match) => match.confirmedBy.length > 0,
-  );
+  const waitingReports = unresolved.filter((match) => match.confirmedBy.length > 0);
   const readyRound = rounds.find(
     (round, index) =>
-      round.status === "pending" &&
-      rounds
-        .slice(0, index)
-        .every((previous) => previous.status === "completed"),
+      round.status === "pending" && rounds.slice(0, index).every((previous) => previous.status === "completed"),
   );
   const tabs = [
     { value: "overview", label: t("leagueUx.overview"), icon: LayoutDashboard },
@@ -231,10 +179,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
       : []),
   ];
   const playerNumbers = leaguePlayerNumbers(
-    data.playerStats.map((player) => ({
-      id: player.playerId,
-      entryId: player.entryId,
-    })),
+    data.playerStats.map((player) => ({ id: player.playerId, entryId: player.entryId })),
   );
   return (
     <div className="page-width space-y-5 py-6 sm:py-8">
@@ -246,9 +191,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
         status={<LeagueStatus status={league.status} />}
         description={
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="font-medium text-foreground">
-              {t("leagueUi.commissioner")}:
-            </span>
+            <span className="font-medium text-foreground">{t("leagueUi.commissioner")}:</span>
             {data.commissionerUsername ? (
               <a
                 href={`https://t.me/${data.commissionerUsername}`}
@@ -263,19 +206,10 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
               <span>{league.commissionerName}</span>
             )}
             <span aria-hidden="true">·</span>
-            <span>
-              {t("leagueUx.roundDuration", { days: league.roundDays })}
-            </span>
+            <span>{t("leagueUx.roundDuration", { days: league.roundDays })}</span>
           </div>
         }
-        action={
-          <ShareButton
-            variant="outline"
-            className="h-10"
-            path={base}
-            onShared={() => setCopied(true)}
-          />
-        }
+        action={<ShareButton variant="outline" className="h-10" path={base} onShared={() => setCopied(true)} />}
       >
         <span className="inline-flex items-center gap-2">
           <Users className="size-4" />
@@ -300,24 +234,14 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
         {!data.canCommission && (
           <span className="inline-flex items-center gap-2">
             <Eye className="size-4" aria-hidden="true" />
-            {t(
-              mine && !mine.withdrawn
-                ? "leagueUx.coachView"
-                : "leagueUx.spectatorView",
-            )}
+            {t(mine && !mine.withdrawn ? "leagueUx.coachView" : "leagueUx.spectatorView")}
           </span>
         )}
       </LeaguePageHeader>
       <LeagueError message={action.error} />
       <div className="catalog-layout">
         <aside className="catalog-index min-w-0">
-          <LeagueNavigation
-            vertical
-            label={t("leagueUi.leagueViews")}
-            value={tab}
-            onChange={setTab}
-            items={tabs}
-          />
+          <LeagueNavigation vertical label={t("leagueUi.leagueViews")} value={tab} onChange={setTab} items={tabs} />
         </aside>
         <div className="min-w-0 space-y-4">
           {tab === "overview" && (
@@ -328,53 +252,34 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                     title={t("leagueUx.seasonComplete")}
                     action={<Trophy className="size-4 text-primary" />}
                   >
-                    <p className="text-sm text-muted-foreground">
-                      {t("leagueUx.seasonCompleteHint")}
-                    </p>
-                    <Button
-                      className="mt-4"
-                      onClick={() => setTab("standings")}
-                    >
+                    <p className="text-sm text-muted-foreground">{t("leagueUx.seasonCompleteHint")}</p>
+                    <Button className="mt-4" onClick={() => setTab("standings")}>
                       {t("leagueUx.finalStandings")}
                       <ArrowRight className="size-4" />
                     </Button>
                   </LeagueSection>
                 )}
-                {!mine &&
-                  !data.canRegister &&
-                  league.status !== "completed" && (
-                    <div className="flex items-start gap-3 rounded-lg border bg-secondary/40 p-4">
-                      <Eye
-                        className="mt-0.5 size-4 shrink-0 text-muted-foreground"
-                        aria-hidden="true"
-                      />
-                      <div>
-                        <p className="text-sm font-medium">
-                          {t("leagueUx.followSeason")}
-                        </p>
-                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                          {t("leagueUx.followSeasonHint")}
-                        </p>
-                      </div>
+                {!mine && !data.canRegister && league.status !== "completed" && (
+                  <div className="flex items-start gap-3 rounded-lg border bg-secondary/40 p-4">
+                    <Eye className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                    <div>
+                      <p className="text-sm font-medium">{t("leagueUx.followSeason")}</p>
+                      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                        {t("leagueUx.followSeasonHint")}
+                      </p>
                     </div>
-                  )}
+                  </div>
+                )}
                 {mine ? (
                   <div className="rounded-lg border border-primary/20 bg-secondary/40 p-4">
                     <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       {t("leagueUx.yourTeam")}
                     </p>
                     <div className="flex items-center gap-4">
-                      <RosterIcon
-                        rosterId={mine.team.rosterId}
-                        className="size-10"
-                      />
+                      <RosterIcon rosterId={mine.team.rosterId} className="size-10" />
                       <div className="min-w-0">
-                        <h2 className="break-words text-base font-semibold">
-                          {mine.team.name}
-                        </h2>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {getRoster(mine.team.rosterId)?.name}
-                        </p>
+                        <h2 className="break-words text-base font-semibold">{mine.team.name}</h2>
+                        <p className="mt-1 text-sm text-muted-foreground">{getRoster(mine.team.rosterId)?.name}</p>
                       </div>
                     </div>
                     <p className="mt-4 text-sm text-muted-foreground">
@@ -398,9 +303,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                         className={`inline-flex min-h-11 items-center gap-2 rounded-lg px-4 text-sm font-medium ${mine.postGamePending || !nextMatch ? "bg-primary text-primary-foreground hover:bg-primary/90" : "border bg-card hover:bg-secondary"}`}
                       >
                         {t(
-                          mine.withdrawn ||
-                            (league.status === "completed" &&
-                              !mine.postGamePending)
+                          mine.withdrawn || (league.status === "completed" && !mine.postGamePending)
                             ? "leagueUx.viewCareer"
                             : mine.postGamePending
                               ? "leagueUx.finishPostgame"
@@ -413,11 +316,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                           href={`${base}/matches/${nextMatch._id}`}
                           className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                         >
-                          {t(
-                            nextMatch.status === "in-progress"
-                              ? "leagueUx.continueReport"
-                              : "leagueUx.nextMatch",
-                          )}
+                          {t(nextMatch.status === "in-progress" ? "leagueUx.continueReport" : "leagueUx.nextMatch")}
                           <ArrowRight className="size-4" />
                         </Link>
                       )}
@@ -427,9 +326,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
 
                 {data.canRegister && !mine && (
                   <LeagueSection title={t("leagueUi.registerTeam")}>
-                    <p className="mb-4 text-sm text-muted-foreground">
-                      {t("leagueUx.joinHint")}
-                    </p>
+                    <p className="mb-4 text-sm text-muted-foreground">{t("leagueUx.joinHint")}</p>
                     <div className="flex flex-wrap items-end gap-3">
                       <LeagueTeamPicker
                         onOpenChange={setTeamPickerOpen}
@@ -445,11 +342,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                       <Button
                         className="h-11"
                         disabled={!canJoin || action.busy}
-                        onClick={() =>
-                          void action.run(() =>
-                            register({ leagueId: id, teamUuid }),
-                          )
-                        }
+                        onClick={() => void action.run(() => register({ leagueId: id, teamUuid }))}
                       >
                         {t("leagueUi.join")}
                       </Button>
@@ -458,22 +351,12 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                 )}
 
                 <LeagueSection
-                  title={t(
-                    league.status === "registration"
-                      ? "leagueUi.participants"
-                      : "leagueUx.seasonProgress",
-                  )}
+                  title={t(league.status === "registration" ? "leagueUi.participants" : "leagueUx.seasonProgress")}
                   action={
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() =>
-                        setTab(
-                          league.status === "registration"
-                            ? "participants"
-                            : "fixtures",
-                        )
-                      }
+                      onClick={() => setTab(league.status === "registration" ? "participants" : "fixtures")}
                     >
                       {t("leagueUx.viewAll")}
                       <ArrowRight className="size-3.5" />
@@ -488,30 +371,19 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                           href={`${base}/teams/${entry._id}`}
                           className="flex items-center gap-3 py-2.5 hover:text-primary"
                         >
-                          <RosterIcon
-                            rosterId={entry.team.rosterId}
-                            className="size-8"
-                          />
+                          <RosterIcon rosterId={entry.team.rosterId} className="size-8" />
                           <span className="min-w-0 flex-1">
-                            <span className="block truncate text-sm font-medium">
-                              {entry.team.name}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {entry.coachName}
-                            </span>
+                            <span className="block truncate text-sm font-medium">{entry.team.name}</span>
+                            <span className="text-xs text-muted-foreground">{entry.coachName}</span>
                           </span>
                           {mine?._id === entry._id && (
-                            <span className="text-xs text-primary">
-                              {t("leagueUx.yourTeam")}
-                            </span>
+                            <span className="text-xs text-primary">{t("leagueUx.yourTeam")}</span>
                           )}
                           <ArrowRight className="size-3.5" />
                         </Link>
                       ))}
                       {!activeEntries.length && (
-                        <p className="py-3 text-sm text-muted-foreground">
-                          {t("leagueUx.noParticipants")}
-                        </p>
+                        <p className="py-3 text-sm text-muted-foreground">{t("leagueUx.noParticipants")}</p>
                       )}
                     </div>
                   ) : (
@@ -519,14 +391,9 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                       <div className="flex items-baseline justify-between gap-3">
                         <strong className="font-mono text-xl">
                           {finished}
-                          <span className="text-sm font-normal text-muted-foreground">
-                            {" "}
-                            / {matches.length}
-                          </span>
+                          <span className="text-sm font-normal text-muted-foreground"> / {matches.length}</span>
                         </strong>
-                        <span className="text-xs text-muted-foreground">
-                          {t("leagueUx.fixturesResolved")}
-                        </span>
+                        <span className="text-xs text-muted-foreground">{t("leagueUx.fixturesResolved")}</span>
                       </div>
                       <progress
                         className="my-3 h-1.5 w-full accent-primary"
@@ -536,8 +403,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                       />
                       {currentRound && (
                         <p className="text-xs text-muted-foreground">
-                          {t("leagueUi.round")} {currentRound.number} ·{" "}
-                          {t("leagueUi.deadline")}:{" "}
+                          {t("leagueUi.round")} {currentRound.number} · {t("leagueUi.deadline")}:{" "}
                           {format.dateTime(currentRound.deadlineAt, "dateTime")}
                         </p>
                       )}
@@ -549,20 +415,14 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                         >
                           <span className="font-medium">
                             {entryById.get(match.homeEntryId)?.team.name}{" "}
-                            <span className="font-normal text-muted-foreground">
-                              {t("leagueUx.versus")}
-                            </span>{" "}
-                            {match.awayEntryId
-                              ? entryById.get(match.awayEntryId)?.team.name
-                              : t("leagueUi.bye")}
+                            <span className="font-normal text-muted-foreground">{t("leagueUx.versus")}</span>{" "}
+                            {match.awayEntryId ? entryById.get(match.awayEntryId)?.team.name : t("leagueUi.bye")}
                           </span>
                           <LeagueStatus status={match.status} />
                         </Link>
                       ))}
                       {!unresolved.length && (
-                        <p className="mt-3 text-sm text-muted-foreground">
-                          {t("leagueUx.allCaughtUp")}
-                        </p>
+                        <p className="mt-3 text-sm text-muted-foreground">{t("leagueUx.allCaughtUp")}</p>
                       )}
                     </>
                   )}
@@ -607,104 +467,75 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                 )}
                 <LeagueSection title={t("leagueUx.leagueDetails")}>
                   <p className="mb-4 text-sm">
-                    <span className="text-muted-foreground">
-                      {t("leagueUx.startingTreasury")}
-                    </span>
+                    <span className="text-muted-foreground">{t("leagueUx.startingTreasury")}</span>
                     <br />
                     <strong>
-                      {format.number(
-                        league.startingTreasury ?? DEFAULT_LEAGUE_TREASURY,
-                        "integer",
-                      )}{" "}
+                      {format.number(league.startingTreasury ?? DEFAULT_LEAGUE_TREASURY, "integer")}{" "}
                       {t("leagueUx.goldUnit")}
                     </strong>
                   </p>
                   <dl className="space-y-3 text-xs">
                     <div className="flex justify-between gap-3">
-                      <dt className="text-muted-foreground">
-                        {t("leagueUx.format")}
-                      </dt>
+                      <dt className="text-muted-foreground">{t("leagueUx.format")}</dt>
                       <dd>{t("leagueUi.roundRobin")}</dd>
                     </div>
                     <div className="flex justify-between gap-3">
-                      <dt className="text-muted-foreground">
-                        {t("leagueUx.scoring")}
-                      </dt>
+                      <dt className="text-muted-foreground">{t("leagueUx.scoring")}</dt>
                       <dd>{t("leagueUi.points")}</dd>
                     </div>
                     <div className="flex justify-between gap-3">
-                      <dt className="text-muted-foreground">
-                        {t("leagueRoundDays")}
-                      </dt>
+                      <dt className="text-muted-foreground">{t("leagueRoundDays")}</dt>
                       <dd>{league.roundDays}</dd>
                     </div>
                   </dl>
                   <details className="mt-3 border-t pt-3 text-xs">
-                    <summary className="cursor-pointer text-muted-foreground">
-                      {t("leagueUx.tiebreaks")}
-                    </summary>
+                    <summary className="cursor-pointer text-muted-foreground">{t("leagueUx.tiebreaks")}</summary>
                     <p className="mt-2">{t("leagueUi.tiebreakOrder")}</p>
                   </details>
                 </LeagueSection>
               </aside>
             </div>
           )}
-          {tab === "manage" &&
-            data.canCommission &&
-            league.status === "registration" && (
-              <LeagueSection
-                title={t("leagueUx.setupChecklist")}
-                action={
-                  <Button
-                    disabled={
-                      entries.filter((entry) => !entry.withdrawn).length < 2 ||
-                      action.busy
-                    }
-                    onClick={() =>
-                      void action.run(() => launch({ leagueId: id }))
-                    }
-                  >
-                    <Flag className="size-4" />
-                    {t("leagueUi.launch")}
-                  </Button>
-                }
-              >
-                <ol className="grid gap-3 md:grid-cols-3">
-                  {[
-                    {
-                      label: t("leagueUx.setupInvite"),
-                      done: copied || activeEntries.length >= 2,
-                      detail: t("leagueUx.inviteCoaches"),
-                    },
-                    {
-                      label: t("leagueUx.setupTeams"),
-                      done: activeEntries.length >= 2,
-                      detail: `${activeEntries.length} / 2 ${t("leagueUi.coaches")}`,
-                    },
-                    {
-                      label: t("leagueUx.setupLaunch"),
-                      done: false,
-                      detail: t("leagueUi.launchHint"),
-                    },
-                  ].map((item, index) => (
-                    <li
-                      key={item.label}
-                      className="rounded-lg border bg-secondary/20 p-4"
+          {tab === "manage" && data.canCommission && league.status === "registration" && (
+            <LeagueSection
+              title={t("leagueUx.setupChecklist")}
+              action={
+                <Button
+                  disabled={entries.filter((entry) => !entry.withdrawn).length < 2 || action.busy}
+                  onClick={() => void action.run(() => launch({ leagueId: id }))}
+                >
+                  <Flag className="size-4" />
+                  {t("leagueUi.launch")}
+                </Button>
+              }
+            >
+              <ol className="grid gap-3 md:grid-cols-3">
+                {[
+                  {
+                    label: t("leagueUx.setupInvite"),
+                    done: copied || activeEntries.length >= 2,
+                    detail: t("leagueUx.inviteCoaches"),
+                  },
+                  {
+                    label: t("leagueUx.setupTeams"),
+                    done: activeEntries.length >= 2,
+                    detail: `${activeEntries.length} / 2 ${t("leagueUi.coaches")}`,
+                  },
+                  { label: t("leagueUx.setupLaunch"), done: false, detail: t("leagueUi.launchHint") },
+                ].map((item, index) => (
+                  <li key={item.label} className="rounded-lg border bg-secondary/20 p-4">
+                    <span
+                      className={`mb-3 flex size-8 items-center justify-center rounded-full text-sm ${item.done ? "bg-primary text-primary-foreground" : "border bg-card text-muted-foreground"}`}
                     >
-                      <span
-                        className={`mb-3 flex size-8 items-center justify-center rounded-full text-sm ${item.done ? "bg-primary text-primary-foreground" : "border bg-card text-muted-foreground"}`}
-                      >
-                        {item.done ? <Check className="size-4" /> : index + 1}
-                      </span>
-                      <p className="text-sm font-semibold">{item.label}</p>
-                      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                        {item.detail}
-                      </p>
-                    </li>
-                  ))}
-                </ol>
-              </LeagueSection>
-            )}
+                      {item.done ? <Check className="size-4" /> : index + 1}
+                    </span>
+                    <p className="text-sm font-semibold">{item.label}</p>
+                    <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{item.detail}</p>
+                  </li>
+                ))}
+              </ol>
+            </LeagueSection>
+          )}
           {tab === "fixtures" && (
             <div className="space-y-5">
               {visibleRound ? (
@@ -715,21 +546,17 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                       <LeagueSelect
                         className="min-w-40"
                         value={visibleRound._id}
-                        onChange={(event) =>
-                          setSelectedRound(event.target.value)
-                        }
+                        onChange={(event) => setSelectedRound(event.target.value)}
                       >
                         {rounds.map((round) => (
                           <option key={round._id} value={round._id}>
-                            {t("leagueUi.round")} {round.number} ·{" "}
-                            {t(`leagueUi.status.${round.status}`)}
+                            {t("leagueUi.round")} {round.number} · {t(`leagueUi.status.${round.status}`)}
                           </option>
                         ))}
                       </LeagueSelect>
                     </label>
                     <span className="text-sm text-muted-foreground">
-                      {t("leagueUi.deadline")}:{" "}
-                      {format.dateTime(visibleRound.deadlineAt, "dateTime")}
+                      {t("leagueUi.deadline")}: {format.dateTime(visibleRound.deadlineAt, "dateTime")}
                     </span>
                   </div>
                   <LeagueSection
@@ -739,12 +566,8 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                     <div className="divide-y overflow-hidden rounded-lg border">
                       {roundMatches.map((match) => {
                         const home = entryById.get(match.homeEntryId);
-                        const away = match.awayEntryId
-                          ? entryById.get(match.awayEntryId)
-                          : null;
-                        const isMine =
-                          !!mine &&
-                          (home?._id === mine._id || away?._id === mine._id);
+                        const away = match.awayEntryId ? entryById.get(match.awayEntryId) : null;
+                        const isMine = !!mine && (home?._id === mine._id || away?._id === mine._id);
                         return (
                           <article
                             key={match._id}
@@ -753,26 +576,17 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                               <LeagueStatus status={match.status} />
                               {isMine && (
-                                <span className="text-xs font-semibold text-primary">
-                                  {t("leagueUx.yourFixture")}
-                                </span>
+                                <span className="text-xs font-semibold text-primary">{t("leagueUx.yourFixture")}</span>
                               )}
                             </div>
                             <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 sm:gap-6">
                               <div className="flex min-w-0 items-center gap-3">
                                 {home && (
-                                  <RosterIcon
-                                    rosterId={home.team.rosterId}
-                                    className="hidden size-8 sm:inline-flex"
-                                  />
+                                  <RosterIcon rosterId={home.team.rosterId} className="hidden size-8 sm:inline-flex" />
                                 )}
                                 <div className="min-w-0">
-                                  <p className="break-words text-sm font-semibold sm:text-base">
-                                    {home?.team.name}
-                                  </p>
-                                  <p className="mt-1 break-words text-xs text-muted-foreground">
-                                    {home?.coachName}
-                                  </p>
+                                  <p className="break-words text-sm font-semibold sm:text-base">{home?.team.name}</p>
+                                  <p className="mt-1 break-words text-xs text-muted-foreground">{home?.coachName}</p>
                                 </div>
                               </div>
                               <span className="rounded-md bg-secondary/60 px-3 py-1 text-center font-mono text-base font-semibold tabular-nums sm:min-w-20">
@@ -789,15 +603,10 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                                   <p className="break-words text-sm font-semibold sm:text-base">
                                     {away?.team.name ?? t("leagueUi.bye")}
                                   </p>
-                                  <p className="mt-1 break-words text-xs text-muted-foreground">
-                                    {away?.coachName}
-                                  </p>
+                                  <p className="mt-1 break-words text-xs text-muted-foreground">{away?.coachName}</p>
                                 </div>
                                 {away && (
-                                  <RosterIcon
-                                    rosterId={away.team.rosterId}
-                                    className="hidden size-8 sm:inline-flex"
-                                  />
+                                  <RosterIcon rosterId={away.team.rosterId} className="hidden size-8 sm:inline-flex" />
                                 )}
                               </div>
                             </div>
@@ -830,11 +639,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                   description={t("leagueUx.fixturesHint")}
                   action={
                     data.canCommission && (
-                      <Button
-                        variant="outline"
-                        className="h-11"
-                        onClick={() => setTab("manage")}
-                      >
+                      <Button variant="outline" className="h-11" onClick={() => setTab("manage")}>
                         {t("leagueUx.commissionerDesk")}
                       </Button>
                     )
@@ -848,12 +653,8 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
               <div className="flex items-start gap-3 rounded-lg border bg-secondary/35 p-4">
                 <ShieldCheck className="mt-1 size-6 shrink-0 text-primary" />
                 <div>
-                  <h2 className="display-font text-xl">
-                    {t("leagueUx.commissionerDesk")}
-                  </h2>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {t("leagueUx.manageHint")}
-                  </p>
+                  <h2 className="display-font text-xl">{t("leagueUx.commissionerDesk")}</h2>
+                  <p className="mt-2 text-sm text-muted-foreground">{t("leagueUx.manageHint")}</p>
                 </div>
               </div>
               <dl className="grid grid-cols-3 gap-3">
@@ -862,16 +663,9 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                   [t("leagueDesk.postgameTasks"), pendingPostgame.length],
                   [t("leagueDesk.completedFixtures"), finished],
                 ].map(([label, value]) => (
-                  <div
-                    key={String(label)}
-                    className="min-w-0 rounded-lg border bg-card p-3 sm:p-4"
-                  >
-                    <dt className="text-[11px] leading-4 text-muted-foreground">
-                      {label}
-                    </dt>
-                    <dd className="mt-2 font-mono text-2xl font-semibold text-primary">
-                      {value}
-                    </dd>
+                  <div key={String(label)} className="min-w-0 rounded-lg border bg-card p-3 sm:p-4">
+                    <dt className="text-[11px] leading-4 text-muted-foreground">{label}</dt>
+                    <dd className="mt-2 font-mono text-2xl font-semibold text-primary">{value}</dd>
                   </div>
                 ))}
               </dl>
@@ -887,9 +681,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                         >
                           <span>
                             {entryById.get(match.homeEntryId)?.team.name} ·{" "}
-                            {match.awayEntryId
-                              ? entryById.get(match.awayEntryId)?.team.name
-                              : t("leagueUi.bye")}
+                            {match.awayEntryId ? entryById.get(match.awayEntryId)?.team.name : t("leagueUi.bye")}
                           </span>
                           <span className="flex items-center gap-2">
                             <LeagueStatus status={match.status} />
@@ -912,11 +704,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                       ))}
                       {!unresolved.length && !pendingPostgame.length && (
                         <p className="py-2 text-sm text-muted-foreground">
-                          {t(
-                            readyRound
-                              ? "leagueUx.readyForRound"
-                              : "leagueUx.noCommissionerTasks",
-                          )}
+                          {t(readyRound ? "leagueUx.readyForRound" : "leagueUx.noCommissionerTasks")}
                         </p>
                       )}
                     </div>
@@ -928,14 +716,11 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                       {t("leagueUi.round")}
                       <LeagueSelect
                         value={visibleRound?._id ?? ""}
-                        onChange={(event) =>
-                          setSelectedRound(event.target.value)
-                        }
+                        onChange={(event) => setSelectedRound(event.target.value)}
                       >
                         {rounds.map((round) => (
                           <option key={round._id} value={round._id}>
-                            {t("leagueUi.round")} {round.number} ·{" "}
-                            {t(`leagueUi.status.${round.status}`)}
+                            {t("leagueUi.round")} {round.number} · {t(`leagueUi.status.${round.status}`)}
                           </option>
                         ))}
                       </LeagueSelect>
@@ -945,18 +730,9 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                         key={visibleRound._id}
                         round={visibleRound}
                         busy={action.busy}
-                        onOpen={() =>
-                          action.run(() =>
-                            openRound({ roundId: visibleRound._id }),
-                          )
-                        }
+                        onOpen={() => action.run(() => openRound({ roundId: visibleRound._id }))}
                         onDeadline={(deadlineAt) =>
-                          action.run(() =>
-                            extendRound({
-                              roundId: visibleRound._id,
-                              deadlineAt,
-                            }),
-                          )
+                          action.run(() => extendRound({ roundId: visibleRound._id, deadlineAt }))
                         }
                       />
                     )}
@@ -966,9 +742,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
               <div className="grid items-start gap-5 xl:grid-cols-2">
                 <CommissionerWithdrawal entries={entries} />
                 <LeagueSection title={t("leagueUx.deleteLeague")}>
-                  <p className="text-sm text-muted-foreground">
-                    {t("leagueUx.deleteLeagueHint")}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{t("leagueUx.deleteLeagueHint")}</p>
                   <LeagueDeleteDialog leagueId={id} name={league.name} />
                 </LeagueSection>
               </div>
@@ -991,11 +765,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
               <LeagueStatTable
                 firstLabel={t("team")}
                 showRank
-                columns={
-                  detailedStats
-                    ? teamColumns
-                    : ["pts", "mp", "w", "d", "l", "td", "cas", "latest"]
-                }
+                columns={detailedStats ? teamColumns : ["pts", "mp", "w", "d", "l", "td", "cas", "latest"]}
                 rows={standings.map((row, index) => ({
                   id: row.entryId,
                   name: row.teamName,
@@ -1028,18 +798,12 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
             >
               <LeagueStatTable
                 firstLabel={t("players")}
-                columns={
-                  detailedStats
-                    ? playerColumns
-                    : ["sppEarned", "available", "mp", "td", "cas", "mvp"]
-                }
+                columns={detailedStats ? playerColumns : ["sppEarned", "available", "mp", "td", "cas", "mvp"]}
                 rows={data.playerStats.map((player) => ({
                   id: player.playerId,
                   name: leaguePlayerLabel(
                     player.name,
-                    getRoster(
-                      entryById.get(player.entryId)!.team.rosterId,
-                    )?.players.find(
+                    getRoster(entryById.get(player.entryId)!.team.rosterId)?.players.find(
                       (position) => position.id === player.positionId,
                     )?.position ?? player.positionId,
                     playerNumbers.get(player.playerId)!,
@@ -1058,11 +822,7 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
           )}
           {tab === "participants" && (
             <LeagueSection title={t("leagueUi.participants")}>
-              {!entries.length && (
-                <p className="py-4 text-sm text-muted-foreground">
-                  {t("leagueUx.noParticipants")}
-                </p>
-              )}
+              {!entries.length && <p className="py-4 text-sm text-muted-foreground">{t("leagueUx.noParticipants")}</p>}
               <div className="divide-y">
                 {entries.map((entry) => (
                   <Link
@@ -1070,28 +830,16 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
                     href={`${base}/teams/${entry._id}`}
                     className="flex items-center gap-3 px-2 py-3 hover:bg-secondary/30"
                   >
-                    <RosterIcon
-                      rosterId={entry.team.rosterId}
-                      className="size-9 shrink-0"
-                    />
+                    <RosterIcon rosterId={entry.team.rosterId} className="size-9 shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <p className="break-words font-semibold">
-                        {entry.team.name}
-                      </p>
+                      <p className="break-words font-semibold">{entry.team.name}</p>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {entry.coachName}
-                        {entry.withdrawn
-                          ? " · " + t("leagueUi.status.withdrawn")
-                          : ""}
+                        {entry.withdrawn ? " · " + t("leagueUi.status.withdrawn") : ""}
                       </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {getRoster(entry.team.rosterId)?.name}
-                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">{getRoster(entry.team.rosterId)?.name}</p>
                     </div>
-                    <ArrowRight
-                      className="size-4 shrink-0 text-muted-foreground"
-                      aria-hidden="true"
-                    />
+                    <ArrowRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                   </Link>
                 ))}
               </div>
@@ -1103,23 +851,16 @@ export function LeagueWorkspace({ leagueId }: { leagueId: string }) {
               {audit.status === "LoadingFirstPage" ? (
                 <HistoryLoading label={t("loading")} />
               ) : !audit.results.length ? (
-                <p className="text-sm text-muted-foreground">
-                  {t("leagueUi.noHistory")}
-                </p>
+                <p className="text-sm text-muted-foreground">{t("leagueUi.noHistory")}</p>
               ) : null}
-              {(audit.status === "CanLoadMore" ||
-                audit.status === "LoadingMore") && (
+              {(audit.status === "CanLoadMore" || audit.status === "LoadingMore") && (
                 <Button
                   variant="outline"
                   className="mt-4"
                   disabled={audit.status === "LoadingMore"}
                   onClick={() => audit.loadMore(15)}
                 >
-                  {t(
-                    audit.status === "LoadingMore"
-                      ? "loading"
-                      : "leagueUi.loadMore",
-                  )}
+                  {t(audit.status === "LoadingMore" ? "loading" : "leagueUi.loadMore")}
                 </Button>
               )}
             </LeagueSection>
@@ -1147,9 +888,7 @@ function RoundControls({
     return (
       <div className="rounded-lg border bg-secondary/25 p-4">
         <LeagueStatus status={round.status} />
-        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-          {t("leagueDesk.roundComplete")}
-        </p>
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{t("leagueDesk.roundComplete")}</p>
       </div>
     );
   return (
@@ -1171,9 +910,7 @@ function RoundControls({
       <Button
         className="h-10"
         variant="outline"
-        disabled={
-          busy || !deadline || !Number.isFinite(new Date(deadline).getTime())
-        }
+        disabled={busy || !deadline || !Number.isFinite(new Date(deadline).getTime())}
         onClick={() =>
           void onDeadline(new Date(deadline).getTime()).then((saved) => {
             if (saved) setDeadline("");

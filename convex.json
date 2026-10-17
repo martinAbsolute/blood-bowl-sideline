@@ -1,8 +1,4 @@
 {
   "$schema": "https://raw.githubusercontent.com/get-convex/convex-js/main/schemas/convex.schema.json",
-  "aiFiles": {
-    "skills": {
-      "agents": ["codex"]
-    }
-  }
+  "aiFiles": { "skills": { "agents": ["codex"] } }
 }

@@ -1,13 +1,7 @@
 "use client";
 import { useDeferredValue, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
-import {
-  useConvex,
-  useConvexAuth,
-  useMutation,
-  usePaginatedQuery,
-  useQuery,
-} from "convex/react";
+import { useConvex, useConvexAuth, useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { rosters, rulesets } from "@/domain/catalog";
 import { teamSchema, type Team } from "@/domain/types";
@@ -24,17 +18,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { CreateTeamButton } from "./create-team-button";
 import { EditorSelect } from "./editor-select";
-import {
-  Archive,
-  Trash2,
-  Undo2,
-  CloudCheck,
-  FileText,
-  Search,
-  LoaderCircle,
-  ChevronDown,
-  Star,
-} from "lucide-react";
+import { Archive, Trash2, Undo2, CloudCheck, FileText, Search, LoaderCircle, ChevronDown, Star } from "lucide-react";
 import { LoginButton } from "./site-shell";
 import { toast } from "@/components/ui/toast";
 import { LibraryHeader } from "./library-header";
@@ -80,16 +64,12 @@ export function TeamLibrary() {
   }
   const confirmedTeam = useQuery(
     api.teams.getByUuid,
-    confirmationOpen &&
-      confirmation &&
-      confirmation.action !== "permanent-delete" &&
-      isAuthenticated
+    confirmationOpen && confirmation && confirmation.action !== "permanent-delete" && isAuthenticated
       ? { uuid: confirmation.team.uuid }
       : "skip",
   );
   const confirmationLocked = !!confirmedTeam?.leagueLocked;
-  const confirmationFavorited =
-    confirmation?.action === "archive" && !!confirmedTeam?.favorite;
+  const confirmationFavorited = confirmation?.action === "archive" && !!confirmedTeam?.favorite;
   const confirmationLoading =
     confirmationOpen &&
     !!confirmation &&
@@ -102,12 +82,7 @@ export function TeamLibrary() {
   const { results, status, loadMore } = usePaginatedQuery(
     api.teams.listMine,
     isAuthenticated
-      ? {
-          archived: false,
-          search: deferredSearch,
-          rosterId: rosterId || undefined,
-          rulesetId: rulesetId || undefined,
-        }
+      ? { archived: false, search: deferredSearch, rosterId: rosterId || undefined, rulesetId: rulesetId || undefined }
       : "skip",
     { initialNumItems: 18 },
   );
@@ -127,38 +102,22 @@ export function TeamLibrary() {
       : "skip",
     { initialNumItems: 18 },
   );
-  const favoritesPending =
-    searchingFavorites && favoriteSearch.status !== "Exhausted";
+  const favoritesPending = searchingFavorites && favoriteSearch.status !== "Exhausted";
   const listStatus = favoritesPending ? favoriteSearch.status : status;
-  const loadNext = () =>
-    favoritesPending ? favoriteSearch.loadMore(18) : loadMore(18);
-  const [settledResults, setSettledResults] = useState<{
-    account: string;
-    results: typeof results;
-  } | null>(null);
+  const loadNext = () => (favoritesPending ? favoriteSearch.loadMore(18) : loadMore(18));
+  const [settledResults, setSettledResults] = useState<{ account: string; results: typeof results } | null>(null);
   if (
     status !== "LoadingFirstPage" &&
     sync.account &&
-    (settledResults?.account !== sync.account ||
-      settledResults.results !== results)
+    (settledResults?.account !== sync.account || settledResults.results !== results)
   ) {
     setSettledResults({ account: sync.account, results });
   }
-  const cachedResults =
-    isAuthenticated && settledResults?.account === sync.account
-      ? settledResults.results
-      : null;
-  const visibleResults = isAuthenticated
-    ? status === "LoadingFirstPage"
-      ? (cachedResults ?? [])
-      : results
-    : [];
+  const cachedResults = isAuthenticated && settledResults?.account === sync.account ? settledResults.results : null;
+  const visibleResults = isAuthenticated ? (status === "LoadingFirstPage" ? (cachedResults ?? []) : results) : [];
   const raw = useSyncExternalStore(subscribeDrafts, draftSnapshot, () => "[]");
   const leagueTeams = new Map(
-    [
-      ...visibleResults,
-      ...(searchingFavorites ? favoriteSearch.results : []),
-    ].map((row) => [row.team.uuid, row]),
+    [...visibleResults, ...(searchingFavorites ? favoriteSearch.results : [])].map((row) => [row.team.uuid, row]),
   );
   const locals = parseDrafts(raw).filter((team) => {
     const owner = draftAccount(team.uuid);
@@ -167,39 +126,24 @@ export function TeamLibrary() {
     const parsed = teamSchema.safeParse({ ...team, notes: "" });
     // Storage cleanup can fail after a successful cloud save. The cloud card
     // remains authoritative when that leftover snapshot is already saved.
-    return (
-      !saved ||
-      !parsed.success ||
-      JSON.stringify(parsed.data) !==
-        JSON.stringify(teamSchema.parse(saved.team))
-    );
+    return !saved || !parsed.success || JSON.stringify(parsed.data) !== JSON.stringify(teamSchema.parse(saved.team));
   });
-  const failedCount = locals.filter((team) =>
-    sync.failed.has(team.uuid),
-  ).length;
+  const failedCount = locals.filter((team) => sync.failed.has(team.uuid)).length;
   const filter = { search: deferredSearch, rosterId, rulesetId };
   const pending = new Map(locals.map((team) => [team.uuid, team]));
   const cards = [
     ...locals
-      .filter(
-        (team) =>
-          !leagueTeams.get(team.uuid)?.leagueLocked &&
-          libraryMatches(team, filter),
-      )
+      .filter((team) => !leagueTeams.get(team.uuid)?.leagueLocked && libraryMatches(team, filter))
       .map((team) => ({
         team,
-        favorite: leagueTeams.has(team.uuid)
-          ? !!leagueTeams.get(team.uuid)?.favorite
-          : readDraftFavorite(team.uuid),
+        favorite: leagueTeams.has(team.uuid) ? !!leagueTeams.get(team.uuid)?.favorite : readDraftFavorite(team.uuid),
         local: true,
         leagueLocked: false,
         leagueExperienced: leagueTeams.get(team.uuid)?.leagueExperienced,
       })),
     ...Array.from(leagueTeams.values())
       .filter((row) => !favoritesPending || row.favorite)
-      .filter(
-        ({ team, leagueLocked }) => leagueLocked || !pending.has(team.uuid),
-      )
+      .filter(({ team, leagueLocked }) => leagueLocked || !pending.has(team.uuid))
       .map((row) => ({ ...row, local: false })),
   ].sort(favoritesFirst);
   const filtered = !!(search || rosterId || rulesetId);
@@ -211,13 +155,10 @@ export function TeamLibrary() {
       // An upload may finish between rendering the draft and clicking its star.
       await waitForTeamSave(team.uuid);
       await withDraftPreferenceLock(team.uuid, async () => {
-        const saved = isAuthenticated
-          ? await convex.query(api.teams.getByUuid, { uuid: team.uuid })
-          : null;
+        const saved = isAuthenticated ? await convex.query(api.teams.getByUuid, { uuid: team.uuid }) : null;
         if (saved) await setFavorite({ uuid: team.uuid, favorite });
         const updatedDraft = setDraftFavorite(team.uuid, favorite);
-        if (!saved && !updatedDraft)
-          throw new Error("Team no longer available");
+        if (!saved && !updatedDraft) throw new Error("Team no longer available");
       });
     } catch {
       toast.add({ type: "error", title: t("saveFailed") });
@@ -227,12 +168,7 @@ export function TeamLibrary() {
     }
   }
   async function toggleArchive(team: Team, nextArchived: boolean) {
-    if (
-      busy ||
-      (nextArchived &&
-        (leagueTeams.get(team.uuid)?.leagueLocked ||
-          leagueTeams.get(team.uuid)?.favorite))
-    )
+    if (busy || (nextArchived && (leagueTeams.get(team.uuid)?.leagueLocked || leagueTeams.get(team.uuid)?.favorite)))
       return;
     setBusy(team.uuid);
     const release = sync.editing(team.uuid);
@@ -256,9 +192,7 @@ export function TeamLibrary() {
     try {
       await waitForTeamSave(team.uuid);
       if (isAuthenticated) {
-        const current = await convex.query(api.teams.getByUuid, {
-          uuid: team.uuid,
-        });
+        const current = await convex.query(api.teams.getByUuid, { uuid: team.uuid });
         if (current?.leagueLocked) {
           toast.add({ type: "error", title: t("teamRemovalLocked") });
           return;
@@ -295,9 +229,7 @@ export function TeamLibrary() {
     <div className="page-width py-8 sm:py-10">
       <LibraryHeader
         title={t("myTeams")}
-        description={t(
-          isAuthenticated ? "libraryCloudHint" : "libraryGuestHint",
-        )}
+        description={t(isAuthenticated ? "libraryCloudHint" : "libraryGuestHint")}
         action={<CreateTeamButton size="sm" className="h-11 sm:h-9" />}
       />
       {!isLoading && !isAuthenticated && (
@@ -322,10 +254,7 @@ export function TeamLibrary() {
       )}
       <div className="mb-7 grid grid-cols-2 gap-3 lg:grid-cols-[minmax(200px,1fr)_180px_210px]">
         <div className="relative col-span-2 lg:col-span-1">
-          <Search
-            aria-hidden="true"
-            className="absolute left-3 top-3 size-4 text-muted-foreground"
-          />
+          <Search aria-hidden="true" className="absolute left-3 top-3 size-4 text-muted-foreground" />
           <Input
             aria-label={t("searchMyTeams")}
             placeholder={t("searchMyTeams")}
@@ -367,29 +296,19 @@ export function TeamLibrary() {
       <section
         className="min-h-[400px]"
         aria-label={t("myTeams")}
-        aria-busy={
-          search !== deferredSearch ||
-          (isAuthenticated && listStatus === "LoadingFirstPage")
-        }
+        aria-busy={search !== deferredSearch || (isAuthenticated && listStatus === "LoadingFirstPage")}
       >
         {cards.length === 0 &&
         (!sync.ready ||
           isLoading ||
-          (searchingFavorites &&
-            favoriteSearch.status === "LoadingFirstPage") ||
-          (isAuthenticated &&
-            listStatus === "LoadingFirstPage" &&
-            !cachedResults)) ? (
+          (searchingFavorites && favoriteSearch.status === "LoadingFirstPage") ||
+          (isAuthenticated && listStatus === "LoadingFirstPage" && !cachedResults)) ? (
           <LibraryCardsLoading label={t("loading")} />
         ) : cards.length === 0 ? (
           <div className="flex min-h-[400px] flex-col items-center justify-center rounded-xl border border-dashed bg-card/50 px-6 py-16 text-center">
             <FileText className="mx-auto mb-4 size-7 text-muted-foreground" />
-            <h2 className="text-lg font-semibold">
-              {t(filtered ? "noMatchingTeams" : "noTeams")}
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {t(filtered ? "clearFiltersHint" : "noTeamsHint")}
-            </p>
+            <h2 className="text-lg font-semibold">{t(filtered ? "noMatchingTeams" : "noTeams")}</h2>
+            <p className="mt-2 text-sm text-muted-foreground">{t(filtered ? "clearFiltersHint" : "noTeamsHint")}</p>
             {filtered ? (
               <Button
                 variant="outline"
@@ -408,120 +327,91 @@ export function TeamLibrary() {
           </div>
         ) : (
           <div className={teamCardStyles.grid}>
-            {cards.map(
-              ({ team, local, leagueLocked, leagueExperienced, favorite }) => (
-                <TeamCard
-                  key={team.uuid}
-                  team={team}
-                  leagueLocked={leagueLocked}
-                  leagueExperienced={leagueExperienced}
-                  href={`/teams/${team.uuid}`}
-                  saveState={
-                    local
-                      ? isAuthenticated
-                        ? sync.failed.has(team.uuid) || !team.name.trim()
-                          ? "error"
-                          : "pending"
-                        : "device"
-                      : "cloud"
-                  }
-                  action={
-                    <>
+            {cards.map(({ team, local, leagueLocked, leagueExperienced, favorite }) => (
+              <TeamCard
+                key={team.uuid}
+                team={team}
+                leagueLocked={leagueLocked}
+                leagueExperienced={leagueExperienced}
+                href={`/teams/${team.uuid}`}
+                saveState={
+                  local
+                    ? isAuthenticated
+                      ? sync.failed.has(team.uuid) || !team.name.trim()
+                        ? "error"
+                        : "pending"
+                      : "device"
+                    : "cloud"
+                }
+                action={
+                  <>
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-orange-600 hover:bg-orange-500/10 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-400"
+                            disabled={busy !== null || isLoading}
+                            aria-label={`${t(favorite ? "removeFavorite" : "addFavorite")} ${team.name}`}
+                            aria-pressed={!!favorite}
+                            onClick={() => void toggleFavorite(team, !favorite)}
+                          />
+                        }
+                      >
+                        <Star aria-hidden="true" className={`size-4 ${favorite ? "fill-current" : "fill-none"}`} />
+                      </TooltipTrigger>
+                      <TooltipContent>{t(favorite ? "removeFavorite" : "addFavorite")}</TooltipContent>
+                    </Tooltip>
+                    {local ? (
                       <Tooltip>
                         <TooltipTrigger
                           render={
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="text-orange-600 hover:bg-orange-500/10 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-400"
-                              disabled={busy !== null || isLoading}
-                              aria-label={`${t(favorite ? "removeFavorite" : "addFavorite")} ${team.name}`}
-                              aria-pressed={!!favorite}
-                              onClick={() =>
-                                void toggleFavorite(team, !favorite)
-                              }
+                              disabled={leagueLocked || busy !== null || isLoading}
+                              aria-label={`${t(isAuthenticated ? "discardDraft" : "remove")} ${team.name}`}
+                              onClick={() => requestConfirmation({ team, action: "delete" })}
                             />
                           }
                         >
-                          <Star
-                            aria-hidden="true"
-                            className={`size-4 ${favorite ? "fill-current" : "fill-none"}`}
-                          />
+                          <Trash2 className="size-4" aria-hidden="true" />
+                        </TooltipTrigger>
+                        <TooltipContent>{t(isAuthenticated ? "discardDraft" : "remove")}</TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              disabled={leagueLocked || !!favorite || busy !== null}
+                              focusableWhenDisabled={!!favorite}
+                              className="aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+                              aria-label={`${t("archive")} ${team.name}`}
+                              onClick={() => requestConfirmation({ team, action: "archive" })}
+                            />
+                          }
+                        >
+                          {busy === team.uuid ? (
+                            <LoaderCircle className="size-4 animate-spin" />
+                          ) : (
+                            <Archive className="size-4" />
+                          )}
                         </TooltipTrigger>
                         <TooltipContent>
-                          {t(favorite ? "removeFavorite" : "addFavorite")}
+                          {t(
+                            favorite ? "unfavoriteBeforeArchive" : leagueLocked ? "teamRemovalLocked" : "archiveLabel",
+                          )}
                         </TooltipContent>
                       </Tooltip>
-                      {local ? (
-                        <Tooltip>
-                          <TooltipTrigger
-                            render={
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                disabled={
-                                  leagueLocked || busy !== null || isLoading
-                                }
-                                aria-label={`${t(isAuthenticated ? "discardDraft" : "remove")} ${team.name}`}
-                                onClick={() =>
-                                  requestConfirmation({
-                                    team,
-                                    action: "delete",
-                                  })
-                                }
-                              />
-                            }
-                          >
-                            <Trash2 className="size-4" aria-hidden="true" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {t(isAuthenticated ? "discardDraft" : "remove")}
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        <Tooltip>
-                          <TooltipTrigger
-                            render={
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                disabled={
-                                  leagueLocked || !!favorite || busy !== null
-                                }
-                                focusableWhenDisabled={!!favorite}
-                                className="aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
-                                aria-label={`${t("archive")} ${team.name}`}
-                                onClick={() =>
-                                  requestConfirmation({
-                                    team,
-                                    action: "archive",
-                                  })
-                                }
-                              />
-                            }
-                          >
-                            {busy === team.uuid ? (
-                              <LoaderCircle className="size-4 animate-spin" />
-                            ) : (
-                              <Archive className="size-4" />
-                            )}
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {t(
-                              favorite
-                                ? "unfavoriteBeforeArchive"
-                                : leagueLocked
-                                  ? "teamRemovalLocked"
-                                  : "archiveLabel",
-                            )}
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
-                    </>
-                  }
-                />
-              ),
-            )}
+                    )}
+                  </>
+                }
+              />
+            ))}
           </div>
         )}
         {isAuthenticated && listStatus === "CanLoadMore" && (
@@ -532,10 +422,7 @@ export function TeamLibrary() {
           </div>
         )}
         {isAuthenticated && listStatus === "LoadingMore" && (
-          <p
-            role="status"
-            className="mt-7 text-center text-sm text-muted-foreground"
-          >
+          <p role="status" className="mt-7 text-center text-sm text-muted-foreground">
             {t("loading")}
           </p>
         )}
@@ -551,9 +438,7 @@ export function TeamLibrary() {
           >
             <Archive className="size-5 text-muted-foreground" />
             {t("archivedTeams")}
-            <ChevronDown
-              className={`ml-auto size-5 transition-transform ${archiveOpen ? "rotate-180" : ""}`}
-            />
+            <ChevronDown className={`ml-auto size-5 transition-transform ${archiveOpen ? "rotate-180" : ""}`} />
           </button>
           {archiveOpen && (
             <div id="team-archive" className="pt-4">
@@ -561,9 +446,7 @@ export function TeamLibrary() {
                 filter={filter}
                 busy={busy}
                 onRestore={(team) => void toggleArchive(team, false)}
-                onDelete={(team) =>
-                  requestConfirmation({ team, action: "permanent-delete" })
-                }
+                onDelete={(team) => requestConfirmation({ team, action: "permanent-delete" })}
               />
             </div>
           )}
@@ -603,34 +486,17 @@ export function TeamLibrary() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <DialogClose
-              data-slot="team-confirm-cancel"
-              disabled={busy !== null}
-              render={<Button variant="outline" />}
-            >
+            <DialogClose data-slot="team-confirm-cancel" disabled={busy !== null} render={<Button variant="outline" />}>
               {t("cancel")}
             </DialogClose>
             <Button
               data-slot="team-confirm-action"
               variant="destructive"
-              disabled={
-                busy !== null ||
-                confirmationLocked ||
-                confirmationFavorited ||
-                confirmationLoading
-              }
+              disabled={busy !== null || confirmationLocked || confirmationFavorited || confirmationLoading}
               onClick={() => {
-                if (
-                  !confirmation ||
-                  confirmationLocked ||
-                  confirmationFavorited ||
-                  confirmationLoading
-                )
-                  return;
-                if (confirmation.action === "archive")
-                  void toggleArchive(confirmation.team, true);
-                else if (confirmation.action === "permanent-delete")
-                  void deleteArchived(confirmation.team);
+                if (!confirmation || confirmationLocked || confirmationFavorited || confirmationLoading) return;
+                if (confirmation.action === "archive") void toggleArchive(confirmation.team, true);
+                else if (confirmation.action === "permanent-delete") void deleteArchived(confirmation.team);
                 else void discard(confirmation.team);
               }}
             >
@@ -671,8 +537,7 @@ function ArchivedTeams({
       archived: true,
       search: filter.search,
       rosterId: filter.rosterId || undefined,
-      rulesetId: (filter.rulesetId || undefined) as
-        Team["rulesetId"] | undefined,
+      rulesetId: (filter.rulesetId || undefined) as Team["rulesetId"] | undefined,
     },
     { initialNumItems: 18 },
   );
@@ -680,19 +545,14 @@ function ArchivedTeams({
   if (status !== "LoadingFirstPage" && lastResults !== results) {
     setLastResults(results);
   }
-  const visibleResults =
-    status === "LoadingFirstPage" ? (lastResults ?? []) : results;
+  const visibleResults = status === "LoadingFirstPage" ? (lastResults ?? []) : results;
   return (
     <div aria-busy={status === "LoadingFirstPage"}>
       {status === "LoadingFirstPage" && !lastResults ? (
         <LibraryCardsLoading label={t("loading")} />
       ) : visibleResults.length === 0 ? (
         <p className="rounded-xl border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
-          {t(
-            filter.search || filter.rosterId || filter.rulesetId
-              ? "noMatchingTeams"
-              : "noArchivedTeams",
-          )}
+          {t(filter.search || filter.rosterId || filter.rulesetId ? "noMatchingTeams" : "noArchivedTeams")}
         </p>
       ) : (
         <div className={teamCardStyles.grid}>
@@ -750,11 +610,7 @@ function ArchivedTeams({
       )}
       {(status === "CanLoadMore" || status === "LoadingMore") && (
         <div className="mt-7 text-center">
-          <Button
-            variant="outline"
-            disabled={status === "LoadingMore"}
-            onClick={() => loadMore(18)}
-          >
+          <Button variant="outline" disabled={status === "LoadingMore"} onClick={() => loadMore(18)}>
             {t(status === "LoadingMore" ? "loading" : "loadMore")}
           </Button>
         </div>

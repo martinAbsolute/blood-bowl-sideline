@@ -2,34 +2,20 @@
 
 import { useEffect, useId, useState } from "react";
 import { useAuthActions } from "@convex-dev/auth/react";
-import {
-  useConvexAuth,
-  useMutation,
-  usePaginatedQuery,
-  useQuery,
-} from "convex/react";
+import { useConvexAuth, useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { useTranslations } from "next-intl";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { EditorSelect } from "./editor-select";
 import { Button } from "./ui/button";
 
-export function DevAuthPanel({
-  currentUserId,
-  onSignedIn,
-}: {
-  currentUserId?: string;
-  onSignedIn?: () => void;
-}) {
+export function DevAuthPanel({ currentUserId, onSignedIn }: { currentUserId?: string; onSignedIn?: () => void }) {
   const [serverEnabled, setServerEnabled] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
     void (async () => {
       try {
-        const response = await fetch("/api/dev-auth", {
-          cache: "no-store",
-          signal: controller.signal,
-        });
+        const response = await fetch("/api/dev-auth", { cache: "no-store", signal: controller.signal });
         if (!response.ok) return;
         const body: unknown = await response.json();
         if (
@@ -49,49 +35,25 @@ export function DevAuthPanel({
   }, []);
   const backend = useQuery(api.devAuth.status, serverEnabled ? {} : "skip");
   if (!serverEnabled || !backend?.enabled) return null;
-  return (
-    <EnabledDevAuthPanel
-      currentUserId={currentUserId}
-      onSignedIn={onSignedIn}
-    />
-  );
+  return <EnabledDevAuthPanel currentUserId={currentUserId} onSignedIn={onSignedIn} />;
 }
 
-function EnabledDevAuthPanel({
-  currentUserId,
-  onSignedIn,
-}: {
-  currentUserId?: string;
-  onSignedIn?: () => void;
-}) {
+function EnabledDevAuthPanel({ currentUserId, onSignedIn }: { currentUserId?: string; onSignedIn?: () => void }) {
   const t = useTranslations();
   const selectId = useId();
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { signIn, signOut } = useAuthActions();
   const ensureTestUsers = useMutation(api.devAuth.ensureTestUsers);
-  const {
-    results: users,
-    status,
-    loadMore,
-  } = usePaginatedQuery(api.devAuth.listUsers, {}, { initialNumItems: 30 });
+  const { results: users, status, loadMore } = usePaginatedQuery(api.devAuth.listUsers, {}, { initialNumItems: 30 });
   const [selectedId, setSelectedId] = useState<Id<"users"> | "">("");
-  const [preparedUsers, setPreparedUsers] = useState<
-    { id: Id<"users">; name: string }[]
-  >([]);
+  const [preparedUsers, setPreparedUsers] = useState<{ id: Id<"users">; name: string }[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const choices = [
-    ...users,
-    ...preparedUsers.filter(
-      (prepared) => !users.some((user) => user.id === prepared.id),
-    ),
-  ];
+  const choices = [...users, ...preparedUsers.filter((prepared) => !users.some((user) => user.id === prepared.id))];
   const selected = selectedId || choices[0]?.id || "";
   const testCoaches = preparedUsers.length
     ? preparedUsers
-    : users.filter((user) =>
-        ["Dev Coach A", "Dev Coach B"].includes(user.name),
-      );
+    : users.filter((user) => ["Dev Coach A", "Dev Coach B"].includes(user.name));
 
   async function createTestCoaches() {
     if (busy) return;
@@ -148,9 +110,7 @@ function EnabledDevAuthPanel({
       className="min-w-0 space-y-2 rounded-lg border border-dashed border-primary/40 bg-primary/5 p-3"
     >
       <h2 className="text-sm font-semibold">{t("devAuth.title")}</h2>
-      <p className="text-xs text-muted-foreground">
-        {t("devAuth.description")}
-      </p>
+      <p className="text-xs text-muted-foreground">{t("devAuth.description")}</p>
       <Button
         variant="outline"
         size="sm"
@@ -181,9 +141,7 @@ function EnabledDevAuthPanel({
           disabled={busy || isLoading || !choices.length}
           onChange={(event) => setSelectedId(event.target.value as Id<"users">)}
         >
-          {!choices.length ? (
-            <option value="">{t("devAuth.noUsers")}</option>
-          ) : null}
+          {!choices.length ? <option value="">{t("devAuth.noUsers")}</option> : null}
           {choices.map((user) => (
             <option key={user.id} value={user.id}>
               {user.name}

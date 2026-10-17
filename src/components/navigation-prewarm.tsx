@@ -19,12 +19,7 @@ export function NavigationPrewarm() {
     function onIntent(event: Event) {
       if (isLoading || !(event.target instanceof Element)) return;
       const link = event.target.closest<HTMLAnchorElement>("a[href]");
-      if (
-        !link ||
-        link.hasAttribute("download") ||
-        (link.target && link.target !== "_self")
-      )
-        return;
+      if (!link || link.hasAttribute("download") || (link.target && link.target !== "_self")) return;
       const url = new URL(link.href, window.location.href);
       if (url.origin !== window.location.origin) return;
       warm(url, isAuthenticated);

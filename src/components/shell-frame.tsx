@@ -18,10 +18,7 @@ export function ShellFrame({
     <div className="site-shell" data-sidebar-open={sidebarOpen}>
       {header}
       <div className="site-shell-body grid flex-1 grid-cols-[minmax(0,1fr)] print:block">
-        <aside
-          id="site-sidebar"
-          className="site-sidebar no-print hidden border-r bg-card/50 lg:block"
-        >
+        <aside id="site-sidebar" className="site-sidebar no-print hidden border-r bg-card/50 lg:block">
           <div className="site-sidebar-body">{sidebar}</div>
         </aside>
         <div className="flex min-w-0 flex-col">

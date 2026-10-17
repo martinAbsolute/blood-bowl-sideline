@@ -14,13 +14,8 @@ vi.mock("next/navigation", () => ({
   },
 }));
 vi.mock("../src/components/team-page", () => ({
-  TeamPage: ({
-    uuid,
-    initial,
-  }: {
-    uuid: string;
-    initial?: { team: { name: string } } | null;
-  }) => createElement("div", { "data-team-editor": uuid }, initial?.team.name),
+  TeamPage: ({ uuid, initial }: { uuid: string; initial?: { team: { name: string } } | null }) =>
+    createElement("div", { "data-team-editor": uuid }, initial?.team.name),
 }));
 
 const uuid = "11111111-1111-4111-8111-111111111111";
@@ -42,17 +37,13 @@ it("includes parseable JSON-LD in server HTML and preserves the editor and shari
     leagueExperienced: false,
   });
   const html = renderToStaticMarkup(await Page({ params }));
-  const script = html.match(
-    /<script[^>]*type="application\/ld\+json"[^>]*>(.*?)<\/script>/,
-  );
+  const script = html.match(/<script[^>]*type="application\/ld\+json"[^>]*>(.*?)<\/script>/);
   expect(script).not.toBeNull();
   expect(JSON.parse(script![1]).mainEntity.teamSnapshot.name).toBe(team.name);
   expect(html).toContain(`data-team-editor="${uuid}"`);
   expect(html).toContain(`>${team.name}</div>`);
   expect(mocks.fetchQuery).toHaveBeenCalledWith(api.teams.getByUuid, { uuid });
-  expect(mocks.connection.mock.invocationCallOrder[0]).toBeLessThan(
-    mocks.fetchQuery.mock.invocationCallOrder[0],
-  );
+  expect(mocks.connection.mock.invocationCallOrder[0]).toBeLessThan(mocks.fetchQuery.mock.invocationCallOrder[0]);
   const metadata = await generateMetadata({ params });
   expect(metadata.title).toBe(team.name);
   expect(metadata.robots).toEqual({ index: false, follow: false });
@@ -66,9 +57,7 @@ it("emits no fictitious roster for a missing cloud team or backend outage", asyn
     const html = renderToStaticMarkup(await Page({ params }));
     expect(html).not.toContain("application/ld+json");
     expect(html).toContain(`data-team-editor="${uuid}"`);
-    expect((await generateMetadata({ params })).title).toBe(
-      "Shared Blood Bowl Team",
-    );
+    expect((await generateMetadata({ params })).title).toBe("Shared Blood Bowl Team");
   }
 });
 

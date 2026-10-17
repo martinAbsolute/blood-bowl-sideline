@@ -1,25 +1,14 @@
 "use client";
 
 import type { ComponentProps, ReactNode } from "react";
-import {
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "./dialog";
+import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./dialog";
 import { cn } from "@/lib/utils";
 
-export function LeagueDialogContent({
-  className,
-  ...props
-}: ComponentProps<typeof DialogContent>) {
+export function LeagueDialogContent({ className, ...props }: ComponentProps<typeof DialogContent>) {
   return (
     <DialogContent
       {...props}
-      className={cn(
-        "flex max-h-[90dvh] flex-col gap-0 overflow-hidden rounded-xl bg-card p-0 sm:max-w-xl",
-        className,
-      )}
+      className={cn("flex max-h-[90dvh] flex-col gap-0 overflow-hidden rounded-xl bg-card p-0 sm:max-w-xl", className)}
     />
   );
 }
@@ -47,39 +36,21 @@ export function LeagueDialogHeader({
           {icon}
         </span>
         <div className="min-w-0">
-          <DialogTitle className="display-font break-words text-xl leading-tight">
-            {title}
-          </DialogTitle>
-          {description && (
-            <DialogDescription className="mt-2 text-xs leading-relaxed">
-              {description}
-            </DialogDescription>
-          )}
+          <DialogTitle className="display-font break-words text-xl leading-tight">{title}</DialogTitle>
+          {description && <DialogDescription className="mt-2 text-xs leading-relaxed">{description}</DialogDescription>}
         </div>
       </div>
     </DialogHeader>
   );
 }
 
-export function LeagueDialogBody({
-  className,
-  ...props
-}: ComponentProps<"div">) {
+export function LeagueDialogBody({ className, ...props }: ComponentProps<"div">) {
   return (
-    <div
-      {...props}
-      className={cn(
-        "min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain p-5",
-        className,
-      )}
-    />
+    <div {...props} className={cn("min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain p-5", className)} />
   );
 }
 
-export function LeagueDialogFooter({
-  className,
-  ...props
-}: ComponentProps<"div">) {
+export function LeagueDialogFooter({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       {...props}
@@ -102,9 +73,7 @@ export function LeagueFormSection({
 }) {
   return (
     <section className={cn("space-y-3", className)}>
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        {title}
-      </h3>
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</h3>
       {children}
     </section>
   );

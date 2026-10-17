@@ -18,9 +18,6 @@ export function translatedSkillName(
   return translated;
 }
 
-export function skillSearchText(
-  id: string,
-  t: (key: `skillNames.${string}` | `inducementNames.${string}`) => string,
-) {
+export function skillSearchText(id: string, t: (key: `skillNames.${string}` | `inducementNames.${string}`) => string) {
   return `${translatedSkillName(id, t)} ${skillName(id)}`.toLocaleLowerCase();
 }

@@ -18,8 +18,7 @@ vi.mock("next-intl", async (importOriginal) => {
   const { formats, timeZone } = await import("../src/i18n/config");
   return {
     ...actual,
-    useFormatter: () =>
-      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useFormatter: () => actual.createFormatter({ locale: "en", formats, timeZone }),
     useTranslations: () => (key: string) => key,
   };
 });
@@ -28,8 +27,7 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams({ view: state.view, keep: "1" }),
 }));
 vi.mock("next/link", () => ({
-  default: ({ children, ...props }: { children: ReactNode; href: string }) =>
-    createElement("a", props, children),
+  default: ({ children, ...props }: { children: ReactNode; href: string }) => createElement("a", props, children),
 }));
 vi.mock("convex/react", () => ({
   useConvexAuth: () => ({ isAuthenticated: true, isLoading: false }),
@@ -38,14 +36,11 @@ vi.mock("convex/react", () => ({
   useQuery: () => ({
     viewerId: "viewer",
     canCommission: state.commissioner,
-    canRegister:
-      !state.participant &&
-      (!state.seasonStatus || state.seasonStatus === "registration"),
+    canRegister: !state.participant && (!state.seasonStatus || state.seasonStatus === "registration"),
     league: {
       _id: "league",
       name: "Autumn League",
-      status:
-        state.seasonStatus || (state.participant ? "active" : "registration"),
+      status: state.seasonStatus || (state.participant ? "active" : "registration"),
       startAt: 1,
       roundDays: 14,
     },
@@ -79,9 +74,7 @@ vi.mock("convex/react", () => ({
   }),
 }));
 vi.mock("../src/components/player-icon", () => ({ RosterIcon: () => null }));
-vi.mock("../src/components/league-commissioner", () => ({
-  CommissionerWithdrawal: () => null,
-}));
+vi.mock("../src/components/league-commissioner", () => ({ CommissionerWithdrawal: () => null }));
 vi.mock("../src/components/league-ui", () => ({
   LeagueBack: () => null,
   LeagueError: () => null,
@@ -91,22 +84,8 @@ vi.mock("../src/components/league-ui", () => ({
   LeagueStatus: () => null,
   leagueDate: () => "1 Oct",
   localDateInput: () => "2026-10-01T12:00",
-  LeagueSection: ({
-    title,
-    children,
-    action,
-  }: {
-    title: ReactNode;
-    children: ReactNode;
-    action?: ReactNode;
-  }) =>
-    createElement(
-      "section",
-      null,
-      createElement("h2", null, title),
-      action,
-      children,
-    ),
+  LeagueSection: ({ title, children, action }: { title: ReactNode; children: ReactNode; action?: ReactNode }) =>
+    createElement("section", null, createElement("h2", null, title), action, children),
   useLeagueAction: () => ({ busy: false, error: "", run: vi.fn() }),
 }));
 
@@ -124,20 +103,13 @@ afterEach(() => {
 
 it("replaces league views without stacking tab history or discarding other parameters", async () => {
   await render((container) => {
-    const buttons = Array.from(
-      container.querySelectorAll<HTMLButtonElement>("nav button"),
-    );
-    buttons
-      .find((button) => button.getAttribute("aria-current") === "page")!
-      .click();
+    const buttons = Array.from(container.querySelectorAll<HTMLButtonElement>("nav button"));
+    buttons.find((button) => button.getAttribute("aria-current") === "page")!.click();
     expect(state.replace).not.toHaveBeenCalled();
-    buttons
-      .find((button) => button.textContent?.includes("leagueUi.history"))!
-      .click();
-    expect(state.replace).toHaveBeenCalledExactlyOnceWith(
-      "/leagues/manage/league?view=history&keep=1",
-      { scroll: false },
-    );
+    buttons.find((button) => button.textContent?.includes("leagueUi.history"))!.click();
+    expect(state.replace).toHaveBeenCalledExactlyOnceWith("/leagues/manage/league?view=history&keep=1", {
+      scroll: false,
+    });
   });
   state.view = "history";
   state.replace.mockClear();
@@ -145,10 +117,7 @@ it("replaces league views without stacking tab history or discarding other param
     const select = container.querySelector<HTMLSelectElement>("nav select")!;
     select.value = "overview";
     select.dispatchEvent(new Event("change", { bubbles: true }));
-    expect(state.replace).toHaveBeenCalledExactlyOnceWith(
-      "/leagues/manage/league?keep=1",
-      { scroll: false },
-    );
+    expect(state.replace).toHaveBeenCalledExactlyOnceWith("/leagues/manage/league?keep=1", { scroll: false });
   });
 });
 
@@ -157,9 +126,7 @@ async function render(check: (container: HTMLElement) => void) {
   document.body.append(container);
   const root = createRoot(container);
   try {
-    await act(async () =>
-      root.render(createElement(LeagueWorkspace, { leagueId: "league" })),
-    );
+    await act(async () => root.render(createElement(LeagueWorkspace, { leagueId: "league" })));
     check(container);
   } finally {
     await act(async () => root.unmount());
@@ -169,9 +136,7 @@ async function render(check: (container: HTMLElement) => void) {
 
 it("puts team registration first for a newcomer without commissioner tasks", async () => {
   await render((container) => {
-    expect(container.querySelector("h2")?.textContent).toBe(
-      "leagueUi.registerTeam",
-    );
+    expect(container.querySelector("h2")?.textContent).toBe("leagueUi.registerTeam");
     expect(container.textContent).not.toContain("leagueUx.commissionerDesk");
     expect(container.textContent).toContain("leagueUi.chooseTeam");
     expect(container.querySelector('a[href="/rosters"]')).toBeNull();
@@ -192,9 +157,7 @@ it("keeps both coach and commissioner actions for a participating commissioner",
   await render((container) => {
     expect(container.textContent).toContain("leagueUx.coachCommissioner");
     expect(container.textContent).toContain("leagueUx.commissionerDesk");
-    expect(
-      container.querySelector('a[href$="/matches/match"]')?.textContent,
-    ).toContain("leagueUx.continueReport");
+    expect(container.querySelector('a[href$="/matches/match"]')?.textContent).toContain("leagueUx.continueReport");
     expect(container.querySelector('a[href$="/teams/mine"]')).not.toBeNull();
   });
 });
@@ -202,9 +165,7 @@ it("keeps both coach and commissioner actions for a participating commissioner",
 it("prioritizes postgame over starting another match", async () => {
   Object.assign(state, { participant: true, postgame: true });
   await render((container) => {
-    expect(
-      container.querySelector('a[href$="/teams/mine"]')?.textContent,
-    ).toContain("leagueUx.finishPostgame");
+    expect(container.querySelector('a[href$="/teams/mine"]')?.textContent).toContain("leagueUx.finishPostgame");
     expect(container.textContent).not.toContain("leagueUx.continueReport");
   });
 });
@@ -241,23 +202,15 @@ it("offers final standings and career history after a completed season", async (
   await render((container) => {
     expect(container.textContent).toContain("leagueUx.seasonComplete");
     expect(container.textContent).toContain("leagueUx.finalStandings");
-    expect(
-      container.querySelector('a[href$="/teams/mine"]')?.textContent,
-    ).toContain("leagueUx.viewCareer");
+    expect(container.querySelector('a[href$="/teams/mine"]')?.textContent).toContain("leagueUx.viewCareer");
     expect(container.textContent).not.toContain("leagueUx.continueReport");
   });
 });
 
 it("keeps unfinished postgame reachable after the final match", async () => {
-  Object.assign(state, {
-    participant: true,
-    postgame: true,
-    seasonStatus: "completed",
-  });
+  Object.assign(state, { participant: true, postgame: true, seasonStatus: "completed" });
   await render((container) => {
-    expect(
-      container.querySelector('a[href$="/teams/mine"]')?.textContent,
-    ).toContain("leagueUx.finishPostgame");
+    expect(container.querySelector('a[href$="/teams/mine"]')?.textContent).toContain("leagueUx.finishPostgame");
     expect(container.textContent).not.toContain("leagueUx.continueReport");
   });
 });

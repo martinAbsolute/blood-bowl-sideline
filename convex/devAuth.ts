@@ -1,8 +1,5 @@
 import { ConvexCredentials } from "@convex-dev/auth/providers/ConvexCredentials";
-import {
-  paginationOptsValidator,
-  paginationResultValidator,
-} from "convex/server";
+import { paginationOptsValidator, paginationResultValidator } from "convex/server";
 import { ConvexError, v } from "convex/values";
 import { jwtVerify } from "jose";
 import { internal } from "./_generated/api";
@@ -10,20 +7,11 @@ import type { DataModel } from "./_generated/dataModel";
 import { internalQuery, mutation, query } from "./_generated/server";
 
 type Environment = Readonly<Record<string, string | undefined>>;
-type VerificationFailure = {
-  name: string;
-  code: string;
-};
-export type DevAuthConfig = {
-  deploymentName: string;
-  environment: "development" | "preview";
-  secret: string;
-};
+type VerificationFailure = { name: string; code: string };
+export type DevAuthConfig = { deploymentName: string; environment: "development" | "preview"; secret: string };
 
 /** Backend configuration is checked independently of the frontend's opt-in. */
-export function devAuthConfig(
-  environment: Environment = process.env,
-): DevAuthConfig | null {
+export function devAuthConfig(environment: Environment = process.env): DevAuthConfig | null {
   const type = environment.DEV_AUTH_DEPLOYMENT_TYPE;
   const name = environment.DEV_AUTH_DEPLOYMENT_NAME;
   const secret = environment.DEV_AUTH_SECRET;
@@ -65,11 +53,7 @@ export function devAuthConfig(
     target.pathname !== "/"
   )
     return null;
-  return {
-    deploymentName: name,
-    environment: type === "dev" ? "development" : "preview",
-    secret,
-  };
+  return { deploymentName: name, environment: type === "dev" ? "development" : "preview", secret };
 }
 
 function requireDevAuth() {
@@ -86,21 +70,16 @@ export async function verifyDevImpersonationToken(
 ): Promise<string> {
   const configuration = devAuthConfig(environment);
   if (!configuration) throw new ConvexError("DEV_AUTH_DISABLED");
-  if (typeof token !== "string" || token.length > 4096 || !token)
-    throw new ConvexError("INVALID_DEV_AUTH_TOKEN");
+  if (typeof token !== "string" || token.length > 4096 || !token) throw new ConvexError("INVALID_DEV_AUTH_TOKEN");
   try {
-    const { payload } = await jwtVerify(
-      token,
-      new TextEncoder().encode(configuration.secret),
-      {
-        algorithms: ["HS256"],
-        issuer: "sideline-dev-auth",
-        audience: "dev-impersonation",
-        requiredClaims: ["sub", "iat", "exp"],
-        maxTokenAge: "60s",
-        clockTolerance: 0,
-      },
-    );
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(configuration.secret), {
+      algorithms: ["HS256"],
+      issuer: "sideline-dev-auth",
+      audience: "dev-impersonation",
+      requiredClaims: ["sub", "iat", "exp"],
+      maxTokenAge: "60s",
+      clockTolerance: 0,
+    });
     if (
       typeof payload.sub !== "string" ||
       !payload.sub ||
@@ -117,16 +96,10 @@ export async function verifyDevImpersonationToken(
   } catch (error) {
     // Never log an exception message, claims, credentials, or the signing key.
     const name = error instanceof Error ? error.name : "UnknownError";
-    const code =
-      error && typeof error === "object" && "code" in error
-        ? error.code
-        : "DEV_AUTH_VERIFICATION_FAILED";
+    const code = error && typeof error === "object" && "code" in error ? error.code : "DEV_AUTH_VERIFICATION_FAILED";
     reportFailure?.({
       name: /^[A-Za-z]{1,80}$/.test(name) ? name : "UnknownError",
-      code:
-        typeof code === "string" && /^[A-Z_]{1,80}$/.test(code)
-          ? code
-          : "DEV_AUTH_VERIFICATION_FAILED",
+      code: typeof code === "string" && /^[A-Z_]{1,80}$/.test(code) ? code : "DEV_AUTH_VERIFICATION_FAILED",
     });
     throw new ConvexError("INVALID_DEV_AUTH_TOKEN");
   }
@@ -136,15 +109,10 @@ export function devImpersonationProvider() {
   return ConvexCredentials<DataModel>({
     id: "dev-impersonation",
     authorize: async (credentials, ctx) => {
-      const subject = await verifyDevImpersonationToken(
-        credentials.token,
-        process.env,
-        (failure) =>
-          console.warn("Development auth token verification failed", failure),
+      const subject = await verifyDevImpersonationToken(credentials.token, process.env, (failure) =>
+        console.warn("Development auth token verification failed", failure),
       );
-      const userId = await ctx.runQuery(internal.devAuth.userForSignIn, {
-        subject,
-      });
+      const userId = await ctx.runQuery(internal.devAuth.userForSignIn, { subject });
       if (!userId) throw new ConvexError("DEV_AUTH_USER_NOT_FOUND");
       return { userId };
     },
@@ -156,11 +124,7 @@ export const status = query({
   args: {},
   returns: v.object({
     enabled: v.boolean(),
-    environment: v.union(
-      v.literal("development"),
-      v.literal("preview"),
-      v.null(),
-    ),
+    environment: v.union(v.literal("development"), v.literal("preview"), v.null()),
     deploymentName: v.union(v.string(), v.null()),
   }),
   handler: async () => {
@@ -177,24 +141,10 @@ export const listUsers = query({
   returns: paginationResultValidator(publicUser),
   handler: async (ctx, { paginationOpts }) => {
     requireDevAuth();
-    if (
-      !Number.isSafeInteger(paginationOpts.numItems) ||
-      paginationOpts.numItems < 1 ||
-      paginationOpts.numItems > 30
-    )
+    if (!Number.isSafeInteger(paginationOpts.numItems) || paginationOpts.numItems < 1 || paginationOpts.numItems > 30)
       throw new ConvexError("INVALID_INPUT");
-    const result = await ctx.db
-      .query("users")
-      .withIndex("by_creation_time")
-      .order("desc")
-      .paginate(paginationOpts);
-    return {
-      ...result,
-      page: result.page.map((user) => ({
-        id: user._id,
-        name: user.name ?? "Coach",
-      })),
-    };
+    const result = await ctx.db.query("users").withIndex("by_creation_time").order("desc").paginate(paginationOpts);
+    return { ...result, page: result.page.map((user) => ({ id: user._id, name: user.name ?? "Coach" })) };
   },
 });
 export const ensureTestUsers = mutation({
@@ -211,16 +161,13 @@ export const ensureTestUsers = mutation({
         .query("devAuthAccounts")
         .withIndex("by_identifier", (q) => q.eq("identifier", identifier))
         .unique();
-      const existing = account
-        ? await ctx.db.get("users", account.userId)
-        : null;
+      const existing = account ? await ctx.db.get("users", account.userId) : null;
       if (existing) {
         users.push({ id: existing._id, name: existing.name ?? name });
         continue;
       }
       const userId = await ctx.db.insert("users", { name, role: "user" });
-      if (account)
-        await ctx.db.patch("devAuthAccounts", account._id, { userId });
+      if (account) await ctx.db.patch("devAuthAccounts", account._id, { userId });
       else await ctx.db.insert("devAuthAccounts", { identifier, userId });
       users.push({ id: userId, name });
     }

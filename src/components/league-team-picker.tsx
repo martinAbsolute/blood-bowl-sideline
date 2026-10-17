@@ -19,12 +19,7 @@ import { LeagueSelect } from "./league-field";
 import { CreateTeamButton } from "./create-team-button";
 import { Dialog, DialogTrigger } from "./dialog";
 
-import {
-  LeagueDialogBody,
-  LeagueDialogContent,
-  LeagueDialogFooter,
-  LeagueDialogHeader,
-} from "./league-dialog";
+import { LeagueDialogBody, LeagueDialogContent, LeagueDialogFooter, LeagueDialogHeader } from "./league-dialog";
 
 export function LeagueTeamPicker({
   teams,
@@ -60,15 +55,11 @@ export function LeagueTeamPicker({
   const eligible = selected && canEnrollTeam(selected, startingTreasury);
   const visible = candidates
     .filter(({ team }) =>
-      `${team.name} ${getRoster(team.rosterId)?.name}`
-        .toLocaleLowerCase()
-        .includes(search.trim().toLocaleLowerCase()),
+      `${team.name} ${getRoster(team.rosterId)?.name}`.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()),
     )
     .sort(
       (a, b) =>
-        favoritesFirst(a, b) ||
-        Number(canEnrollTeam(b, startingTreasury)) -
-          Number(canEnrollTeam(a, startingTreasury)),
+        favoritesFirst(a, b) || Number(canEnrollTeam(b, startingTreasury)) - Number(canEnrollTeam(a, startingTreasury)),
     );
   return (
     <Dialog
@@ -87,21 +78,13 @@ export function LeagueTeamPicker({
           />
         }
       >
-        <span className="truncate">
-          {eligible ? selected.team.name : t("leagueUi.chooseTeam")}
-        </span>
-        {eligible ? (
-          <Check className="size-4 shrink-0" />
-        ) : (
-          <ChevronDown className="size-4 shrink-0" />
-        )}
+        <span className="truncate">{eligible ? selected.team.name : t("leagueUi.chooseTeam")}</span>
+        {eligible ? <Check className="size-4 shrink-0" /> : <ChevronDown className="size-4 shrink-0" />}
       </DialogTrigger>
       <LeagueDialogContent className="h-[min(90dvh,44rem)]">
         <LeagueDialogHeader
           title={t("leagueUi.chooseTeam")}
-          description={t("leagueUx.pickerHint", {
-            amount: format.number(startingTreasury, "integer"),
-          })}
+          description={t("leagueUx.pickerHint", { amount: format.number(startingTreasury, "integer") })}
           icon={<Users className="size-5" />}
         />
         <div className="shrink-0 px-5 pt-4">
@@ -146,30 +129,17 @@ export function LeagueTeamPicker({
                       className="flex w-full items-center gap-3 bg-primary px-3 py-3 text-left text-primary-foreground transition-colors enabled:hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-white/90">
-                        <RosterIcon
-                          rosterId={team.rosterId}
-                          className="size-9"
-                        />
+                        <RosterIcon rosterId={team.rosterId} className="size-9" />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="display-font block truncate text-lg leading-6">
-                          {team.name}
-                        </span>
+                        <span className="display-font block truncate text-lg leading-6">{team.name}</span>
                         <span className="mt-0.5 block truncate text-xs text-primary-foreground/75">
-                          {getRoster(team.rosterId)?.name} ·{" "}
-                          {team.players.length} {t("players")} ·{" "}
-                          {format.number(
-                            summarize(team).teamGold / 1000,
-                            "gold",
-                          )}
-                          k
+                          {getRoster(team.rosterId)?.name} · {team.players.length} {t("players")} ·{" "}
+                          {format.number(summarize(team).teamGold / 1000, "gold")}k
                         </span>
                       </span>
                       {row.favorite && (
-                        <Star
-                          aria-label={t("favoriteTeam")}
-                          className="size-4 shrink-0 fill-current text-orange-400"
-                        />
+                        <Star aria-label={t("favoriteTeam")} className="size-4 shrink-0 fill-current text-orange-400" />
                       )}
                       {ready && (
                         <span
@@ -205,11 +175,7 @@ export function LeagueTeamPicker({
             </div>
           )}
           {(status === "CanLoadMore" || status === "LoadingMore") && (
-            <Button
-              variant="outline"
-              disabled={status === "LoadingMore"}
-              onClick={loadMore}
-            >
+            <Button variant="outline" disabled={status === "LoadingMore"} onClick={loadMore}>
               {t(status === "LoadingMore" ? "loading" : "loadMore")}
             </Button>
           )}
@@ -218,10 +184,7 @@ export function LeagueTeamPicker({
           <LeagueDialogFooter className="block space-y-3">
             {creating ? (
               <>
-                <label
-                  className="block text-sm font-medium"
-                  htmlFor="league-roster"
-                >
+                <label className="block text-sm font-medium" htmlFor="league-roster">
                   {t("leagueUx.chooseRoster")}
                 </label>
                 <div className="flex flex-wrap gap-3">
@@ -239,16 +202,10 @@ export function LeagueTeamPicker({
                   </LeagueSelect>
                   <CreateTeamButton rosterId={rosterId} leagueId={leagueId} />
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {t("leagueUx.buildThenJoin")}
-                </p>
+                <p className="text-xs text-muted-foreground">{t("leagueUx.buildThenJoin")}</p>
               </>
             ) : (
-              <Button
-                variant="secondary"
-                className="h-11 w-full"
-                onClick={() => setCreating(true)}
-              >
+              <Button variant="secondary" className="h-11 w-full" onClick={() => setCreating(true)}>
                 {t("leagueUx.createForLeague")}
               </Button>
             )}

@@ -1,16 +1,10 @@
 import { describe, expect, it } from "vitest";
-import {
-  leaguePlayerLabel,
-  leaguePlayerNumbers,
-  snapshotPlayerNumber,
-} from "../src/lib/league-player-label";
+import { leaguePlayerLabel, leaguePlayerNumbers, snapshotPlayerNumber } from "../src/lib/league-player-label";
 
 describe("league player identification", () => {
   it("labels unnamed players by their canonical roster slot and position", () => {
     expect(leaguePlayerLabel("", "Human Lineman", 1)).toBe("#1 Human Lineman");
-    expect(leaguePlayerLabel("   ", "Human Lineman", 2)).toBe(
-      "#2 Human Lineman",
-    );
+    expect(leaguePlayerLabel("   ", "Human Lineman", 2)).toBe("#2 Human Lineman");
     expect(leaguePlayerLabel("  Griff  ", "Human Blitzer", 3)).toBe("Griff");
   });
 
@@ -25,10 +19,7 @@ describe("league player identification", () => {
     expect(numbers.get("home-active")).toBe(2);
     expect(numbers.get("away-a")).toBe(1);
     expect(numbers.get("away-b")).toBe(2);
-    const afterHire = leaguePlayerNumbers([
-      ...canonical,
-      { id: "new-hire", entryId: "home" },
-    ]);
+    const afterHire = leaguePlayerNumbers([...canonical, { id: "new-hire", entryId: "home" }]);
     expect(afterHire.get("home-active")).toBe(numbers.get("home-active"));
     expect(afterHire.get("new-hire")).toBe(3);
   });

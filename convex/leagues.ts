@@ -1,7 +1,4 @@
-import {
-  paginationOptsValidator,
-  paginationResultValidator,
-} from "convex/server";
+import { paginationOptsValidator, paginationResultValidator } from "convex/server";
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
@@ -66,8 +63,7 @@ function playerUuid() {
 }
 
 function integer(value: number, min = 0, max = 1000) {
-  if (!Number.isSafeInteger(value) || value < min || value > max)
-    throw new ConvexError("INVALID_INPUT");
+  if (!Number.isSafeInteger(value) || value < min || value > max) throw new ConvexError("INVALID_INPUT");
 }
 function revision(actual: number, expected: number) {
   integer(expected, 0, Number.MAX_SAFE_INTEGER);
@@ -75,14 +71,12 @@ function revision(actual: number, expected: number) {
 }
 function text(value: string, max: number, required = false) {
   const clean = value.trim();
-  if (clean.length > max || (required && !clean))
-    throw new ConvexError("INVALID_INPUT");
+  if (clean.length > max || (required && !clean)) throw new ConvexError("INVALID_INPUT");
   return clean;
 }
 function checkedStats(stats: Stats) {
   for (const value of Object.values(stats)) integer(value, 0, 100);
-  if (stats.sppCas > stats.cas || stats.mvp > 1 || stats.dth > 1)
-    throw new ConvexError("INVALID_STATS");
+  if (stats.sppCas > stats.cas || stats.mvp > 1 || stats.dth > 1) throw new ConvexError("INVALID_STATS");
   return stats;
 }
 function capturedSpp(row: Doc<"leagueMatchPlayers">) {
@@ -111,10 +105,7 @@ function zeroTeamStats(): Doc<"leagueTeams">["stats"] {
     latest: [],
   };
 }
-function fixtureResult(
-  match: Doc<"leagueMatches">,
-  entryId: Id<"leagueTeams">,
-): "W" | "D" | "L" {
+function fixtureResult(match: Doc<"leagueMatches">, entryId: Id<"leagueTeams">): "W" | "D" | "L" {
   const home = match.homeEntryId === entryId;
   if (match.administrativeResult === "draw") return "D";
   if (match.administrativeResult === "home-win") return home ? "W" : "L";
@@ -166,17 +157,10 @@ function projectEvents(
   try {
     return projectMatchEvents(rows, events, homeId);
   } catch (error) {
-    throw new ConvexError(
-      error instanceof Error && /^[A-Z_]+$/.test(error.message)
-        ? error.message
-        : "INVALID_DICE",
-    );
+    throw new ConvexError(error instanceof Error && /^[A-Z_]+$/.test(error.message) ? error.message : "INVALID_DICE");
   }
 }
-async function persistEventRows(
-  ctx: MutationCtx,
-  rows: Doc<"leagueMatchPlayers">[],
-) {
+async function persistEventRows(ctx: MutationCtx, rows: Doc<"leagueMatchPlayers">[]) {
   for (const row of rows)
     await ctx.db.patch("leagueMatchPlayers", row._id, {
       stats: row.stats,
@@ -196,10 +180,7 @@ export const savePlayEvent = mutation({
     deleted: v.optional(v.boolean()),
   },
   returns: v.number(),
-  handler: async (
-    ctx,
-    { matchId, event, expectedVersion, deleted = false },
-  ) => {
+  handler: async (ctx, { matchId, event, expectedVersion, deleted = false }) => {
     const { user, match } = await editableMatch(ctx, matchId);
     if (!isPreGameComplete(match)) throw new ConvexError("PRE_GAME_INCOMPLETE");
     integer(expectedVersion, 0, Number.MAX_SAFE_INTEGER);
@@ -213,22 +194,14 @@ export const savePlayEvent = mutation({
       JSON.stringify(previous.event) === JSON.stringify(event)
     )
       return previous.version;
-    if (
-      (previous?.version ?? 0) !== expectedVersion ||
-      (previous?.deleted && !deleted)
-    )
+    if ((previous?.version ?? 0) !== expectedVersion || (previous?.deleted && !deleted))
       throw new ConvexError("CONFLICT");
-    if ((!previous && deleted) || (!previous && ledger.length >= 512))
-      throw new ConvexError("EVENT_LIMIT");
+    if ((!previous && deleted) || (!previous && ledger.length >= 512)) throw new ConvexError("EVENT_LIMIT");
     const active = ledger
       .filter((row) => !row.deleted && !(deleted && row.event.id === event.id))
       .map((row) => (row.event.id === event.id ? event : row.event));
     if (!previous && !deleted) active.push(event);
-    const projection = projectEvents(
-      await matchPlayers(ctx, matchId),
-      active,
-      match.homeEntryId,
-    );
+    const projection = projectEvents(await matchPlayers(ctx, matchId), active, match.homeEntryId);
     const value = {
       matchId,
       event,
@@ -251,12 +224,7 @@ export const savePlayEvent = mutation({
       match.leagueId,
       user,
       "play-event-edited",
-      {
-        previous: previous?.event ?? null,
-        event,
-        deleted,
-        revision: match.revision + 1,
-      },
+      { previous: previous?.event ?? null, event, deleted, revision: match.revision + 1 },
       { matchId },
     );
     return value.version;
@@ -279,11 +247,7 @@ async function auditEvent(
   actor: Doc<"users">,
   kind: string,
   details: unknown,
-  options: {
-    entryId?: Id<"leagueTeams">;
-    matchId?: Id<"leagueMatches">;
-    reason?: string;
-  } = {},
+  options: { entryId?: Id<"leagueTeams">; matchId?: Id<"leagueMatches">; reason?: string } = {},
 ) {
   await ctx.db.insert("leagueAudit", {
     leagueId,
@@ -296,39 +260,24 @@ async function auditEvent(
     ...(options.matchId ? { matchId: options.matchId } : {}),
   });
 }
-async function editableMatch(
-  ctx: MutationCtx,
-  matchId: Id<"leagueMatches">,
-  expected?: number,
-) {
+async function editableMatch(ctx: MutationCtx, matchId: Id<"leagueMatches">, expected?: number) {
   const user = await requireUser(ctx);
   const match = await matchDoc(ctx, matchId);
   const league = await leagueDoc(ctx, match.leagueId);
   const home = await entryDoc(ctx, match.homeEntryId);
-  const away = match.awayEntryId
-    ? await entryDoc(ctx, match.awayEntryId)
-    : null;
-  if (
-    user.role !== "admin" &&
-    ![home.coachId, away?.coachId, league.ownerId].includes(user._id)
-  )
+  const away = match.awayEntryId ? await entryDoc(ctx, match.awayEntryId) : null;
+  if (user.role !== "admin" && ![home.coachId, away?.coachId, league.ownerId].includes(user._id))
     throw new ConvexError("FORBIDDEN");
   if (match.status !== "in-progress") throw new ConvexError("REPORT_LOCKED");
   if (expected !== undefined) revision(match.revision, expected);
   return { user, match, league, home, away };
 }
-async function editableCareer(
-  ctx: MutationCtx,
-  entryId: Id<"leagueTeams">,
-  expected: number,
-) {
+async function editableCareer(ctx: MutationCtx, entryId: Id<"leagueTeams">, expected: number) {
   const user = await requireUser(ctx);
   const entry = await entryDoc(ctx, entryId);
   const league = await leagueDoc(ctx, entry.leagueId);
-  if (entry.coachId !== user._id && league.ownerId !== user._id)
-    throw new ConvexError("FORBIDDEN");
-  if (entry.withdrawn && league.ownerId !== user._id)
-    throw new ConvexError("ENTRY_WITHDRAWN");
+  if (entry.coachId !== user._id && league.ownerId !== user._id) throw new ConvexError("FORBIDDEN");
+  if (entry.withdrawn && league.ownerId !== user._id) throw new ConvexError("ENTRY_WITHDRAWN");
   if (entry.activeMatchId) throw new ConvexError("MATCH_IN_PROGRESS");
   revision(entry.revision, expected);
   return { user, entry, league };
@@ -339,11 +288,7 @@ export const list = query({
   returns: paginationResultValidator(schema.doc("leagues")),
   handler: async (ctx, { paginationOpts }) => {
     integer(paginationOpts.numItems, 1, 30);
-    return ctx.db
-      .query("leagues")
-      .withIndex("by_creation_time")
-      .order("desc")
-      .paginate(paginationOpts);
+    return ctx.db.query("leagues").withIndex("by_creation_time").order("desc").paginate(paginationOpts);
   },
 });
 export const create = mutation({
@@ -390,14 +335,10 @@ export const deleteLeague = mutation({
   handler: async (ctx, { leagueId, confirmationName }) => {
     const league = await leagueDoc(ctx, leagueId);
     await commissioner(ctx, league);
-    if (confirmationName !== league.name)
-      throw new ConvexError("LEAGUE_NAME_MISMATCH");
+    if (confirmationName !== league.name) throw new ConvexError("LEAGUE_NAME_MISMATCH");
     const entries = await leagueEntries(ctx, leagueId);
     const teamIds = [...new Set(entries.map((entry) => entry.teamId))];
-    await ctx.scheduler.runAfter(0, internal.leagueDeletion.sweep, {
-      leagueId,
-      teamIds,
-    });
+    await ctx.scheduler.runAfter(0, internal.leagueDeletion.sweep, { leagueId, teamIds });
     await ctx.db.delete("leagues", leagueId);
     return null;
   },
@@ -482,27 +423,17 @@ export const get = query({
           cu = 0,
           runningPoints = 0;
         const results = matches.filter(
-          (m) =>
-            m.status === "completed" &&
-            (m.homeEntryId === entry._id || m.awayEntryId === entry._id),
+          (m) => m.status === "completed" && (m.homeEntryId === entry._id || m.awayEntryId === entry._id),
         );
         for (const match of results) {
           const home = match.homeEntryId === entry._id;
-          const opponent = entryById.get(
-            home ? match.awayEntryId! : match.homeEntryId,
-          );
+          const opponent = entryById.get(home ? match.awayEntryId! : match.homeEntryId);
           const result = fixtureResult(match, entry._id);
           bhz += opponent?.stats.pts ?? 0;
-          sbr +=
-            (opponent?.stats.pts ?? 0) *
-            (result === "W" ? 1 : result === "D" ? 0.5 : 0);
+          sbr += (opponent?.stats.pts ?? 0) * (result === "W" ? 1 : result === "D" ? 0.5 : 0);
         }
         for (const round of [...rounds].sort((a, b) => a.number - b.number)) {
-          if (
-            round.status !== "completed" &&
-            !results.some((m) => m.roundId === round._id)
-          )
-            continue;
+          if (round.status !== "completed" && !results.some((m) => m.roundId === round._id)) continue;
           for (const match of results)
             if (roundById.get(match.roundId)?.number === round.number) {
               const result = fixtureResult(match, entry._id);
@@ -520,17 +451,11 @@ export const get = query({
           bhz,
           sbr,
           cu,
-          winDrawPercent: entry.stats.mp
-            ? (entry.stats.w + entry.stats.d * 0.5) / entry.stats.mp
-            : 0,
+          winDrawPercent: entry.stats.mp ? (entry.stats.w + entry.stats.d * 0.5) / entry.stats.mp : 0,
         };
       })
       .sort(
-        (a, b) =>
-          b.pts - a.pts ||
-          b.tdDiff - a.tdDiff ||
-          b.casDiff - a.casDiff ||
-          a.teamName.localeCompare(b.teamName),
+        (a, b) => b.pts - a.pts || b.tdDiff - a.tdDiff || b.casDiff - a.casDiff || a.teamName.localeCompare(b.teamName),
       );
     return {
       league,
@@ -552,10 +477,7 @@ export const get = query({
         stats: p.stats,
       })),
       canCommission: league.ownerId === user?._id,
-      canRegister:
-        !!user &&
-        league.status === "registration" &&
-        !entries.some((e) => e.coachId === user._id),
+      canRegister: !!user && league.status === "registration" && !entries.some((e) => e.coachId === user._id),
       viewerId: user?._id ?? null,
     };
   },
@@ -567,34 +489,24 @@ export const register = mutation({
   handler: async (ctx, { leagueId, teamUuid }) => {
     const user = await requireUser(ctx);
     const league = await leagueDoc(ctx, leagueId);
-    if (league.status !== "registration")
-      throw new ConvexError("REGISTRATION_CLOSED");
+    if (league.status !== "registration") throw new ConvexError("REGISTRATION_CLOSED");
     const existing = await ctx.db
       .query("leagueTeams")
-      .withIndex("by_leagueId_and_coachId", (q) =>
-        q.eq("leagueId", leagueId).eq("coachId", user._id),
-      )
+      .withIndex("by_leagueId_and_coachId", (q) => q.eq("leagueId", leagueId).eq("coachId", user._id))
       .unique();
     if (existing) throw new ConvexError("ALREADY_REGISTERED");
-    if ((await leagueEntries(ctx, leagueId)).length >= MAX_ENTRIES)
-      throw new ConvexError("LEAGUE_FULL");
+    if ((await leagueEntries(ctx, leagueId)).length >= MAX_ENTRIES) throw new ConvexError("LEAGUE_FULL");
     const source = await ctx.db
       .query("teams")
       .withIndex("by_uuid", (q) => q.eq("uuid", teamUuid))
       .unique();
-    if (!source || source.ownerId !== user._id || source.archived)
-      throw new ConvexError("FORBIDDEN");
-    if ((await teamLeagueState(ctx, source)).leagueExperienced)
-      throw new ConvexError("TEAM_EXPERIENCED");
+    if (!source || source.ownerId !== user._id || source.archived) throw new ConvexError("FORBIDDEN");
+    if ((await teamLeagueState(ctx, source)).leagueExperienced) throw new ConvexError("TEAM_EXPERIENCED");
     const issues = rookieLeagueIssues(source.team, league.startingTreasury);
-    if (issues.length)
-      throw new ConvexError({ code: "INVALID_ROOKIE", issues });
+    if (issues.length) throw new ConvexError({ code: "INVALID_ROOKIE", issues });
     const team = {
       ...source.team,
-      staff: {
-        ...source.team.staff,
-        dedicatedFans: source.team.staff.dedicatedFans + 1,
-      },
+      staff: { ...source.team.staff, dedicatedFans: source.team.staff.dedicatedFans + 1 },
     };
     const entryId = await ctx.db.insert("leagueTeams", {
       leagueId,
@@ -653,11 +565,8 @@ export const launch = mutation({
   handler: async (ctx, { leagueId }) => {
     const league = await leagueDoc(ctx, leagueId),
       user = await commissioner(ctx, league);
-    if (league.status !== "registration")
-      throw new ConvexError("ALREADY_LAUNCHED");
-    const entries = (await leagueEntries(ctx, leagueId)).filter(
-      (e) => !e.withdrawn,
-    );
+    if (league.status !== "registration") throw new ConvexError("ALREADY_LAUNCHED");
+    const entries = (await leagueEntries(ctx, leagueId)).filter((e) => !e.withdrawn);
     if (entries.length < 2) throw new ConvexError("NOT_ENOUGH_TEAMS");
     const rounds = roundRobin(entries.map((e) => e._id));
     for (let index = 0; index < rounds.length; index++) {
@@ -693,11 +602,7 @@ export const launch = mutation({
           ...emptyEconomy(),
         });
     }
-    await ctx.db.patch("leagues", leagueId, {
-      status: "active",
-      activeRound: 1,
-      updatedAt: Date.now(),
-    });
+    await ctx.db.patch("leagues", leagueId, { status: "active", activeRound: 1, updatedAt: Date.now() });
     await auditEvent(ctx, leagueId, user, "fixtures-generated", {
       entries: entries.map((e) => e._id),
       rounds: rounds.length,
@@ -713,27 +618,16 @@ export const openRound = mutation({
     if (!round) throw new ConvexError("NOT_FOUND");
     const league = await leagueDoc(ctx, round.leagueId),
       user = await commissioner(ctx, league);
-    if (round.status !== "pending" || league.status !== "active")
-      throw new ConvexError("ROUND_NOT_AVAILABLE");
+    if (round.status !== "pending" || league.status !== "active") throw new ConvexError("ROUND_NOT_AVAILABLE");
     const previous = await ctx.db
       .query("leagueRounds")
       .withIndex("by_leagueId", (q) => q.eq("leagueId", league._id))
       .take(MAX_ENTRIES);
-    if (
-      previous.some((r) => r.number < round.number && r.status !== "completed")
-    )
+    if (previous.some((r) => r.number < round.number && r.status !== "completed"))
       throw new ConvexError("PREVIOUS_ROUND_INCOMPLETE");
-    await ctx.db.patch("leagueRounds", roundId, {
-      status: "open",
-      opensAt: Date.now(),
-    });
-    await ctx.db.patch("leagues", league._id, {
-      activeRound: round.number,
-      updatedAt: Date.now(),
-    });
-    await auditEvent(ctx, league._id, user, "round-opened", {
-      round: round.number,
-    });
+    await ctx.db.patch("leagueRounds", roundId, { status: "open", opensAt: Date.now() });
+    await ctx.db.patch("leagues", league._id, { activeRound: round.number, updatedAt: Date.now() });
+    await auditEvent(ctx, league._id, user, "round-opened", { round: round.number });
     return null;
   },
 });
@@ -746,8 +640,7 @@ export const extendRound = mutation({
     const league = await leagueDoc(ctx, round.leagueId),
       user = await commissioner(ctx, league);
     integer(deadlineAt, 0, Number.MAX_SAFE_INTEGER);
-    if (deadlineAt <= round.deadlineAt || round.status === "completed")
-      throw new ConvexError("INVALID_DEADLINE");
+    if (deadlineAt <= round.deadlineAt || round.status === "completed") throw new ConvexError("INVALID_DEADLINE");
     await ctx.db.patch("leagueRounds", roundId, { deadlineAt });
     await auditEvent(ctx, league._id, user, "round-deadline-extended", {
       round: round.number,
@@ -776,30 +669,19 @@ export const getMatch = query({
     const match = await matchDoc(ctx, matchId),
       league = await leagueDoc(ctx, match.leagueId),
       home = await entryDoc(ctx, match.homeEntryId);
-    const away = match.awayEntryId
-      ? await entryDoc(ctx, match.awayEntryId)
-      : null;
+    const away = match.awayEntryId ? await entryDoc(ctx, match.awayEntryId) : null;
     const user = await currentUser(ctx),
-      isCoach =
-        !!user && (home.coachId === user._id || away?.coachId === user._id),
-      canCommission =
-        !!user && (league.ownerId === user._id || user.role === "admin");
+      isCoach = !!user && (home.coachId === user._id || away?.coachId === user._id),
+      canCommission = !!user && (league.ownerId === user._id || user.role === "admin");
     return {
       match,
       league,
       home,
       away,
       players: await matchPlayers(ctx, matchId),
-      playEvents: (await playEvents(ctx, matchId)).filter(
-        (row) => !row.deleted,
-      ),
-      canEdit:
-        (isCoach || canCommission) &&
-        (match.status === "scheduled" || match.status === "in-progress"),
-      canConfirm:
-        isCoach &&
-        match.status === "in-progress" &&
-        !match.confirmedBy.includes(user!._id),
+      playEvents: (await playEvents(ctx, matchId)).filter((row) => !row.deleted),
+      canEdit: (isCoach || canCommission) && (match.status === "scheduled" || match.status === "in-progress"),
+      canConfirm: isCoach && match.status === "in-progress" && !match.confirmedBy.includes(user!._id),
       canCommission,
       viewerId: user?._id ?? null,
     };
@@ -840,9 +722,7 @@ export const getMatchHistory = query({
 });
 
 export const startMatch = mutation({
-  args: {
-    matchId: v.id("leagueMatches"),
-  },
+  args: { matchId: v.id("leagueMatches") },
   returns: v.null(),
   handler: async (ctx, { matchId }) => {
     const user = await requireUser(ctx),
@@ -850,22 +730,15 @@ export const startMatch = mutation({
       league = await leagueDoc(ctx, match.leagueId);
     const home = await entryDoc(ctx, match.homeEntryId),
       away = match.awayEntryId ? await entryDoc(ctx, match.awayEntryId) : null;
-    if (
-      !away ||
-      (user.role !== "admin" &&
-        ![home.coachId, away.coachId, league.ownerId].includes(user._id))
-    )
+    if (!away || (user.role !== "admin" && ![home.coachId, away.coachId, league.ownerId].includes(user._id)))
       throw new ConvexError("FORBIDDEN");
-    if (home.withdrawn || away.withdrawn)
-      throw new ConvexError("ENTRY_WITHDRAWN");
+    if (home.withdrawn || away.withdrawn) throw new ConvexError("ENTRY_WITHDRAWN");
     if (match.status === "in-progress") return null;
     if (match.status !== "scheduled") throw new ConvexError("REPORT_LOCKED");
     const round = await ctx.db.get("leagueRounds", match.roundId);
     if (round?.status !== "open") throw new ConvexError("ROUND_NOT_OPEN");
-    if (home.activeMatchId || away.activeMatchId)
-      throw new ConvexError("MATCH_IN_PROGRESS");
-    if (home.postGamePending || away.postGamePending)
-      throw new ConvexError("POSTGAME_INCOMPLETE");
+    if (home.activeMatchId || away.activeMatchId) throw new ConvexError("MATCH_IN_PROGRESS");
+    if (home.postGamePending || away.postGamePending) throw new ConvexError("POSTGAME_INCOMPLETE");
     const snapshots = new Map<Id<"leagueTeams">, Doc<"leagueTeams">["team"]>();
     for (const entry of [home, away]) {
       let players = await entryPlayers(ctx, entry._id);
@@ -882,17 +755,11 @@ export const startMatch = mutation({
           ))
       )
         throw new ConvexError("CAPTAIN_REQUIRED");
-      const available = players.filter(
-        (p) => !p.temporary && p.status === "active",
-      );
-      const position = getRoster(entry.team.rosterId)!.players.find(
-        (p) => Number(p.qty.split("-")[1]) >= 12,
-      );
-      if (available.length < 11 && !position)
-        throw new ConvexError("JOURNEYMAN_POSITION_UNAVAILABLE");
+      const available = players.filter((p) => !p.temporary && p.status === "active");
+      const position = getRoster(entry.team.rosterId)!.players.find((p) => Number(p.qty.split("-")[1]) >= 12);
+      if (available.length < 11 && !position) throw new ConvexError("JOURNEYMAN_POSITION_UNAVAILABLE");
       for (let count = available.length; count < 11; count++) {
-        if (players.length + 11 - available.length > MAX_PLAYERS)
-          throw new ConvexError("CAREER_PLAYER_LIMIT");
+        if (players.length + 11 - available.length > MAX_PLAYERS) throw new ConvexError("CAREER_PLAYER_LIMIT");
         await ctx.db.insert("leaguePlayers", {
           leagueId: entry.leagueId,
           entryId: entry._id,
@@ -914,9 +781,7 @@ export const startMatch = mutation({
         });
       }
       players = await entryPlayers(ctx, entry._id);
-      const temporaryPlayers = players.filter(
-        (p) => p.temporary && p.status === "active",
-      );
+      const temporaryPlayers = players.filter((p) => p.temporary && p.status === "active");
       snapshots.set(entry._id, {
         ...entry.team,
         players: [
@@ -931,13 +796,8 @@ export const startMatch = mutation({
       });
       for (const player of players) {
         if (player.status === "dead" || player.status === "retired") continue;
-        const position = roster.players.find(
-          (p) => p.id === player.positionId,
-        )!;
-        const skills = [
-          ...player.skills,
-          ...(entry.team.captainId === player.sourcePlayerId ? ["pro"] : []),
-        ];
+        const position = roster.players.find((p) => p.id === player.positionId)!;
+        const skills = [...player.skills, ...(entry.team.captainId === player.sourcePlayerId ? ["pro"] : [])];
         const sppRates = emptyPlayerStats();
         for (const key of Object.keys(sppRates) as (keyof Stats)[])
           sppRates[key] = calculateSpp(entry.team.rosterId, {
@@ -967,17 +827,8 @@ export const startMatch = mutation({
             nigglingInjuries: player.nigglingInjuries,
             characteristicReductions: player.characteristicReductions,
             injuryNotes: player.injuryNotes,
-            profile: applyCharacteristicReductions(
-              position,
-              player.characteristicReductions,
-            ),
-            baseProfile: {
-              ma: position.ma,
-              st: position.st,
-              ag: position.ag,
-              pa: position.pa,
-              av: position.av,
-            },
+            profile: applyCharacteristicReductions(position, player.characteristicReductions),
+            baseProfile: { ma: position.ma, st: position.st, ag: position.ag, pa: position.pa, av: position.av },
             sppRates,
             baseCost: position.cost,
             positionName: position.position,
@@ -991,10 +842,7 @@ export const startMatch = mutation({
           lastingRoll: null,
         });
       }
-      await ctx.db.patch("leagueTeams", entry._id, {
-        activeMatchId: matchId,
-        revision: entry.revision + 1,
-      });
+      await ctx.db.patch("leagueTeams", entry._id, { activeMatchId: matchId, revision: entry.revision + 1 });
     }
     await ctx.db.patch("leagueMatches", matchId, {
       status: "in-progress",
@@ -1010,11 +858,7 @@ export const startMatch = mutation({
       league._id,
       user,
       "match-started",
-      {
-        revision: match.revision + 1,
-        homeRoster: home.team,
-        awayRoster: away.team,
-      },
+      { revision: match.revision + 1, homeRoster: home.team, awayRoster: away.team },
       { matchId },
     );
     return null;
@@ -1035,9 +879,7 @@ const economyArgs = {
   homeStashRolls: v.optional(v.union(v.array(v.number()), v.null())),
   awayStashRolls: v.optional(v.union(v.array(v.number()), v.null())),
 };
-type EconomyChanges = Partial<
-  Pick<Doc<"leagueMatches">, keyof typeof economyArgs>
->;
+type EconomyChanges = Partial<Pick<Doc<"leagueMatches">, keyof typeof economyArgs>>;
 function economyPatch(match: Doc<"leagueMatches">, args: EconomyChanges) {
   const patch: EconomyChanges = {};
   for (const key of Object.keys(economyArgs) as (keyof EconomyChanges)[]) {
@@ -1050,21 +892,13 @@ function economyPatch(match: Doc<"leagueMatches">, args: EconomyChanges) {
       value.forEach((roll) => integer(roll, 1, 6));
     } else if (value !== null) {
       if (typeof value !== "number") throw new ConvexError("INVALID_DICE");
-      integer(
-        value,
-        1,
-        key.endsWith("FanRoll") || key.endsWith("MinorRoll") ? 3 : 6,
-      );
+      integer(value, 1, key.endsWith("FanRoll") || key.endsWith("MinorRoll") ? 3 : 6);
     }
     Object.assign(patch, { [key]: value });
   }
   return { ...match, ...patch };
 }
-function matchEconomy(
-  match: Doc<"leagueMatches">,
-  home: Doc<"leagueTeams">,
-  away: Doc<"leagueTeams">,
-) {
+function matchEconomy(match: Doc<"leagueMatches">, home: Doc<"leagueTeams">, away: Doc<"leagueTeams">) {
   integer(match.homeFanRoll!, 1, 3);
   integer(match.awayFanRoll!, 1, 3);
   const attendance =
@@ -1077,15 +911,10 @@ function matchEconomy(
       opponent = isHome ? match.scoreAway : match.scoreHome;
     const prefix = isHome ? "home" : "away";
     const snapshot = isHome ? match.homeSnapshot! : match.awaySnapshot!;
-    const winnings = calculateWinnings(
-      attendance,
-      score,
-      match[`${prefix}Stalled`],
-    );
+    const winnings = calculateWinnings(attendance, score, match[`${prefix}Stalled`]);
     if (score !== opponent) integer(match[`${prefix}FansRoll`]!, 1, 6);
     const fans = updatedDedicatedFans(
-      (isHome ? match.homeDedicatedFans : match.awayDedicatedFans) ??
-        snapshot.staff.dedicatedFans,
+      (isHome ? match.homeDedicatedFans : match.awayDedicatedFans) ?? snapshot.staff.dedicatedFans,
       score > opponent ? "win" : score === opponent ? "draw" : "loss",
       match[`${prefix}FansRoll`] ?? undefined,
     );
@@ -1104,19 +933,11 @@ export const updateMatchDetails = mutation({
   },
   returns: v.number(),
   handler: async (ctx, args) => {
-    const { match, user } = await editableMatch(
-      ctx,
-      args.matchId,
-      args.expectedRevision,
-    );
-    if (args.weather !== undefined && args.weather !== null)
-      integer(args.weather, 2, 12);
+    const { match, user } = await editableMatch(ctx, args.matchId, args.expectedRevision);
+    if (args.weather !== undefined && args.weather !== null) integer(args.weather, 2, 12);
     const nextEconomy = economyPatch(match, args);
     const financialPatch = Object.fromEntries(
-      Object.keys(economyArgs).map((key) => [
-        key,
-        nextEconomy[key as keyof typeof economyArgs],
-      ]),
+      Object.keys(economyArgs).map((key) => [key, nextEconomy[key as keyof typeof economyArgs]]),
     );
     const patch = {
       ...(args.weather !== undefined ? { weather: args.weather } : {}),
@@ -1129,8 +950,7 @@ export const updateMatchDetails = mutation({
         ([key, value]) =>
           key === "revision" ||
           key === "confirmedBy" ||
-          JSON.stringify(value) ===
-            JSON.stringify(match[key as keyof typeof match]),
+          JSON.stringify(value) === JSON.stringify(match[key as keyof typeof match]),
       )
     )
       return match.revision;
@@ -1157,17 +977,10 @@ export const updateMatchDetails = mutation({
 
 function sumRows(rows: Doc<"leagueMatchPlayers">[]) {
   const stats = emptyPlayerStats();
-  for (const row of rows)
-    for (const key of Object.keys(stats) as (keyof Stats)[])
-      stats[key] += row.stats[key];
+  for (const row of rows) for (const key of Object.keys(stats) as (keyof Stats)[]) stats[key] += row.stats[key];
   return stats;
 }
-function resultStats(
-  score: number,
-  against: number,
-  own: Stats,
-  opponent: Stats,
-): Doc<"leagueTeams">["stats"] {
+function resultStats(score: number, against: number, own: Stats, opponent: Stats): Doc<"leagueTeams">["stats"] {
   const result = score > against ? "W" : score === against ? "D" : "L";
   return {
     pts: result === "W" ? 3 : result === "D" ? 1 : 0,
@@ -1200,44 +1013,28 @@ function updateTotals(
   }
   return next;
 }
-function validateReport(
-  match: Doc<"leagueMatches">,
-  rows: Doc<"leagueMatchPlayers">[],
-) {
+function validateReport(match: Doc<"leagueMatches">, rows: Doc<"leagueMatchPlayers">[]) {
   if (!isPreGameComplete(match)) throw new ConvexError("PRE_GAME_INCOMPLETE");
   const home = rows.filter((r) => r.entryId === match.homeEntryId),
     away = rows.filter((r) => r.entryId === match.awayEntryId);
   for (const row of rows) {
     checkedStats(row.stats);
-    if (!row.participated && Object.values(row.stats).some(Boolean))
-      throw new ConvexError("INELIGIBLE_PLAYER");
-    if ((row.statusAfter === "dead") !== (row.stats.dth === 1))
-      throw new ConvexError("INVALID_DEATH_REPORT");
+    if (!row.participated && Object.values(row.stats).some(Boolean)) throw new ConvexError("INELIGIBLE_PLAYER");
+    if ((row.statusAfter === "dead") !== (row.stats.dth === 1)) throw new ConvexError("INVALID_DEATH_REPORT");
   }
   const homeStats = sumRows(home),
     awayStats = sumRows(away);
   if (homeStats.td !== match.scoreHome || awayStats.td !== match.scoreAway)
     throw new ConvexError("TOUCHDOWN_TOTAL_MISMATCH");
-  if (homeStats.mvp !== 1 || awayStats.mvp !== 1)
-    throw new ConvexError("ONE_MVP_PER_TEAM_REQUIRED");
+  if (homeStats.mvp !== 1 || awayStats.mvp !== 1) throw new ConvexError("ONE_MVP_PER_TEAM_REQUIRED");
   return { homeStats, awayStats };
 }
-function rosterFromPlayers(
-  entry: Doc<"leagueTeams">,
-  players: Doc<"leaguePlayers">[],
-) {
+function rosterFromPlayers(entry: Doc<"leagueTeams">, players: Doc<"leaguePlayers">[]) {
   return {
     ...entry.team,
     players: players
-      .filter(
-        (p) => !p.temporary && p.status !== "dead" && p.status !== "retired",
-      )
-      .map((p) => ({
-        id: p.sourcePlayerId,
-        positionId: p.positionId,
-        name: p.name,
-        skills: p.skills,
-      })),
+      .filter((p) => !p.temporary && p.status !== "dead" && p.status !== "retired")
+      .map((p) => ({ id: p.sourcePlayerId, positionId: p.positionId, name: p.name, skills: p.skills })),
   };
 }
 async function finishRound(ctx: MutationCtx, match: Doc<"leagueMatches">) {
@@ -1245,29 +1042,17 @@ async function finishRound(ctx: MutationCtx, match: Doc<"leagueMatches">) {
     .query("leagueMatches")
     .withIndex("by_roundId", (q) => q.eq("roundId", match.roundId))
     .take(MAX_ENTRIES / 2);
-  if (
-    fixtures.some(
-      (m) =>
-        m.status !== "completed" && m.status !== "bye" && m.status !== "void",
-    )
-  )
-    return;
+  if (fixtures.some((m) => m.status !== "completed" && m.status !== "bye" && m.status !== "void")) return;
   await ctx.db.patch("leagueRounds", match.roundId, { status: "completed" });
   const rounds = await ctx.db
     .query("leagueRounds")
     .withIndex("by_leagueId", (q) => q.eq("leagueId", match.leagueId))
     .take(MAX_ENTRIES);
   if (rounds.every((r) => r.status === "completed" || r._id === match.roundId))
-    await ctx.db.patch("leagues", match.leagueId, {
-      status: "completed",
-      updatedAt: Date.now(),
-    });
+    await ctx.db.patch("leagues", match.leagueId, { status: "completed", updatedAt: Date.now() });
 }
 
-function recordedReport(
-  match: Doc<"leagueMatches">,
-  rows: Doc<"leagueMatchPlayers">[],
-) {
+function recordedReport(match: Doc<"leagueMatches">, rows: Doc<"leagueMatchPlayers">[]) {
   return {
     scoreHome: match.scoreHome,
     scoreAway: match.scoreAway,
@@ -1280,10 +1065,8 @@ function recordedReport(
     awayStalled: match.awayStalled,
     homeWinnings: match.homeWinnings,
     awayWinnings: match.awayWinnings,
-    homeDedicatedFans:
-      match.homeDedicatedFans ?? match.homeSnapshot!.staff.dedicatedFans,
-    awayDedicatedFans:
-      match.awayDedicatedFans ?? match.awaySnapshot!.staff.dedicatedFans,
+    homeDedicatedFans: match.homeDedicatedFans ?? match.homeSnapshot!.staff.dedicatedFans,
+    awayDedicatedFans: match.awayDedicatedFans ?? match.awaySnapshot!.staff.dedicatedFans,
     players: rows.map((row) => ({
       playerId: row.playerId,
       entryId: row.entryId,
@@ -1307,9 +1090,7 @@ async function recordReportEvent(
   previousRows = rows,
   previousPlayEvents?: Doc<"leaguePlayEvents">["event"][],
 ) {
-  const events = (await playEvents(ctx, next._id))
-    .filter((row) => !row.deleted)
-    .map((row) => row.event);
+  const events = (await playEvents(ctx, next._id)).filter((row) => !row.deleted).map((row) => row.event);
   return ctx.db.insert("leagueMatchEvents", {
     leagueId: next.leagueId,
     matchId: next._id,
@@ -1318,16 +1099,8 @@ async function recordReportEvent(
     actorName: actor.name ?? "Coach",
     kind,
     reason,
-    before: previous
-      ? {
-          ...recordedReport(previous, previousRows),
-          playEvents: previousPlayEvents ?? events,
-        }
-      : null,
-    after: {
-      ...recordedReport(next, rows),
-      playEvents: events,
-    },
+    before: previous ? { ...recordedReport(previous, previousRows), playEvents: previousPlayEvents ?? events } : null,
+    after: { ...recordedReport(next, rows), playEvents: events },
   });
 }
 
@@ -1339,100 +1112,51 @@ export const confirmMatch = mutation({
       match = await matchDoc(ctx, matchId);
     const home = await entryDoc(ctx, match.homeEntryId),
       away = match.awayEntryId ? await entryDoc(ctx, match.awayEntryId) : null;
-    if (!away || (user._id !== home.coachId && user._id !== away.coachId))
-      throw new ConvexError("FORBIDDEN");
+    if (!away || (user._id !== home.coachId && user._id !== away.coachId)) throw new ConvexError("FORBIDDEN");
     revision(match.revision, expectedRevision);
-    if (match.status === "completed")
-      return { completed: true, revision: match.revision };
-    if (match.status !== "in-progress")
-      throw new ConvexError("REPORT_NOT_STARTED");
+    if (match.status === "completed") return { completed: true, revision: match.revision };
+    if (match.status !== "in-progress") throw new ConvexError("REPORT_NOT_STARTED");
     const rows = await matchPlayers(ctx, matchId),
       totals = validateReport(match, rows),
       economy = matchEconomy(match, home, away);
-    if (match.confirmedBy.includes(user._id))
-      return { completed: false, revision: match.revision };
+    if (match.confirmedBy.includes(user._id)) return { completed: false, revision: match.revision };
     const confirmedBy = [...match.confirmedBy, user._id];
-    if (
-      !confirmedBy.includes(home.coachId) ||
-      !confirmedBy.includes(away.coachId)
-    ) {
+    if (!confirmedBy.includes(home.coachId) || !confirmedBy.includes(away.coachId)) {
       await ctx.db.patch("leagueMatches", matchId, { confirmedBy });
-      await auditEvent(
-        ctx,
-        match.leagueId,
-        user,
-        "report-confirmed",
-        { revision: match.revision },
-        { matchId },
-      );
+      await auditEvent(ctx, match.leagueId, user, "report-confirmed", { revision: match.revision }, { matchId });
       return { completed: false, revision: match.revision };
     }
     for (const row of rows) {
       const player = await ctx.db.get("leaguePlayers", row.playerId);
-      if (!player || player.entryId !== row.entryId)
-        throw new ConvexError("INVALID_PLAYER");
-      const stats = {
-        ...player.stats,
-        mp: player.stats.mp + (row.participated ? 1 : 0),
-      };
-      for (const key of Object.keys(row.stats) as (keyof Stats)[])
-        stats[key] += row.stats[key];
+      if (!player || player.entryId !== row.entryId) throw new ConvexError("INVALID_PLAYER");
+      const stats = { ...player.stats, mp: player.stats.mp + (row.participated ? 1 : 0) };
+      for (const key of Object.keys(row.stats) as (keyof Stats)[]) stats[key] += row.stats[key];
       const reductions = { ...player.characteristicReductions };
       const casualty =
-        row.casualtyRoll === null
-          ? null
-          : casualtyOutcome(row.casualtyRoll, row.lastingRoll ?? undefined);
+        row.casualtyRoll === null ? null : casualtyOutcome(row.casualtyRoll, row.lastingRoll ?? undefined);
       if (casualty?.characteristicReduction) {
-        const before = applyCharacteristicReductions(
-            row.snapshot.baseProfile,
-            reductions,
-          ),
+        const before = applyCharacteristicReductions(row.snapshot.baseProfile, reductions),
           proposed = {
             ...reductions,
-            [casualty.characteristicReduction]:
-              reductions[casualty.characteristicReduction] + 1,
+            [casualty.characteristicReduction]: reductions[casualty.characteristicReduction] + 1,
           },
-          after = applyCharacteristicReductions(
-            row.snapshot.baseProfile,
-            proposed,
-          );
-        if (
-          before[casualty.characteristicReduction] !==
-          after[casualty.characteristicReduction]
-        )
+          after = applyCharacteristicReductions(row.snapshot.baseProfile, proposed);
+        if (before[casualty.characteristicReduction] !== after[casualty.characteristicReduction])
           reductions[casualty.characteristicReduction] += 1;
       }
       await ctx.db.patch("leaguePlayers", player._id, {
         stats,
         sppEarned: player.sppEarned + capturedSpp(row),
-        status:
-          player.temporary && row.statusAfter !== "dead"
-            ? "retired"
-            : row.statusAfter,
+        status: player.temporary && row.statusAfter !== "dead" ? "retired" : row.statusAfter,
         injuryNotes: row.injuryNotes || player.injuryNotes,
         characteristicReductions: reductions,
-        nigglingInjuries:
-          player.nigglingInjuries + (casualty?.nigglingInjuries ?? 0),
+        nigglingInjuries: player.nigglingInjuries + (casualty?.nigglingInjuries ?? 0),
       });
     }
     const now = Date.now();
     for (const [entry, own, opponent, scored, against, finances] of [
-      [
-        home,
-        totals.homeStats,
-        totals.awayStats,
-        match.scoreHome,
-        match.scoreAway,
-        economy.home,
-      ],
-      [
-        away,
-        totals.awayStats,
-        totals.homeStats,
-        match.scoreAway,
-        match.scoreHome,
-        economy.away,
-      ],
+      [home, totals.homeStats, totals.awayStats, match.scoreHome, match.scoreAway, economy.home],
+      [away, totals.awayStats, totals.homeStats, match.scoreAway, match.scoreHome, economy.away],
     ] as const) {
       const added = resultStats(scored, against, own, opponent),
         stats = updateTotals(entry.stats, added);
@@ -1440,8 +1164,7 @@ export const confirmMatch = mutation({
       const players = await entryPlayers(ctx, entry._id);
       const team = rosterFromPlayers(entry, players);
       team.staff = { ...team.staff, dedicatedFans: finances.fans };
-      if (team.captainId && !team.players.some((p) => p.id === team.captainId))
-        delete team.captainId;
+      if (team.captainId && !team.players.some((p) => p.id === team.captainId)) delete team.captainId;
       await ctx.db.patch("leagueTeams", entry._id, {
         stats,
         treasury: finances.treasury,
@@ -1490,11 +1213,7 @@ export const confirmMatch = mutation({
         confirmedBy,
         scoreHome: match.scoreHome,
         scoreAway: match.scoreAway,
-        players: rows.map((r) => ({
-          playerId: r.playerId,
-          stats: r.stats,
-          statusAfter: r.statusAfter,
-        })),
+        players: rows.map((r) => ({ playerId: r.playerId, stats: r.stats, statusAfter: r.statusAfter })),
         economy,
       },
       { matchId },
@@ -1503,17 +1222,11 @@ export const confirmMatch = mutation({
       ctx,
       user,
       "recorded",
-      {
-        ...match,
-        homeWinnings: economy.home.winnings,
-        awayWinnings: economy.away.winnings,
-      },
+      { ...match, homeWinnings: economy.home.winnings, awayWinnings: economy.away.winnings },
       rows,
     );
     const recorded = await ctx.db.get("leagueMatchEvents", eventId);
-    await ctx.db.patch("leagueMatches", matchId, {
-      recordedOrder: recorded!._creationTime,
-    });
+    await ctx.db.patch("leagueMatches", matchId, { recordedOrder: recorded!._creationTime });
     await finishRound(ctx, match);
     return { completed: true, revision: match.revision };
   },
@@ -1539,24 +1252,14 @@ function auditView(row: Doc<"leagueAudit">) {
     details: row.details,
   };
 }
-const careerPlayerValidator = schema.doc("leaguePlayers").extend({
-  availableAdvancements: v.array(
-    v.object({
-      skillId: v.string(),
-      cost: v.number(),
-      valueIncrease: v.number(),
-    }),
-  ),
-  canHireJourneyman: v.boolean(),
-  canUndoAdvancement: v.boolean(),
-  effectiveStats: v.object({
-    ma: v.number(),
-    st: v.number(),
-    ag: v.string(),
-    pa: v.string(),
-    av: v.string(),
-  }),
-});
+const careerPlayerValidator = schema
+  .doc("leaguePlayers")
+  .extend({
+    availableAdvancements: v.array(v.object({ skillId: v.string(), cost: v.number(), valueIncrease: v.number() })),
+    canHireJourneyman: v.boolean(),
+    canUndoAdvancement: v.boolean(),
+    effectiveStats: v.object({ ma: v.number(), st: v.number(), ag: v.string(), pa: v.string(), av: v.string() }),
+  });
 export const getCareer = query({
   args: { entryId: v.id("leagueTeams") },
   returns: v.object({
@@ -1574,9 +1277,7 @@ export const getCareer = query({
       league = await leagueDoc(ctx, entry.leagueId),
       user = await currentUser(ctx);
     const players = await entryPlayers(ctx, entryId);
-    const latestRows = entry.latestMatchId
-      ? await matchPlayers(ctx, entry.latestMatchId)
-      : [];
+    const latestRows = entry.latestMatchId ? await matchPlayers(ctx, entry.latestMatchId) : [];
     const history = await ctx.db
       .query("leagueAudit")
       .withIndex("by_entryId", (q) => q.eq("entryId", entryId))
@@ -1591,13 +1292,8 @@ export const getCareer = query({
       entry,
       league,
       players: players.map((p) => {
-        const position = getRoster(entry.team.rosterId)!.players.find(
-          (position) => position.id === p.positionId,
-        )!;
-        const existing = [
-          ...p.skills,
-          ...(entry.team.captainId === p.sourcePlayerId ? ["pro"] : []),
-        ];
+        const position = getRoster(entry.team.rosterId)!.players.find((position) => position.id === p.positionId)!;
+        const existing = [...p.skills, ...(entry.team.captainId === p.sourcePlayerId ? ["pro"] : [])];
         const choices =
           entry.postGamePending &&
           p.status !== "dead" &&
@@ -1605,19 +1301,10 @@ export const getCareer = query({
           (!p.temporary || latestRows.some((row) => row.playerId === p._id)) &&
           p.hiredAfterMatchId !== entry.latestMatchId &&
           !entry.activeMatchId
-            ? advancementChoices(
-                entry.team.rosterId,
-                p.positionId,
-                existing,
-                p.advancements.length,
-              )
+            ? advancementChoices(entry.team.rosterId, p.positionId, existing, p.advancements.length)
                 .map((choice) => ({
                   skillId: choice.skillId,
-                  cost: advancementCost(
-                    p.advancements.length,
-                    choice.access,
-                    choice.elite,
-                  ),
+                  cost: advancementCost(p.advancements.length, choice.access, choice.elite),
                   valueIncrease: advancementValue(choice.access, choice.elite),
                 }))
                 .filter((choice) => choice.cost <= p.sppEarned - p.sppSpent)
@@ -1626,11 +1313,7 @@ export const getCareer = query({
         return {
           ...p,
           availableAdvancements: choices,
-          canHireJourneyman:
-            p.temporary &&
-            p.status !== "dead" &&
-            entry.postGamePending &&
-            !!latestRow,
+          canHireJourneyman: p.temporary && p.status !== "dead" && entry.postGamePending && !!latestRow,
           canUndoAdvancement:
             league.ownerId === user?._id &&
             entry.postGamePending &&
@@ -1638,16 +1321,12 @@ export const getCareer = query({
             p.hiredAfterMatchId !== entry.latestMatchId &&
             !!latestRow &&
             p.advancements.length > latestRow.snapshot.advancements.length,
-          effectiveStats: applyCharacteristicReductions(
-            position,
-            p.characteristicReductions,
-          ),
+          effectiveStats: applyCharacteristicReductions(position, p.characteristicReductions),
         };
       }),
       canManage:
         !!user &&
-        ((entry.coachId === user._id && !entry.withdrawn) ||
-          league.ownerId === user._id) &&
+        ((entry.coachId === user._id && !entry.withdrawn) || league.ownerId === user._id) &&
         !entry.activeMatchId,
       canCommission: league.ownerId === user?._id,
       history: history.map(auditView),
@@ -1659,12 +1338,7 @@ export const getCareer = query({
             ...entry.team.players,
             ...players
               .filter((p) => p.temporary && p.status === "active")
-              .map((p) => ({
-                id: p.sourcePlayerId,
-                positionId: p.positionId,
-                name: p.name,
-                skills: p.skills,
-              })),
+              .map((p) => ({ id: p.sourcePlayerId, positionId: p.positionId, name: p.name, skills: p.skills })),
           ],
         },
         values,
@@ -1674,20 +1348,12 @@ export const getCareer = query({
 });
 
 export const advancePlayer = mutation({
-  args: {
-    playerId: v.id("leaguePlayers"),
-    skillId: v.string(),
-    expectedRevision: v.number(),
-  },
+  args: { playerId: v.id("leaguePlayers"), skillId: v.string(), expectedRevision: v.number() },
   returns: v.null(),
   handler: async (ctx, { playerId, skillId, expectedRevision }) => {
     const player = await ctx.db.get("leaguePlayers", playerId);
     if (!player) throw new ConvexError("NOT_FOUND");
-    const { entry, user } = await editableCareer(
-      ctx,
-      player.entryId,
-      expectedRevision,
-    );
+    const { entry, user } = await editableCareer(ctx, player.entryId, expectedRevision);
     if (
       !entry.postGamePending ||
       player.status === "dead" ||
@@ -1700,16 +1366,11 @@ export const advancePlayer = mutation({
       (!entry.latestMatchId ||
         !(await ctx.db
           .query("leagueMatchPlayers")
-          .withIndex("by_matchId_and_playerId", (q) =>
-            q.eq("matchId", entry.latestMatchId!).eq("playerId", playerId),
-          )
+          .withIndex("by_matchId_and_playerId", (q) => q.eq("matchId", entry.latestMatchId!).eq("playerId", playerId))
           .unique()))
     )
       throw new ConvexError("JOURNEYMAN_UNAVAILABLE");
-    const existing = [
-      ...player.skills,
-      ...(entry.team.captainId === player.sourcePlayerId ? ["pro"] : []),
-    ];
+    const existing = [...player.skills, ...(entry.team.captainId === player.sourcePlayerId ? ["pro"] : [])];
     const choice = advancementChoices(
       entry.team.rosterId,
       player.positionId,
@@ -1717,31 +1378,21 @@ export const advancePlayer = mutation({
       player.advancements.length,
     ).find((choice) => choice.skillId === skillId);
     if (!choice) throw new ConvexError("ILLEGAL_ADVANCEMENT");
-    const cost = advancementCost(
-        player.advancements.length,
-        choice.access,
-        choice.elite,
-      ),
+    const cost = advancementCost(player.advancements.length, choice.access, choice.elite),
       value = advancementValue(choice.access, choice.elite);
-    if (player.sppEarned - player.sppSpent < cost)
-      throw new ConvexError("INSUFFICIENT_SPP");
+    if (player.sppEarned - player.sppSpent < cost) throw new ConvexError("INSUFFICIENT_SPP");
     const skills = [...player.skills, skillId];
     await ctx.db.patch("leaguePlayers", playerId, {
       skills,
       sppSpent: player.sppSpent + cost,
       valueIncrease: player.valueIncrease + value,
-      advancements: [
-        ...player.advancements,
-        { ...choice, sppCost: cost, valueIncrease: value },
-      ],
+      advancements: [...player.advancements, { ...choice, sppCost: cost, valueIncrease: value }],
     });
     await ctx.db.patch("leagueTeams", entry._id, {
       revision: entry.revision + 1,
       team: {
         ...entry.team,
-        players: entry.team.players.map((p) =>
-          p.id === player.sourcePlayerId ? { ...p, skills } : p,
-        ),
+        players: entry.team.players.map((p) => (p.id === player.sourcePlayerId ? { ...p, skills } : p)),
       },
     });
     await auditEvent(
@@ -1749,52 +1400,33 @@ export const advancePlayer = mutation({
       entry.leagueId,
       user,
       "player-advanced",
-      {
-        playerId,
-        skillId,
-        sppBefore: player.sppEarned - player.sppSpent,
-        cost,
-        valueIncrease: value,
-      },
+      { playerId, skillId, sppBefore: player.sppEarned - player.sppSpent, cost, valueIncrease: value },
       { entryId: entry._id },
     );
     return null;
   },
 });
 
-function checkHire(
-  entry: Doc<"leagueTeams">,
-  players: Doc<"leaguePlayers">[],
-  positionId: string,
-) {
+function checkHire(entry: Doc<"leagueTeams">, players: Doc<"leaguePlayers">[], positionId: string) {
   const roster = getRoster(entry.team.rosterId)!,
     position = roster.players.find((p) => p.id === positionId);
   if (!position) throw new ConvexError("INVALID_POSITION");
-  if (entry.blockedPositionIds.includes(positionId))
-    throw new ConvexError("POSITION_REHIRE_AFTER_NEXT_MATCH");
-  const employed = players.filter(
-    (p) => !p.temporary && p.status !== "dead" && p.status !== "retired",
-  );
+  if (entry.blockedPositionIds.includes(positionId)) throw new ConvexError("POSITION_REHIRE_AFTER_NEXT_MATCH");
+  const employed = players.filter((p) => !p.temporary && p.status !== "dead" && p.status !== "retired");
   if (
     employed.length >= 16 ||
-    employed.filter((p) => p.positionId === positionId).length >=
-      Number(position.qty.split("-")[1])
+    employed.filter((p) => p.positionId === positionId).length >= Number(position.qty.split("-")[1])
   )
     throw new ConvexError("ROSTER_LIMIT");
   if (
     position.position.includes("Big Guy") &&
     roster.bigGuyMax !== undefined &&
-    employed.filter((p) =>
-      roster.players
-        .find((x) => x.id === p.positionId)
-        ?.position.includes("Big Guy"),
-    ).length >= roster.bigGuyMax
+    employed.filter((p) => roster.players.find((x) => x.id === p.positionId)?.position.includes("Big Guy")).length >=
+      roster.bigGuyMax
   )
     throw new ConvexError("ROSTER_LIMIT");
-  if (players.length >= MAX_PLAYERS)
-    throw new ConvexError("CAREER_PLAYER_LIMIT");
-  if (entry.treasury < position.cost)
-    throw new ConvexError("INSUFFICIENT_TREASURY");
+  if (players.length >= MAX_PLAYERS) throw new ConvexError("CAREER_PLAYER_LIMIT");
+  if (entry.treasury < position.cost) throw new ConvexError("INSUFFICIENT_TREASURY");
   return position;
 }
 export const hirePlayer = mutation({
@@ -1806,11 +1438,7 @@ export const hirePlayer = mutation({
   },
   returns: v.id("leaguePlayers"),
   handler: async (ctx, { entryId, positionId, name, expectedRevision }) => {
-    const { entry, user } = await editableCareer(
-      ctx,
-      entryId,
-      expectedRevision,
-    );
+    const { entry, user } = await editableCareer(ctx, entryId, expectedRevision);
     if (!entry.postGamePending) throw new ConvexError("POSTGAME_REQUIRED");
     if (entry.hiringClosed) throw new ConvexError("HIRING_MUST_PRECEDE_FIRING");
     const players = await entryPlayers(ctx, entryId),
@@ -1838,10 +1466,7 @@ export const hirePlayer = mutation({
     });
     const team = {
       ...entry.team,
-      players: [
-        ...entry.team.players,
-        { id: sourcePlayerId, positionId, name: playerName, skills: [] },
-      ],
+      players: [...entry.team.players, { id: sourcePlayerId, positionId, name: playerName, skills: [] }],
     };
     await ctx.db.patch("leagueTeams", entryId, {
       treasury: entry.treasury - position.cost,
@@ -1872,25 +1497,18 @@ export const hireJourneyman = mutation({
   handler: async (ctx, { playerId, expectedRevision }) => {
     const player = await ctx.db.get("leaguePlayers", playerId);
     if (!player) throw new ConvexError("NOT_FOUND");
-    const { entry, user } = await editableCareer(
-      ctx,
-      player.entryId,
-      expectedRevision,
-    );
+    const { entry, user } = await editableCareer(ctx, player.entryId, expectedRevision);
     if (!player.temporary || player.status === "dead" || !entry.postGamePending)
       throw new ConvexError("JOURNEYMAN_UNAVAILABLE");
     if (
       player.advancements.length < 6 &&
-      player.sppEarned - player.sppSpent >=
-        leagueAdvancementCosts.characteristic[player.advancements.length]
+      player.sppEarned - player.sppSpent >= leagueAdvancementCosts.characteristic[player.advancements.length]
     )
       throw new ConvexError("MANDATORY_ADVANCEMENT_REQUIRED");
     const recent = entry.latestMatchId
       ? await ctx.db
           .query("leagueMatchPlayers")
-          .withIndex("by_matchId_and_playerId", (q) =>
-            q.eq("matchId", entry.latestMatchId!).eq("playerId", playerId),
-          )
+          .withIndex("by_matchId_and_playerId", (q) => q.eq("matchId", entry.latestMatchId!).eq("playerId", playerId))
           .unique()
       : null;
     if (!recent) throw new ConvexError("JOURNEYMAN_UNAVAILABLE");
@@ -1910,12 +1528,7 @@ export const hireJourneyman = mutation({
         ...entry.team,
         players: [
           ...entry.team.players,
-          {
-            id: player.sourcePlayerId,
-            positionId: player.positionId,
-            name: player.name,
-            skills,
-          },
+          { id: player.sourcePlayerId, positionId: player.positionId, name: player.name, skills },
         ],
       },
       treasury: entry.treasury - cost,
@@ -1945,37 +1558,19 @@ export const retirePlayer = mutation({
   handler: async (ctx, { playerId, expectedRevision }) => {
     const player = await ctx.db.get("leaguePlayers", playerId);
     if (!player) throw new ConvexError("NOT_FOUND");
-    const { entry, user } = await editableCareer(
-      ctx,
-      player.entryId,
-      expectedRevision,
-    );
-    if (
-      !entry.postGamePending ||
-      player.temporary ||
-      player.status === "dead" ||
-      player.status === "retired"
-    )
+    const { entry, user } = await editableCareer(ctx, player.entryId, expectedRevision);
+    if (!entry.postGamePending || player.temporary || player.status === "dead" || player.status === "retired")
       throw new ConvexError("PLAYER_UNAVAILABLE");
     const players = await entryPlayers(ctx, entry._id);
-    if (
-      players.filter(
-        (p) => !p.temporary && p._id !== playerId && p.status === "active",
-      ).length < 11
-    )
+    if (players.filter((p) => !p.temporary && p._id !== playerId && p.status === "active").length < 11)
       throw new ConvexError("MINIMUM_ROSTER");
     await ctx.db.patch("leaguePlayers", playerId, { status: "retired" });
-    const team = {
-      ...entry.team,
-      players: entry.team.players.filter((p) => p.id !== player.sourcePlayerId),
-    };
+    const team = { ...entry.team, players: entry.team.players.filter((p) => p.id !== player.sourcePlayerId) };
     if (team.captainId === player.sourcePlayerId) delete team.captainId;
     await ctx.db.patch("leagueTeams", entry._id, {
       team,
       revision: entry.revision + 1,
-      blockedPositionIds: [
-        ...new Set([...entry.blockedPositionIds, player.positionId]),
-      ],
+      blockedPositionIds: [...new Set([...entry.blockedPositionIds, player.positionId])],
       hiringClosed: true,
     });
     await auditEvent(
@@ -1991,28 +1586,18 @@ export const retirePlayer = mutation({
 });
 
 export const renamePlayer = mutation({
-  args: {
-    playerId: v.id("leaguePlayers"),
-    name: v.string(),
-    expectedRevision: v.number(),
-  },
+  args: { playerId: v.id("leaguePlayers"), name: v.string(), expectedRevision: v.number() },
   returns: v.null(),
   handler: async (ctx, { playerId, name, expectedRevision }) => {
     const player = await ctx.db.get("leaguePlayers", playerId);
     if (!player) throw new ConvexError("NOT_FOUND");
-    const { entry, user } = await editableCareer(
-        ctx,
-        player.entryId,
-        expectedRevision,
-      ),
+    const { entry, user } = await editableCareer(ctx, player.entryId, expectedRevision),
       clean = text(name, 80);
     await ctx.db.patch("leaguePlayers", playerId, { name: clean });
     await ctx.db.patch("leagueTeams", entry._id, {
       team: {
         ...entry.team,
-        players: entry.team.players.map((p) =>
-          p.id === player.sourcePlayerId ? { ...p, name: clean } : p,
-        ),
+        players: entry.team.players.map((p) => (p.id === player.sourcePlayerId ? { ...p, name: clean } : p)),
       },
       revision: entry.revision + 1,
     });
@@ -2028,32 +1613,15 @@ export const renamePlayer = mutation({
   },
 });
 export const renameTeam = mutation({
-  args: {
-    entryId: v.id("leagueTeams"),
-    name: v.string(),
-    expectedRevision: v.number(),
-  },
+  args: { entryId: v.id("leagueTeams"), name: v.string(), expectedRevision: v.number() },
   returns: v.null(),
   handler: async (ctx, { entryId, name, expectedRevision }) => {
-    const { entry, user } = await editableCareer(
-        ctx,
-        entryId,
-        expectedRevision,
-      ),
+    const { entry, user } = await editableCareer(ctx, entryId, expectedRevision),
       clean = text(name, 80, true);
     const entries = await leagueEntries(ctx, entry.leagueId);
-    if (
-      entries.some(
-        (e) =>
-          e._id !== entryId &&
-          e.team.name.toLowerCase() === clean.toLowerCase(),
-      )
-    )
+    if (entries.some((e) => e._id !== entryId && e.team.name.toLowerCase() === clean.toLowerCase()))
       throw new ConvexError("DUPLICATE_TEAM_NAME");
-    await ctx.db.patch("leagueTeams", entryId, {
-      team: { ...entry.team, name: clean },
-      revision: entry.revision + 1,
-    });
+    await ctx.db.patch("leagueTeams", entryId, { team: { ...entry.team, name: clean }, revision: entry.revision + 1 });
     // The builder page and library subscribe to the source team. Keep its
     // identity in sync without replacing its roster with the career snapshot.
     const source = await ctx.db.get("teams", entry.teamId);
@@ -2062,20 +1630,9 @@ export const renameTeam = mutation({
         team: { ...source.team, name: clean },
         revision: source.revision + 1,
         updatedAt: Date.now(),
-        searchText: [
-          clean,
-          getRoster(source.team.rosterId)!.name,
-          getRuleset(source.team.rulesetId).name,
-        ].join(" "),
+        searchText: [clean, getRoster(source.team.rosterId)!.name, getRuleset(source.team.rulesetId).name].join(" "),
       });
-    await auditEvent(
-      ctx,
-      entry.leagueId,
-      user,
-      "team-renamed",
-      { from: entry.team.name, to: clean },
-      { entryId },
-    );
+    await auditEvent(ctx, entry.leagueId, user, "team-renamed", { from: entry.team.name, to: clean }, { entryId });
     return null;
   },
 });
@@ -2089,17 +1646,9 @@ export const completePostGame = mutation({
     stashRolls: v.optional(v.array(v.number())),
   },
   returns: v.null(),
-  handler: async (
-    ctx,
-    { entryId, expectedRevision, mistakeRoll, minorRoll, stashRolls },
-  ) => {
-    const { entry, user } = await editableCareer(
-      ctx,
-      entryId,
-      expectedRevision,
-    );
-    if (!entry.postGamePending)
-      throw new ConvexError("POSTGAME_ALREADY_COMPLETED");
+  handler: async (ctx, { entryId, expectedRevision, mistakeRoll, minorRoll, stashRolls }) => {
+    const { entry, user } = await editableCareer(ctx, entryId, expectedRevision);
+    if (!entry.postGamePending) throw new ConvexError("POSTGAME_ALREADY_COMPLETED");
     const players = await entryPlayers(ctx, entryId);
     if (
       players.some(
@@ -2108,13 +1657,11 @@ export const completePostGame = mutation({
           p.status !== "dead" &&
           p.status !== "retired" &&
           p.advancements.length < 6 &&
-          p.sppEarned - p.sppSpent >=
-            leagueAdvancementCosts.characteristic[p.advancements.length],
+          p.sppEarned - p.sppSpent >= leagueAdvancementCosts.characteristic[p.advancements.length],
       )
     )
       throw new ConvexError("MANDATORY_ADVANCEMENT_REQUIRED");
-    if (stashRolls && stashRolls.length !== 2)
-      throw new ConvexError("INVALID_DICE");
+    if (stashRolls && stashRolls.length !== 2) throw new ConvexError("INVALID_DICE");
     const outcome = (() => {
       try {
         return expensiveMistake(
@@ -2137,13 +1684,7 @@ export const completePostGame = mutation({
       entry.leagueId,
       user,
       "postgame-completed",
-      {
-        treasuryBefore: entry.treasury,
-        ...outcome,
-        mistakeRoll,
-        minorRoll,
-        stashRolls,
-      },
+      { treasuryBefore: entry.treasury, ...outcome, mistakeRoll, minorRoll, stashRolls },
       { entryId },
     );
     return null;
@@ -2164,35 +1705,16 @@ export const manageStaff = mutation({
   },
   returns: v.null(),
   handler: async (ctx, { entryId, staff, change, expectedRevision }) => {
-    const { entry, user } = await editableCareer(
-      ctx,
-      entryId,
-      expectedRevision,
-    );
-    if (!entry.postGamePending || (change !== 1 && change !== -1))
-      throw new ConvexError("INVALID_INPUT");
-    if (staff === "rerolls" && change === -1)
-      throw new ConvexError("REROLLS_CANNOT_BE_REMOVED");
+    const { entry, user } = await editableCareer(ctx, entryId, expectedRevision);
+    if (!entry.postGamePending || (change !== 1 && change !== -1)) throw new ConvexError("INVALID_INPUT");
+    if (staff === "rerolls" && change === -1) throw new ConvexError("REROLLS_CANNOT_BE_REMOVED");
     const roster = getRoster(entry.team.rosterId)!,
       current = entry.team.staff[staff],
       next = current + change;
-    const max =
-      staff === "rerolls"
-        ? roster.rerolls.max
-        : staff === "apothecary"
-          ? roster.apothecary
-            ? 1
-            : 0
-          : 6;
+    const max = staff === "rerolls" ? roster.rerolls.max : staff === "apothecary" ? (roster.apothecary ? 1 : 0) : 6;
     integer(next, 0, max);
     const cost =
-      change === -1
-        ? 0
-        : staff === "rerolls"
-          ? roster.rerolls.cost * 2
-          : staff === "apothecary"
-            ? 50000
-            : 10000;
+      change === -1 ? 0 : staff === "rerolls" ? roster.rerolls.cost * 2 : staff === "apothecary" ? 50000 : 10000;
     if (entry.treasury < cost) throw new ConvexError("INSUFFICIENT_TREASURY");
     await ctx.db.patch("leagueTeams", entryId, {
       team: { ...entry.team, staff: { ...entry.team.staff, [staff]: next } },
@@ -2204,14 +1726,7 @@ export const manageStaff = mutation({
       entry.leagueId,
       user,
       "staff-changed",
-      {
-        staff,
-        from: current,
-        to: next,
-        cost,
-        treasuryBefore: entry.treasury,
-        treasuryAfter: entry.treasury - cost,
-      },
+      { staff, from: current, to: next, cost, treasuryBefore: entry.treasury, treasuryAfter: entry.treasury - cost },
       { entryId },
     );
     return null;
@@ -2274,44 +1789,27 @@ export const listTeamCareers = query({
 });
 
 export const replaceEntryTeam = mutation({
-  args: {
-    entryId: v.id("leagueTeams"),
-    teamUuid: v.string(),
-    expectedRevision: v.number(),
-  },
+  args: { entryId: v.id("leagueTeams"), teamUuid: v.string(), expectedRevision: v.number() },
   returns: v.null(),
   handler: async (ctx, { entryId, teamUuid, expectedRevision }) => {
-    const { entry, user, league } = await editableCareer(
-      ctx,
-      entryId,
-      expectedRevision,
-    );
-    if (entry.firstPlayedAt || entry.postGamePending)
-      throw new ConvexError("TEAM_REPLACEMENT_CLOSED");
+    const { entry, user, league } = await editableCareer(ctx, entryId, expectedRevision);
+    if (entry.firstPlayedAt || entry.postGamePending) throw new ConvexError("TEAM_REPLACEMENT_CLOSED");
     const source = await ctx.db
       .query("teams")
       .withIndex("by_uuid", (q) => q.eq("uuid", teamUuid))
       .unique();
-    if (!source || source.ownerId !== entry.coachId || source.archived)
-      throw new ConvexError("FORBIDDEN");
-    if ((await teamLeagueState(ctx, source)).leagueExperienced)
-      throw new ConvexError("TEAM_EXPERIENCED");
+    if (!source || source.ownerId !== entry.coachId || source.archived) throw new ConvexError("FORBIDDEN");
+    if ((await teamLeagueState(ctx, source)).leagueExperienced) throw new ConvexError("TEAM_EXPERIENCED");
     const issues = rookieLeagueIssues(source.team, league.startingTreasury);
-    if (issues.length)
-      throw new ConvexError({ code: "INVALID_ROOKIE", issues });
+    if (issues.length) throw new ConvexError({ code: "INVALID_ROOKIE", issues });
     const oldPlayers = await entryPlayers(ctx, entryId);
     // Preserve experience even when replacement removes the old team's career link.
-    if (await ctx.db.get("teams", entry.teamId))
-      await ctx.db.patch("teams", entry.teamId, { leagueExperienced: true });
+    if (await ctx.db.get("teams", entry.teamId)) await ctx.db.patch("teams", entry.teamId, { leagueExperienced: true });
     await ctx.db.patch("teams", source._id, { leagueExperienced: true });
-    for (const player of oldPlayers)
-      await ctx.db.delete("leaguePlayers", player._id);
+    for (const player of oldPlayers) await ctx.db.delete("leaguePlayers", player._id);
     const team = {
       ...source.team,
-      staff: {
-        ...source.team.staff,
-        dedicatedFans: source.team.staff.dedicatedFans + 1,
-      },
+      staff: { ...source.team.staff, dedicatedFans: source.team.staff.dedicatedFans + 1 },
     };
     for (const player of team.players)
       await ctx.db.insert("leaguePlayers", {
@@ -2358,18 +1856,10 @@ export const replaceEntryTeam = mutation({
 });
 
 export const setCaptain = mutation({
-  args: {
-    entryId: v.id("leagueTeams"),
-    playerId: v.id("leaguePlayers"),
-    expectedRevision: v.number(),
-  },
+  args: { entryId: v.id("leagueTeams"), playerId: v.id("leaguePlayers"), expectedRevision: v.number() },
   returns: v.null(),
   handler: async (ctx, { entryId, playerId, expectedRevision }) => {
-    const { entry, user } = await editableCareer(
-        ctx,
-        entryId,
-        expectedRevision,
-      ),
+    const { entry, user } = await editableCareer(ctx, entryId, expectedRevision),
       player = await ctx.db.get("leaguePlayers", playerId);
     const roster = getRoster(entry.team.rosterId)!,
       position = roster.players.find((p) => p.id === player?.positionId);
@@ -2389,14 +1879,7 @@ export const setCaptain = mutation({
       team: { ...entry.team, captainId: player.sourcePlayerId },
       revision: entry.revision + 1,
     });
-    await auditEvent(
-      ctx,
-      entry.leagueId,
-      user,
-      "captain-assigned",
-      { playerId },
-      { entryId },
-    );
+    await auditEvent(ctx, entry.leagueId, user, "captain-assigned", { playerId }, { entryId });
     return null;
   },
 });
@@ -2419,14 +1902,12 @@ async function replayPlayerCorrection(
   const earned = player.sppEarned + capturedSpp(next) - capturedSpp(old);
   if (earned < player.sppSpent) throw new ConvexError("SPENT_SPP_CONFLICT");
   const stats = { ...player.stats };
-  for (const key of Object.keys(next.stats) as (keyof Stats)[])
-    stats[key] += next.stats[key] - old.stats[key];
+  for (const key of Object.keys(next.stats) as (keyof Stats)[]) stats[key] += next.stats[key] - old.stats[key];
   const history = await ctx.db
     .query("leagueMatchPlayers")
     .withIndex("by_playerId", (q) => q.eq("playerId", next.playerId))
     .take(MAX_MATCHES + 1);
-  if (history.length > MAX_MATCHES)
-    throw new ConvexError("DEPENDENT_CAREER_CHANGES_REQUIRE_RECONCILIATION");
+  if (history.length > MAX_MATCHES) throw new ConvexError("DEPENDENT_CAREER_CHANGES_REQUIRE_RECONCILIATION");
   const match = matches.get(next.matchId)!;
   const rows = history
     .filter((row) => {
@@ -2439,9 +1920,7 @@ async function replayPlayerCorrection(
     })
     .sort(
       (a, b) =>
-        matchOrder(matches.get(a.matchId)!) -
-          matchOrder(matches.get(b.matchId)!) ||
-        a._creationTime - b._creationTime,
+        matchOrder(matches.get(a.matchId)!) - matchOrder(matches.get(b.matchId)!) || a._creationTime - b._creationTime,
     )
     .map((row) => (row.matchId === next.matchId ? next : row));
   let status: Doc<"leaguePlayers">["status"] = next.snapshot.status;
@@ -2449,39 +1928,21 @@ async function replayPlayerCorrection(
     niggles = next.snapshot.nigglingInjuries;
   const reductions = { ...next.snapshot.characteristicReductions };
   for (const row of rows) {
-    if (
-      row.matchId !== next.matchId &&
-      (status === "dead" ||
-        (status === "missing-next-game" && row.participated))
-    )
+    if (row.matchId !== next.matchId && (status === "dead" || (status === "missing-next-game" && row.participated)))
       throw new ConvexError("DEPENDENT_CAREER_CHANGES_REQUIRE_RECONCILIATION");
     status = row.statusAfter;
     notes = row.injuryNotes || notes;
     if (row.casualtyRoll === null) continue;
-    const outcome = casualtyOutcome(
-      row.casualtyRoll,
-      row.lastingRoll ?? undefined,
-    );
+    const outcome = casualtyOutcome(row.casualtyRoll, row.lastingRoll ?? undefined);
     niggles += outcome.nigglingInjuries;
     if (outcome.characteristicReduction) {
       const key = outcome.characteristicReduction;
-      const before = applyCharacteristicReductions(
-        row.snapshot.baseProfile,
-        reductions,
-      );
+      const before = applyCharacteristicReductions(row.snapshot.baseProfile, reductions);
       const proposed = { ...reductions, [key]: reductions[key] + 1 };
-      if (
-        before[key] !==
-        applyCharacteristicReductions(row.snapshot.baseProfile, proposed)[key]
-      )
-        reductions[key] += 1;
+      if (before[key] !== applyCharacteristicReductions(row.snapshot.baseProfile, proposed)[key]) reductions[key] += 1;
     }
   }
-  if (
-    (player.status === "retired" && !player.temporary) ||
-    (player.temporary && status !== "dead")
-  )
-    status = "retired";
+  if ((player.status === "retired" && !player.temporary) || (player.temporary && status !== "dead")) status = "retired";
   await ctx.db.patch("leaguePlayers", player._id, {
     stats,
     sppEarned: earned,
@@ -2504,54 +1965,35 @@ async function replayTreasury(
     .query("leagueAudit")
     .withIndex("by_entryId", (q) => q.eq("entryId", entry._id))
     .take(4097);
-  if (events.length > 4096)
-    throw new ConvexError("DEPENDENT_CAREER_CHANGES_REQUIRE_RECONCILIATION");
-  const start = events.findIndex(
-    (event) =>
-      event.kind === "match-progression-applied" && event.matchId === first._id,
-  );
-  if (start < 0)
-    throw new ConvexError("DEPENDENT_CAREER_CHANGES_REQUIRE_RECONCILIATION");
-  let treasury = (
-    first.homeEntryId === entry._id
-      ? first.homeTreasuryBefore
-      : first.awayTreasuryBefore
-  )!;
+  if (events.length > 4096) throw new ConvexError("DEPENDENT_CAREER_CHANGES_REQUIRE_RECONCILIATION");
+  const start = events.findIndex((event) => event.kind === "match-progression-applied" && event.matchId === first._id);
+  if (start < 0) throw new ConvexError("DEPENDENT_CAREER_CHANGES_REQUIRE_RECONCILIATION");
+  let treasury = (first.homeEntryId === entry._id ? first.homeTreasuryBefore : first.awayTreasuryBefore)!;
   for (const event of events.slice(start)) {
     const details = JSON.parse(event.details) as Record<string, unknown>;
     if (event.kind === "match-progression-applied") {
       const fixture = event.matchId ? projections.get(event.matchId) : null;
       if (!fixture) throw new ConvexError("INVALID_INPUT");
-      treasury +=
-        fixture.homeEntryId === entry._id
-          ? fixture.homeWinnings
-          : fixture.awayWinnings;
-    } else if (
-      ["player-hired", "journeyman-hired", "staff-changed"].includes(event.kind)
-    ) {
+      treasury += fixture.homeEntryId === entry._id ? fixture.homeWinnings : fixture.awayWinnings;
+    } else if (["player-hired", "journeyman-hired", "staff-changed"].includes(event.kind)) {
       treasury -= Number(details.cost);
     } else if (event.kind === "postgame-completed") {
       try {
         treasury = expensiveMistake(
           treasury,
-          typeof details.mistakeRoll === "number"
-            ? details.mistakeRoll
-            : undefined,
+          typeof details.mistakeRoll === "number" ? details.mistakeRoll : undefined,
           typeof details.minorRoll === "number" ? details.minorRoll : undefined,
           Array.isArray(details.stashRolls)
             ? [Number(details.stashRolls[0]), Number(details.stashRolls[1])]
             : undefined,
         ).treasury;
       } catch {
-        throw new ConvexError(
-          "DEPENDENT_CAREER_CHANGES_REQUIRE_RECONCILIATION",
-        );
+        throw new ConvexError("DEPENDENT_CAREER_CHANGES_REQUIRE_RECONCILIATION");
       }
     } else if (event.kind === "career-treasury-corrected") {
       treasury = Number(details.treasuryAfter);
     }
-    if (!Number.isSafeInteger(treasury) || treasury < 0)
-      throw new ConvexError("INSUFFICIENT_TREASURY");
+    if (!Number.isSafeInteger(treasury) || treasury < 0) throw new ConvexError("INSUFFICIENT_TREASURY");
   }
   return treasury;
 }
@@ -2570,26 +2012,16 @@ export const correctMatch = mutation({
     const match = await matchDoc(ctx, args.matchId),
       league = await leagueDoc(ctx, match.leagueId),
       user = await requireUser(ctx);
-    if (user.role !== "admin" && user._id !== league.ownerId)
-      throw new ConvexError("FORBIDDEN");
-    if (match.status !== "completed" || !match.awayEntryId)
-      throw new ConvexError("REPORT_NOT_COMPLETED");
-    if (match.administrativeResult)
-      throw new ConvexError("USE_ADMINISTRATIVE_ADJUDICATION");
+    if (user.role !== "admin" && user._id !== league.ownerId) throw new ConvexError("FORBIDDEN");
+    if (match.status !== "completed" || !match.awayEntryId) throw new ConvexError("REPORT_NOT_COMPLETED");
+    if (match.administrativeResult) throw new ConvexError("USE_ADMINISTRATIVE_ADJUDICATION");
     revision(match.revision, args.expectedRevision);
     const reason = text(args.reason, 1000, true);
-    if (args.weather !== undefined && args.weather !== null)
-      integer(args.weather, 2, 12);
+    if (args.weather !== undefined && args.weather !== null) integer(args.weather, 2, 12);
     const rows = await matchPlayers(ctx, match._id);
     const oldLedger = await playEvents(ctx, match._id);
-    const previousPlayEvents = oldLedger
-      .filter((row) => !row.deleted)
-      .map((row) => row.event);
-    const projection = projectEvents(
-      rows,
-      args.playEvents ?? previousPlayEvents,
-      match.homeEntryId,
-    );
+    const previousPlayEvents = oldLedger.filter((row) => !row.deleted).map((row) => row.event);
+    const projection = projectEvents(rows, args.playEvents ?? previousPlayEvents, match.homeEntryId);
     const nextRows = projection.players;
     const next: Doc<"leagueMatches"> = {
       ...economyPatch(match, args),
@@ -2622,39 +2054,19 @@ export const correctMatch = mutation({
       .query("leagueMatches")
       .withIndex("by_leagueId", (q) => q.eq("leagueId", league._id))
       .take(MAX_MATCHES);
-    const projections = new Map(
-      fixtures.map((fixture) => [fixture._id, fixture]),
-    );
+    const projections = new Map(fixtures.map((fixture) => [fixture._id, fixture]));
     projections.set(match._id, next);
     if (affectsCareers) {
       if (home.activeMatchId || away.activeMatchId)
-        throw new ConvexError(
-          "DEPENDENT_CAREER_CHANGES_REQUIRE_RECONCILIATION",
-        );
+        throw new ConvexError("DEPENDENT_CAREER_CHANGES_REQUIRE_RECONCILIATION");
       for (let index = 0; index < rows.length; index++)
         if (JSON.stringify(nextRows[index]) !== JSON.stringify(rows[index]))
-          await replayPlayerCorrection(
-            ctx,
-            rows[index],
-            nextRows[index],
-            projections,
-          );
+          await replayPlayerCorrection(ctx, rows[index], nextRows[index], projections);
       const fans = new Map<Id<"leagueTeams">, number>([
-        [
-          home._id,
-          match.homeDedicatedFans ?? match.homeSnapshot!.staff.dedicatedFans,
-        ],
-        [
-          away._id,
-          match.awayDedicatedFans ?? match.awaySnapshot!.staff.dedicatedFans,
-        ],
+        [home._id, match.homeDedicatedFans ?? match.homeSnapshot!.staff.dedicatedFans],
+        [away._id, match.awayDedicatedFans ?? match.awaySnapshot!.staff.dedicatedFans],
       ]);
-      const entries = new Map(
-        (await leagueEntries(ctx, league._id)).map((entry) => [
-          entry._id,
-          entry,
-        ]),
-      );
+      const entries = new Map((await leagueEntries(ctx, league._id)).map((entry) => [entry._id, entry]));
       const firstAffected = new Map<Id<"leagueTeams">, Doc<"leagueMatches">>();
       const later = fixtures
         .filter(
@@ -2664,30 +2076,18 @@ export const correctMatch = mutation({
             fixture.awayEntryId &&
             matchOrder(fixture) >= matchOrder(match),
         )
-        .sort(
-          (a, b) =>
-            matchOrder(a) - matchOrder(b) || a._creationTime - b._creationTime,
-        );
+        .sort((a, b) => matchOrder(a) - matchOrder(b) || a._creationTime - b._creationTime);
       for (const original of later) {
-        if (!fans.has(original.homeEntryId) && !fans.has(original.awayEntryId!))
-          continue;
+        if (!fans.has(original.homeEntryId) && !fans.has(original.awayEntryId!)) continue;
         const fixture = projections.get(original._id)!;
         const h = entries.get(fixture.homeEntryId)!,
           a = entries.get(fixture.awayEntryId!)!;
         if (h.activeMatchId || a.activeMatchId)
-          throw new ConvexError(
-            "DEPENDENT_CAREER_CHANGES_REQUIRE_RECONCILIATION",
-          );
+          throw new ConvexError("DEPENDENT_CAREER_CHANGES_REQUIRE_RECONCILIATION");
         const replayed = {
           ...fixture,
-          homeDedicatedFans:
-            fans.get(h._id) ??
-            fixture.homeDedicatedFans ??
-            fixture.homeSnapshot!.staff.dedicatedFans,
-          awayDedicatedFans:
-            fans.get(a._id) ??
-            fixture.awayDedicatedFans ??
-            fixture.awaySnapshot!.staff.dedicatedFans,
+          homeDedicatedFans: fans.get(h._id) ?? fixture.homeDedicatedFans ?? fixture.homeSnapshot!.staff.dedicatedFans,
+          awayDedicatedFans: fans.get(a._id) ?? fixture.awayDedicatedFans ?? fixture.awaySnapshot!.staff.dedicatedFans,
         };
         const economy = matchEconomy(replayed, h, a);
         replayed.homeWinnings = economy.home.winnings;
@@ -2728,38 +2128,13 @@ export const correctMatch = mutation({
         const treasury = await replayTreasury(ctx, entry, first, projections);
         const team = rosterFromPlayers(entry, await entryPlayers(ctx, entryId));
         team.staff = { ...team.staff, dedicatedFans: fans.get(entryId)! };
-        const captain =
-          first.homeEntryId === entryId
-            ? first.homeSnapshot?.captainId
-            : first.awaySnapshot?.captainId;
-        if (
-          !team.captainId &&
-          captain &&
-          team.players.some((player) => player.id === captain)
-        )
+        const captain = first.homeEntryId === entryId ? first.homeSnapshot?.captainId : first.awaySnapshot?.captainId;
+        if (!team.captainId && captain && team.players.some((player) => player.id === captain))
           team.captainId = captain;
-        if (
-          team.captainId &&
-          !team.players.some((player) => player.id === team.captainId)
-        )
-          delete team.captainId;
-        await ctx.db.patch("leagueTeams", entryId, {
-          treasury,
-          team,
-          revision: entry.revision + 1,
-        });
+        if (team.captainId && !team.players.some((player) => player.id === team.captainId)) delete team.captainId;
+        await ctx.db.patch("leagueTeams", entryId, { treasury, team, revision: entry.revision + 1 });
       }
-      for (const [
-        entry,
-        oldOwn,
-        oldOpp,
-        newOwn,
-        newOpp,
-        oldScore,
-        oldAgainst,
-        newScore,
-        newAgainst,
-      ] of [
+      for (const [entry, oldOwn, oldOpp, newOwn, newOpp, oldScore, oldAgainst, newScore, newAgainst] of [
         [
           home,
           sumRows(rows.filter((row) => row.entryId === home._id)),
@@ -2792,14 +2167,9 @@ export const correctMatch = mutation({
           .filter(
             (fixture) =>
               fixture.status === "completed" &&
-              (fixture.homeEntryId === entry._id ||
-                fixture.awayEntryId === entry._id),
+              (fixture.homeEntryId === entry._id || fixture.awayEntryId === entry._id),
           )
-          .sort(
-            (a, b) =>
-              matchOrder(a) - matchOrder(b) ||
-              a._creationTime - b._creationTime,
-          )
+          .sort((a, b) => matchOrder(a) - matchOrder(b) || a._creationTime - b._creationTime)
           .slice(-5)
           .map((fixture) => fixtureResult(fixture, entry._id));
         await ctx.db.patch("leagueTeams", entry._id, { stats });
@@ -2819,14 +2189,10 @@ export const correctMatch = mutation({
     void _creationTime;
     await ctx.db.patch("leagueMatches", _id, document);
     if (args.playEvents !== undefined) {
-      const desired = new Map(
-        args.playEvents.map((event) => [event.id, event]),
-      );
+      const desired = new Map(args.playEvents.map((event) => [event.id, event]));
       if (
         oldLedger.length +
-          args.playEvents.filter(
-            (event) => !oldLedger.some((row) => row.event.id === event.id),
-          ).length >
+          args.playEvents.filter((event) => !oldLedger.some((row) => row.event.id === event.id)).length >
         512
       )
         throw new ConvexError("EVENT_LIMIT");
@@ -2851,17 +2217,7 @@ export const correctMatch = mutation({
           actorName: user.name ?? "Commissioner",
         });
     }
-    await recordReportEvent(
-      ctx,
-      user,
-      "corrected",
-      next,
-      nextRows,
-      reason,
-      match,
-      rows,
-      previousPlayEvents,
-    );
+    await recordReportEvent(ctx, user, "corrected", next, nextRows, reason, match, rows, previousPlayEvents);
     await auditEvent(
       ctx,
       league._id,
@@ -2871,12 +2227,7 @@ export const correctMatch = mutation({
         previous: recordedReport(match, rows),
         next: recordedReport(next, nextRows),
         replayedMatchIds: [...projections.values()]
-          .filter(
-            (fixture) =>
-              fixture.revision !==
-              fixtures.find((original) => original._id === fixture._id)
-                ?.revision,
-          )
+          .filter((fixture) => fixture.revision !== fixtures.find((original) => original._id === fixture._id)?.revision)
           .map((fixture) => fixture._id),
       },
       { matchId: match._id, reason },
@@ -2886,12 +2237,7 @@ export const correctMatch = mutation({
 });
 
 export const correctCareer = mutation({
-  args: {
-    entryId: v.id("leagueTeams"),
-    expectedRevision: v.number(),
-    treasury: v.number(),
-    reason: v.string(),
-  },
+  args: { entryId: v.id("leagueTeams"), expectedRevision: v.number(), treasury: v.number(), reason: v.string() },
   returns: v.null(),
   handler: async (ctx, { entryId, expectedRevision, treasury, reason }) => {
     const entry = await entryDoc(ctx, entryId),
@@ -2902,10 +2248,7 @@ export const correctCareer = mutation({
     integer(treasury, 0, 100_000_000);
     if (treasury % 5000) throw new ConvexError("INVALID_TREASURY");
     const clean = text(reason, 1000, true);
-    await ctx.db.patch("leagueTeams", entryId, {
-      treasury,
-      revision: entry.revision + 1,
-    });
+    await ctx.db.patch("leagueTeams", entryId, { treasury, revision: entry.revision + 1 });
     await auditEvent(
       ctx,
       league._id,
@@ -2919,11 +2262,7 @@ export const correctCareer = mutation({
 });
 
 export const undoLatestAdvancement = mutation({
-  args: {
-    playerId: v.id("leaguePlayers"),
-    expectedRevision: v.number(),
-    reason: v.string(),
-  },
+  args: { playerId: v.id("leaguePlayers"), expectedRevision: v.number(), reason: v.string() },
   returns: v.null(),
   handler: async (ctx, { playerId, expectedRevision, reason }) => {
     const player = await ctx.db.get("leaguePlayers", playerId);
@@ -2942,9 +2281,7 @@ export const undoLatestAdvancement = mutation({
       throw new ConvexError("ADVANCEMENT_CORRECTION_UNAVAILABLE");
     const row = await ctx.db
       .query("leagueMatchPlayers")
-      .withIndex("by_matchId_and_playerId", (q) =>
-        q.eq("matchId", entry.latestMatchId!).eq("playerId", playerId),
-      )
+      .withIndex("by_matchId_and_playerId", (q) => q.eq("matchId", entry.latestMatchId!).eq("playerId", playerId))
       .unique();
     if (!row || player.advancements.length <= row.snapshot.advancements.length)
       throw new ConvexError("ADVANCEMENT_ALREADY_CAPTURED_IN_MATCH");
@@ -2952,8 +2289,7 @@ export const undoLatestAdvancement = mutation({
       skills = player.skills.filter((skill) => skill !== advancement.skillId),
       sppSpent = player.sppSpent - advancement.sppCost,
       valueIncrease = player.valueIncrease - advancement.valueIncrease;
-    if (sppSpent < 0 || valueIncrease < 0)
-      throw new ConvexError("INVALID_ADVANCEMENT_LEDGER");
+    if (sppSpent < 0 || valueIncrease < 0) throw new ConvexError("INVALID_ADVANCEMENT_LEDGER");
     await ctx.db.patch("leaguePlayers", playerId, {
       skills,
       sppSpent,
@@ -2963,9 +2299,7 @@ export const undoLatestAdvancement = mutation({
     await ctx.db.patch("leagueTeams", entry._id, {
       team: {
         ...entry.team,
-        players: entry.team.players.map((p) =>
-          p.id === player.sourcePlayerId ? { ...p, skills } : p,
-        ),
+        players: entry.team.players.map((p) => (p.id === player.sourcePlayerId ? { ...p, skills } : p)),
       },
       revision: entry.revision + 1,
     });
@@ -2994,12 +2328,8 @@ const administrativeOutcomeValidator = v.union(
   v.literal("draw"),
   v.literal("void"),
 );
-function administrativeStats(
-  outcome: "home-win" | "away-win" | "draw" | "void",
-  isHome: boolean,
-) {
-  const result =
-    outcome === "draw" ? "D" : (outcome === "home-win") === isHome ? "W" : "L";
+function administrativeStats(outcome: "home-win" | "away-win" | "draw" | "void", isHome: boolean) {
+  const result = outcome === "draw" ? "D" : (outcome === "home-win") === isHome ? "W" : "L";
   const stats = zeroTeamStats();
   if (outcome === "void") return stats;
   return {
@@ -3024,8 +2354,7 @@ export const adjudicateMatch = mutation({
     const match = await matchDoc(ctx, matchId),
       league = await leagueDoc(ctx, match.leagueId),
       user = await requireUser(ctx);
-    if (user.role !== "admin" && user._id !== league.ownerId)
-      throw new ConvexError("FORBIDDEN");
+    if (user.role !== "admin" && user._id !== league.ownerId) throw new ConvexError("FORBIDDEN");
     revision(match.revision, expectedRevision);
     const clean = text(reason, 1000, true);
     if (
@@ -3051,28 +2380,13 @@ export const adjudicateMatch = mutation({
       .take(MAX_MATCHES);
     for (const entry of [home, away]) {
       const old = match.administrativeResult
-        ? administrativeStats(
-            match.administrativeResult,
-            entry._id === home._id,
-          )
+        ? administrativeStats(match.administrativeResult, entry._id === home._id)
         : zeroTeamStats();
-      const stats = updateTotals(
-        entry.stats,
-        administrativeStats(outcome, entry._id === home._id),
-        old,
-      );
+      const stats = updateTotals(entry.stats, administrativeStats(outcome, entry._id === home._id), old);
       stats.latest = allMatches
         .map((m) => (m._id === matchId ? nextMatch : m))
-        .filter(
-          (m) =>
-            m.status === "completed" &&
-            (m.homeEntryId === entry._id || m.awayEntryId === entry._id),
-        )
-        .sort(
-          (a, b) =>
-            (a.completedAt ?? 0) - (b.completedAt ?? 0) ||
-            a._creationTime - b._creationTime,
-        )
+        .filter((m) => m.status === "completed" && (m.homeEntryId === entry._id || m.awayEntryId === entry._id))
+        .sort((a, b) => (a.completedAt ?? 0) - (b.completedAt ?? 0) || a._creationTime - b._creationTime)
         .slice(-5)
         .map((m) => fixtureResult(m, entry._id));
       await ctx.db.patch("leagueTeams", entry._id, { stats });
@@ -3091,11 +2405,7 @@ export const adjudicateMatch = mutation({
       league._id,
       user,
       "unplayed-match-adjudicated",
-      {
-        previousOutcome: match.administrativeResult,
-        outcome,
-        playerProgressionApplied: false,
-      },
+      { previousOutcome: match.administrativeResult, outcome, playerProgressionApplied: false },
       { matchId, reason: clean },
     );
     await finishRound(ctx, nextMatch);
@@ -3110,8 +2420,7 @@ export const withdrawEntry = mutation({
       league = await leagueDoc(ctx, entry.leagueId),
       user = await commissioner(ctx, league),
       clean = text(reason, 1000, true);
-    if (entry.activeMatchId)
-      throw new ConvexError("ACTIVE_REPORT_MUST_BE_RESOLVED_FIRST");
+    if (entry.activeMatchId) throw new ConvexError("ACTIVE_REPORT_MUST_BE_RESOLVED_FIRST");
     if (entry.withdrawn) return null;
     await ctx.db.patch("leagueTeams", entryId, { withdrawn: true });
     const matches = await ctx.db
@@ -3120,21 +2429,14 @@ export const withdrawEntry = mutation({
       .take(MAX_MATCHES);
     const affected: Id<"leagueMatches">[] = [];
     for (const match of matches)
-      if (
-        match.status === "scheduled" &&
-        (match.homeEntryId === entryId || match.awayEntryId === entryId)
-      ) {
+      if (match.status === "scheduled" && (match.homeEntryId === entryId || match.awayEntryId === entryId)) {
         await ctx.db.patch("leagueMatches", match._id, {
           status: "void",
           administrativeResult: "void",
           revision: match.revision + 1,
         });
         affected.push(match._id);
-        await finishRound(ctx, {
-          ...match,
-          status: "void",
-          administrativeResult: "void",
-        });
+        await finishRound(ctx, { ...match, status: "void", administrativeResult: "void" });
       }
     await auditEvent(
       ctx,

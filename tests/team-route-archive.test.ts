@@ -13,38 +13,28 @@ beforeEach(() => {
 it("returns a 404 rewrite for archived URLs, including prefetch requests", async () => {
   query.mockResolvedValue(true);
   const response = await proxy(
-    new NextRequest(`https://sideline.example/teams/${uuid}`, {
-      headers: { "next-router-prefetch": "1" },
-    }),
+    new NextRequest(`https://sideline.example/teams/${uuid}`, { headers: { "next-router-prefetch": "1" } }),
   );
   expect(response.status).toBe(404);
-  expect(response.headers.get("x-middleware-rewrite")).toBe(
-    "https://sideline.example/404",
-  );
+  expect(response.headers.get("x-middleware-rewrite")).toBe("https://sideline.example/404");
   expect(response.headers.get("cache-control")).toBe("no-store");
 });
 
 it("allows active and device-only UUIDs to reach their editor", async () => {
   query.mockResolvedValue(false);
-  const response = await proxy(
-    new NextRequest(`https://sideline.example/teams/${uuid}`),
-  );
+  const response = await proxy(new NextRequest(`https://sideline.example/teams/${uuid}`));
   expect(response.headers.get("x-middleware-next")).toBe("1");
 });
 
 it("does not query Convex for an invalid UUID", async () => {
-  const response = await proxy(
-    new NextRequest("https://sideline.example/teams/invalid"),
-  );
+  const response = await proxy(new NextRequest("https://sideline.example/teams/invalid"));
   expect(response.headers.get("x-middleware-next")).toBe("1");
   expect(query).not.toHaveBeenCalled();
 });
 
 it("propagates backend outages rather than classifying the team as missing", async () => {
   query.mockRejectedValue(new Error("Backend unavailable"));
-  await expect(
-    proxy(new NextRequest(`https://sideline.example/teams/${uuid}`)),
-  ).rejects.toThrow("Backend unavailable");
+  await expect(proxy(new NextRequest(`https://sideline.example/teams/${uuid}`))).rejects.toThrow("Backend unavailable");
 });
 
 it("serves complete roster HTML at the shared URL for text-only readers", async () => {
@@ -59,13 +49,9 @@ it("serves complete roster HTML at the shared URL for text-only readers", async 
     "node",
   ]) {
     const response = await proxy(
-      new NextRequest(`https://sideline.example/teams/${uuid}`, {
-        headers: { "user-agent": agent },
-      }),
+      new NextRequest(`https://sideline.example/teams/${uuid}`, { headers: { "user-agent": agent } }),
     );
-    expect(response.headers.get("x-middleware-rewrite")).toBe(
-      `https://sideline.example/teams/${uuid}/roster`,
-    );
+    expect(response.headers.get("x-middleware-rewrite")).toBe(`https://sideline.example/teams/${uuid}/roster`);
     expect(response.headers.get("cache-control")).toBe("no-store");
     expect(response.headers.get("vary")).toBe("Accept, User-Agent");
   }
@@ -75,15 +61,10 @@ it("serves complete roster HTML at the shared URL for text-only readers", async 
 it("negotiates JSON-LD independently of user-agent identification and advertises alternate representations", async () => {
   const response = await proxy(
     new NextRequest(`https://sideline.example/teams/${uuid}`, {
-      headers: {
-        "user-agent": "UnknownAgent/1.0",
-        accept: "application/ld+json",
-      },
+      headers: { "user-agent": "UnknownAgent/1.0", accept: "application/ld+json" },
     }),
   );
-  expect(response.headers.get("x-middleware-rewrite")).toBe(
-    `https://sideline.example/teams/${uuid}/roster`,
-  );
+  expect(response.headers.get("x-middleware-rewrite")).toBe(`https://sideline.example/teams/${uuid}/roster`);
   expect(query).not.toHaveBeenCalled();
   query.mockResolvedValue(false);
   const browser = await proxy(
@@ -94,28 +75,22 @@ it("negotiates JSON-LD independently of user-agent identification and advertises
   expect(browser.headers.get("x-middleware-next")).toBe("1");
   expect(browser.headers.get("vary")).toBe("Accept, User-Agent");
   expect(browser.headers.get("cache-control")).toBe("no-store");
-  expect(browser.headers.get("link")).toContain(
-    `https://sideline.example/teams/${uuid}/roster`,
-  );
+  expect(browser.headers.get("link")).toContain(`https://sideline.example/teams/${uuid}/roster`);
   expect(browser.headers.get("link")).toContain('type="application/ld+json"');
 });
 
-it.each([
-  "Twitterbot/1.0",
-  "Slackbot-LinkExpanding 1.0",
-  "facebookexternalhit/1.1",
-  "Discordbot/2.0",
-])("preserves the page's social sharing metadata for %s", async (agent) => {
-  query.mockResolvedValue(false);
-  const response = await proxy(
-    new NextRequest(`https://sideline.example/teams/${uuid}`, {
-      headers: { "user-agent": agent },
-    }),
-  );
-  expect(response.headers.get("x-middleware-next")).toBe("1");
-  expect(response.headers.get("x-middleware-rewrite")).toBeNull();
-  expect(response.headers.get("link")).toContain("/roster");
-});
+it.each(["Twitterbot/1.0", "Slackbot-LinkExpanding 1.0", "facebookexternalhit/1.1", "Discordbot/2.0"])(
+  "preserves the page's social sharing metadata for %s",
+  async (agent) => {
+    query.mockResolvedValue(false);
+    const response = await proxy(
+      new NextRequest(`https://sideline.example/teams/${uuid}`, { headers: { "user-agent": agent } }),
+    );
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+    expect(response.headers.get("x-middleware-rewrite")).toBeNull();
+    expect(response.headers.get("link")).toContain("/roster");
+  },
+);
 
 it("keeps browsers and React navigation on the interactive page", async () => {
   query.mockResolvedValue(false);
@@ -125,9 +100,7 @@ it("keeps browsers and React navigation on the interactive page", async () => {
     { "user-agent": "ChatGPT-User/1.0", "next-router-prefetch": "1" },
   ];
   for (const headers of requests) {
-    const response = await proxy(
-      new NextRequest(`https://sideline.example/teams/${uuid}`, { headers }),
-    );
+    const response = await proxy(new NextRequest(`https://sideline.example/teams/${uuid}`, { headers }));
     expect(response.headers.get("x-middleware-next")).toBe("1");
   }
 });

@@ -5,10 +5,7 @@ const lockName = (uuid: string) => `bbsideline:editor:${uuid}`;
 
 // Wait for another tab's background upload before changing draft metadata.
 // A shared editor lock then prevents it from deleting that metadata mid-change.
-export async function withDraftPreferenceLock(
-  uuid: string,
-  update: () => Promise<void>,
-) {
+export async function withDraftPreferenceLock(uuid: string, update: () => Promise<void>) {
   if (!navigator.locks) return update();
   return navigator.locks.request(lockName(uuid), { mode: "shared" }, update);
 }
@@ -18,9 +15,7 @@ export function holdDraftEditor(uuid: string) {
   const held = new Promise<void>((resolve) => {
     release = resolve;
   });
-  void navigator.locks
-    ?.request(lockName(uuid), { mode: "shared" }, () => held)
-    .catch(() => {});
+  void navigator.locks?.request(lockName(uuid), { mode: "shared" }, () => held).catch(() => {});
   return () => {
     release();
     try {
@@ -31,21 +26,14 @@ export function holdDraftEditor(uuid: string) {
   };
 }
 
-export async function uploadWithoutEditor(
-  uuid: string,
-  upload: () => Promise<void>,
-) {
+export async function uploadWithoutEditor(uuid: string, upload: () => Promise<void>) {
   if (!navigator.locks) {
     await upload();
     return true;
   }
-  return navigator.locks.request(
-    lockName(uuid),
-    { ifAvailable: true },
-    async (lock) => {
-      if (!lock) return false;
-      await upload();
-      return true;
-    },
-  );
+  return navigator.locks.request(lockName(uuid), { ifAvailable: true }, async (lock) => {
+    if (!lock) return false;
+    await upload();
+    return true;
+  });
 }

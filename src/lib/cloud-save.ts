@@ -2,38 +2,23 @@ import type { Team } from "@/domain/types";
 import { acknowledgeDraft, readDraftFavorite } from "./drafts";
 
 type Result = { revision: number };
-type Save = (args: {
-  team: Team;
-  expectedRevision: number;
-  favorite?: boolean;
-}) => Promise<Result>;
-const pending = new Map<
-  string,
-  { snapshot: string; promise: Promise<Result> }
->();
+type Save = (args: { team: Team; expectedRevision: number; favorite?: boolean }) => Promise<Result>;
+const pending = new Map<string, { snapshot: string; promise: Promise<Result> }>();
 
 export async function waitForTeamSave(uuid: string) {
   await pending.get(uuid)?.promise.catch(() => null);
 }
 
 // The library uploader and editor share a queue, including across navigation.
-export function saveCloudDraft(
-  team: Team,
-  expectedRevision: number,
-  save: Save,
-): Promise<Result> {
+export function saveCloudDraft(team: Team, expectedRevision: number, save: Save): Promise<Result> {
   const snapshot = JSON.stringify(team);
   const previous = pending.get(team.uuid);
   if (previous?.snapshot === snapshot) return previous.promise;
   const promise = (async () => {
-    const acknowledged = previous
-      ? await previous.promise.catch(() => null)
-      : null;
+    const acknowledged = previous ? await previous.promise.catch(() => null) : null;
     const result = await save({
       team,
-      ...(readDraftFavorite(team.uuid) === undefined
-        ? {}
-        : { favorite: readDraftFavorite(team.uuid) }),
+      ...(readDraftFavorite(team.uuid) === undefined ? {} : { favorite: readDraftFavorite(team.uuid) }),
       expectedRevision: Math.max(expectedRevision, acknowledged?.revision ?? 0),
     });
     // Cleanup is best effort. A quota/privacy error after the server commits

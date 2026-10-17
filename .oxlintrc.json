@@ -1,0 +1,29 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "react", "nextjs", "jsx-a11y"],
+  "categories": { "correctness": "error" },
+  "env": { "browser": true, "node": true },
+  "ignorePatterns": [
+    "convex/_generated/**",
+    ".agents/**",
+    "src/components/ui/**",
+    "src/components/magic-ui/**",
+    "src/hooks/use-mobile.ts"
+  ],
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/ban-ts-comment": "error",
+    "eqeqeq": ["error", "smart"],
+    "no-var": "error",
+    "prefer-const": "error",
+    "jsx-a11y/prefer-tag-over-role": "off",
+    "jsx-a11y/control-has-associated-label": "off",
+    "jsx-a11y/label-has-associated-control": [
+      "error",
+      { "controlComponents": ["Input", "Checkbox", "Textarea", "EditorSelect", "LeagueSelect"], "depth": 3 }
+    ],
+    "jsx-a11y/no-noninteractive-tabindex": "off"
+  },
+  "settings": { "jsx-a11y": { "components": { "Image": "img", "Link": "a" } } }
+}

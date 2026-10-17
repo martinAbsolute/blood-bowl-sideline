@@ -11,15 +11,13 @@ vi.mock("next-intl", async (importOriginal) => {
   const { formats, timeZone } = await import("../src/i18n/config");
   return {
     ...actual,
-    useFormatter: () =>
-      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useFormatter: () => actual.createFormatter({ locale: "en", formats, timeZone }),
     useTranslations: () => (key: string, values?: Record<string, number>) =>
       key + (values ? JSON.stringify(values) : ""),
   };
 });
 vi.mock("../src/components/skill-box", () => ({
-  SkillBox: ({ id }: { id: string }) =>
-    createElement("span", null, skillName(id)),
+  SkillBox: ({ id }: { id: string }) => createElement("span", null, skillName(id)),
 }));
 
 let root: Root;
@@ -47,15 +45,12 @@ function team(rosterId = "human") {
     skills: [] as string[],
   }));
   value.veteranId = value.players[0].id;
-  if (getRoster(rosterId)!.specialRules.includes("Team Captain"))
-    value.captainId = value.players[0].id;
+  if (getRoster(rosterId)!.specialRules.includes("Team Captain")) value.captainId = value.players[0].id;
   return value;
 }
 async function render(value: Team, selected: string[] = [], index = 1) {
   const player = value.players[index];
-  const position = getRoster(value.rosterId)!.players.find(
-    (position) => position.id === player.positionId,
-  )!;
+  const position = getRoster(value.rosterId)!.players.find((position) => position.id === player.positionId)!;
   await act(async () =>
     root.render(
       createElement(PlayerSkillPicker, {
@@ -70,10 +65,7 @@ async function render(value: Team, selected: string[] = [], index = 1) {
     ),
   );
 }
-const rows = () =>
-  [...container.querySelectorAll("[data-skill-row]")].map((row) =>
-    row.getAttribute("data-skill-row"),
-  );
+const rows = () => [...container.querySelectorAll("[data-skill-row]")].map((row) => row.getAttribute("data-skill-row"));
 
 it("explains the tier-1 empty state without a locked skill wall", async () => {
   await render(team("amazon"));
@@ -91,18 +83,14 @@ it("directs tier-2 captains to another player and preserves removable illegal ad
   expect(container.textContent).not.toContain("playerModal.sevensSlots");
   expect(container.textContent).not.toContain("playerModal.sevensSecondary");
   expect(rows()).toEqual(["block"]);
-  const remove = container.querySelector<HTMLButtonElement>(
-    '[aria-label="removeSkill · Block"]',
-  )!;
+  const remove = container.querySelector<HTMLButtonElement>('[aria-label="removeSkill · Block"]')!;
   await act(async () => remove.click());
   expect(onChange).toHaveBeenCalledWith([]);
 });
 
 it("shows primary options without SP prices and hides banned Leader and forbidden secondary skills", async () => {
   await render(team());
-  expect(container.textContent).toContain(
-    'playerModal.sevensSlots{"remaining":1,"total":1}',
-  );
+  expect(container.textContent).toContain('playerModal.sevensSlots{"remaining":1,"total":1}');
   expect(container.textContent).not.toContain("playerModal.sevensSecondary");
   expect(rows()).toContain("block");
   expect(rows()).not.toContain("leader");
@@ -128,9 +116,7 @@ it("allows one secondary or its primary replacement and hides second secondary c
   expect(rows()).toContain("block");
   value.players[2].skills = ["dodge"];
   await render(value);
-  expect(container.textContent).toContain(
-    'playerModal.sevensSecondary{"remaining":0,"total":1}',
-  );
+  expect(container.textContent).toContain('playerModal.sevensSecondary{"remaining":0,"total":1}');
   expect(rows()).not.toContain("dodge");
   expect(rows()).toContain("block");
 });
@@ -139,23 +125,21 @@ it("keeps banned, inaccessible and unknown imported skills removable", async () 
   await render(team(), ["leader", "unknown-imported-skill", "pro"]);
   expect(rows()).toContain("leader");
   expect(rows()).toContain("unknown-imported-skill");
-  const remove = container.querySelector<HTMLButtonElement>(
-    '[aria-label="removeSkill · Leader"]',
-  )!;
+  const remove = container.querySelector<HTMLButtonElement>('[aria-label="removeSkill · Leader"]')!;
   await act(async () => remove.click());
   expect(onChange).toHaveBeenCalledWith(["pro", "unknown-imported-skill"]);
 });
 
 it("retains the reset action when a filter contains no permitted skills", async () => {
   await render(team());
-  const strength = [
-    ...container.querySelectorAll<HTMLButtonElement>("button"),
-  ].find((button) => button.textContent === "skillCategories.strength")!;
+  const strength = [...container.querySelectorAll<HTMLButtonElement>("button")].find(
+    (button) => button.textContent === "skillCategories.strength",
+  )!;
   await act(async () => strength.click());
   expect(rows()).toEqual([]);
-  const reset = [
-    ...container.querySelectorAll<HTMLButtonElement>("button"),
-  ].find((button) => button.textContent === "playerModal.showAllSkills")!;
+  const reset = [...container.querySelectorAll<HTMLButtonElement>("button")].find(
+    (button) => button.textContent === "playerModal.showAllSkills",
+  )!;
   expect(reset).toBeTruthy();
   await act(async () => reset.click());
   expect(rows()).toContain("block");

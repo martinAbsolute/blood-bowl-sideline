@@ -5,11 +5,7 @@ import { TeamPage } from "@/components/team-page";
 import { pageMetadata } from "@/lib/site-metadata";
 import { publicTeamContent } from "@/lib/public-team-content";
 import { serializeTeamStructuredData } from "@/lib/team-structured-data";
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   if (!z.uuid().safeParse(slug).success) notFound();
   const data = await publicTeamContent(slug);
@@ -24,19 +20,12 @@ export async function generateMetadata({
     ...metadata,
     alternates: {
       ...metadata.alternates,
-      types: {
-        "text/html": `/teams/${slug}/roster`,
-        "application/ld+json": `/teams/${slug}/roster`,
-      },
+      types: { "text/html": `/teams/${slug}/roster`, "application/ld+json": `/teams/${slug}/roster` },
     },
     robots: { index: false, follow: false },
   };
 }
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   if (!z.uuid().safeParse(slug).success) notFound();
   const data = await publicTeamContent(slug);
@@ -46,9 +35,7 @@ export default async function Page({
         <script
           id="team-structured-data"
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: serializeTeamStructuredData(data),
-          }}
+          dangerouslySetInnerHTML={{ __html: serializeTeamStructuredData(data) }}
         />
       )}
       <TeamPage uuid={slug} initial={data} />

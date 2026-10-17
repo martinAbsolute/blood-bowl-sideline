@@ -13,9 +13,7 @@ export function rosterChoices(rulesetId: RulesetId) {
 }
 
 export function sharedRosterBudget(rulesetId: RulesetId) {
-  const budgets = new Set(
-    rosterChoices(rulesetId).map(({ budget }) => budget.teamBudget),
-  );
+  const budgets = new Set(rosterChoices(rulesetId).map(({ budget }) => budget.teamBudget));
   return budgets.size === 1 ? [...budgets][0] : undefined;
 }
 
@@ -23,10 +21,7 @@ export function rosterRuleset(value: string | string[] | undefined): RulesetId {
   return rulesets.find((rules) => rules.id === value)?.id ?? "bb2025-default";
 }
 
-export function rosterReferenceHref(
-  rosterId: string | undefined,
-  rulesetId: RulesetId,
-) {
+export function rosterReferenceHref(rosterId: string | undefined, rulesetId: RulesetId) {
   const path = rosterId ? `/rosters/${rosterId}` : "/rosters";
   return rulesetId === "bb2025-default" ? path : `${path}?ruleset=${rulesetId}`;
 }

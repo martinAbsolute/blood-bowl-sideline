@@ -2,16 +2,11 @@ import type { Team } from "./types";
 
 /** Resolve legacy row numbers before sorting or changing the roster. */
 export function numberedPlayers(players: Team["players"]) {
-  const used = new Set(
-    players.flatMap((player) =>
-      player.number === undefined ? [] : [Number(player.number)],
-    ),
-  );
+  const used = new Set(players.flatMap((player) => (player.number === undefined ? [] : [Number(player.number)])));
   let next = 1;
   return players
     .map((player) => {
-      if (player.number !== undefined)
-        return { ...player, number: player.number };
+      if (player.number !== undefined) return { ...player, number: player.number };
       while (used.has(next)) next++;
       const number = next++;
       used.add(number);
@@ -21,9 +16,7 @@ export function numberedPlayers(players: Team["players"]) {
 }
 
 export function nextPlayerNumber(players: Team["players"], offset = 0) {
-  const used = new Set(
-    numberedPlayers(players).map((player) => Number(player.number)),
-  );
+  const used = new Set(numberedPlayers(players).map((player) => Number(player.number)));
   let next = 1;
   while (true) {
     while (used.has(next)) next++;
@@ -33,16 +26,9 @@ export function nextPlayerNumber(players: Team["players"], offset = 0) {
   return String(next).padStart(2, "0");
 }
 
-export function isPlayerNumberAvailable(
-  players: Team["players"],
-  playerId: string,
-  number: string,
-) {
+export function isPlayerNumberAvailable(players: Team["players"], playerId: string, number: string) {
   return (
     /^\d{1,2}$/.test(number) &&
-    !numberedPlayers(players).some(
-      (player) =>
-        player.id !== playerId && Number(player.number) === Number(number),
-    )
+    !numberedPlayers(players).some((player) => player.id !== playerId && Number(player.number) === Number(number))
   );
 }

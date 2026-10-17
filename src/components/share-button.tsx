@@ -11,10 +11,10 @@ export function ShareButton({
   path,
   onShared,
   ...props
-}: Omit<
-  ComponentProps<typeof ActionButton>,
-  "onClick" | "icon" | "successLabel" | "errorLabel" | "children"
-> & { path: string; onShared?: () => void }) {
+}: Omit<ComponentProps<typeof ActionButton>, "onClick" | "icon" | "successLabel" | "errorLabel" | "children"> & {
+  path: string;
+  onShared?: () => void;
+}) {
   const t = useTranslations();
   return (
     <ActionButton
@@ -25,12 +25,7 @@ export function ShareButton({
       onClick={async () => {
         const result = await shareTeamLink(`${window.location.origin}${path}`);
         if (result === "cancelled") return false;
-        toast.add({
-          type: "success",
-          title: t(
-            result === "copied" ? "leagueUx.linkCopied" : "shareSucceeded",
-          ),
-        });
+        toast.add({ type: "success", title: t(result === "copied" ? "leagueUx.linkCopied" : "shareSucceeded") });
         onShared?.();
       }}
     >

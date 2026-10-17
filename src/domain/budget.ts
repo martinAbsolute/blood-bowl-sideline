@@ -16,13 +16,7 @@ export function budgetSummary(team: Team, startingTreasury?: number) {
   const roster = getRoster(team.rosterId)!;
   const shared = rules.id === "eurobowl-2026";
   const pools: BudgetPool[] = [
-    {
-      id: "team",
-      used: totals.teamGold,
-      limit: totals.budget.teamBudget,
-      unit: "GP",
-      shared,
-    },
+    { id: "team", used: totals.teamGold, limit: totals.budget.teamBudget, unit: "GP", shared },
   ];
   if (rules.id !== "bb2025-default") {
     pools.push({
@@ -41,13 +35,7 @@ export function budgetSummary(team: Team, startingTreasury?: number) {
     });
   }
   if (shared) {
-    pools.push({
-      id: "funds",
-      used: totals.fundsUsed,
-      limit: totals.budget.flowingFunds,
-      unit: "GP",
-      shared: false,
-    });
+    pools.push({ id: "funds", used: totals.fundsUsed, limit: totals.budget.flowingFunds, unit: "GP", shared: false });
   }
   const counts = { primary: 0, secondary: 0 };
   for (const player of team.players) {

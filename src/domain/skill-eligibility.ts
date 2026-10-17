@@ -1,10 +1,7 @@
 // BB2025 Skills & Traits prerequisites and prohibited combinations.
 // Kept separate from category access, preset budgets and duplicate checks so
 // league advancement and tournament drafts use the same restrictions.
-export function skillCompatible(
-  skillId: string,
-  existingSkills: readonly string[],
-): boolean {
+export function skillCompatible(skillId: string, existingSkills: readonly string[]): boolean {
   // Parameters belong to starting traits, never to purchased skill IDs.
   // Reject aliases before checking bans, prerequisites and duplicate limits.
   if (skillId.includes(":")) return false;
@@ -21,8 +18,7 @@ export function skillCompatible(
     bullseye: "throw_team_mate",
     strong_arm: "throw_team_mate",
   };
-  if (requiredTrait[skillId] && !known.has(requiredTrait[skillId]))
-    return false;
+  if (requiredTrait[skillId] && !known.has(requiredTrait[skillId])) return false;
   if (skillId === "leap" && known.has("pogo")) return false;
   if (
     skillId === "violent_innovator" &&

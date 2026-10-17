@@ -1,22 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createFormatter } from "next-intl";
-import {
-  defaultLocale,
-  formats,
-  localeCookie,
-  timeZone,
-} from "../src/i18n/config";
+import { defaultLocale, formats, localeCookie, timeZone } from "../src/i18n/config";
 import en from "../src/i18n/en.json";
 import uk from "../src/i18n/uk.json";
 
-const state = vi.hoisted(() => ({
-  cookie: undefined as string | undefined,
-  set: vi.fn(),
-}));
+const state = vi.hoisted(() => ({ cookie: undefined as string | undefined, set: vi.fn() }));
 vi.mock("next/headers", () => ({
   cookies: async () => ({
-    get: (name: string) =>
-      name === "bbs_locale" ? { value: state.cookie } : undefined,
+    get: (name: string) => (name === "bbs_locale" ? { value: state.cookie } : undefined),
     set: state.set,
   }),
 }));
@@ -34,9 +25,7 @@ describe("locale preferences", () => {
     "loads only supported messages for cookie %s",
     async (cookie) => {
       state.cookie = cookie;
-      const config = await requestConfig({
-        requestLocale: Promise.resolve(undefined),
-      });
+      const config = await requestConfig({ requestLocale: Promise.resolve(undefined) });
       const locale = cookie === "uk" ? "uk" : defaultLocale;
       expect(config.locale).toBe(locale);
       expect(config.messages).toEqual(locale === "uk" ? uk : en);
@@ -46,26 +35,14 @@ describe("locale preferences", () => {
   );
   it("honors an explicit locale for server translations", async () => {
     state.cookie = "uk";
-    expect(
-      (
-        await requestConfig({
-          locale: "en",
-          requestLocale: Promise.resolve(undefined),
-        })
-      ).locale,
-    ).toBe("en");
+    expect((await requestConfig({ locale: "en", requestLocale: Promise.resolve(undefined) })).locale).toBe("en");
   });
   it("persists language changes in the existing cookie", async () => {
     await setLocale("uk");
     expect(state.set).toHaveBeenCalledWith(
       localeCookie,
       "uk",
-      expect.objectContaining({
-        path: "/",
-        sameSite: "lax",
-        httpOnly: true,
-        maxAge: 31_536_000,
-      }),
+      expect.objectContaining({ path: "/", sameSite: "lax", httpOnly: true, maxAge: 31_536_000 }),
     );
   });
   it("rejects unsupported locale writes", async () => {

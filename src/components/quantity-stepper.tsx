@@ -28,11 +28,7 @@ export function QuantityStepper({
 }) {
   const t = useTranslations();
   return (
-    <div
-      role="group"
-      aria-label={label}
-      className="quantity-stepper flex items-center justify-end gap-1"
-    >
+    <div role="group" aria-label={label} className="quantity-stepper flex items-center justify-end gap-1">
       <Button
         type="button"
         variant="outline"
@@ -49,9 +45,7 @@ export function QuantityStepper({
         className={`${showMax ? "min-w-10" : "min-w-6"} text-center font-mono text-sm tabular-nums`}
       >
         <span className="font-semibold">{value}</span>
-        {showMax && (
-          <span className="text-xs text-muted-foreground">/{max}</span>
-        )}
+        {showMax && <span className="text-xs text-muted-foreground">/{max}</span>}
       </output>
       <Tooltip disabled={!increaseHint}>
         <TooltipTrigger
@@ -59,11 +53,7 @@ export function QuantityStepper({
             <span
               className="inline-flex"
               tabIndex={increaseHint ? 0 : undefined}
-              aria-label={
-                increaseHint
-                  ? t("increaseQuantity", { name: label })
-                  : undefined
-              }
+              aria-label={increaseHint ? t("increaseQuantity", { name: label }) : undefined}
             />
           }
         >

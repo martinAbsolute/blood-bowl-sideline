@@ -30,8 +30,7 @@ function rookie(rosterId = "human") {
     name: "",
     skills: [],
   }));
-  if (getRoster(rosterId)!.specialRules.includes("Team Captain"))
-    team.captainId = team.players[0].id;
+  if (getRoster(rosterId)!.specialRules.includes("Team Captain")) team.captainId = team.players[0].id;
   return team;
 }
 
@@ -58,18 +57,10 @@ describe("BB2025 earned league SPP", () => {
   });
 
   it("rejects negative, fractional, missing, and inconsistent counters", () => {
-    expect(() =>
-      validatePlayerStats({ ...emptyPlayerStats(), com: -1 }),
-    ).toThrow();
-    expect(() =>
-      validatePlayerStats({ ...emptyPlayerStats(), td: 0.5 }),
-    ).toThrow();
-    expect(() =>
-      validatePlayerStats({ ...emptyPlayerStats(), sppCas: 1 }),
-    ).toThrow();
-    expect(() => calculateSpp("unknown", emptyPlayerStats())).toThrow(
-      "Unknown roster",
-    );
+    expect(() => validatePlayerStats({ ...emptyPlayerStats(), com: -1 })).toThrow();
+    expect(() => validatePlayerStats({ ...emptyPlayerStats(), td: 0.5 })).toThrow();
+    expect(() => validatePlayerStats({ ...emptyPlayerStats(), sppCas: 1 })).toThrow();
+    expect(() => calculateSpp("unknown", emptyPlayerStats())).toThrow("Unknown roster");
     const first = emptyPlayerStats();
     first.com = 3;
     expect(emptyPlayerStats().com).toBe(0);
@@ -78,16 +69,12 @@ describe("BB2025 earned league SPP", () => {
 
 describe("league advancement and rookie enrollment", () => {
   it("uses the six league cost levels without tournament elite SPP surcharges", () => {
-    expect(
-      Array.from({ length: 6 }, (_, index) =>
-        advancementCost(index, "primary", false),
-      ),
-    ).toEqual([6, 8, 12, 16, 20, 30]);
-    expect(
-      Array.from({ length: 6 }, (_, index) =>
-        advancementCost(index, "secondary", true),
-      ),
-    ).toEqual([10, 12, 16, 20, 24, 34]);
+    expect(Array.from({ length: 6 }, (_, index) => advancementCost(index, "primary", false))).toEqual([
+      6, 8, 12, 16, 20, 30,
+    ]);
+    expect(Array.from({ length: 6 }, (_, index) => advancementCost(index, "secondary", true))).toEqual([
+      10, 12, 16, 20, 24, 34,
+    ]);
     expect(advancementCost(0, "primary", true)).toBe(6);
     expect(advancementValue("primary", true)).toBe(30000);
     expect(advancementValue("secondary", false)).toBe(40000);
@@ -97,19 +84,12 @@ describe("league advancement and rookie enrollment", () => {
 
   it("excludes built-in skills, duplicates, traits and incompatible skill combinations", () => {
     const position = getRoster("human")!.players[0];
-    const choices = advancementChoices("human", position.id, [
-      "block",
-      "multiple_block",
-    ]);
+    const choices = advancementChoices("human", position.id, ["block", "multiple_block"]);
     expect(choices.some((choice) => choice.skillId === "block")).toBe(false);
     expect(choices.some((choice) => choice.skillId === "frenzy")).toBe(false);
-    expect(
-      choices.every((choice) => getSkill(choice.skillId)!.category !== "trait"),
-    ).toBe(true);
+    expect(choices.every((choice) => getSkill(choice.skillId)!.category !== "trait")).toBe(true);
     expect(advancementChoices("human", position.id, [], 6)).toEqual([]);
-    expect(
-      advancementChoices("human", position.id, ["pro", "block"], 1).length,
-    ).toBeGreaterThan(0);
+    expect(advancementChoices("human", position.id, ["pro", "block"], 1).length).toBeGreaterThan(0);
     expect(() => advancementChoices("human", "unknown", [])).toThrow();
   });
 
@@ -119,20 +99,13 @@ describe("league advancement and rookie enrollment", () => {
     team.staff.dedicatedFans = 2;
     expect(rookieLeagueIssues(team)).toEqual([]);
     const roster = getRoster("human")!;
-    expect(startingTreasury(team)).toBe(
-      1000000 - 11 * roster.players[0].cost - 2 * roster.rerolls.cost - 10000,
-    );
+    expect(startingTreasury(team)).toBe(1000000 - 11 * roster.players[0].cost - 2 * roster.rerolls.cost - 10000);
     team.players[0].skills = ["block"];
     team.stars = ["griff-oberwald"];
     team.inducements = { bribes: 1 };
     team.staff.dedicatedFans = 3;
     expect(rookieLeagueIssues(team)).toEqual(
-      expect.arrayContaining([
-        "rookieSkills",
-        "rookieStars",
-        "rookieInducements",
-        "rookieFans",
-      ]),
+      expect.arrayContaining(["rookieSkills", "rookieStars", "rookieInducements", "rookieFans"]),
     );
     expect(() => startingTreasury(team)).toThrow();
   });
@@ -142,40 +115,18 @@ describe("league advancement and rookie enrollment", () => {
     const choices = advancementChoices("human", human.id, []);
     expect(
       choices.some((choice) =>
-        [
-          "bullseye",
-          "strong_arm",
-          "lethal_flight",
-          "saboteur",
-          "violent_innovator",
-        ].includes(choice.skillId),
+        ["bullseye", "strong_arm", "lethal_flight", "saboteur", "violent_innovator"].includes(choice.skillId),
       ),
     ).toBe(false);
-    const fanatic = getRoster("goblin")!.players.find((player) =>
-      player.skills.includes("ball_and_chain"),
-    )!;
+    const fanatic = getRoster("goblin")!.players.find((player) => player.skills.includes("ball_and_chain"))!;
     const fanaticChoices = advancementChoices("goblin", fanatic.id, []);
     expect(
-      fanaticChoices.some((choice) =>
-        ["frenzy", "multiple_block", "grab", "eye_gouge"].includes(
-          choice.skillId,
-        ),
-      ),
+      fanaticChoices.some((choice) => ["frenzy", "multiple_block", "grab", "eye_gouge"].includes(choice.skillId)),
     ).toBe(false);
-    expect(fanaticChoices.some((choice) => choice.skillId === "saboteur")).toBe(
-      true,
-    );
-    expect(
-      fanaticChoices.some((choice) => choice.skillId === "violent_innovator"),
-    ).toBe(true);
-    const pogo = getRoster("goblin")!.players.find((player) =>
-      player.skills.includes("pogo"),
-    )!;
-    expect(
-      advancementChoices("goblin", pogo.id, []).some(
-        (choice) => choice.skillId === "leap",
-      ),
-    ).toBe(false);
+    expect(fanaticChoices.some((choice) => choice.skillId === "saboteur")).toBe(true);
+    expect(fanaticChoices.some((choice) => choice.skillId === "violent_innovator")).toBe(true);
+    const pogo = getRoster("goblin")!.players.find((player) => player.skills.includes("pogo"))!;
+    expect(advancementChoices("goblin", pogo.id, []).some((choice) => choice.skillId === "leap")).toBe(false);
   });
 });
 
@@ -186,16 +137,8 @@ describe("permanent TV and available CTV", () => {
     team.staff.dedicatedFans = 2;
     team.inducements = { bribes: 1 };
     const states = [
-      {
-        playerId: team.players[0].id,
-        valueIncrease: 30000,
-        status: "missing-next-game" as const,
-      },
-      {
-        playerId: team.players[1].id,
-        valueIncrease: 20000,
-        status: "dead" as const,
-      },
+      { playerId: team.players[0].id, valueIncrease: 30000, status: "missing-next-game" as const },
+      { playerId: team.players[1].id, valueIncrease: 20000, status: "dead" as const },
     ];
     expect(leagueTeamValue(team, states)).toBe(10 * base + 30000);
     expect(leagueCurrentTeamValue(team, states)).toBe(9 * base);
@@ -213,32 +156,24 @@ describe("permanent TV and available CTV", () => {
 describe("BB2025 post-game rules", () => {
   it("applies reductions in the correct direction and respects minima and absent PA", () => {
     const profile = { ma: 6, st: 3, ag: "3+", pa: "4+", av: "9+" };
-    expect(
-      applyCharacteristicReductions(profile, {
-        ma: 1,
-        st: 1,
-        ag: 1,
-        pa: 1,
-        av: 1,
-      }),
-    ).toEqual({ ma: 5, st: 2, ag: "4+", pa: "5+", av: "8+" });
-    expect(
-      applyCharacteristicReductions(profile, {
-        ma: 9,
-        st: 9,
-        ag: 9,
-        pa: 9,
-        av: 9,
-      }),
-    ).toEqual({ ma: 1, st: 1, ag: "6+", pa: "6+", av: "3+" });
-    expect(
-      applyCharacteristicReductions({ ...profile, pa: "-" }, { pa: 1 }).pa,
-    ).toBe("-");
+    expect(applyCharacteristicReductions(profile, { ma: 1, st: 1, ag: 1, pa: 1, av: 1 })).toEqual({
+      ma: 5,
+      st: 2,
+      ag: "4+",
+      pa: "5+",
+      av: "8+",
+    });
+    expect(applyCharacteristicReductions(profile, { ma: 9, st: 9, ag: 9, pa: 9, av: 9 })).toEqual({
+      ma: 1,
+      st: 1,
+      ag: "6+",
+      pa: "6+",
+      av: "3+",
+    });
+    expect(applyCharacteristicReductions({ ...profile, pa: "-" }, { pa: 1 }).pa).toBe("-");
     expect(profile.ma).toBe(6);
     expect(() => applyCharacteristicReductions(profile, { st: -1 })).toThrow();
-    expect(() =>
-      applyCharacteristicReductions({ ...profile, ag: "7+" }, {}),
-    ).toThrow();
+    expect(() => applyCharacteristicReductions({ ...profile, ag: "7+" }, {})).toThrow();
   });
 
   it("allows half attendance to produce 5,000 GP increments", () => {
@@ -258,22 +193,10 @@ describe("BB2025 post-game rules", () => {
   });
 
   it("handles expensive-mistake thresholds, half rounding, D3 loss and emergency stash", () => {
-    expect(expensiveMistake(95000)).toEqual({
-      kind: "none",
-      treasury: 95000,
-      lost: 0,
-    });
+    expect(expensiveMistake(95000)).toEqual({ kind: "none", treasury: 95000, lost: 0 });
     expect(expensiveMistake(100000, 2).kind).toBe("crisis-averted");
-    expect(expensiveMistake(200000, 2, 3)).toEqual({
-      kind: "minor-incident",
-      treasury: 170000,
-      lost: 30000,
-    });
-    expect(expensiveMistake(315000, 1)).toEqual({
-      kind: "major-incident",
-      treasury: 155000,
-      lost: 160000,
-    });
+    expect(expensiveMistake(200000, 2, 3)).toEqual({ kind: "minor-incident", treasury: 170000, lost: 30000 });
+    expect(expensiveMistake(315000, 1)).toEqual({ kind: "major-incident", treasury: 155000, lost: 160000 });
     expect(expensiveMistake(500000, 1, undefined, [2, 4])).toEqual({
       kind: "catastrophe",
       treasury: 60000,
@@ -284,22 +207,17 @@ describe("BB2025 post-game rules", () => {
   });
 
   it("maps lasting injuries and separates temporary, niggling, permanent and fatal outcomes", () => {
-    expect(
-      Array.from({ length: 6 }, (_, index) => lastingInjury(index + 1)),
-    ).toEqual(["av", "av", "ma", "pa", "ag", "st"]);
-    expect(casualtyOutcome(8)).toMatchObject({
-      result: "badly-hurt",
-      missNextGame: false,
-      nigglingInjuries: 0,
-    });
-    expect(casualtyOutcome(9)).toMatchObject({
-      result: "seriously-hurt",
-      missNextGame: true,
-    });
-    expect(casualtyOutcome(12)).toMatchObject({
-      result: "serious-injury",
-      nigglingInjuries: 1,
-    });
+    expect(Array.from({ length: 6 }, (_, index) => lastingInjury(index + 1))).toEqual([
+      "av",
+      "av",
+      "ma",
+      "pa",
+      "ag",
+      "st",
+    ]);
+    expect(casualtyOutcome(8)).toMatchObject({ result: "badly-hurt", missNextGame: false, nigglingInjuries: 0 });
+    expect(casualtyOutcome(9)).toMatchObject({ result: "seriously-hurt", missNextGame: true });
+    expect(casualtyOutcome(12)).toMatchObject({ result: "serious-injury", nigglingInjuries: 1 });
     expect(casualtyOutcome(13, 5)).toMatchObject({
       result: "lasting-injury",
       characteristicReduction: "ag",
@@ -314,9 +232,7 @@ describe("single round-robin fixtures", () => {
   it.each([2, 3, 4, 5, 6, 7, 8, 9])(
     "pairs every opponent exactly once for %i entries and distributes byes evenly",
     (count) => {
-      const entries = Array.from({ length: count }, (_, index) =>
-        String(index + 1),
-      );
+      const entries = Array.from({ length: count }, (_, index) => String(index + 1));
       const rounds = roundRobin(entries);
       expect(rounds).toHaveLength(count % 2 ? count : count - 1);
       const opponents = new Set<string>();
@@ -335,11 +251,8 @@ describe("single round-robin fixtures", () => {
         expect(new Set(participants).size).toBe(count);
       }
       expect(opponents.size).toBe((count * (count - 1)) / 2);
-      if (count % 2)
-        for (const entry of entries) expect(byes.get(entry)).toBe(1);
-      expect(entries).toEqual(
-        Array.from({ length: count }, (_, index) => String(index + 1)),
-      );
+      if (count % 2) for (const entry of entries) expect(byes.get(entry)).toBe(1);
+      expect(entries).toEqual(Array.from({ length: count }, (_, index) => String(index + 1)));
     },
   );
 
@@ -357,8 +270,6 @@ it("uses the league treasury for rookie eligibility and carries over unspent gol
   team.staff.assistantCoaches = 1;
   expect(rookieLeagueIssues(team)).toContain("budget");
   expect(rookieLeagueIssues(team, 1_200_000)).toEqual([]);
-  expect(startingTreasury(team, 1_200_000)).toBe(
-    1_200_000 - summarize(team).teamGold,
-  );
+  expect(startingTreasury(team, 1_200_000)).toBe(1_200_000 - summarize(team).teamGold);
   expect(rookieLeagueIssues(team, 500_000)).toContain("budget");
 });

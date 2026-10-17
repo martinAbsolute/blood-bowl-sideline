@@ -7,12 +7,7 @@ import { useSyncExternalStore } from "react";
 import { useConvexAuth, useQuery } from "convex/react";
 import { useTranslations } from "next-intl";
 import { api } from "../../convex/_generated/api";
-import {
-  draftAccount,
-  draftSnapshot,
-  parseDrafts,
-  subscribeDrafts,
-} from "@/lib/drafts";
+import { draftAccount, draftSnapshot, parseDrafts, subscribeDrafts } from "@/lib/drafts";
 import { useDraftSync } from "./draft-sync-provider";
 import { TeamEditor } from "./team-editor";
 import { WorkspaceLoading } from "./workspace-loading";
@@ -39,16 +34,9 @@ export function TeamPage({
   const leagueId = requestedLeagueId ?? live?.draftLeagueId;
   const leagueContext = useQuery(
     api.leagues.get,
-    isAuthenticated && leagueId
-      ? { leagueId: leagueId as Id<"leagues"> }
-      : "skip",
+    isAuthenticated && leagueId ? { leagueId: leagueId as Id<"leagues"> } : "skip",
   );
-  if (
-    isLoading ||
-    !sync.ready ||
-    live === undefined ||
-    (isAuthenticated && leagueId && leagueContext === undefined)
-  ) {
+  if (isLoading || !sync.ready || live === undefined || (isAuthenticated && leagueId && leagueContext === undefined)) {
     // Render the public roster into the initial HTML for text-only readers.
     // Wait for auth, local recovery and live permissions before enabling edits.
     // An explicit null from the live query must invalidate the server snapshot.
@@ -63,11 +51,7 @@ export function TeamPage({
           server={preview}
           recovered={false}
           leagueNotice={
-            <TeamLeagueLinks
-              uuid={uuid}
-              locked={preview.leagueLocked}
-              experienced={preview.leagueExperienced}
-            />
+            <TeamLeagueLinks uuid={uuid} locked={preview.leagueLocked} experienced={preview.leagueExperienced} />
           }
         />
       );
@@ -81,26 +65,14 @@ export function TeamPage({
         key={`${uuid}:${sync.account ?? "guest"}:${editable ? "edit" : `view-${live?.revision}`}`}
         leagueContext={leagueId ? leagueContext : undefined}
         initial={live?.leagueLocked ? live.team : (local ?? live!.team)}
-        revision={
-          live?.leagueLocked ? live.revision : local ? 0 : live!.revision
-        }
+        revision={live?.leagueLocked ? live.revision : local ? 0 : live!.revision}
         readOnly={!editable}
         server={live}
         recovered={!!local && !live?.leagueLocked}
         leagueNotice={
-          <TeamLeagueLinks
-            uuid={uuid}
-            locked={!!live?.leagueLocked}
-            experienced={!!live?.leagueExperienced}
-          />
+          <TeamLeagueLinks uuid={uuid} locked={!!live?.leagueLocked} experienced={!!live?.leagueExperienced} />
         }
       />
     );
-  return (
-    <PageStatus
-      code="404"
-      title={t("notFound")}
-      description={t("notFoundHint")}
-    />
-  );
+  return <PageStatus code="404" title={t("notFound")} description={t("notFoundHint")} />;
 }

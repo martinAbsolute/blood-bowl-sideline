@@ -1,23 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import {
-  Check,
-  ChevronDown,
-  CloudCheck,
-  CloudOff,
-  LoaderCircle,
-} from "lucide-react";
+import { Check, ChevronDown, CloudCheck, CloudOff, LoaderCircle } from "lucide-react";
 import type { useTeamAutosave } from "@/lib/use-team-autosave";
 import { useConvexConnectionState } from "convex/react";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverTitle,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverDescription, PopoverTitle, PopoverTrigger } from "@/components/ui/popover";
 
 type SaveState = ReturnType<typeof useTeamAutosave>;
 
@@ -27,13 +15,7 @@ const iconBaselineOffset = new Map([
   [Check, 3],
 ]);
 
-export function TeamSaveStatus({
-  state,
-  isAuthenticated,
-}: {
-  state: SaveState;
-  isAuthenticated: boolean;
-}) {
+export function TeamSaveStatus({ state, isAuthenticated }: { state: SaveState; isAuthenticated: boolean }) {
   const t = useTranslations();
   const connection = useConvexConnectionState();
   const {
@@ -50,8 +32,7 @@ export function TeamSaveStatus({
     discardChanges,
     hasServer,
   } = state;
-  const reconnecting =
-    isAuthenticated && !connection.isWebSocketConnected && (dirty || saving);
+  const reconnecting = isAuthenticated && !connection.isWebSocketConnected && (dirty || saving);
   const { label, Icon } = reconnecting
     ? { label: "saveReconnecting" as const, Icon: CloudOff }
     : syncError || cloudInvalid
@@ -93,20 +74,11 @@ export function TeamSaveStatus({
         <Popover>
           <PopoverTrigger className="inline-flex cursor-pointer items-baseline gap-1.5 whitespace-nowrap rounded-sm py-1 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
             {indicator}
-            <ChevronDown
-              aria-hidden="true"
-              className="size-3 self-center opacity-60"
-            />
+            <ChevronDown aria-hidden="true" className="size-3 self-center opacity-60" />
           </PopoverTrigger>
-          <PopoverContent
-            align="start"
-            sideOffset={8}
-            className="w-80 max-w-[calc(100vw-2rem)] gap-3 p-4"
-          >
+          <PopoverContent align="start" sideOffset={8} className="w-80 max-w-[calc(100vw-2rem)] gap-3 p-4">
             <PopoverTitle className="text-sm">{t(label)}</PopoverTitle>
-            <PopoverDescription className="text-xs leading-relaxed">
-              {t(detail)}
-            </PopoverDescription>
+            <PopoverDescription className="text-xs leading-relaxed">{t(detail)}</PopoverDescription>
             {syncError && (
               <div className="flex flex-col items-stretch gap-2">
                 {!syncError.conflict && (
@@ -133,9 +105,7 @@ export function TeamSaveStatus({
           </PopoverContent>
         </Popover>
       ) : (
-        <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap py-1">
-          {indicator}
-        </span>
+        <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap py-1">{indicator}</span>
       )}
     </div>
   );

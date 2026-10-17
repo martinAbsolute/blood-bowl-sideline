@@ -8,17 +8,17 @@ Record each team's D3 attendance roll alongside its captured Dedicated Fans valu
 
 ## What to record
 
-| Event           | Participants                                                                           | League effect                                                    |
-| --------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| Touchdown       | Scorer                                                                                 | Score and captured roster-specific SPP                           |
-| Completion      | Passer and receiving team-mate                                                         | Passer SPP; no separate catch award                              |
-| Interception    | Interceptor and opposing passer                                                        | Interceptor SPP                                                  |
-| Block casualty  | Causing player and opposing victim                                                     | Casualty SPP even after recovery; final injury applies to victim |
-| Other casualty  | Opposing culprit for foul/special action, or injured player for crowd/dodge/rush/other | Final injury; no casualty SPP                                    |
-| Throw Team-mate | Thrower and safely landed team-mate                                                    | Landing SPP; thrower SPP only for a Superb Throw                 |
-| Knockout        | Removed player; optional Apothecary                                                    | Timeline only; no permanent injury or SPP                        |
-| Sent off        | Removed player                                                                         | Removal record; no SPP                                           |
-| MVP             | One participating player per team                                                      | MVP SPP                                                          |
+| Event | Participants | League effect |
+| --- | --- | --- |
+| Touchdown | Scorer | Score and captured roster-specific SPP |
+| Completion | Passer and receiving team-mate | Passer SPP; no separate catch award |
+| Interception | Interceptor and opposing passer | Interceptor SPP |
+| Block casualty | Causing player and opposing victim | Casualty SPP even after recovery; final injury applies to victim |
+| Other casualty | Opposing culprit for foul/special action, or injured player for crowd/dodge/rush/other | Final injury; no casualty SPP |
+| Throw Team-mate | Thrower and safely landed team-mate | Landing SPP; thrower SPP only for a Superb Throw |
+| Knockout | Removed player; optional Apothecary | Timeline only; no permanent injury or SPP |
+| Sent off | Removed player | Removal record; no SPP |
+| MVP | One participating player per team | MVP SPP |
 
 Do not record routine movement, blocks without a casualty, hand-offs, ordinary catches, failed passes or stuns. They do not affect league advancement or remove a player from the match. Stalling remains a team-level financial input. Inducement purchasing and concession automation remain outside this report's scope.
 

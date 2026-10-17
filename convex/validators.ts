@@ -2,10 +2,7 @@ import { v } from "convex/values";
 import { PREVIOUS_RULES_VERSION, RULES_VERSION } from "../src/domain/types";
 export const teamValidator = v.object({
   schemaVersion: v.literal(1),
-  rulesVersion: v.union(
-    v.literal(RULES_VERSION),
-    v.literal(PREVIOUS_RULES_VERSION),
-  ),
+  rulesVersion: v.union(v.literal(RULES_VERSION), v.literal(PREVIOUS_RULES_VERSION)),
   uuid: v.string(),
   name: v.string(),
   rosterId: v.string(),
@@ -25,10 +22,7 @@ export const teamValidator = v.object({
     v.literal("Tzeentch"),
     v.literal("Hashut"),
   ),
-  norseLeague: v.union(
-    v.literal("Old World Classic"),
-    v.literal("Chaos Clash"),
-  ),
+  norseLeague: v.union(v.literal("Old World Classic"), v.literal("Chaos Clash")),
   players: v.array(
     v.object({
       id: v.string(),

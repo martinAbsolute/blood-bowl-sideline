@@ -30,6 +30,14 @@ pnpm test
 pnpm build
 ```
 
+Linting uses Oxlint (`pnpm lint`, or `pnpm lint:fix` for automatic fixes). Formatting uses Oxfmt (`pnpm format` to write changes, `pnpm format:check` to check). Both scan the repository, respect `.gitignore`, and keep their remaining exclusions in `.oxlintrc.json` and `.oxfmtrc.json`.
+
+Oxfmt uses 120-column lines, collapses short objects, and leaves prose paragraphs unwrapped to keep agent context compact without minifying code. Other formatting options use Oxfmt defaults. Generated files, vendored UI components, assets, lockfiles, and managed agent instructions are excluded.
+
+Oxlint enables correctness rules for JavaScript, TypeScript, React, Next.js, accessibility, Unicorn, and Oxc. This covers hook usage, invalid JSX/ARIA, image alternatives, link and heading content, document language, and Next.js head/script/image conventions. A few explicit rules prevent unsafe `any`, unchecked TypeScript suppression, loose equality (except null checks and same-type literals), and mutable declarations when `const` works. Warnings fail CI. TypeScript remains part of `pnpm check`; metadata quality, crawlability, and rendered semantics still need page-level verification.
+
+Three accessibility rules are disabled because they misclassify translated Base UI render props, valid ARIA status/region elements, or keyboard-focusable tooltip wrappers: `control-has-associated-label`, `prefer-tag-over-role`, and `no-noninteractive-tabindex`. Label association checks recognize the project's form controls; narrowly scoped comments explain render-prop exceptions. Vendored UI components and their `use-mobile` hook are excluded from linting. Avoid broad suppressions or style-only lint rules.
+
 Do not commit environment files, credentials, deploy keys, or signing keys. Do not deploy changes to the project's production services.
 
 ## License and artwork

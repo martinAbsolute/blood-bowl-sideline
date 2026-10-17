@@ -154,9 +154,7 @@
   color: #fff;
   border: 1px solid #466b3440;
   border-radius: 8px;
-  background:
-    repeating-linear-gradient(90deg, #ffffff07 0 38px, #00000003 38px 76px),
-    var(--pitch);
+  background: repeating-linear-gradient(90deg, #ffffff07 0 38px, #00000003 38px 76px), var(--pitch);
 }
 .squad::before,
 .squad::after {

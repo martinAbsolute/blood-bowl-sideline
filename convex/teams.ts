@@ -1,17 +1,10 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
-import {
-  paginationOptsValidator,
-  paginationResultValidator,
-} from "convex/server";
+import { paginationOptsValidator, paginationResultValidator } from "convex/server";
 import { ConvexError, v } from "convex/values";
 import { mutation, query, type QueryCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { publicTeam, teamValidator } from "./validators";
-import {
-  RULES_VERSION,
-  teamSchema,
-  upgradeTeamRules,
-} from "../src/domain/types";
+import { RULES_VERSION, teamSchema, upgradeTeamRules } from "../src/domain/types";
 import { z } from "zod";
 import { getRoster, getRuleset } from "../src/domain/catalog";
 import { teamSaveIssues, validateTeam } from "../src/domain/rules";
@@ -22,12 +15,9 @@ import { teamLeagueState } from "./teamLeagueState";
 // legal badge. Reads project a current draft without mutating the stored row or
 // historical league snapshots. Normal revision-checked saves persist upgrades.
 async function currentDraft(ctx: QueryCtx, doc: Doc<"teams">) {
-  if (doc.team.rulesVersion === RULES_VERSION)
-    return { team: doc.team, legal: doc.legal };
+  if (doc.team.rulesVersion === RULES_VERSION) return { team: doc.team, legal: doc.legal };
   const team = upgradeTeamRules(doc.team);
-  const league = doc.draftLeagueId
-    ? await ctx.db.get("leagues", doc.draftLeagueId)
-    : null;
+  const league = doc.draftLeagueId ? await ctx.db.get("leagues", doc.draftLeagueId) : null;
   return { team, legal: validateTeam(team, league?.startingTreasury).valid };
 }
 
@@ -50,9 +40,7 @@ export const getByUuid = query({
       revision: doc.revision,
       updatedAt: doc.updatedAt,
       ...leagueState,
-      canEdit:
-        !leagueState.leagueLocked &&
-        (viewer?._id === doc.ownerId || viewer?.role === "admin"),
+      canEdit: !leagueState.leagueLocked && (viewer?._id === doc.ownerId || viewer?.role === "admin"),
     };
   },
 });
@@ -76,10 +64,7 @@ export const listMine = query({
     rulesetId: v.optional(teamValidator.fields.rulesetId),
   },
   returns: paginationResultValidator(publicTeam),
-  handler: async (
-    ctx,
-    { paginationOpts, archived, search, rosterId, rulesetId, favoritesOnly },
-  ) => {
+  handler: async (ctx, { paginationOpts, archived, search, rosterId, rulesetId, favoritesOnly }) => {
     const owner = await getAuthUserId(ctx);
     if (!owner) throw new ConvexError("UNAUTHENTICATED");
     if (
@@ -89,8 +74,7 @@ export const listMine = query({
       paginationOpts.numItems < 1 ||
       paginationOpts.numItems > 30 ||
       [paginationOpts.maximumRowsRead, paginationOpts.maximumBytesRead].some(
-        (limit) =>
-          limit !== undefined && (!Number.isSafeInteger(limit) || limit < 1),
+        (limit) => limit !== undefined && (!Number.isSafeInteger(limit) || limit < 1),
       )
     )
       throw new ConvexError("INVALID_INPUT");
@@ -99,10 +83,7 @@ export const listMine = query({
     const table = ctx.db.query("teams");
     const source = text
       ? table.withSearchIndex("search_library", (q) => {
-          let filter = q
-            .search("searchText", text)
-            .eq("ownerId", owner)
-            .eq("archived", archived);
+          let filter = q.search("searchText", text).eq("ownerId", owner).eq("archived", archived);
           if (rosterId) filter = filter.eq("team.rosterId", rosterId);
           if (rulesetId) filter = filter.eq("team.rulesetId", rulesetId);
           if (favoritesOnly) filter = filter.eq("favorite", true);
@@ -110,36 +91,24 @@ export const listMine = query({
         })
       : rosterId && rulesetId
         ? table
-            .withIndex(
-              "by_ownerId_and_archived_and_roster_and_ruleset_and_favorite",
-              (q) =>
-                q
-                  .eq("ownerId", owner)
-                  .eq("archived", archived)
-                  .eq("team.rosterId", rosterId)
-                  .eq("team.rulesetId", rulesetId),
+            .withIndex("by_ownerId_and_archived_and_roster_and_ruleset_and_favorite", (q) =>
+              q
+                .eq("ownerId", owner)
+                .eq("archived", archived)
+                .eq("team.rosterId", rosterId)
+                .eq("team.rulesetId", rulesetId),
             )
             .order("desc")
         : rosterId
           ? table
-              .withIndex(
-                "by_ownerId_and_archived_and_roster_and_favorite",
-                (q) =>
-                  q
-                    .eq("ownerId", owner)
-                    .eq("archived", archived)
-                    .eq("team.rosterId", rosterId),
+              .withIndex("by_ownerId_and_archived_and_roster_and_favorite", (q) =>
+                q.eq("ownerId", owner).eq("archived", archived).eq("team.rosterId", rosterId),
               )
               .order("desc")
           : rulesetId
             ? table
-                .withIndex(
-                  "by_ownerId_and_archived_and_ruleset_and_favorite",
-                  (q) =>
-                    q
-                      .eq("ownerId", owner)
-                      .eq("archived", archived)
-                      .eq("team.rulesetId", rulesetId),
+                .withIndex("by_ownerId_and_archived_and_ruleset_and_favorite", (q) =>
+                  q.eq("ownerId", owner).eq("archived", archived).eq("team.rulesetId", rulesetId),
                 )
                 .order("desc")
             : table
@@ -149,14 +118,8 @@ export const listMine = query({
                 .order("desc");
     // Reactive pages can grow beyond numItems. Bound reads while preserving
     // endCursor/id and the native split metadata used by usePaginatedQuery.
-    paginationOpts.maximumRowsRead = Math.min(
-      paginationOpts.maximumRowsRead ?? 60,
-      60,
-    );
-    paginationOpts.maximumBytesRead = Math.min(
-      paginationOpts.maximumBytesRead ?? 512 * 1024,
-      512 * 1024,
-    );
+    paginationOpts.maximumRowsRead = Math.min(paginationOpts.maximumRowsRead ?? 60, 60);
+    paginationOpts.maximumBytesRead = Math.min(paginationOpts.maximumBytesRead ?? 512 * 1024, 512 * 1024);
     const result = await source.paginate(paginationOpts);
     return {
       ...result,
@@ -189,20 +152,13 @@ export const save = mutation({
   handler: async (ctx, args) => {
     const viewer = await requireUser(ctx);
     const ownerId = viewer._id;
-    if (
-      !Number.isSafeInteger(args.expectedRevision) ||
-      args.expectedRevision < 0
-    )
+    if (!Number.isSafeInteger(args.expectedRevision) || args.expectedRevision < 0)
       throw new ConvexError("INVALID_INPUT");
     // The shared schema enforces the same name limit as the editor, including
     // requests that bypass the UI. Never silently truncate a saved name.
     const parsed = teamSchema.safeParse(args.team);
-    if (!parsed.success || !getRoster(parsed.data.rosterId))
-      throw new ConvexError("INVALID_TEAM");
-    const team = {
-      ...upgradeTeamRules(parsed.data),
-      notes: "",
-    };
+    if (!parsed.success || !getRoster(parsed.data.rosterId)) throw new ConvexError("INVALID_TEAM");
+    const team = { ...upgradeTeamRules(parsed.data), notes: "" };
     const existing = await ctx.db
       .query("teams")
       .withIndex("by_uuid", (q) => q.eq("uuid", team.uuid))
@@ -215,17 +171,13 @@ export const save = mutation({
         .unique())
     )
       throw new ConvexError("ARCHIVED");
-    if (existing && existing.ownerId !== ownerId && viewer.role !== "admin")
-      throw new ConvexError("FORBIDDEN");
+    if (existing && existing.ownerId !== ownerId && viewer.role !== "admin") throw new ConvexError("FORBIDDEN");
     // A draft keeps its league allowance across navigation and background saves.
     // Resolve the allowance from the league; never accept a client-supplied budget.
     const draftLeagueId = args.leagueId ?? existing?.draftLeagueId;
-    const draftLeague = draftLeagueId
-      ? await ctx.db.get("leagues", draftLeagueId)
-      : null;
+    const draftLeague = draftLeagueId ? await ctx.db.get("leagues", draftLeagueId) : null;
     if (draftLeagueId && !draftLeague) throw new ConvexError("INVALID_INPUT");
-    if (teamSaveIssues(team, draftLeague?.startingTreasury).length)
-      throw new ConvexError("INVALID_TEAM");
+    if (teamSaveIssues(team, draftLeague?.startingTreasury).length) throw new ConvexError("INVALID_TEAM");
     const leagueState = existing
       ? await teamLeagueState(ctx, existing)
       : { leagueLocked: false, leagueExperienced: false };
@@ -256,20 +208,8 @@ export const save = mutation({
     const revision = (existing?.revision ?? 0) + 1,
       updatedAt = Date.now(),
       legal = validateTeam(team, draftLeague?.startingTreasury).valid;
-    const searchText = [
-      team.name,
-      getRoster(team.rosterId)!.name,
-      getRuleset(team.rulesetId).name,
-    ].join(" ");
-    if (existing)
-      await ctx.db.patch(existing._id, {
-        team,
-        draftLeagueId,
-        revision,
-        updatedAt,
-        legal,
-        searchText,
-      });
+    const searchText = [team.name, getRoster(team.rosterId)!.name, getRuleset(team.rulesetId).name].join(" ");
+    if (existing) await ctx.db.patch(existing._id, { team, draftLeagueId, revision, updatedAt, legal, searchText });
     else
       await ctx.db.insert("teams", {
         favorite: args.favorite ? true : undefined,
@@ -285,8 +225,7 @@ export const save = mutation({
       });
     return {
       team,
-      favorite:
-        existing?.favorite ?? (!existing && args.favorite ? true : undefined),
+      favorite: existing?.favorite ?? (!existing && args.favorite ? true : undefined),
       draftLeagueId,
       revision,
       updatedAt,
@@ -302,23 +241,16 @@ export const setArchived = mutation({
   handler: async (ctx, { uuid, archived }) => {
     const viewer = await requireUser(ctx);
     const ownerId = viewer._id;
-    if (!z.uuid().safeParse(uuid).success)
-      throw new ConvexError("INVALID_INPUT");
+    if (!z.uuid().safeParse(uuid).success) throw new ConvexError("INVALID_INPUT");
     const doc = await ctx.db
       .query("teams")
       .withIndex("by_uuid", (q) => q.eq("uuid", uuid))
       .unique();
-    if (!doc || (doc.ownerId !== ownerId && viewer.role !== "admin"))
-      throw new ConvexError("FORBIDDEN");
-    if (archived && (await teamLeagueState(ctx, doc)).leagueLocked)
-      throw new ConvexError("TEAM_IN_LEAGUE");
+    if (!doc || (doc.ownerId !== ownerId && viewer.role !== "admin")) throw new ConvexError("FORBIDDEN");
+    if (archived && (await teamLeagueState(ctx, doc)).leagueLocked) throw new ConvexError("TEAM_IN_LEAGUE");
     if (archived && doc.favorite) throw new ConvexError("TEAM_FAVORITED");
     if (doc.archived === archived) return null;
-    await ctx.db.patch(doc._id, {
-      archived,
-      updatedAt: Date.now(),
-      revision: doc.revision + 1,
-    });
+    await ctx.db.patch(doc._id, { archived, updatedAt: Date.now(), revision: doc.revision + 1 });
     return null;
   },
 });
@@ -328,8 +260,7 @@ export const setFavorite = mutation({
   returns: v.null(),
   handler: async (ctx, { uuid, favorite }) => {
     const viewer = await requireUser(ctx);
-    if (!z.uuid().safeParse(uuid).success)
-      throw new ConvexError("INVALID_INPUT");
+    if (!z.uuid().safeParse(uuid).success) throw new ConvexError("INVALID_INPUT");
     const doc = await ctx.db
       .query("teams")
       .withIndex("by_uuid", (q) => q.eq("uuid", uuid))
@@ -347,16 +278,14 @@ export const deleteArchived = mutation({
   returns: v.null(),
   handler: async (ctx, { uuid }) => {
     const viewer = await requireUser(ctx);
-    if (!z.uuid().safeParse(uuid).success)
-      throw new ConvexError("INVALID_INPUT");
+    if (!z.uuid().safeParse(uuid).success) throw new ConvexError("INVALID_INPUT");
     const doc = await ctx.db
       .query("teams")
       .withIndex("by_uuid", (q) => q.eq("uuid", uuid))
       .unique();
     if (!doc || doc.ownerId !== viewer._id) throw new ConvexError("FORBIDDEN");
     if (!doc.archived) throw new ConvexError("NOT_ARCHIVED");
-    if ((await teamLeagueState(ctx, doc)).leagueLocked)
-      throw new ConvexError("TEAM_IN_LEAGUE");
+    if ((await teamLeagueState(ctx, doc)).leagueLocked) throw new ConvexError("TEAM_IN_LEAGUE");
     // League entries retain their own team snapshots and match history.
     await ctx.db.insert("deletedTeams", { uuid });
     await ctx.db.delete("teams", doc._id);

@@ -48,11 +48,7 @@ export function LeaguePageHeader({
             )}
           </div>
         </div>
-        {action && (
-          <div className="relative flex flex-wrap items-center gap-2 text-foreground">
-            {action}
-          </div>
-        )}
+        {action && <div className="relative flex flex-wrap items-center gap-2 text-foreground">{action}</div>}
       </div>
       {children && (
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t bg-secondary/30 px-4 py-3 text-xs text-muted-foreground sm:px-5">
@@ -81,13 +77,9 @@ export function LeagueEmptyState({
       </div>
       <h2 className="text-base font-semibold">{title}</h2>
       {description && (
-        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-          {description}
-        </p>
+        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">{description}</p>
       )}
-      {action && (
-        <div className="mt-5 flex flex-wrap justify-center gap-2">{action}</div>
-      )}
+      {action && <div className="mt-5 flex flex-wrap justify-center gap-2">{action}</div>}
     </div>
   );
 }

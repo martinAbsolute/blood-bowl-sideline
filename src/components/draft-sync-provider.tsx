@@ -21,11 +21,7 @@ import {
   subscribeDrafts,
   readDrafts,
 } from "@/lib/drafts";
-import {
-  DRAFT_EDITOR_RELEASED,
-  holdDraftEditor,
-  uploadWithoutEditor,
-} from "@/lib/draft-lock";
+import { DRAFT_EDITOR_RELEASED, holdDraftEditor, uploadWithoutEditor } from "@/lib/draft-lock";
 import { saveCloudDraft } from "@/lib/cloud-save";
 import { useTeamSave } from "@/lib/use-team-save";
 import { useBeforeUnload } from "@/lib/use-before-unload";
@@ -33,11 +29,7 @@ import { finishDraftSignIn } from "@/lib/draft-sign-in";
 import type { Team } from "@/domain/types";
 
 function recoveryVersion(team: Team) {
-  return JSON.stringify([
-    draftAccount(team.uuid),
-    readDraftRevision(team.uuid),
-    team,
-  ]);
+  return JSON.stringify([draftAccount(team.uuid), readDraftRevision(team.uuid), team]);
 }
 
 type Sync = {
@@ -48,13 +40,7 @@ type Sync = {
   retry: () => void;
 };
 const Context = createContext<Sync | null>(null);
-const fallback: Sync = {
-  account: null,
-  ready: true,
-  editing: () => () => {},
-  failed: new Set(),
-  retry: () => {},
-};
+const fallback: Sync = { account: null, ready: true, editing: () => () => {}, failed: new Set(), retry: () => {} };
 export function useDraftSync() {
   return useContext(Context) ?? fallback;
 }
@@ -65,19 +51,14 @@ export function DraftSyncProvider({ children }: { children: ReactNode }) {
   const account = viewer?.id ?? null;
   const save = useTeamSave();
   const raw = useSyncExternalStore(subscribeDrafts, draftSnapshot, () => "[]");
-  const [acknowledged, setAcknowledged] = useState<ReadonlyMap<string, string>>(
-    new Map(),
-  );
+  const [acknowledged, setAcknowledged] = useState<ReadonlyMap<string, string>>(new Map());
   // This provider outlives route changes, so queued recovery saves remain
   // protected even after the editor has unmounted.
   useBeforeUnload(
     !!account &&
       parseDrafts(raw).some((team) => {
         const owner = draftAccount(team.uuid);
-        return (
-          (!owner || owner === account) &&
-          acknowledged.get(team.uuid) !== recoveryVersion(team)
-        );
+        return (!owner || owner === account) && acknowledged.get(team.uuid) !== recoveryVersion(team);
       }),
   );
   const active = useRef(new Set<string>());
@@ -156,20 +137,15 @@ export function DraftSyncProvider({ children }: { children: ReactNode }) {
         try {
           const uploaded = await uploadWithoutEditor(team.uuid, async () => {
             // A tab may discard or edit the draft before the lock is granted.
-            const current = readDrafts().find(
-              (draft) => draft.uuid === team.uuid,
-            );
-            if (!current || JSON.stringify(current) !== JSON.stringify(team))
-              return;
+            const current = readDrafts().find((draft) => draft.uuid === team.uuid);
+            if (!current || JSON.stringify(current) !== JSON.stringify(team)) return;
             const owner = draftAccount(team.uuid);
             if (owner && owner !== account) return;
             const revision = readDraftRevision(team.uuid);
             storeDraft(team, account, revision);
             const version = recoveryVersion(team);
             await saveCloudDraft(team, revision, save);
-            setAcknowledged((previous) =>
-              new Map(previous).set(team.uuid, version),
-            );
+            setAcknowledged((previous) => new Map(previous).set(team.uuid, version));
             finishDraftSignIn(team.uuid);
             failures.current.delete(team.uuid);
           });
@@ -187,12 +163,7 @@ export function DraftSyncProvider({ children }: { children: ReactNode }) {
   }, [account, raw, save, epoch, acknowledged]);
   return (
     <Context.Provider
-      value={{
-        account,
-        ready: !isLoading && (!isAuthenticated || viewer !== undefined),
-        failed,
-        ...controls,
-      }}
+      value={{ account, ready: !isLoading && (!isAuthenticated || viewer !== undefined), failed, ...controls }}
     >
       {children}
     </Context.Provider>

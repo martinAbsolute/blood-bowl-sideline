@@ -11,11 +11,7 @@ import { RuleInfo } from "./rule-help";
 import { useRosterRuleset } from "@/lib/use-roster-ruleset";
 import { BrandPeriod } from "./brand-period";
 
-export function TeamCatalog({
-  rulesetId = "bb2025-default",
-}: {
-  rulesetId?: RulesetId;
-}) {
+export function TeamCatalog({ rulesetId = "bb2025-default" }: { rulesetId?: RulesetId }) {
   const activeRulesetId = useRosterRuleset(rulesetId);
   return <Catalog rulesetId={activeRulesetId} />;
 }
@@ -28,9 +24,7 @@ function Catalog({ rulesetId }: { rulesetId: RulesetId }) {
   const tiers = [...new Set(rosterChoices(rulesetId).map(({ tier }) => tier))]
     .filter((tier) => tier > 0)
     .sort((a, b) => a - b);
-  const [selectedTiers, setSelectedTiers] = useState<Set<number>>(
-    () => new Set(),
-  );
+  const [selectedTiers, setSelectedTiers] = useState<Set<number>>(() => new Set());
   const [previousRulesetId, setPreviousRulesetId] = useState(rulesetId);
   if (previousRulesetId !== rulesetId) {
     setPreviousRulesetId(rulesetId);
@@ -51,11 +45,7 @@ function Catalog({ rulesetId }: { rulesetId: RulesetId }) {
         </h1>
         <div className="no-print flex max-w-full flex-wrap items-end gap-x-4 gap-y-2">
           {tiers.length > 0 && (
-            <div
-              role="group"
-              aria-label={t("tier")}
-              className="flex flex-wrap items-center gap-1 pb-1"
-            >
+            <div role="group" aria-label={t("tier")} className="flex flex-wrap items-center gap-1 pb-1">
               {tiers.map((tier) => (
                 <button
                   key={tier}
@@ -88,22 +78,10 @@ function Catalog({ rulesetId }: { rulesetId: RulesetId }) {
                 title={rules.name}
                 className="mb-0.5"
                 description={[
-                  ...(sharedBudget !== undefined
-                    ? [t("treasury") + ": " + sharedBudget / 1000 + "k GP"]
-                    : []),
-                  t("players") +
-                    ": " +
-                    rules.minPlayers +
-                    "–" +
-                    rules.maxPlayers,
+                  ...(sharedBudget !== undefined ? [t("treasury") + ": " + sharedBudget / 1000 + "k GP"] : []),
+                  t("players") + ": " + rules.minPlayers + "–" + rules.maxPlayers,
                   ...(rules.sevens
-                    ? [
-                        t("referenceSpecialists") + ": 0–4",
-                        t("rerolls") +
-                          ": " +
-                          staff.rerolls.cost / 1000 +
-                          "k GP",
-                      ]
+                    ? [t("referenceSpecialists") + ": 0–4", t("rerolls") + ": " + staff.rerolls.cost / 1000 + "k GP"]
                     : []),
                 ].join("\n\n")}
               />
@@ -111,11 +89,7 @@ function Catalog({ rulesetId }: { rulesetId: RulesetId }) {
           </div>
         </div>
       </div>
-      <RosterExplorer
-        rulesetId={rulesetId}
-        selectedTiers={selectedTiers}
-        onRevealTier={revealTier}
-      />
+      <RosterExplorer rulesetId={rulesetId} selectedTiers={selectedTiers} onRevealTier={revealTier} />
     </div>
   );
 }

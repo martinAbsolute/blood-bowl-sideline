@@ -13,11 +13,7 @@ import { SharedTeam } from "./shared-team";
 import { useDraftSync } from "./draft-sync-provider";
 import { WorkspaceLoading } from "./workspace-loading";
 const subscribe = () => () => {};
-export function BuilderStart(props: {
-  roster?: string;
-  draft?: string;
-  fresh: boolean;
-}) {
+export function BuilderStart(props: { roster?: string; draft?: string; fresh: boolean }) {
   const hydrated = useSyncExternalStore(
     subscribe,
     () => true,
@@ -46,9 +42,7 @@ function LocalBuilder({
   account: string | null;
 }) {
   const [initial] = useState(() => {
-    const drafts = readDrafts().filter(
-      (team) => !draftAccount(team.uuid) || draftAccount(team.uuid) === account,
-    );
+    const drafts = readDrafts().filter((team) => !draftAccount(team.uuid) || draftAccount(team.uuid) === account);
     const existing = !fresh
       ? drafts.find(
           (t) =>
@@ -65,9 +59,7 @@ function LocalBuilder({
       : undefined;
     if (existing) return existing;
     const selectedRoster = getRoster(roster ?? "");
-    return fresh || selectedRoster
-      ? newTeam(crypto.randomUUID(), selectedRoster?.id ?? "human")
-      : null;
+    return fresh || selectedRoster ? newTeam(crypto.randomUUID(), selectedRoster?.id ?? "human") : null;
   });
   const router = useRouter();
   const t = useTranslations();
@@ -75,11 +67,7 @@ function LocalBuilder({
     if (!initial) return;
     // Convex Auth must consume the callback code before any URL normalization.
     const params = new URLSearchParams(window.location.search);
-    if (
-      params.has("code") ||
-      (params.get("draft") === initial.uuid && !params.has("new"))
-    )
-      return;
+    if (params.has("code") || (params.get("draft") === initial.uuid && !params.has("new"))) return;
     router.replace(`/teams/${initial.uuid}`, { scroll: false });
   }, [router, initial]);
   return initial ? (
@@ -90,11 +78,7 @@ function LocalBuilder({
     <div className="page-width py-16 text-center">
       <h1 className="display-font text-3xl">{t("noTeams")}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{t("noTeamsHint")}</p>
-      <Button
-        className="mt-5"
-        nativeButton={false}
-        render={<Link href="/rosters" />}
-      >
+      <Button className="mt-5" nativeButton={false} render={<Link href="/rosters" />}>
         {t("chooseRoster")}
       </Button>
     </div>
@@ -108,8 +92,6 @@ function CloudDraft({ uuid }: { uuid: string }) {
   return team ? (
     <SharedTeam initial={team} />
   ) : (
-    <p className="page-width py-20 text-muted-foreground">
-      {t(team === undefined ? "loading" : "notFound")}
-    </p>
+    <p className="page-width py-20 text-muted-foreground">{t(team === undefined ? "loading" : "notFound")}</p>
   );
 }

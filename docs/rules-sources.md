@@ -11,7 +11,7 @@ Current source precedence and exceptions are documented in [roster sources](rost
 - [Mordorbihan BB2025 skills API](https://mordorbihan.fr/api/skills/public/ruleset/BB2025): the user supplied its JSON export on 30 September 2026. This established the skill and trait catalog, but its English definitions have since been superseded by the bilingual community reference above at the user's request. The export's inactive characteristic increases (with empty descriptions) and hidden Team Captain entry are outside the selectable skill catalog.
 - [EuroBowl 2026 organiser](https://www.eurobowl.eu/entrance-options/): links BBTC as its roster builder. Event rules and organiser decisions take precedence.
 
-Catalog fields and numerical restrictions are based on the references above. Full skill definitions in both languages follow the community reference. Third-party application code and research downloads are not distributed. FUMBBL player artwork is attributed separately in `public/assets/fumbbl/README.md`. Temporary research downloads are ignored by Git and Vercel. Our implementation and presentation are original.
+Catalog fields and numerical restrictions are based on the references above. Full skill definitions in both languages follow the community reference. Third-party application code and research downloads are not distributed. See [attribution](../ATTRIBUTION.md) for player artwork. Temporary research downloads are ignored by Git and Vercel. Our implementation and presentation are original.
 
 ## Presets
 

@@ -22,10 +22,7 @@ export function LeagueDatePicker({
   const [open, setOpen] = useState(false);
   return (
     <div className="min-w-0 space-y-2">
-      <span
-        id="league-start-label"
-        className="block text-xs font-medium text-muted-foreground"
-      >
+      <span id="league-start-label" className="block text-xs font-medium text-muted-foreground">
         {t("leagueUx.plannedStart")}
       </span>
       <Popover open={open} onOpenChange={setOpen}>
@@ -42,23 +39,12 @@ export function LeagueDatePicker({
         >
           <CalendarDays className="size-4 text-muted-foreground" />
           <span id="league-start-value">
-            {format.dateTime(
-              new Date(
-                Date.UTC(
-                  value.getFullYear(),
-                  value.getMonth(),
-                  value.getDate(),
-                ),
-              ),
-              "short",
-              { timeZone: "UTC" },
-            )}
+            {format.dateTime(new Date(Date.UTC(value.getFullYear(), value.getMonth(), value.getDate())), "short", {
+              timeZone: "UTC",
+            })}
           </span>
         </PopoverTrigger>
-        <PopoverContent
-          align="start"
-          className="w-auto max-w-[calc(100vw-2rem)] p-2"
-        >
+        <PopoverContent align="start" className="w-auto max-w-[calc(100vw-2rem)] p-2">
           <Calendar
             mode="single"
             required

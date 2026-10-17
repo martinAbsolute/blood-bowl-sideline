@@ -1,11 +1,4 @@
-import {
-  getRoster,
-  getRuleset,
-  inducements,
-  skillName,
-  sortSkillIds,
-  stars,
-} from "@/domain/catalog";
+import { getRoster, getRuleset, inducements, skillName, sortSkillIds, stars } from "@/domain/catalog";
 import {
   affiliation,
   dedicatedFansBase,
@@ -31,8 +24,7 @@ type PublicSnapshot = {
 };
 
 const gold = (value: number) => ({ value, unit: "gold pieces" });
-const namedSkills = (ids: string[]) =>
-  sortSkillIds(ids).map((id) => ({ id, name: skillName(id) }));
+const namedSkills = (ids: string[]) => sortSkillIds(ids).map((id) => ({ id, name: skillName(id) }));
 const staffNames: Record<keyof Team["staff"], string> = {
   rerolls: "Team re-rolls",
   apothecary: "Apothecary",
@@ -40,10 +32,7 @@ const staffNames: Record<keyof Team["staff"], string> = {
   cheerleaders: "Cheerleaders",
   dedicatedFans: "Dedicated fans",
 };
-const attributes = (
-  player: Position | Star,
-  movementAllowance = player.ma,
-) => ({
+const attributes = (player: Position | Star, movementAllowance = player.ma) => ({
   movementAllowance,
   strength: player.st,
   agility: player.ag,
@@ -67,10 +56,7 @@ export function teamStructuredData(data: PublicSnapshot) {
       number: Number(player.number),
       name: player.name,
       position: { id: position.id, name: position.position },
-      attributes: attributes(
-        position,
-        playerMovement(team, player.id, position),
-      ),
+      attributes: attributes(position, playerMovement(team, player.id, position)),
       builtInSkills: namedSkills(position.skills),
       addedSkills: namedSkills(player.skills),
       captainSkills: namedSkills(team.captainId === player.id ? ["pro"] : []),
@@ -78,9 +64,7 @@ export function teamStructuredData(data: PublicSnapshot) {
       veteran: isSevens(team) && team.veteranId === player.id,
       baseCost: gold(position.cost),
       advancementCost: { value: skillCost, unit: skillUnit },
-      cost: gold(
-        position.cost + (ruleset.id === "bb2025-default" ? skillCost : 0),
-      ),
+      cost: gold(position.cost + (ruleset.id === "bb2025-default" ? skillCost : 0)),
     };
   });
   const starPlayers = team.stars.map((id, index) => {
@@ -112,9 +96,7 @@ export function teamStructuredData(data: PublicSnapshot) {
       tier: budget.tier,
       leagues: roster.id === "norse" ? [team.norseLeague] : roster.leagues,
       specialRules: roster.specialRules.flatMap((name) =>
-        name.startsWith("Favoured of") || name.startsWith("If Chaos Clash")
-          ? (affiliation(team) ?? [])
-          : name,
+        name.startsWith("Favoured of") || name.startsWith("If Chaos Clash") ? (affiliation(team) ?? []) : name,
       ),
     },
     ruleset: { ...ruleset, skillCurrency: skillUnit },
@@ -124,8 +106,7 @@ export function teamStructuredData(data: PublicSnapshot) {
       id,
       name: staffNames[id],
       purchased: team.staff[id],
-      count:
-        team.staff[id] + (id === "dedicatedFans" ? dedicatedFansBase(team) : 0),
+      count: team.staff[id] + (id === "dedicatedFans" ? dedicatedFansBase(team) : 0),
       unitCost: gold(staffPrices[id].cost),
       cost: gold(team.staff[id] * staffPrices[id].cost),
     })),
@@ -155,12 +136,7 @@ export function teamStructuredData(data: PublicSnapshot) {
         ? null
         : budget.pools.map((pool) => ({
             id: pool.id,
-            name:
-              pool.id === "team"
-                ? "Treasury"
-                : pool.id === "funds"
-                  ? "Flowing Funds"
-                  : "Skills",
+            name: pool.id === "team" ? "Treasury" : pool.id === "funds" ? "Flowing Funds" : "Skills",
             allowance: pool.limit,
             used: pool.used,
             remaining: pool.limit - pool.used,
@@ -173,10 +149,7 @@ export function teamStructuredData(data: PublicSnapshot) {
       "https://schema.org",
       {
         // JSON-LD 1.1 JSON literal: game-specific fields are not Schema.org terms.
-        teamSnapshot: {
-          "@id": "https://sideline.com.ua/ns/blood-bowl#teamSnapshot",
-          "@type": "@json",
-        },
+        teamSnapshot: { "@id": "https://sideline.com.ua/ns/blood-bowl#teamSnapshot", "@type": "@json" },
       },
     ],
     "@type": "WebPage",
@@ -220,8 +193,6 @@ export function serializeTeamStructuredData(data: PublicSnapshot) {
   return serializeTeamJsonLd(teamStructuredData(data));
 }
 
-export function serializeTeamJsonLd(
-  data: ReturnType<typeof teamStructuredData>,
-) {
+export function serializeTeamJsonLd(data: ReturnType<typeof teamStructuredData>) {
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }

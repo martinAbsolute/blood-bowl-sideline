@@ -38,46 +38,26 @@ export function SidebarAccountMenu({
           aria-label={label}
           data-collapsed={collapsed}
           render={
-            <Button
-              variant="ghost"
-              className="sidebar-menu-button sidebar-account-button h-12 w-full rounded-lg"
-            />
+            <Button variant="ghost" className="sidebar-menu-button sidebar-account-button h-12 w-full rounded-lg" />
           }
         >
           <UserAvatar user={user} className="size-8" />
-          <span
-            className="sidebar-button-label min-w-0 flex-1 text-left"
-            aria-hidden={collapsed}
-          >
+          <span className="sidebar-button-label min-w-0 flex-1 text-left" aria-hidden={collapsed}>
             <span className="block truncate text-sm font-semibold">{name}</span>
             {user.email ? (
-              <span className="block truncate text-xs font-normal text-muted-foreground">
-                {user.email}
-              </span>
+              <span className="block truncate text-xs font-normal text-muted-foreground">{user.email}</span>
             ) : null}
           </span>
-          <span
-            className="sidebar-button-badge text-muted-foreground"
-            aria-hidden="true"
-          >
+          <span className="sidebar-button-badge text-muted-foreground" aria-hidden="true">
             <ChevronsUpDown className="size-4" />
           </span>
         </DropdownMenuTrigger>
       </SidebarTooltip>
-      <DropdownMenuContent
-        side={mobile ? "top" : "right"}
-        align="end"
-        sideOffset={8}
-        className="w-60"
-      >
+      <DropdownMenuContent side={mobile ? "top" : "right"} align="end" sideOffset={8} className="w-60">
         <DropdownMenuGroup>
           <DropdownMenuLabel className="px-3 py-2 font-normal">
-            <span className="block truncate text-sm font-semibold text-foreground">
-              {name}
-            </span>
-            {user.email ? (
-              <span className="block truncate">{user.email}</span>
-            ) : null}
+            <span className="block truncate text-sm font-semibold text-foreground">{name}</span>
+            {user.email ? <span className="block truncate">{user.email}</span> : null}
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

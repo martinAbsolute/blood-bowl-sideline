@@ -6,11 +6,7 @@ import { rosterRuleset } from "@/lib/roster-ruleset";
 export function generateStaticParams() {
   return rosters.map(({ id }) => ({ slug: id }));
 }
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const roster = getRoster((await params).slug);
   return roster
     ? pageMetadata(
@@ -30,7 +26,5 @@ export default async function Page({
   const [route, query] = await Promise.all([params, searchParams]);
   const roster = getRoster(route.slug);
   if (!roster) notFound();
-  return (
-    <TeamReference roster={roster} rulesetId={rosterRuleset(query.ruleset)} />
-  );
+  return <TeamReference roster={roster} rulesetId={rosterRuleset(query.ruleset)} />;
 }

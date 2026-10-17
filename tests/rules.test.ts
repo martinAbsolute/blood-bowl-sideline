@@ -1,30 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { randomUUID } from "node:crypto";
-import {
-  getRoster,
-  newTeam,
-  rosters,
-  rulesets,
-  skills,
-  stars,
-  inducements,
-} from "../src/domain/catalog";
-import {
-  budgetFor,
-  inducementInfo,
-  playerSkillCost,
-  starEligible,
-  summarize,
-  validateTeam,
-} from "../src/domain/rules";
+import { getRoster, newTeam, rosters, rulesets, skills, stars, inducements } from "../src/domain/catalog";
+import { budgetFor, inducementInfo, playerSkillCost, starEligible, summarize, validateTeam } from "../src/domain/rules";
 import type { Team } from "../src/domain/types";
-import {
-  leagueName,
-  leagueSlug,
-  leagues,
-  specialRuleKey,
-  starsForLeague,
-} from "../src/domain/team-reference";
+import { leagueName, leagueSlug, leagues, specialRuleKey, starsForLeague } from "../src/domain/team-reference";
 import en from "../src/i18n/en.json";
 import uk from "../src/i18n/uk.json";
 
@@ -39,15 +18,11 @@ describe("league and team-rule reference", () => {
   });
   it("includes universal hires, honours league exclusions, and separates god-specific hires", () => {
     const universal = stars.find((star) => star.playsFor.includes("Any Team"))!;
-    const excluded = stars.find((star) =>
-      star.playsFor.some((name) => name.startsWith("Any team except")),
-    )!;
+    const excluded = stars.find((star) => star.playsFor.some((name) => name.startsWith("Any team except")))!;
     expect(starsForLeague("Old World Classic")).toContain(universal);
     expect(starsForLeague("Old World Classic")).toContain(excluded);
     expect(starsForLeague("Sylvanian Spotlight")).not.toContain(excluded);
-    for (const star of stars.filter((s) =>
-      s.playsFor.every((name) => name.startsWith("Favoured of")),
-    )) {
+    for (const star of stars.filter((s) => s.playsFor.every((name) => name.startsWith("Favoured of")))) {
       expect(starsForLeague("Chaos Clash")).not.toContain(star);
     }
   });
@@ -77,10 +52,7 @@ describe("BB2025 roster checks", () => {
     t.staff.rerolls = 2;
     t.captainId = t.players[0].id;
     expect(validateTeam(t).valid).toBe(true);
-    expect(summarize(t).teamGold).toBe(
-      getRoster("human")!.players[0].cost * 11 +
-        getRoster("human")!.rerolls.cost * 2,
-    );
+    expect(summarize(t).teamGold).toBe(getRoster("human")!.players[0].cost * 11 + getRoster("human")!.rerolls.cost * 2);
   });
   it("rejects incomplete, oversized, and duplicated player identities", () => {
     const t = human();
@@ -117,9 +89,7 @@ describe("BB2025 roster checks", () => {
     expect(codes(t)).toContain("captain");
   });
   it("requires a captain for captain rosters in every supported preset", () => {
-    for (const roster of rosters.filter((roster) =>
-      roster.specialRules.includes("Team Captain"),
-    )) {
+    for (const roster of rosters.filter((roster) => roster.specialRules.includes("Team Captain"))) {
       for (const ruleset of rulesets) {
         const t = human(ruleset.id);
         t.rosterId = roster.id;
@@ -138,9 +108,7 @@ describe("BB2025 roster checks", () => {
   it("does not require a captain for other rosters and rejects Big Guy captains", () => {
     const t = human();
     t.captainId = t.players[0].id;
-    t.players[0].positionId = getRoster("human")!.players.find((position) =>
-      position.position.includes("Big Guy"),
-    )!.id;
+    t.players[0].positionId = getRoster("human")!.players.find((position) => position.position.includes("Big Guy"))!.id;
     expect(codes(t)).toContain("captain");
     delete t.captainId;
     t.rosterId = "amazon";
@@ -202,16 +170,12 @@ describe("Tournament currencies and restrictions", () => {
     expect(summarize(t).skills).toBe(8);
     expect(validateTeam(t).issues).toEqual([]);
     t.players[4].skills = ["block"];
-    expect(validateTeam(t).issues).toEqual([
-      { code: "eliteCopies", values: { skill: "Block", max: 4 } },
-    ]);
+    expect(validateTeam(t).issues).toEqual([{ code: "eliteCopies", values: { skill: "Block", max: 4 } }]);
   });
   it("prices Euro primary stacks and rejects secondary stacks", () => {
     const t = human("eurobowl-2026"),
       p = getRoster("human")!.players[0];
-    const primary = skills
-      .filter((s) => s.category === "general" && !s.isElite)
-      .slice(0, 2);
+    const primary = skills.filter((s) => s.category === "general" && !s.isElite).slice(0, 2);
     expect(
       playerSkillCost(
         t,
@@ -230,17 +194,14 @@ describe("Tournament currencies and restrictions", () => {
     t.players.forEach((p) => (p.skills = ["block", "tackle"]));
     const s = summarize(t);
     expect(s.fundsUsed).toBe(
-      Math.max(0, s.teamGold - s.budget.teamBudget) +
-        Math.max(0, s.skills - s.budget.skillGold),
+      Math.max(0, s.teamGold - s.budget.teamBudget) + Math.max(0, s.skills - s.budget.skillGold),
     );
     expect(codes(t)).toContain("flowingFunds");
   });
   it("prices ordered World Cup advancements at their successive costs", () => {
     const t = human("world-cup-2027"),
       p = getRoster("human")!.players[0];
-    const a = skills
-      .filter((s) => s.category === "general" && !s.isElite)
-      .slice(0, 2);
+    const a = skills.filter((s) => s.category === "general" && !s.isElite).slice(0, 2);
     expect(
       playerSkillCost(
         t,
@@ -257,9 +218,7 @@ describe("Tournament currencies and restrictions", () => {
     const eligible = stars.filter((s) => starEligible(t, s));
     t.stars = eligible.slice(0, 2).map((s) => s.id);
     const sum = eligible.slice(0, 2).reduce((n, s) => n + s.cost, 0);
-    expect(summarize(t).starTax).toBe(
-      sum <= 199000 ? 18 : sum <= 299000 ? 24 : 32,
-    );
+    expect(summarize(t).starTax).toBe(sum <= 199000 ? 18 : sum <= 299000 ? 24 : 32);
     expect(codes(t)).toContain("regularPlayers");
   });
   it("applies cheap bribes and rejects unavailable inducements", () => {

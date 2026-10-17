@@ -20,14 +20,7 @@ async function setup(incompatible = false, customBudget = false) {
   }));
   team.captainId = team.players[0].id;
   if (incompatible) team.players[1].skills = ["bullseye"];
-  if (customBudget)
-    team.staff = {
-      rerolls: 8,
-      apothecary: 1,
-      assistantCoaches: 6,
-      cheerleaders: 6,
-      dedicatedFans: 0,
-    };
+  if (customBudget) team.staff = { rerolls: 8, apothecary: 1, assistantCoaches: 6, cheerleaders: 6, dedicatedFans: 0 };
   const result = await t.run(async (ctx) => {
     const ownerId = await ctx.db.insert("users", { name: "Owner" });
     const strangerId = await ctx.db.insert("users", { name: "Stranger" });
@@ -81,61 +74,32 @@ it("reads an existing snapshot under corrected rules without mutating or falsely
     archived: false,
     paginationOpts: { numItems: 12, cursor: null },
   });
-  expect(library.page[0]).toMatchObject({
-    team: viewed?.team,
-    legal: false,
-    canEdit: true,
-    favorite: true,
-  });
-  expect(await t.run((ctx) => ctx.db.get("teams", teamId))).toMatchObject({
-    team,
-    revision: 7,
-    legal: true,
-  });
-  await expect(
-    owner.mutation(api.teams.save, { team, expectedRevision: 7 }),
-  ).rejects.toThrow("INVALID_TEAM");
-  expect(await t.run((ctx) => ctx.db.get("teams", teamId))).toMatchObject({
-    team,
-    revision: 7,
-  });
+  expect(library.page[0]).toMatchObject({ team: viewed?.team, legal: false, canEdit: true, favorite: true });
+  expect(await t.run((ctx) => ctx.db.get("teams", teamId))).toMatchObject({ team, revision: 7, legal: true });
+  await expect(owner.mutation(api.teams.save, { team, expectedRevision: 7 })).rejects.toThrow("INVALID_TEAM");
+  expect(await t.run((ctx) => ctx.db.get("teams", teamId))).toMatchObject({ team, revision: 7 });
 });
 
 it("preserves ownership and revisions when a legacy team is repaired and saved", async () => {
   const { t, owner, stranger, team, teamId } = await setup(true);
   team.players[1].skills = [];
-  await expect(
-    stranger.mutation(api.teams.save, { team, expectedRevision: 7 }),
-  ).rejects.toThrow("FORBIDDEN");
-  await expect(
-    owner.mutation(api.teams.save, { team, expectedRevision: 6 }),
-  ).rejects.toThrow("CONFLICT");
-  const saved = await owner.mutation(api.teams.save, {
-    team,
-    expectedRevision: 7,
-  });
+  await expect(stranger.mutation(api.teams.save, { team, expectedRevision: 7 })).rejects.toThrow("FORBIDDEN");
+  await expect(owner.mutation(api.teams.save, { team, expectedRevision: 6 })).rejects.toThrow("CONFLICT");
+  const saved = await owner.mutation(api.teams.save, { team, expectedRevision: 7 });
   expect(saved).toMatchObject({
     team: { ...team, rulesVersion: RULES_VERSION },
     legal: true,
     revision: 8,
     favorite: true,
   });
-  const retry = await owner.mutation(api.teams.save, {
-    team,
-    expectedRevision: 7,
-  });
+  const retry = await owner.mutation(api.teams.save, { team, expectedRevision: 7 });
   expect(retry.revision).toBe(8);
-  expect(await t.run((ctx) => ctx.db.get("teams", teamId))).toMatchObject({
-    team: saved.team,
-    revision: 8,
-  });
+  expect(await t.run((ctx) => ctx.db.get("teams", teamId))).toMatchObject({ team: saved.team, revision: 8 });
 });
 
 it("rechecks old drafts using their stored league treasury allowance", async () => {
   const { t, team } = await setup(false, true);
-  expect((await t.query(api.teams.getByUuid, { uuid: team.uuid }))?.legal).toBe(
-    true,
-  );
+  expect((await t.query(api.teams.getByUuid, { uuid: team.uuid }))?.legal).toBe(true);
 });
 
 it("removes an obsolete invalid badge when the corrected elite-copy rule permits the roster", async () => {
@@ -149,11 +113,7 @@ it("removes an obsolete invalid badge when the corrected elite-copy rule permits
   });
   await t.run((ctx) => ctx.db.patch("teams", teamId, { team, legal: false }));
   const viewed = await t.query(api.teams.getByUuid, { uuid: team.uuid });
-  expect(viewed).toMatchObject({
-    legal: true,
-    revision: 7,
-    team: { rulesVersion: RULES_VERSION },
-  });
+  expect(viewed).toMatchObject({ legal: true, revision: 7, team: { rulesVersion: RULES_VERSION } });
   expect(await t.run((ctx) => ctx.db.get("teams", teamId))).toMatchObject({
     legal: false,
     team: { rulesVersion: PREVIOUS_RULES_VERSION },

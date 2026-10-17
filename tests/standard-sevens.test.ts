@@ -23,23 +23,17 @@ function draft(rosterId = "human"): Team {
     skills: [],
   }));
   team.veteranId = team.players[0].id;
-  if (getRoster(rosterId)!.specialRules.includes("Team Captain"))
-    team.captainId = team.players[0].id;
+  if (getRoster(rosterId)!.specialRules.includes("Team Captain")) team.captainId = team.players[0].id;
   return team;
 }
 const codes = (team: Team) => validateTeam(team).issues.map((i) => i.code);
 describe("Blood Bowl Sevens 2025 matched play", () => {
   it("uses its distinct tiers, 600k treasury and one SP per tier", () => {
-    for (const [tier, ids] of Object.entries(
-      getRuleset("bb2025-sevens").tiers,
-    )) {
+    for (const [tier, ids] of Object.entries(getRuleset("bb2025-sevens").tiers)) {
       for (const id of ids) {
         const team = draft(id);
         expect(tierFor(team)).toBe(Number(tier));
-        expect(budgetFor(team)).toMatchObject({
-          teamBudget: 600000,
-          skillGold: Number(tier),
-        });
+        expect(budgetFor(team)).toMatchObject({ teamBudget: 600000, skillGold: Number(tier) });
       }
     }
     expect(tierFor(draft("human"))).toBe(1);
@@ -50,9 +44,7 @@ describe("Blood Bowl Sevens 2025 matched play", () => {
     const team = draft();
     team.players[0].skills = ["block"];
     expect(codes(team)).toEqual([]);
-    team.players[1].positionId = getRoster("human")!.players.find((p) =>
-      p.primarySkills.includes("P"),
-    )!.id;
+    team.players[1].positionId = getRoster("human")!.players.find((p) => p.primarySkills.includes("P"))!.id;
     team.players[0].skills = [];
     team.players[1].skills = ["leader"];
     expect(codes(team)).toEqual([]);
@@ -73,9 +65,7 @@ describe("Blood Bowl Sevens 2025 matched play", () => {
   });
   it("allows Leader on a captain with free Pro without treating it as an added skill stack", () => {
     const team = draft();
-    team.players[1].positionId = getRoster("human")!.players.find((p) =>
-      p.primarySkills.includes("P"),
-    )!.id;
+    team.players[1].positionId = getRoster("human")!.players.find((p) => p.primarySkills.includes("P"))!.id;
     team.captainId = team.players[1].id;
     team.players[1].skills = ["leader"];
     expect(codes(team)).toEqual([]);
@@ -99,9 +89,7 @@ describe("Blood Bowl Sevens 2025 matched play", () => {
   });
   it("counts only added elite skills toward the cap, independently of SP", () => {
     const team = draft("chaos-chosen");
-    team.players[4].positionId = getRoster("chaos-chosen")!.players.find((p) =>
-      p.skills.includes("mighty_blow"),
-    )!.id;
+    team.players[4].positionId = getRoster("chaos-chosen")!.players.find((p) => p.skills.includes("mighty_blow"))!.id;
     team.players[1].skills = ["block"];
     team.players[2].skills = ["block"];
     expect(codes(team)).toEqual([]);

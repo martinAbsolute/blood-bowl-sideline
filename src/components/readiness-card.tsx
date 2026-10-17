@@ -3,13 +3,7 @@
 import type { ReactNode } from "react";
 import { MagicCard } from "./magic-ui/magic-card";
 
-export function ReadinessCard({
-  ready,
-  children,
-}: {
-  ready: boolean;
-  children: ReactNode;
-}) {
+export function ReadinessCard({ ready, children }: { ready: boolean; children: ReactNode }) {
   return (
     <section aria-live="polite" className="rounded-lg">
       {ready ? (

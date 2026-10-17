@@ -2,10 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import {
-  isPlayerNumberAvailable,
-  numberedPlayers,
-} from "@/domain/player-number";
+import { isPlayerNumberAvailable, numberedPlayers } from "@/domain/player-number";
 import type { Team } from "@/domain/types";
 
 export function PlayerNumber({
@@ -100,11 +97,7 @@ export function InlinePlayerNumber({
         if (number === player.number) return;
         onChange({
           ...team,
-          players: numberedPlayers(
-            players.map((item) =>
-              item.id === playerId ? { ...item, number } : item,
-            ),
-          ),
+          players: numberedPlayers(players.map((item) => (item.id === playerId ? { ...item, number } : item))),
         });
       }}
     />

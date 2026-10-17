@@ -6,13 +6,7 @@ import { getRoster, starPairs, stars } from "@/domain/catalog";
 import type { Team } from "@/domain/types";
 import { numberedPlayers } from "@/domain/player-number";
 import { Button } from "./ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "./dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./dialog";
 import { SkillList } from "./skill-box";
 import { positionLabel } from "./position-name";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
@@ -38,34 +32,22 @@ export function RemovePlayerButton({
   const cancelRef = useRef<HTMLButtonElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const player = team.players.find((item) => item.id === selected);
-  const position = getRoster(team.rosterId)?.players.find(
-    (item) => item.id === player?.positionId,
-  );
-  const star = team.stars.includes(selected)
-    ? stars.find((item) => item.id === selected)
-    : undefined;
+  const position = getRoster(team.rosterId)?.players.find((item) => item.id === player?.positionId);
+  const star = team.stars.includes(selected) ? stars.find((item) => item.id === selected) : undefined;
   if (!player && !star) return null;
   const savedName = player?.name.trim();
   const savedSkills = player?.skills ?? [];
   const captain = team.captainId === selected;
   const veteran = team.veteranId === selected;
-  const savedCustomisation =
-    !!savedName || savedSkills.length > 0 || captain || veteran;
+  const savedCustomisation = !!savedName || savedSkills.length > 0 || captain || veteran;
   const removedStars = star
-    ? (starPairs.find((pair) => pair.includes(star.id)) ?? [star.id]).filter(
-        (id) => team.stars.includes(id),
-      )
+    ? (starPairs.find((pair) => pair.includes(star.id)) ?? [star.id]).filter((id) => team.stars.includes(id))
     : [];
-  const name =
-    savedName ||
-    star?.name ||
-    (position ? positionLabel(position.position) : t("player"));
+  const name = savedName || star?.name || (position ? positionLabel(position.position) : t("player"));
   function remove() {
     const next = {
       ...team,
-      players: numberedPlayers(team.players).filter(
-        (item) => item.id !== selected,
-      ),
+      players: numberedPlayers(team.players).filter((item) => item.id !== selected),
       stars: team.stars.filter((id) => !removedStars.includes(id)),
     };
     if (next.captainId === selected) delete next.captainId;
@@ -86,13 +68,10 @@ export function RemovePlayerButton({
           ? "hidden size-6 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 group-has-[:focus-visible]:opacity-100 hover:bg-destructive/10 hover:text-destructive lg:inline-flex [@media(hover:none)]:hidden [@media(pointer:coarse)]:hidden"
           : "h-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:h-8"
       }
-      aria-label={
-        compact ? `${t("removePlayer")} · ${name}` : t("removePlayer")
-      }
+      aria-label={compact ? `${t("removePlayer")} · ${name}` : t("removePlayer")}
       onClick={(event) => {
         event.stopPropagation();
-        if (savedCustomisation || dirty || removedStars.length > 1)
-          setOpen(true);
+        if (savedCustomisation || dirty || removedStars.length > 1) setOpen(true);
         else remove();
       }}
     >
@@ -118,27 +97,18 @@ export function RemovePlayerButton({
         button
       )}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent
-          initialFocus={cancelRef}
-          finalFocus={triggerRef}
-          onClick={(event) => event.stopPropagation()}
-        >
+        <DialogContent initialFocus={cancelRef} finalFocus={triggerRef} onClick={(event) => event.stopPropagation()}>
           <DialogHeader>
             <DialogTitle>{t("removePlayer")}</DialogTitle>
-            <DialogDescription>
-              {t("playerModal.removeQuestion", { player: name })}
-            </DialogDescription>
+            <DialogDescription>{t("playerModal.removeQuestion", { player: name })}</DialogDescription>
           </DialogHeader>
           <div className="space-y-3 text-sm">
             {savedCustomisation && (
               <div className="space-y-2 rounded-lg border bg-secondary/40 p-3">
-                <p className="text-xs text-muted-foreground">
-                  {t("playerModal.savedDetailsLost")}
-                </p>
+                <p className="text-xs text-muted-foreground">{t("playerModal.savedDetailsLost")}</p>
                 {savedName && (
                   <p>
-                    {t("playerName")}:{" "}
-                    <strong className="wrap-anywhere">{savedName}</strong>
+                    {t("playerName")}: <strong className="wrap-anywhere">{savedName}</strong>
                   </p>
                 )}
                 {savedSkills.length > 0 && (
@@ -159,28 +129,17 @@ export function RemovePlayerButton({
             {removedStars.length > 1 && (
               <p>
                 {t("playerModal.removePair", {
-                  players: removedStars
-                    .map((id) => stars.find((item) => item.id === id)!.name)
-                    .join(" & "),
+                  players: removedStars.map((id) => stars.find((item) => item.id === id)!.name).join(" & "),
                 })}
               </p>
             )}
             {dirty && <p>{t("playerModal.removeUnsaved")}</p>}
           </div>
           <div className="flex justify-end gap-2">
-            <Button
-              ref={cancelRef}
-              variant="outline"
-              className="h-11 sm:h-8"
-              onClick={() => setOpen(false)}
-            >
+            <Button ref={cancelRef} variant="outline" className="h-11 sm:h-8" onClick={() => setOpen(false)}>
               {t("cancel")}
             </Button>
-            <Button
-              variant="destructive"
-              className="h-11 sm:h-8"
-              onClick={remove}
-            >
+            <Button variant="destructive" className="h-11 sm:h-8" onClick={remove}>
               {t("removePlayer")}
             </Button>
           </div>

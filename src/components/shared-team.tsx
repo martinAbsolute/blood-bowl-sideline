@@ -8,25 +8,12 @@ import { PageStatus } from "./page-status";
 export function SharedTeam({
   initial,
 }: {
-  initial: {
-    team: Team;
-    revision: number;
-    legal: boolean;
-    updatedAt: number;
-    canEdit: boolean;
-  };
+  initial: { team: Team; revision: number; legal: boolean; updatedAt: number; canEdit: boolean };
 }) {
   const t = useTranslations(),
     live = useQuery(api.teams.getByUuid, { uuid: initial.team.uuid });
   const { isAuthenticated } = useConvexAuth();
-  if (live === null)
-    return (
-      <PageStatus
-        code="404"
-        title={t("notFound")}
-        description={t("notFoundHint")}
-      />
-    );
+  if (live === null) return <PageStatus code="404" title={t("notFound")} description={t("notFoundHint")} />;
   const data = live ?? initial;
   const canEdit = isAuthenticated && data.canEdit;
   return (

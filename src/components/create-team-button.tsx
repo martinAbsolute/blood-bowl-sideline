@@ -35,11 +35,7 @@ export function CreateTeamButton({
   const { isAuthenticated } = useConvexAuth();
   const save = useTeamSave(leagueId);
   const [creating, setCreating] = useState(false);
-  const unavailable =
-    !!rosterId &&
-    !!getRuleset(rulesetId ?? "bb2025-default").excludedRosters?.includes(
-      rosterId,
-    );
+  const unavailable = !!rosterId && !!getRuleset(rulesetId ?? "bb2025-default").excludedRosters?.includes(rosterId);
   if (rosterId)
     return (
       <Button
@@ -56,14 +52,9 @@ export function CreateTeamButton({
           try {
             if (isAuthenticated) await saveCloudDraft(team, 0, save);
             else storeDraft(team, null, 0);
-            router.push(
-              `/teams/${team.uuid}${leagueId ? `?league=${encodeURIComponent(leagueId)}` : ""}`,
-            );
+            router.push(`/teams/${team.uuid}${leagueId ? `?league=${encodeURIComponent(leagueId)}` : ""}`);
           } catch {
-            toast.add({
-              type: "error",
-              title: t(isAuthenticated ? "saveFailed" : "storageError"),
-            });
+            toast.add({ type: "error", title: t(isAuthenticated ? "saveFailed" : "storageError") });
           } finally {
             release();
             setCreating(false);
@@ -75,12 +66,7 @@ export function CreateTeamButton({
       </Button>
     );
   return (
-    <Button
-      className={className}
-      size={size}
-      nativeButton={false}
-      render={<Link href="/rosters" prefetch />}
-    >
+    <Button className={className} size={size} nativeButton={false} render={<Link href="/rosters" prefetch />}>
       <Plus className="size-4" />
       {t("createTeam")}
     </Button>

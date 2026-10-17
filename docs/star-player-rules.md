@@ -1,13 +1,13 @@
 # Star Player rules and sources
 
-| Preset                         | Star Player availability                                                                                                                                                                                      |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| BB2025 Default                 | Up to two choices in this app's exhibition draft. Ordinary league recruitment does not permanently hire Stars; they are match inducements.                                                                    |
-| BB2025 Matched Play            | Every roster can hire eligible Stars. Tier 1 permits one choice; tiers 2–4 permit two. At most one Mega-star; ordinary Stars cost 2 SP and Mega-stars 4 SP, in addition to gold.                              |
-| Blood Bowl Sevens 2025 Edition | No Stars. They are absent from the permitted Sevens inducements.                                                                                                                                              |
-| Kyiv Seven Sins Sevens         | No Stars under organiser rules.                                                                                                                                                                               |
-| EuroBowl 2026                  | Tiers 1–4 cannot hire Stars. Tiers 5–7 may hire two Veterans or one Legend, without mixing. Published named lists and bans also apply.                                                                        |
-| World Cup 2027 v2.1            | Only Black Orc, Bretonnian, Chaos Renegade, Gnome, Goblin, Halfling, Norse, Ogre and Snotling. Up to two choices, the preset's banned list and SPP tax apply, and eleven regular players must be hired first. |
+| Preset | Star Player availability |
+| --- | --- |
+| BB2025 Default | Up to two choices in this app's exhibition draft. Ordinary league recruitment does not permanently hire Stars; they are match inducements. |
+| BB2025 Matched Play | Every roster can hire eligible Stars. Tier 1 permits one choice; tiers 2–4 permit two. At most one Mega-star; ordinary Stars cost 2 SP and Mega-stars 4 SP, in addition to gold. |
+| Blood Bowl Sevens 2025 Edition | No Stars. They are absent from the permitted Sevens inducements. |
+| Kyiv Seven Sins Sevens | No Stars under organiser rules. |
+| EuroBowl 2026 | Tiers 1–4 cannot hire Stars. Tiers 5–7 may hire two Veterans or one Legend, without mixing. Published named lists and bans also apply. |
+| World Cup 2027 v2.1 | Only Black Orc, Bretonnian, Chaos Renegade, Gnome, Goblin, Halfling, Norse, Ogre and Snotling. Up to two choices, the preset's banned list and SPP tax apply, and eleven regular players must be hired first. |
 
 All permitted hires remain subject to the Star's team/league/god affiliations, available roster spaces and budget. Mandatory pairs count as one choice and two roster places. Existing selections are validated even when their hiring controls are hidden.
 

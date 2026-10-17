@@ -12,25 +12,15 @@ vi.mock("next-intl", async (importOriginal) => {
   const { formats, timeZone } = await import("../src/i18n/config");
   return {
     ...actual,
-    useFormatter: () =>
-      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useFormatter: () => actual.createFormatter({ locale: "en", formats, timeZone }),
     useTranslations: () => (key: string) => key,
   };
 });
-const navigation = vi.hoisted(() => ({
-  params: null as URLSearchParams | null,
-}));
-vi.mock("next/navigation", () => ({
-  useSearchParams: () => navigation.params,
-}));
-vi.mock("../src/components/create-team-button", () => ({
-  CreateTeamButton: () => null,
-}));
+const navigation = vi.hoisted(() => ({ params: null as URLSearchParams | null }));
+vi.mock("next/navigation", () => ({ useSearchParams: () => navigation.params }));
+vi.mock("../src/components/create-team-button", () => ({ CreateTeamButton: () => null }));
 vi.mock("../src/components/player-icon", () => ({ RosterIcon: () => null }));
-vi.mock("../src/components/roster-reference", () => ({
-  RosterFacts: () => null,
-  RosterTable: () => null,
-}));
+vi.mock("../src/components/roster-reference", () => ({ RosterFacts: () => null, RosterTable: () => null }));
 
 let root: Root, container: HTMLDivElement;
 beforeEach(() => {
@@ -46,9 +36,7 @@ it("switches rulesets through native history without remounting the catalog or w
   window.history.replaceState(null, "", "/rosters?keep=1#human");
   // Flush happy-dom's hashchange from replaceState (browsers do not emit one).
   await new Promise((resolve) => setTimeout(resolve, 0));
-  const scrollFrame = vi
-    .spyOn(window.HTMLElement.prototype, "scrollIntoView")
-    .mockImplementation(() => {});
+  const scrollFrame = vi.spyOn(window.HTMLElement.prototype, "scrollIntoView").mockImplementation(() => {});
   vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
     callback(0);
     return 0;
@@ -68,9 +56,7 @@ it("switches rulesets through native history without remounting the catalog or w
   // Next's native history integration supplies the new search params locally.
   navigation.params = new URLSearchParams(window.location.search);
   await render("bb2025-default");
-  expect(container.querySelector("select")?.value).toBe(
-    "kyiv-seven-sins-sevens",
-  );
+  expect(container.querySelector("select")?.value).toBe("kyiv-seven-sins-sevens");
   expect(container.querySelector("input")).toBe(input);
   expect(scrollFrame).not.toHaveBeenCalled();
   expect(container.querySelector("[aria-pressed]")?.textContent).toBe("tier 1");
@@ -95,9 +81,7 @@ async function render(rulesetId: RulesetId) {
   await act(async () => root.render(createElement(TeamCatalog, { rulesetId })));
 }
 async function click(label: string) {
-  const button = [...container.querySelectorAll("button")].find((item) =>
-    item.textContent?.startsWith(label),
-  );
+  const button = [...container.querySelectorAll("button")].find((item) => item.textContent?.startsWith(label));
   expect(button).toBeDefined();
   await act(async () => button!.click());
 }
@@ -105,18 +89,14 @@ async function click(label: string) {
 it("offers only the selected ruleset's tiers and resets selection when ruleset changes", async () => {
   await render("world-cup-2027");
   await click("tier 3");
-  expect(
-    [...container.querySelectorAll("section")].map((item) => item.id),
-  ).toEqual(
+  expect([...container.querySelectorAll("section")].map((item) => item.id)).toEqual(
     rosterChoices("world-cup-2027")
       .filter((item) => item.tier === 3)
       .map((item) => item.roster.id),
   );
   await render("kyiv-seven-sins-sevens");
   expect(container.querySelector('[aria-pressed="true"]')).toBeNull();
-  expect(container.querySelectorAll("section")).toHaveLength(
-    rosterChoices("kyiv-seven-sins-sevens").length,
-  );
+  expect(container.querySelectorAll("section")).toHaveLength(rosterChoices("kyiv-seven-sins-sevens").length);
   await render("bb2025-default");
   expect(container.querySelector("fieldset")).toBeNull();
   expect(container.querySelector("[aria-pressed]")).toBeNull();
@@ -128,32 +108,21 @@ it("combines search and tier filtering and recovers from no matches", async () =
   await click("tier 1");
   const input = container.querySelector("input")!;
   await act(async () => {
-    Object.getOwnPropertyDescriptor(
-      window.HTMLInputElement.prototype,
-      "value",
-    )!.set!.call(input, "human");
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")!.set!.call(input, "human");
     input.dispatchEvent(new Event("input", { bubbles: true }));
   });
   expect(container.querySelectorAll("section")).toHaveLength(0);
   expect(container.textContent).toContain("noResults");
   await click("tier 2");
-  expect(
-    [...container.querySelectorAll("section")].map((item) => item.id),
-  ).toEqual(["human"]);
+  expect([...container.querySelectorAll("section")].map((item) => item.id)).toEqual(["human"]);
 });
 
 it("includes only eligible rosters and recognizes shared budgets for every ruleset", () => {
   for (const rules of rulesets) {
     const choices = rosterChoices(rules.id);
-    expect(
-      choices.every(
-        ({ roster }) => !rules.excludedRosters?.includes(roster.id),
-      ),
-    ).toBe(true);
+    expect(choices.every(({ roster }) => !rules.excludedRosters?.includes(roster.id))).toBe(true);
     const budgets = new Set(choices.map(({ budget }) => budget.teamBudget));
-    expect(sharedRosterBudget(rules.id)).toBe(
-      budgets.size === 1 ? [...budgets][0] : undefined,
-    );
+    expect(sharedRosterBudget(rules.id)).toBe(budgets.size === 1 ? [...budgets][0] : undefined);
   }
 });
 
@@ -162,31 +131,15 @@ it("opens stats on demand and preserves the tier when using the roster index", a
   await render("kyiv-seven-sins-sevens");
   await click("tier 2");
   // Browsers do not fire hashchange for replaceState; happy-dom does.
-  const replace = vi
-    .spyOn(window.history, "replaceState")
-    .mockImplementation(() => {});
-  const link = container.querySelector<HTMLAnchorElement>(
-    'nav a[href="#human"]',
-  )!;
+  const replace = vi.spyOn(window.history, "replaceState").mockImplementation(() => {});
+  const link = container.querySelector<HTMLAnchorElement>('nav a[href="#human"]')!;
   await act(async () => link.click());
   expect(replace).toHaveBeenCalledWith(window.history.state, "", "#human");
-  expect(
-    container.querySelector('[aria-pressed="true"]')?.textContent,
-  ).toContain("tier 2");
-  expect(
-    container
-      .querySelector("#roster-content-human")
-      ?.classList.contains("hidden"),
-  ).toBe(false);
-  const toggle = container.querySelector<HTMLButtonElement>(
-    '#human button[aria-controls="roster-content-human"]',
-  )!;
+  expect(container.querySelector('[aria-pressed="true"]')?.textContent).toContain("tier 2");
+  expect(container.querySelector("#roster-content-human")?.classList.contains("hidden")).toBe(false);
+  const toggle = container.querySelector<HTMLButtonElement>('#human button[aria-controls="roster-content-human"]')!;
   await act(async () => toggle.click());
-  expect(
-    container
-      .querySelector("#roster-content-human")
-      ?.classList.contains("hidden"),
-  ).toBe(true);
+  expect(container.querySelector("#roster-content-human")?.classList.contains("hidden")).toBe(true);
   vi.restoreAllMocks();
 });
 
@@ -200,31 +153,19 @@ it("reveals an incoming roster anchor even when filtered out", async () => {
     window.dispatchEvent(new Event("hashchange"));
   });
   expect(container.querySelector('[aria-pressed="true"]')).toBeNull();
-  expect(
-    container
-      .querySelector("#roster-content-human")
-      ?.classList.contains("hidden"),
-  ).toBe(false);
+  expect(container.querySelector("#roster-content-human")?.classList.contains("hidden")).toBe(false);
   vi.restoreAllMocks();
 });
 
 it("keeps shared rules behind the non-standard ruleset help button", async () => {
   await render("kyiv-seven-sins-sevens");
   expect(document.body.textContent).not.toContain("650k GP");
-  const trigger = container.querySelector<HTMLButtonElement>(
-    'button[aria-haspopup="dialog"]',
-  )!;
+  const trigger = container.querySelector<HTMLButtonElement>('button[aria-haspopup="dialog"]')!;
   expect(trigger).not.toBeNull();
   await act(async () => trigger.click());
-  expect(document.body.querySelector('[role="dialog"]')?.textContent).toContain(
-    "650k GP",
-  );
-  expect(document.body.querySelector('[role="dialog"]')?.textContent).toContain(
-    "7–11",
-  );
-  expect(document.body.querySelector('[role="dialog"]')?.textContent).toContain(
-    "rerolls: 100k GP",
-  );
+  expect(document.body.querySelector('[role="dialog"]')?.textContent).toContain("650k GP");
+  expect(document.body.querySelector('[role="dialog"]')?.textContent).toContain("7–11");
+  expect(document.body.querySelector('[role="dialog"]')?.textContent).toContain("rerolls: 100k GP");
 });
 
 it("starts with neutral badges, combines selected tiers, and shows all when the last is cleared", async () => {
@@ -234,17 +175,11 @@ it("starts with neutral badges, combines selected tiers, and shows all when the 
   expect(container.querySelectorAll("section")).toHaveLength(choices.length);
   await click("tier 1");
   await click("tier 2");
-  expect(
-    [...container.querySelectorAll("section")].map((item) => item.id),
-  ).toEqual(
-    choices
-      .filter(({ tier }) => tier === 1 || tier === 2)
-      .map(({ roster }) => roster.id),
+  expect([...container.querySelectorAll("section")].map((item) => item.id)).toEqual(
+    choices.filter(({ tier }) => tier === 1 || tier === 2).map(({ roster }) => roster.id),
   );
   await click("tier 1");
-  expect(container.querySelectorAll("section")).toHaveLength(
-    choices.filter(({ tier }) => tier === 2).length,
-  );
+  expect(container.querySelectorAll("section")).toHaveLength(choices.filter(({ tier }) => tier === 2).length);
   await click("tier 2");
   expect(container.querySelector('[aria-pressed="true"]')).toBeNull();
   expect(container.querySelectorAll("section")).toHaveLength(choices.length);

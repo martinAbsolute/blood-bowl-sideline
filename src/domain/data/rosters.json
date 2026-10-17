@@ -63,10 +63,7 @@
         "id": "amazon-3"
       }
     ],
-    "rerolls": {
-      "cost": 60000,
-      "max": 8
-    },
+    "rerolls": { "cost": 60000, "max": 8 },
     "apothecary": true
   },
   {
@@ -126,10 +123,7 @@
         "id": "black-orc-2"
       }
     ],
-    "rerolls": {
-      "cost": 60000,
-      "max": 8
-    },
+    "rerolls": { "cost": 60000, "max": 8 },
     "apothecary": true
   },
   {
@@ -196,10 +190,7 @@
         "id": "bretonnian-3"
       }
     ],
-    "rerolls": {
-      "cost": 60000,
-      "max": 8
-    },
+    "rerolls": { "cost": 60000, "max": 8 },
     "apothecary": true
   },
   {
@@ -268,13 +259,7 @@
         "ag": "4+",
         "pa": "5+",
         "av": "10+",
-        "skills": [
-          "bone_head",
-          "loner:4+",
-          "mighty_blow",
-          "thick_skull",
-          "throw_team_mate"
-        ],
+        "skills": ["bone_head", "loner:4+", "mighty_blow", "thick_skull", "throw_team_mate"],
         "primarySkills": ["M", "S"],
         "secondarySkills": ["A", "G"],
         "id": "chaos-chosen-3"
@@ -288,23 +273,13 @@
         "ag": "4+",
         "pa": "6+",
         "av": "9+",
-        "skills": [
-          "frenzy",
-          "horns",
-          "loner:4+",
-          "mighty_blow",
-          "thick_skull",
-          "unchannelled_fury"
-        ],
+        "skills": ["frenzy", "horns", "loner:4+", "mighty_blow", "thick_skull", "unchannelled_fury"],
         "primarySkills": ["M", "S"],
         "secondarySkills": ["A", "G"],
         "id": "chaos-chosen-4"
       }
     ],
-    "rerolls": {
-      "cost": 50000,
-      "max": 8
-    },
+    "rerolls": { "cost": 50000, "max": 8 },
     "apothecary": true,
     "bigGuyMax": 1
   },
@@ -366,12 +341,7 @@
         "ag": "4+",
         "pa": "6+",
         "av": "10+",
-        "skills": [
-          "brawler",
-          "breathe_fire",
-          "disturbing_presence",
-          "thick_skull"
-        ],
+        "skills": ["brawler", "breathe_fire", "disturbing_presence", "thick_skull"],
         "primarySkills": ["G", "S"],
         "secondarySkills": ["A", "D", "M"],
         "id": "chaos-dwarf-3"
@@ -399,32 +369,20 @@
         "ag": "4+",
         "pa": "6+",
         "av": "9+",
-        "skills": [
-          "frenzy",
-          "horns",
-          "loner:4+",
-          "mighty_blow",
-          "thick_skull",
-          "unchannelled_fury"
-        ],
+        "skills": ["frenzy", "horns", "loner:4+", "mighty_blow", "thick_skull", "unchannelled_fury"],
         "primarySkills": ["M", "S"],
         "secondarySkills": ["A", "G"],
         "id": "chaos-dwarf-5"
       }
     ],
-    "rerolls": {
-      "cost": 70000,
-      "max": 8
-    },
+    "rerolls": { "cost": 70000, "max": 8 },
     "apothecary": true
   },
   {
     "id": "chaos-renegade",
     "name": "Chaos Renegade",
     "leagues": ["Chaos Clash"],
-    "specialRules": [
-      "Favoured of (Choose either Khorne, Nurgle, Slaanesh, Tzeentch or Undivided)"
-    ],
+    "specialRules": ["Favoured of (Choose either Khorne, Nurgle, Slaanesh, Tzeentch or Undivided)"],
     "tier": 3,
     "players": [
       {
@@ -542,13 +500,7 @@
         "ag": "4+",
         "pa": "5+",
         "av": "10+",
-        "skills": [
-          "bone_head",
-          "loner:3+",
-          "mighty_blow",
-          "thick_skull",
-          "throw_team_mate"
-        ],
+        "skills": ["bone_head", "loner:3+", "mighty_blow", "thick_skull", "throw_team_mate"],
         "primarySkills": ["S"],
         "secondarySkills": ["A", "G", "M"],
         "errata": [
@@ -586,14 +538,7 @@
         "ag": "4+",
         "pa": "6+",
         "av": "9+",
-        "skills": [
-          "frenzy",
-          "horns",
-          "loner:4+",
-          "mighty_blow",
-          "thick_skull",
-          "unchannelled_fury"
-        ],
+        "skills": ["frenzy", "horns", "loner:4+", "mighty_blow", "thick_skull", "unchannelled_fury"],
         "primarySkills": ["S"],
         "secondarySkills": ["A", "G", "M"],
         "id": "chaos-renegade-8"
@@ -607,22 +552,13 @@
         "ag": "4+",
         "pa": "6+",
         "av": "9+",
-        "skills": [
-          "animal_savagery",
-          "frenzy",
-          "loner:4+",
-          "mighty_blow",
-          "prehensile_tail"
-        ],
+        "skills": ["animal_savagery", "frenzy", "loner:4+", "mighty_blow", "prehensile_tail"],
         "primarySkills": ["S"],
         "secondarySkills": ["A", "G", "M"],
         "id": "chaos-renegade-9"
       }
     ],
-    "rerolls": {
-      "cost": 70000,
-      "max": 8
-    },
+    "rerolls": { "cost": 70000, "max": 8 },
     "apothecary": true,
     "bigGuyMax": 3
   },
@@ -704,10 +640,7 @@
         "id": "dark-elf-4"
       }
     ],
-    "rerolls": {
-      "cost": 50000,
-      "max": 8
-    },
+    "rerolls": { "cost": 50000, "max": 8 },
     "apothecary": true
   },
   {
@@ -777,13 +710,7 @@
         "ag": "4+",
         "pa": "5+",
         "av": "9+",
-        "skills": [
-          "block",
-          "dauntless",
-          "frenzy",
-          "hatred:Troll",
-          "thick_skull"
-        ],
+        "skills": ["block", "dauntless", "frenzy", "hatred:Troll", "thick_skull"],
         "primarySkills": ["G", "S"],
         "secondarySkills": ["D"],
         "id": "dwarf-3"
@@ -812,10 +739,7 @@
         "id": "dwarf-4"
       }
     ],
-    "rerolls": {
-      "cost": 60000,
-      "max": 8
-    },
+    "rerolls": { "cost": 60000, "max": 8 },
     "apothecary": true
   },
   {
@@ -882,10 +806,7 @@
         "id": "elven-union-3"
       }
     ],
-    "rerolls": {
-      "cost": 50000,
-      "max": 8
-    },
+    "rerolls": { "cost": 50000, "max": 8 },
     "apothecary": true
   },
   {
@@ -974,10 +895,7 @@
         "id": "gnome-4"
       }
     ],
-    "rerolls": {
-      "cost": 50000,
-      "max": 8
-    },
+    "rerolls": { "cost": 50000, "max": 8 },
     "apothecary": true
   },
   {
@@ -1038,14 +956,7 @@
         "ag": "3+",
         "pa": "5+",
         "av": "8+",
-        "skills": [
-          "dirty_player",
-          "disturbing_presence",
-          "dodge",
-          "right_stuff",
-          "stunty",
-          "taunt"
-        ],
+        "skills": ["dirty_player", "disturbing_presence", "dodge", "right_stuff", "stunty", "taunt"],
         "primarySkills": ["A", "D"],
         "secondarySkills": ["G", "S"],
         "id": "goblin-3"
@@ -1114,10 +1025,7 @@
         "id": "goblin-7"
       }
     ],
-    "rerolls": {
-      "cost": 60000,
-      "max": 8
-    },
+    "rerolls": { "cost": 60000, "max": 8 },
     "apothecary": true
   },
   {
@@ -1192,10 +1100,7 @@
         "id": "halfling-3"
       }
     ],
-    "rerolls": {
-      "cost": 60000,
-      "max": 8
-    },
+    "rerolls": { "cost": 60000, "max": 8 },
     "apothecary": true
   },
   {
@@ -1262,10 +1167,7 @@
         "id": "high-elf-3"
       }
     ],
-    "rerolls": {
-      "cost": 50000,
-      "max": 8
-    },
+    "rerolls": { "cost": 50000, "max": 8 },
     "apothecary": true
   },
   {
@@ -1354,13 +1256,7 @@
         "ag": "4+",
         "pa": "5+",
         "av": "10+",
-        "skills": [
-          "bone_head",
-          "loner:3+",
-          "mighty_blow",
-          "thick_skull",
-          "throw_team_mate"
-        ],
+        "skills": ["bone_head", "loner:3+", "mighty_blow", "thick_skull", "throw_team_mate"],
         "primarySkills": ["S"],
         "secondarySkills": ["A", "G"],
         "errata": [
@@ -1382,10 +1278,7 @@
         "id": "human-5"
       }
     ],
-    "rerolls": {
-      "cost": 50000,
-      "max": 8
-    },
+    "rerolls": { "cost": 50000, "max": 8 },
     "apothecary": true
   },
   {
@@ -1460,13 +1353,7 @@
         "ag": "4+",
         "pa": "5+",
         "av": "10+",
-        "skills": [
-          "bone_head",
-          "loner:3+",
-          "mighty_blow",
-          "thick_skull",
-          "throw_team_mate"
-        ],
+        "skills": ["bone_head", "loner:3+", "mighty_blow", "thick_skull", "throw_team_mate"],
         "primarySkills": ["S"],
         "secondarySkills": ["A", "G"],
         "errata": [
@@ -1488,10 +1375,7 @@
         "id": "imperial-nobility-4"
       }
     ],
-    "rerolls": {
-      "cost": 60000,
-      "max": 8
-    },
+    "rerolls": { "cost": 60000, "max": 8 },
     "apothecary": true
   },
   {
@@ -1552,22 +1436,13 @@
         "ag": "4+",
         "pa": "6+",
         "av": "9+",
-        "skills": [
-          "claws",
-          "frenzy",
-          "loner:4+",
-          "mighty_blow",
-          "unchannelled_fury"
-        ],
+        "skills": ["claws", "frenzy", "loner:4+", "mighty_blow", "unchannelled_fury"],
         "primarySkills": ["M", "S"],
         "secondarySkills": ["A", "G"],
         "id": "khorne-3"
       }
     ],
-    "rerolls": {
-      "cost": 60000,
-      "max": 8
-    },
+    "rerolls": { "cost": 60000, "max": 8 },
     "apothecary": true
   },
   {
@@ -1628,22 +1503,13 @@
         "ag": "5+",
         "pa": "6+",
         "av": "10+",
-        "skills": [
-          "bone_head",
-          "loner:4+",
-          "mighty_blow",
-          "prehensile_tail",
-          "thick_skull"
-        ],
+        "skills": ["bone_head", "loner:4+", "mighty_blow", "prehensile_tail", "thick_skull"],
         "primarySkills": ["S"],
         "secondarySkills": ["A", "G"],
         "id": "lizardmen-3"
       }
     ],
-    "rerolls": {
-      "cost": 70000,
-      "max": 8
-    },
+    "rerolls": { "cost": 70000, "max": 8 },
     "apothecary": true
   },
   {
@@ -1690,13 +1556,7 @@
         "ag": "3+",
         "pa": "-",
         "av": "9+",
-        "skills": [
-          "block",
-          "foul_appearance",
-          "no_ball",
-          "regeneration",
-          "sidestep"
-        ],
+        "skills": ["block", "foul_appearance", "no_ball", "regeneration", "sidestep"],
         "primarySkills": ["G", "S"],
         "secondarySkills": ["A", "D"],
         "id": "necromantic-horror-2"
@@ -1730,19 +1590,14 @@
         "id": "necromantic-horror-4"
       }
     ],
-    "rerolls": {
-      "cost": 70000,
-      "max": 8
-    },
+    "rerolls": { "cost": 70000, "max": 8 },
     "apothecary": false
   },
   {
     "id": "norse",
     "name": "Norse",
     "leagues": ["Chaos Clash", "Old World Classic"],
-    "specialRules": [
-      "If Chaos Clash is chosen, this team gains Favoured of Khorne"
-    ],
+    "specialRules": ["If Chaos Clash is chosen, this team gains Favoured of Khorne"],
     "tier": 1,
     "players": [
       {
@@ -1824,22 +1679,13 @@
         "ag": "4+",
         "pa": "6+",
         "av": "9+",
-        "skills": [
-          "claws",
-          "disturbing_presence",
-          "frenzy",
-          "loner:4+",
-          "unchannelled_fury"
-        ],
+        "skills": ["claws", "disturbing_presence", "frenzy", "loner:4+", "unchannelled_fury"],
         "primarySkills": ["S"],
         "secondarySkills": ["A", "G"],
         "id": "norse-5"
       }
     ],
-    "rerolls": {
-      "cost": 60000,
-      "max": 8
-    },
+    "rerolls": { "cost": 60000, "max": 8 },
     "apothecary": true
   },
   {
@@ -1872,13 +1718,7 @@
         "ag": "3+",
         "pa": "4+",
         "av": "9+",
-        "skills": [
-          "horns",
-          "plague_ridden",
-          "regeneration",
-          "steady_footing",
-          "thick_skull"
-        ],
+        "skills": ["horns", "plague_ridden", "regeneration", "steady_footing", "thick_skull"],
         "primarySkills": ["G", "M", "S"],
         "secondarySkills": ["A", "D", "P"],
         "id": "nurgle-1"
@@ -1892,14 +1732,7 @@
         "ag": "4+",
         "pa": "6+",
         "av": "10+",
-        "skills": [
-          "disturbing_presence",
-          "foul_appearance",
-          "plague_ridden",
-          "regeneration",
-          "stand_firm",
-          "unsteady"
-        ],
+        "skills": ["disturbing_presence", "foul_appearance", "plague_ridden", "regeneration", "stand_firm", "unsteady"],
         "primarySkills": ["G", "M", "S"],
         "secondarySkills": ["A", "D"],
         "id": "nurgle-2"
@@ -1929,10 +1762,7 @@
         "id": "nurgle-3"
       }
     ],
-    "rerolls": {
-      "cost": 60000,
-      "max": 8
-    },
+    "rerolls": { "cost": 60000, "max": 8 },
     "apothecary": false
   },
   {
@@ -1965,12 +1795,7 @@
         "ag": "4+",
         "pa": "5+",
         "av": "10+",
-        "skills": [
-          "bone_head",
-          "mighty_blow",
-          "thick_skull",
-          "throw_team_mate"
-        ],
+        "skills": ["bone_head", "mighty_blow", "thick_skull", "throw_team_mate"],
         "primarySkills": ["S"],
         "secondarySkills": ["A", "D", "G", "P"],
         "id": "ogre-1"
@@ -1990,10 +1815,7 @@
         "id": "ogre-2"
       }
     ],
-    "rerolls": {
-      "cost": 70000,
-      "max": 8
-    },
+    "rerolls": { "cost": 70000, "max": 8 },
     "apothecary": true
   },
   {
@@ -2142,13 +1964,7 @@
         "ag": "4+",
         "pa": "5+",
         "av": "9+",
-        "skills": [
-          "block",
-          "dauntless",
-          "frenzy",
-          "hatred:Troll",
-          "thick_skull"
-        ],
+        "skills": ["block", "dauntless", "frenzy", "hatred:Troll", "thick_skull"],
         "primarySkills": ["G", "S"],
         "secondarySkills": ["A"],
         "id": "old-world-alliance-8"
@@ -2162,13 +1978,7 @@
         "ag": "4+",
         "pa": "5+",
         "av": "10+",
-        "skills": [
-          "bone_head",
-          "loner:3+",
-          "mighty_blow",
-          "thick_skull",
-          "throw_team_mate"
-        ],
+        "skills": ["bone_head", "loner:3+", "mighty_blow", "thick_skull", "throw_team_mate"],
         "primarySkills": ["S"],
         "secondarySkills": ["A", "G"],
         "errata": [
@@ -2222,10 +2032,7 @@
         "id": "old-world-alliance-10"
       }
     ],
-    "rerolls": {
-      "cost": 70000,
-      "max": 8
-    },
+    "rerolls": { "cost": 70000, "max": 8 },
     "apothecary": true,
     "bigGuyMax": 1
   },
@@ -2339,10 +2146,7 @@
         "id": "orc-5"
       }
     ],
-    "rerolls": {
-      "cost": 60000,
-      "max": 8
-    },
+    "rerolls": { "cost": 60000, "max": 8 },
     "apothecary": true
   },
   {
@@ -2423,10 +2227,7 @@
         "id": "shambling-undead-4"
       }
     ],
-    "rerolls": {
-      "cost": 70000,
-      "max": 8
-    },
+    "rerolls": { "cost": 70000, "max": 8 },
     "apothecary": false
   },
   {
@@ -2501,22 +2302,13 @@
         "ag": "4+",
         "pa": "6+",
         "av": "9+",
-        "skills": [
-          "animal_savagery",
-          "frenzy",
-          "loner:4+",
-          "mighty_blow",
-          "prehensile_tail"
-        ],
+        "skills": ["animal_savagery", "frenzy", "loner:4+", "mighty_blow", "prehensile_tail"],
         "primarySkills": ["S"],
         "secondarySkills": ["A", "G", "M"],
         "id": "skaven-4"
       }
     ],
-    "rerolls": {
-      "cost": 50000,
-      "max": 8
-    },
+    "rerolls": { "cost": 50000, "max": 8 },
     "apothecary": true
   },
   {
@@ -2577,22 +2369,13 @@
         "ag": "5+",
         "pa": "6+",
         "av": "10+",
-        "skills": [
-          "bone_head",
-          "loner:4+",
-          "mighty_blow",
-          "prehensile_tail",
-          "thick_skull"
-        ],
+        "skills": ["bone_head", "loner:4+", "mighty_blow", "prehensile_tail", "thick_skull"],
         "primarySkills": ["S"],
         "secondarySkills": ["A", "G"],
         "id": "slann-3"
       }
     ],
-    "rerolls": {
-      "cost": 50000,
-      "max": 8
-    },
+    "rerolls": { "cost": 50000, "max": 8 },
     "apothecary": true
   },
   {
@@ -2611,14 +2394,7 @@
         "ag": "3+",
         "pa": "4+",
         "av": "6+",
-        "skills": [
-          "dodge",
-          "insignificant",
-          "right_stuff",
-          "sidestep",
-          "stunty",
-          "titchy"
-        ],
+        "skills": ["dodge", "insignificant", "right_stuff", "sidestep", "stunty", "titchy"],
         "primarySkills": ["A", "D"],
         "secondarySkills": ["G"],
         "id": "snotling-0"
@@ -2660,15 +2436,7 @@
         "ag": "3+",
         "pa": "4+",
         "av": "6+",
-        "skills": [
-          "bombardier",
-          "dodge",
-          "right_stuff",
-          "secret_weapon",
-          "sidestep",
-          "stunty",
-          "titchy"
-        ],
+        "skills": ["bombardier", "dodge", "right_stuff", "secret_weapon", "sidestep", "stunty", "titchy"],
         "primarySkills": ["A", "D", "P"],
         "secondarySkills": ["G"],
         "id": "snotling-3"
@@ -2682,13 +2450,7 @@
         "ag": "5+",
         "pa": "6+",
         "av": "9+",
-        "skills": [
-          "dirty_player",
-          "juggernaut",
-          "mighty_blow",
-          "really_stupid",
-          "stand_firm"
-        ],
+        "skills": ["dirty_player", "juggernaut", "mighty_blow", "really_stupid", "stand_firm"],
         "primarySkills": ["D", "S"],
         "secondarySkills": ["A", "G"],
         "id": "snotling-4"
@@ -2715,10 +2477,7 @@
         "id": "snotling-5"
       }
     ],
-    "rerolls": {
-      "cost": 70000,
-      "max": 8
-    },
+    "rerolls": { "cost": 70000, "max": 8 },
     "apothecary": true
   },
   {
@@ -2785,10 +2544,7 @@
         "id": "tomb-kings-3"
       }
     ],
-    "rerolls": {
-      "cost": 60000,
-      "max": 8
-    },
+    "rerolls": { "cost": 60000, "max": 8 },
     "apothecary": false
   },
   {
@@ -2821,14 +2577,7 @@
         "ag": "3+",
         "pa": "4+",
         "av": "6+",
-        "skills": [
-          "dodge",
-          "insignificant",
-          "right_stuff",
-          "sidestep",
-          "stunty",
-          "titchy"
-        ],
+        "skills": ["dodge", "insignificant", "right_stuff", "sidestep", "stunty", "titchy"],
         "primarySkills": ["A", "D", "M"],
         "secondarySkills": ["G"],
         "id": "underworld-denizens-1"
@@ -2920,22 +2669,13 @@
         "ag": "4+",
         "pa": "6+",
         "av": "9+",
-        "skills": [
-          "animal_savagery",
-          "frenzy",
-          "loner:4+",
-          "mighty_blow",
-          "prehensile_tail"
-        ],
+        "skills": ["animal_savagery", "frenzy", "loner:4+", "mighty_blow", "prehensile_tail"],
         "primarySkills": ["M", "S"],
         "secondarySkills": ["A", "G"],
         "id": "underworld-denizens-7"
       }
     ],
-    "rerolls": {
-      "cost": 70000,
-      "max": 8
-    },
+    "rerolls": { "cost": 70000, "max": 8 },
     "apothecary": true,
     "bigGuyMax": 1
   },
@@ -2997,12 +2737,7 @@
         "ag": "2+",
         "pa": "4+",
         "av": "9+",
-        "skills": [
-          "bloodlust:3+",
-          "hypnotic_gaze",
-          "juggernaut",
-          "regeneration"
-        ],
+        "skills": ["bloodlust:3+", "hypnotic_gaze", "juggernaut", "regeneration"],
         "primarySkills": ["A", "G", "S"],
         "secondarySkills": [],
         "id": "vampire-3"
@@ -3016,22 +2751,13 @@
         "ag": "4+",
         "pa": "6+",
         "av": "10+",
-        "skills": [
-          "bloodlust:3+",
-          "claws",
-          "frenzy",
-          "loner:4+",
-          "regeneration"
-        ],
+        "skills": ["bloodlust:3+", "claws", "frenzy", "loner:4+", "regeneration"],
         "primarySkills": ["S"],
         "secondarySkills": ["A", "G"],
         "id": "vampire-4"
       }
     ],
-    "rerolls": {
-      "cost": 60000,
-      "max": 8
-    },
+    "rerolls": { "cost": 60000, "max": 8 },
     "apothecary": true
   },
   {
@@ -3120,10 +2846,7 @@
         "id": "wood-elf-4"
       }
     ],
-    "rerolls": {
-      "cost": 50000,
-      "max": 8
-    },
+    "rerolls": { "cost": 50000, "max": 8 },
     "apothecary": true
   }
 ]

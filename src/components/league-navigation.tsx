@@ -14,12 +14,7 @@ export function LeagueNavigation<T extends string>({
   value: T;
   onChange: (value: T) => void;
   vertical?: boolean;
-  items: {
-    value: T;
-    label: string;
-    icon?: ComponentType<{ className?: string }>;
-    badge?: number;
-  }[];
+  items: { value: T; label: string; icon?: ComponentType<{ className?: string }>; badge?: number }[];
 }) {
   return (
     <nav aria-label={label} className="min-w-0">
@@ -37,13 +32,7 @@ export function LeagueNavigation<T extends string>({
           </option>
         ))}
       </LeagueSelect>
-      <div
-        className={
-          vertical
-            ? "hidden flex-col gap-1 lg:flex"
-            : "hidden flex-wrap gap-1 border-b pb-2 md:flex"
-        }
-      >
+      <div className={vertical ? "hidden flex-col gap-1 lg:flex" : "hidden flex-wrap gap-1 border-b pb-2 md:flex"}>
         {items.map(({ value: key, label: text, icon: Icon, badge }) => (
           <button
             key={key}
@@ -55,9 +44,7 @@ export function LeagueNavigation<T extends string>({
             {Icon && <Icon className="size-4 shrink-0" />}
             <span className="min-w-0 flex-1">{text}</span>
             {!!badge && (
-              <span className="rounded border border-current/10 bg-card px-1.5 text-xs tabular-nums">
-                {badge}
-              </span>
+              <span className="rounded border border-current/10 bg-card px-1.5 text-xs tabular-nums">{badge}</span>
             )}
           </button>
         ))}

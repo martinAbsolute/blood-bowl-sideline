@@ -13,12 +13,12 @@ import { rosterChoices, rosterReferenceHref } from "@/lib/roster-ruleset";
 
 function scrollToRoster(id: string) {
   window.requestAnimationFrame(() => {
-    document.getElementById(id)?.scrollIntoView({
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? "instant"
-        : "smooth",
-      block: "start",
-    });
+    document
+      .getElementById(id)
+      ?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+        block: "start",
+      });
   });
 }
 
@@ -37,9 +37,7 @@ export function RosterExplorer({
 
   const openHashRoster = useEffectEvent(() => {
     const id = window.location.hash.slice(1);
-    const choice = rosterChoices(rulesetId).find(
-      ({ roster }) => roster.id === id,
-    );
+    const choice = rosterChoices(rulesetId).find(({ roster }) => roster.id === id);
     if (!choice) return;
 
     setSearch("");
@@ -94,20 +92,10 @@ export function RosterExplorer({
               key={r.id}
               href={`#${r.id}`}
               onClick={(event) => {
-                if (
-                  event.metaKey ||
-                  event.ctrlKey ||
-                  event.shiftKey ||
-                  event.altKey
-                )
-                  return;
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
                 event.preventDefault();
                 setExpanded((current) => new Set([...current, r.id]));
-                window.history.replaceState(
-                  window.history.state,
-                  "",
-                  `#${r.id}`,
-                );
+                window.history.replaceState(window.history.state, "", `#${r.id}`);
                 scrollToRoster(r.id);
               }}
               className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded px-2 py-1.5 text-xs hover:bg-secondary focus-visible:outline-2 focus-visible:outline-ring lg:min-h-0 lg:py-1"
@@ -120,11 +108,7 @@ export function RosterExplorer({
       </aside>
       <div className="min-w-0 space-y-5">
         {list.map((r) => (
-          <section
-            id={r.id}
-            key={r.id}
-            className="scroll-mt-4 overflow-hidden rounded-lg border bg-card"
-          >
+          <section id={r.id} key={r.id} className="scroll-mt-4 overflow-hidden rounded-lg border bg-card">
             <div className="relative flex items-center gap-1 border-b bg-secondary/40 px-2 py-2 md:gap-2 md:px-3">
               <button
                 type="button"
@@ -136,10 +120,7 @@ export function RosterExplorer({
               />
               <h2 className="pointer-events-none relative min-w-0 flex-1 font-semibold md:pointer-events-auto">
                 <span className="flex min-w-0 items-center gap-1 text-xs md:hidden">
-                  <RosterIcon
-                    rosterId={r.id}
-                    className="size-4 shrink-0 min-[360px]:size-6"
-                  />
+                  <RosterIcon rosterId={r.id} className="size-4 shrink-0 min-[360px]:size-6" />
                   <span className="line-clamp-2 leading-tight" title={r.name}>
                     {r.name}
                   </span>
@@ -190,9 +171,7 @@ export function RosterExplorer({
             </div>
           </section>
         ))}
-        {!list.length && (
-          <p className="py-4 text-sm text-muted-foreground">{t("noResults")}</p>
-        )}
+        {!list.length && <p className="py-4 text-sm text-muted-foreground">{t("noResults")}</p>}
       </div>
     </div>
   );

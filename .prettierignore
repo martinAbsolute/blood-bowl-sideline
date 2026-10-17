@@ -1,7 +1,0 @@
-node_modules
-.next
-.research
-.agents
-convex/_generated
-src/components/ui
-src/components/magic-ui

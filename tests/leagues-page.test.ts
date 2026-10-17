@@ -4,34 +4,25 @@ import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
 import { LeaguesPage } from "../src/components/leagues-page";
 
-const state = vi.hoisted(() => ({
-  create: vi.fn().mockResolvedValue("new-league"),
-  push: vi.fn(),
-}));
+const state = vi.hoisted(() => ({ create: vi.fn().mockResolvedValue("new-league"), push: vi.fn() }));
 vi.mock("next-intl", async (importOriginal) => {
   const actual = await importOriginal<typeof import("next-intl")>();
   const { formats, timeZone } = await import("../src/i18n/config");
   return {
     ...actual,
-    useFormatter: () =>
-      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useFormatter: () => actual.createFormatter({ locale: "en", formats, timeZone }),
     useTranslations: () => (key: string) => key,
     useLocale: () => "en",
   };
 });
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: state.push }) }));
 vi.mock("next/link", () => ({
-  default: ({ children, ...props }: { children: ReactNode; href: string }) =>
-    createElement("a", props, children),
+  default: ({ children, ...props }: { children: ReactNode; href: string }) => createElement("a", props, children),
 }));
 vi.mock("convex/react", () => ({
   useConvexAuth: () => ({ isAuthenticated: true, isLoading: false }),
   useMutation: () => state.create,
-  usePaginatedQuery: () => ({
-    results: [],
-    status: "Exhausted",
-    loadMore: vi.fn(),
-  }),
+  usePaginatedQuery: () => ({ results: [], status: "Exhausted", loadMore: vi.fn() }),
 }));
 vi.mock("../src/components/site-shell", () => ({ LoginButton: () => null }));
 
@@ -51,29 +42,16 @@ it("creates a league directly with today's date and the selected treasury", asyn
     container.remove();
   };
   await act(async () => root.render(createElement(LeaguesPage)));
-  await act(async () =>
-    container.querySelector<HTMLButtonElement>("button")!.click(),
-  );
+  await act(async () => container.querySelector<HTMLButtonElement>("button")!.click());
   const dialog = document.querySelector('[role="dialog"]')!;
   expect(dialog.textContent).not.toContain("leagueUx.createReview");
   const date = new Date();
   expect(dialog.textContent).toContain(
-    date.toLocaleDateString("en", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    }),
+    date.toLocaleDateString("en", { day: "2-digit", month: "2-digit", year: "numeric" }),
   );
-  const name = dialog.querySelector<HTMLInputElement>(
-    'input[maxlength="100"]',
-  )!;
-  const treasury = dialog.querySelector<HTMLInputElement>(
-    'input[aria-describedby="treasury-hint"]',
-  )!;
-  const setter = Object.getOwnPropertyDescriptor(
-    HTMLInputElement.prototype,
-    "value",
-  )!.set!;
+  const name = dialog.querySelector<HTMLInputElement>('input[maxlength="100"]')!;
+  const treasury = dialog.querySelector<HTMLInputElement>('input[aria-describedby="treasury-hint"]')!;
+  const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
   expect(treasury.value.replace(/\D/g, "")).toBe("1000000");
   await act(async () => {
     setter.call(name, "Kyiv autumn league");
@@ -82,9 +60,7 @@ it("creates a league directly with today's date and the selected treasury", asyn
     treasury.dispatchEvent(new Event("input", { bubbles: true }));
   });
   await act(async () =>
-    dialog
-      .querySelector("form")!
-      .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })),
+    dialog.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })),
   );
   expect(state.create).toHaveBeenCalledExactlyOnceWith({
     name: "Kyiv autumn league",

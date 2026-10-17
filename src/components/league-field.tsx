@@ -5,6 +5,8 @@ import { EditorSelect } from "./editor-select";
 /** Match the team editor's labels and let the field own control spacing. */
 export function LeagueField({ className, ...props }: ComponentProps<"label">) {
   return (
+    // Callers supply the nested control and label text through props.children.
+    // oxlint-disable-next-line jsx-a11y/label-has-associated-control
     <label
       {...props}
       className={cn(
@@ -15,11 +17,7 @@ export function LeagueField({ className, ...props }: ComponentProps<"label">) {
   );
 }
 
-export function LeagueSelect({
-  className,
-  wrapperClassName,
-  ...props
-}: ComponentProps<typeof EditorSelect>) {
+export function LeagueSelect({ className, wrapperClassName, ...props }: ComponentProps<typeof EditorSelect>) {
   return (
     <EditorSelect
       {...props}

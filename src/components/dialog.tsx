@@ -48,15 +48,7 @@ export function DialogContent({
       >
         {children}
         {showCloseButton && (
-          <DialogClose
-            render={
-              <Button
-                variant="ghost"
-                className="absolute right-2 top-2"
-                size="icon-sm"
-              />
-            }
-          >
+          <DialogClose render={<Button variant="ghost" className="absolute right-2 top-2" size="icon-sm" />}>
             <X />
             <span className="sr-only">{t("close")}</span>
           </DialogClose>

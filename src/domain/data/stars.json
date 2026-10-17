@@ -33,14 +33,7 @@
     "ag": "5+",
     "pa": "6+",
     "av": "10+",
-    "skills": [
-      "block",
-      "grab",
-      "loner:4+",
-      "stand_firm",
-      "unsteady",
-      "savage_blow"
-    ],
+    "skills": ["block", "grab", "loner:4+", "stand_firm", "unsteady", "savage_blow"],
     "playsFor": ["Lustrian Superleague"],
     "playerType": "Lizardman, Blocker"
   },
@@ -53,15 +46,7 @@
     "ag": "3+",
     "pa": "3+",
     "av": "7+",
-    "skills": [
-      "accurate",
-      "bombardier",
-      "dodge",
-      "loner:4+",
-      "secret_weapon",
-      "stunty",
-      "all_you_can_eat"
-    ],
+    "skills": ["accurate", "bombardier", "dodge", "loner:4+", "secret_weapon", "stunty", "all_you_can_eat"],
     "playsFor": ["Halfling Thimble Cup", "Old World Classic"],
     "playerType": "Halfling, Special"
   },
@@ -74,14 +59,7 @@
     "ag": "2+",
     "pa": "3+",
     "av": "10+",
-    "skills": [
-      "block",
-      "hypnotic_gaze",
-      "loner:4+",
-      "regeneration",
-      "sidestep",
-      "star_of_the_show"
-    ],
+    "skills": ["block", "hypnotic_gaze", "loner:4+", "regeneration", "sidestep", "star_of_the_show"],
     "playsFor": ["Sylvanian Spotlight"],
     "playerType": "Vampire, Blocker"
   },
@@ -94,15 +72,7 @@
     "ag": "2+",
     "pa": "3+",
     "av": "9+",
-    "skills": [
-      "block",
-      "dodge",
-      "fend",
-      "loner:3+",
-      "sprint",
-      "sure_feet",
-      "consummate_professional"
-    ],
+    "skills": ["block", "dodge", "fend", "loner:3+", "sprint", "sure_feet", "consummate_professional"],
     "playsFor": ["Old World Classic"],
     "playerType": "Human, Blitzer"
   },
@@ -115,16 +85,7 @@
     "ag": "3+",
     "pa": "6+",
     "av": "9+",
-    "skills": [
-      "block",
-      "dauntless",
-      "frenzy",
-      "hatred:Big Guy",
-      "loner:4+",
-      "multiple_block",
-      "thick_skull",
-      "slayer"
-    ],
+    "skills": ["block", "dauntless", "frenzy", "hatred:Big Guy", "loner:4+", "multiple_block", "thick_skull", "slayer"],
     "playsFor": ["Worlds Edge Superleague"],
     "playerType": "Dwarf, Special"
   },
@@ -161,16 +122,7 @@
     "ag": "3+",
     "pa": "4+",
     "av": "9+",
-    "skills": [
-      "block",
-      "drunkard",
-      "fend",
-      "loner:3+",
-      "tackle",
-      "taunt",
-      "thick_skull",
-      "dwarfen_grit"
-    ],
+    "skills": ["block", "drunkard", "fend", "loner:3+", "tackle", "taunt", "thick_skull", "dwarfen_grit"],
     "playsFor": ["Old World Classic", "Worlds Edge Superleague"],
     "playerType": "Dwarf, Blocker"
   },
@@ -227,15 +179,7 @@
     "ag": "3+",
     "pa": "3+",
     "av": "8+",
-    "skills": [
-      "block",
-      "dodge",
-      "loner:3+",
-      "nerves_of_steel",
-      "right_stuff",
-      "stunty",
-      "halfling_luck"
-    ],
+    "skills": ["block", "dodge", "loner:3+", "nerves_of_steel", "right_stuff", "stunty", "halfling_luck"],
     "playsFor": ["Halfling Thimble Cup", "Old World Classic"],
     "playerType": "Halfling, Blitzer"
   },
@@ -248,15 +192,7 @@
     "ag": "5+",
     "pa": "4+",
     "av": "10+",
-    "skills": [
-      "bullseye",
-      "grab",
-      "loner:4+",
-      "mighty_blow",
-      "regeneration",
-      "throw_team_mate",
-      "thinking_mans_troll"
-    ],
+    "skills": ["bullseye", "grab", "loner:4+", "mighty_blow", "regeneration", "throw_team_mate", "thinking_mans_troll"],
     "playsFor": ["Badlands Brawl", "Underworld Challenge"],
     "playerType": "Troll, Big Guy"
   },
@@ -292,15 +228,7 @@
     "ag": "3+",
     "pa": "5+",
     "av": "8+",
-    "skills": [
-      "block",
-      "horns",
-      "juggernaut",
-      "loner:4+",
-      "tackle",
-      "thick_skull",
-      "ram"
-    ],
+    "skills": ["block", "horns", "juggernaut", "loner:4+", "tackle", "thick_skull", "ram"],
     "playsFor": ["Halfling Thimble Cup"],
     "playerType": "Blitzer, Halfling"
   },
@@ -313,14 +241,7 @@
     "ag": "2+",
     "pa": "4+",
     "av": "8+",
-    "skills": [
-      "dodge",
-      "loner:4+",
-      "prehensile_tail",
-      "shadowing",
-      "stab",
-      "master_assassin"
-    ],
+    "skills": ["dodge", "loner:4+", "prehensile_tail", "shadowing", "stab", "master_assassin"],
     "playsFor": ["Underworld Challenge"],
     "playerType": "Skaven, Runner"
   },
@@ -444,16 +365,7 @@
     "ag": "3+",
     "pa": "3+",
     "av": "8+",
-    "skills": [
-      "accurate",
-      "bombardier",
-      "dodge",
-      "loner:4+",
-      "right_stuff",
-      "secret_weapon",
-      "stunty",
-      "kaboom"
-    ],
+    "skills": ["accurate", "bombardier", "dodge", "loner:4+", "right_stuff", "secret_weapon", "stunty", "kaboom"],
     "playsFor": ["Badlands Brawl", "Underworld Challenge"],
     "playerType": "Goblin, Special"
   },
@@ -466,15 +378,7 @@
     "ag": "2+",
     "pa": "3+",
     "av": "9+",
-    "skills": [
-      "bloodlust:2+",
-      "dodge",
-      "hypnotic_gaze",
-      "jump_up",
-      "loner:4+",
-      "regeneration",
-      "tasty_morsel"
-    ],
+    "skills": ["bloodlust:2+", "dodge", "hypnotic_gaze", "jump_up", "loner:4+", "regeneration", "tasty_morsel"],
     "playsFor": ["Sylvanian Spotlight"],
     "playerType": "Runner, Vampire"
   },
@@ -511,16 +415,7 @@
     "ag": "3+",
     "pa": "4+",
     "av": "8+",
-    "skills": [
-      "dirty_player",
-      "dodge",
-      "loner:4+",
-      "quick_foul",
-      "sidestep",
-      "sneaky_git",
-      "stunty",
-      "a_sneaky_pair"
-    ],
+    "skills": ["dirty_player", "dodge", "loner:4+", "quick_foul", "sidestep", "sneaky_git", "stunty", "a_sneaky_pair"],
     "playsFor": ["Lustrian Superleague"],
     "playerType": "Skink, Special"
   },
@@ -533,14 +428,7 @@
     "ag": "3+",
     "pa": "4+",
     "av": "8+",
-    "skills": [
-      "dodge",
-      "loner:4+",
-      "sidestep",
-      "stab",
-      "stunty",
-      "a_sneaky_pair"
-    ],
+    "skills": ["dodge", "loner:4+", "sidestep", "stab", "stunty", "a_sneaky_pair"],
     "playsFor": ["Lustrian Superleague"],
     "playerType": "Skink, Special"
   },
@@ -553,15 +441,7 @@
     "ag": "2+",
     "pa": "3+",
     "av": "8+",
-    "skills": [
-      "catch",
-      "dodge",
-      "hypnotic_gaze",
-      "loner:4+",
-      "nerves_of_steel",
-      "on_the_ball",
-      "mesmerising_dance"
-    ],
+    "skills": ["catch", "dodge", "hypnotic_gaze", "loner:4+", "nerves_of_steel", "on_the_ball", "mesmerising_dance"],
     "playsFor": ["Elven Kingdoms League"],
     "playerType": "Catcher, Elf"
   },
@@ -574,14 +454,7 @@
     "ag": "3+",
     "pa": "4+",
     "av": "8+",
-    "skills": [
-      "disturbing_presence",
-      "dodge",
-      "guard",
-      "loner:4+",
-      "sidestep",
-      "baleful_hex"
-    ],
+    "skills": ["disturbing_presence", "dodge", "guard", "loner:4+", "sidestep", "baleful_hex"],
     "playsFor": ["Lustrian Superleague"],
     "playerType": "Human, Lineman"
   },
@@ -594,15 +467,7 @@
     "ag": "3+",
     "pa": "-",
     "av": "8+",
-    "skills": [
-      "ball_and_chain",
-      "loner:4+",
-      "mighty_blow",
-      "no_ball",
-      "secret_weapon",
-      "stunty",
-      "whirling_dervish"
-    ],
+    "skills": ["ball_and_chain", "loner:4+", "mighty_blow", "no_ball", "secret_weapon", "stunty", "whirling_dervish"],
     "playsFor": ["Badlands Brawl", "Underworld Challenge"],
     "playerType": "Goblin, Special"
   },
@@ -615,15 +480,7 @@
     "ag": "4+",
     "pa": "6+",
     "av": "9+",
-    "skills": [
-      "block",
-      "claws",
-      "grab",
-      "juggernaut",
-      "loner:4+",
-      "stand_firm",
-      "frenzied_rush"
-    ],
+    "skills": ["block", "claws", "grab", "juggernaut", "loner:4+", "stand_firm", "frenzied_rush"],
     "playsFor": ["Underworld Challenge"],
     "playerType": "Blocker, Skaven"
   },
@@ -636,15 +493,7 @@
     "ag": "2+",
     "pa": "2+",
     "av": "8+",
-    "skills": [
-      "accurate",
-      "dodge",
-      "loner:3+",
-      "pass",
-      "sidestep",
-      "sure_hands",
-      "shot_to_nothing"
-    ],
+    "skills": ["accurate", "dodge", "loner:3+", "pass", "sidestep", "sure_hands", "shot_to_nothing"],
     "playsFor": ["Elven Kingdoms League"],
     "playerType": "Elf, Thrower"
   },
@@ -679,14 +528,7 @@
     "ag": "4+",
     "pa": "4+",
     "av": "10+",
-    "skills": [
-      "bone_head",
-      "kick_team_mate",
-      "loner:4+",
-      "mighty_blow",
-      "thick_skull",
-      "ill_carry_you"
-    ],
+    "skills": ["bone_head", "kick_team_mate", "loner:4+", "mighty_blow", "thick_skull", "ill_carry_you"],
     "playsFor": ["Any Team"],
     "playerType": "Big Guy, Ogre"
   },
@@ -699,15 +541,7 @@
     "ag": "3+",
     "pa": "5+",
     "av": "7+",
-    "skills": [
-      "dodge",
-      "lethal_flight",
-      "loner:4+",
-      "right_stuff",
-      "stunty",
-      "sure_hands",
-      "ill_carry_you"
-    ],
+    "skills": ["dodge", "lethal_flight", "loner:4+", "right_stuff", "stunty", "sure_hands", "ill_carry_you"],
     "playsFor": ["Any Team"],
     "playerType": "Halfling, Lineman"
   },
@@ -720,15 +554,7 @@
     "ag": "4+",
     "pa": "6+",
     "av": "9+",
-    "skills": [
-      "frenzy",
-      "horns",
-      "loner:4+",
-      "mighty_blow",
-      "thick_skull",
-      "unchannelled_fury",
-      "gored_by_the_bull"
-    ],
+    "skills": ["frenzy", "horns", "loner:4+", "mighty_blow", "thick_skull", "unchannelled_fury", "gored_by_the_bull"],
     "playsFor": ["Chaos Clash"],
     "playerType": "Big Guy, Minotaur"
   },
@@ -776,11 +602,7 @@
       "thick_skull",
       "wisdom_of_the_white_dwarf"
     ],
-    "playsFor": [
-      "Halfling Thimble Cup",
-      "Old World Classic",
-      "Worlds Edge Superleague"
-    ],
+    "playsFor": ["Halfling Thimble Cup", "Old World Classic", "Worlds Edge Superleague"],
     "playerType": "Blocker, Dwarf"
   },
   {
@@ -813,14 +635,7 @@
     "ag": "2+",
     "pa": "3+",
     "av": "8+",
-    "skills": [
-      "dodge",
-      "extra_arms",
-      "loner:4+",
-      "prehensile_tail",
-      "two_heads",
-      "treacherous"
-    ],
+    "skills": ["dodge", "extra_arms", "loner:4+", "prehensile_tail", "two_heads", "treacherous"],
     "playsFor": ["Underworld Challenge"],
     "playerType": "Runner, Skaven"
   },
@@ -833,15 +648,7 @@
     "ag": "3+",
     "pa": "-",
     "av": "9+",
-    "skills": [
-      "chainsaw",
-      "loner:4+",
-      "no_ball",
-      "pro",
-      "secret_weapon",
-      "stand_firm",
-      "old_pro"
-    ],
+    "skills": ["chainsaw", "loner:4+", "no_ball", "pro", "secret_weapon", "stand_firm", "old_pro"],
     "playsFor": ["Old World Classic"],
     "playerType": "Human, Special"
   },
@@ -936,14 +743,7 @@
     "ag": "3+",
     "pa": "3+",
     "av": "9+",
-    "skills": [
-      "block",
-      "dauntless",
-      "dodge",
-      "jump_up",
-      "loner:4+",
-      "indomitable"
-    ],
+    "skills": ["block", "dauntless", "dodge", "jump_up", "loner:4+", "indomitable"],
     "playsFor": ["Lustrian Superleague", "Old World Classic"],
     "playerType": "Blitzer, Human"
   },
@@ -956,15 +756,7 @@
     "ag": "2+",
     "pa": "3+",
     "av": "8+",
-    "skills": [
-      "disturbing_presence",
-      "foul_appearance",
-      "loner:4+",
-      "on_the_ball",
-      "tackle",
-      "tentacles",
-      "black_ink"
-    ],
+    "skills": ["disturbing_presence", "foul_appearance", "loner:4+", "on_the_ball", "tackle", "tentacles", "black_ink"],
     "playsFor": ["Elven Kingdoms League"],
     "playerType": "Elf, Runner"
   },
@@ -998,16 +790,7 @@
     "ag": "5+",
     "pa": "5+",
     "av": "11+",
-    "skills": [
-      "brawler",
-      "grab",
-      "loner:4+",
-      "mighty_blow",
-      "stand_firm",
-      "tentacles",
-      "thick_skull",
-      "vicious_vines"
-    ],
+    "skills": ["brawler", "grab", "loner:4+", "mighty_blow", "stand_firm", "tentacles", "thick_skull", "vicious_vines"],
     "playsFor": ["Woodland League"],
     "playerType": "Big Guy, Treeman"
   },
@@ -1020,13 +803,7 @@
     "ag": "4+",
     "pa": "-",
     "av": "9+",
-    "skills": [
-      "chainsaw",
-      "loner:4+",
-      "no_ball",
-      "secret_weapon",
-      "maximum_carnage"
-    ],
+    "skills": ["chainsaw", "loner:4+", "no_ball", "secret_weapon", "maximum_carnage"],
     "playsFor": ["Favoured of Khorne"],
     "playerType": "Human, Special"
   },
@@ -1075,14 +852,7 @@
     "ag": "3+",
     "pa": "5+",
     "av": "8+",
-    "skills": [
-      "loner:4+",
-      "shadowing",
-      "sidestep",
-      "sneaky_git",
-      "stab",
-      "toxin_connoisseur"
-    ],
+    "skills": ["loner:4+", "shadowing", "sidestep", "sneaky_git", "stab", "toxin_connoisseur"],
     "playsFor": ["Badlands Brawl"],
     "playerType": "Goblin, Special"
   },
@@ -1095,16 +865,7 @@
     "ag": "3+",
     "pa": "4+",
     "av": "8+",
-    "skills": [
-      "dodge",
-      "dump_off",
-      "guard",
-      "horns",
-      "jump_up",
-      "leap",
-      "loner:4+",
-      "bounding_leap"
-    ],
+    "skills": ["dodge", "dump_off", "guard", "horns", "jump_up", "leap", "loner:4+", "bounding_leap"],
     "playsFor": ["Woodland League"],
     "playerType": "Blocker, Gnome"
   },
@@ -1117,15 +878,7 @@
     "ag": "1+",
     "pa": "3+",
     "av": "8+",
-    "skills": [
-      "dodge",
-      "frenzy",
-      "jump_up",
-      "juggernaut",
-      "leap",
-      "loner:4+",
-      "slashing_nails"
-    ],
+    "skills": ["dodge", "frenzy", "jump_up", "juggernaut", "leap", "loner:4+", "slashing_nails"],
     "playsFor": ["Elven Kingdoms League"],
     "playerType": "Elf, Special"
   },
@@ -1138,17 +891,7 @@
     "ag": "3+",
     "pa": "4+",
     "av": "8+",
-    "skills": [
-      "dirty_player",
-      "dodge",
-      "loner:4+",
-      "pogo",
-      "right_stuff",
-      "sprint",
-      "stunty",
-      "sure_feet",
-      "yoink"
-    ],
+    "skills": ["dirty_player", "dodge", "loner:4+", "pogo", "right_stuff", "sprint", "stunty", "sure_feet", "yoink"],
     "playsFor": ["Badlands Brawl", "Underworld Challenge"],
     "playerType": "Goblin, Special"
   },
@@ -1183,15 +926,7 @@
     "ag": "4+",
     "pa": "6+",
     "av": "9+",
-    "skills": [
-      "block",
-      "claws",
-      "disturbing_presence",
-      "juggernaut",
-      "loner:4+",
-      "mighty_blow",
-      "pump_up_the_crowd"
-    ],
+    "skills": ["block", "claws", "disturbing_presence", "juggernaut", "loner:4+", "mighty_blow", "pump_up_the_crowd"],
     "playsFor": ["Old World Classic", "Worlds Edge Superleague"],
     "playerType": "Big Guy, Yhetee"
   },
@@ -1226,13 +961,7 @@
     "ag": "2+",
     "pa": "3+",
     "av": "9+",
-    "skills": [
-      "block",
-      "loner:4+",
-      "mighty_blow",
-      "tackle",
-      "working_in_tandem"
-    ],
+    "skills": ["block", "loner:4+", "mighty_blow", "tackle", "working_in_tandem"],
     "playsFor": ["Elven Kingdoms League"],
     "playerType": "Blitzer, Elf"
   },
@@ -1245,15 +974,7 @@
     "ag": "2+",
     "pa": "2+",
     "av": "9+",
-    "skills": [
-      "accurate",
-      "loner:4+",
-      "nerves_of_steel",
-      "pass",
-      "safe_pass",
-      "sure_hands",
-      "working_in_tandem"
-    ],
+    "skills": ["accurate", "loner:4+", "nerves_of_steel", "pass", "safe_pass", "sure_hands", "working_in_tandem"],
     "playsFor": ["Elven Kingdoms League"],
     "playerType": "Elf, Thrower"
   },
@@ -1266,15 +987,7 @@
     "ag": "3+",
     "pa": "5+",
     "av": "7+",
-    "skills": [
-      "disturbing_presence",
-      "fend",
-      "loner:4+",
-      "sidestep",
-      "stab",
-      "stunty",
-      "furious_outburst"
-    ],
+    "skills": ["disturbing_presence", "fend", "loner:4+", "sidestep", "stab", "stunty", "furious_outburst"],
     "playsFor": ["Woodland League"],
     "playerType": "Special, Spite"
   },
@@ -1287,13 +1000,7 @@
     "ag": "4+",
     "pa": "3+",
     "av": "8+",
-    "skills": [
-      "block",
-      "drunkard",
-      "loner:4+",
-      "thick_skull",
-      "beer_barrel_bash"
-    ],
+    "skills": ["block", "drunkard", "loner:4+", "thick_skull", "beer_barrel_bash"],
     "playsFor": ["Old World Classic", "Worlds Edge Superleague"],
     "playerType": "Human, Lineman"
   },
@@ -1306,15 +1013,7 @@
     "ag": "3+",
     "pa": "4+",
     "av": "9+",
-    "skills": [
-      "catch",
-      "claws",
-      "frenzy",
-      "loner:4+",
-      "regeneration",
-      "wrestle",
-      "savage_mauling"
-    ],
+    "skills": ["catch", "claws", "frenzy", "loner:4+", "regeneration", "wrestle", "savage_mauling"],
     "playsFor": ["Sylvanian Spotlight"],
     "playerType": "Blitzer, Undead, Werewolf"
   },
@@ -1327,13 +1026,7 @@
     "ag": "3+",
     "pa": "5+",
     "av": "9+",
-    "skills": [
-      "dauntless",
-      "loner:4+",
-      "sidestep",
-      "thick_skull",
-      "woodland_fury"
-    ],
+    "skills": ["dauntless", "loner:4+", "sidestep", "thick_skull", "woodland_fury"],
     "playsFor": ["Woodland League"],
     "playerType": "Blitzer, Dryad"
   },

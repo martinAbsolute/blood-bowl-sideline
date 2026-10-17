@@ -11,18 +11,12 @@ vi.mock("next-intl", async (importOriginal) => {
   const { formats, timeZone } = await import("../src/i18n/config");
   return {
     ...actual,
-    useFormatter: () =>
-      actual.createFormatter({ locale: "en", formats, timeZone }),
+    useFormatter: () => actual.createFormatter({ locale: "en", formats, timeZone }),
     useTranslations: () => (key: string) => en[key as keyof typeof en],
   };
 });
 let root: Root, container: HTMLDivElement;
-const user = {
-  name: "Test Coach",
-  email: "coach@example.test",
-  image: null,
-  role: "user" as const,
-};
+const user = { name: "Test Coach", email: "coach@example.test", image: null, role: "user" as const };
 beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   container = document.createElement("div");
@@ -47,20 +41,12 @@ it.each([
         createElement(
           TooltipProvider,
           null,
-          createElement(SidebarAccountMenu, {
-            user,
-            collapsed,
-            mobile,
-            signingOut: false,
-            onSignOut,
-          }),
+          createElement(SidebarAccountMenu, { user, collapsed, mobile, signingOut: false, onSignOut }),
         ),
       ),
     );
     const trigger = container.querySelector<HTMLButtonElement>("button")!;
-    expect(trigger.getAttribute("aria-label")).toBe(
-      "Account menu · Test Coach",
-    );
+    expect(trigger.getAttribute("aria-label")).toBe("Account menu · Test Coach");
     expect(trigger.querySelector('[data-slot="avatar"]')).not.toBeNull();
     await act(async () => trigger.click());
     const menu = document.querySelector('[role="menu"]')!;
@@ -79,12 +65,7 @@ it("preserves keyboard focus on the account button when the sidebar collapses", 
     return createElement(
       TooltipProvider,
       null,
-      createElement(SidebarAccountMenu, {
-        user,
-        collapsed,
-        signingOut: false,
-        onSignOut,
-      }),
+      createElement(SidebarAccountMenu, { user, collapsed, signingOut: false, onSignOut }),
     );
   }
   await act(async () => root.render(render(false)));

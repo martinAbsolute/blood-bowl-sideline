@@ -4,11 +4,7 @@ import styles from "./team-card.module.css";
 /** Shares card geometry so provider and library loading states stay in place. */
 export function TeamCardSkeleton({ className = "" }: { className?: string }) {
   return (
-    <div
-      className={`${styles.card} ${className}`}
-      data-loading
-      aria-hidden="true"
-    >
+    <div className={`${styles.card} ${className}`} data-loading aria-hidden="true">
       <div className={styles.cardLink}>
         <div className={styles.identity}>
           <Skeleton className="h-[22px] w-14 rounded-full" />

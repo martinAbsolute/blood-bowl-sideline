@@ -218,9 +218,7 @@ body {
   }
   .site-shell[data-sidebar-open="false"] .site-sidebar-header {
     height: 112px;
-    padding-inline: calc(
-      (var(--site-sidebar-icon-width) - 1px - 36px * 38 / 52) / 2
-    );
+    padding-inline: calc((var(--site-sidebar-icon-width) - 1px - 36px * 38 / 52) / 2);
   }
   .site-shell[data-sidebar-open="false"] .site-sidebar-toggle {
     top: 64px;
@@ -692,9 +690,7 @@ html:has(.catalog-layout) {
 }
 /* The persistent, non-modal budget drawer stays below player and rule dialogs,
    including when its portal mounts after a viewport change. */
-[data-slot="drawer-overlay"]:has(
-  + [data-slot="drawer-viewport"] .mobile-budget-drawer
-),
+[data-slot="drawer-overlay"]:has(+ [data-slot="drawer-viewport"] .mobile-budget-drawer),
 [data-slot="drawer-viewport"]:has(.mobile-budget-drawer) {
   z-index: 40;
 }

@@ -35,17 +35,10 @@ export function UserProfile({
       </div>
       <div className="min-w-0">
         <p className="truncate font-semibold">{name}</p>
-        {user.email ? (
-          <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-        ) : null}
+        {user.email ? <p className="truncate text-xs text-muted-foreground">{user.email}</p> : null}
         {showRole ? (
           <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-            {user.role === "admin" ? (
-              <ShieldCheck
-                aria-hidden="true"
-                className="size-3.5 text-primary"
-              />
-            ) : null}
+            {user.role === "admin" ? <ShieldCheck aria-hidden="true" className="size-3.5 text-primary" /> : null}
             {t(user.role === "admin" ? "adminRole" : "userRole")}
           </p>
         ) : null}
@@ -72,9 +65,7 @@ export function UserAvatar({
     .toLocaleUpperCase();
   return (
     <Avatar className={className}>
-      {user.image ? (
-        <AvatarImage src={user.image} alt={name} referrerPolicy="no-referrer" />
-      ) : null}
+      {user.image ? <AvatarImage src={user.image} alt={name} referrerPolicy="no-referrer" /> : null}
       <AvatarFallback className="bg-primary/10 font-semibold text-primary">
         {initials || <UserRound className="size-5" />}
       </AvatarFallback>

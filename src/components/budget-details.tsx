@@ -37,21 +37,11 @@ function BudgetMeter({ pool }: { pool: BudgetPool }) {
   // Shared base pools draw on Flowing Funds; the reserve reports overspending.
   const overBudget = excess > 0 && !pool.shared;
   const tone = overBudget ? "text-destructive" : "text-muted-foreground";
-  const status = t(
-    excess
-      ? pool.shared
-        ? "budgetFromFunds"
-        : "treasuryOver"
-      : "treasuryLeft",
-    { amount: amount(Math.abs(pool.limit - pool.used), pool.unit) },
-  );
+  const status = t(excess ? (pool.shared ? "budgetFromFunds" : "treasuryOver") : "treasuryLeft", {
+    amount: amount(Math.abs(pool.limit - pool.used), pool.unit),
+  });
   const values = `${amount(pool.used, pool.unit)} / ${amount(pool.limit, pool.unit)}`;
-  const progress =
-    pool.limit > 0
-      ? Math.min(100, (pool.used / pool.limit) * 100)
-      : pool.used > 0
-        ? 100
-        : 0;
+  const progress = pool.limit > 0 ? Math.min(100, (pool.used / pool.limit) * 100) : pool.used > 0 ? 100 : 0;
   return (
     <span className="budget-meter block" data-budget-meter={pool.id}>
       <span className="budget-meter-top flex items-baseline justify-between gap-2 text-xs leading-4">
@@ -99,13 +89,7 @@ export function BudgetOverview({ pool }: { pool: BudgetPool }) {
   );
 }
 
-export function BudgetBreakdown({
-  summary,
-  drawerPool,
-}: {
-  summary: BudgetSummary;
-  drawerPool?: BudgetPool;
-}) {
+export function BudgetBreakdown({ summary, drawerPool }: { summary: BudgetSummary; drawerPool?: BudgetPool }) {
   const t = useTranslations();
   const amount = useAmount();
   const { totals, pools, counts } = summary;
@@ -138,9 +122,7 @@ export function BudgetBreakdown({
           {counts.primary + counts.secondary > 0 && (
             <div className="flex justify-between gap-3 pt-1.5">
               <dt className="text-muted-foreground">{t("addedSkills")}</dt>
-              <dd className="text-right tabular-nums">
-                {t("addedSkillsCount", counts)}
-              </dd>
+              <dd className="text-right tabular-nums">{t("addedSkillsCount", counts)}</dd>
             </div>
           )}
         </dl>
