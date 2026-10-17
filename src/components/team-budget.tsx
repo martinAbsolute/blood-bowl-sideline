@@ -30,7 +30,6 @@ export function TeamBudget({
     const target = section.current;
     if (!floating || !target) return;
     const mobile = window.matchMedia("(max-width: 767px)");
-    // Slide the bar away when the inline Treasury reaches the screen.
     const observer = new IntersectionObserver(([entry]) => {
       const above = mobile.matches && entry.boundingClientRect.top >= (entry.rootBounds?.bottom ?? 0);
       setAboveBudget(above);

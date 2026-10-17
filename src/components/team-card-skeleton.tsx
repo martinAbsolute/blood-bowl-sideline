@@ -1,7 +1,6 @@
 import { Skeleton } from "./ui/skeleton";
 import styles from "./team-card.module.css";
 
-/** Shares card geometry so provider and library loading states stay in place. */
 export function TeamCardSkeleton({ className = "" }: { className?: string }) {
   return (
     <div className={`${styles.card} ${className}`} data-loading aria-hidden="true">
@@ -48,9 +47,9 @@ export function TeamCardSkeleton({ className = "" }: { className?: string }) {
         <div className={styles.cardFooter}>
           <Skeleton className="h-3 w-24" />
           <div className={styles.actions}>
-            <span className="flex size-[30px] items-center justify-center max-[720px]:size-8">
+            <div className="flex size-[30px] items-center justify-center max-[720px]:size-8">
               <Skeleton className="size-4" />
-            </span>
+            </div>
           </div>
         </div>
       </div>

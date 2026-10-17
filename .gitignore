@@ -1,52 +1,23 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
+# Dependencies and build output
+/node_modules/
 /.next/
 /out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
+/build/
+/coverage/
 *.tsbuildinfo
 next-env.d.ts
 
-# Research downloads are local only.
-.research/
-/Absolute*.pdf
-
+# Local configuration and secrets
+.env*
+!.env.example
+/.vercel/
+*.pem
+.DS_Store
 *.log
-.test-results/
+
+# Local research and verification output
+/.research/
+/Absolute*.pdf
+/.test-results/
 /.tmp/
 /artifacts/
-
-!.env.example

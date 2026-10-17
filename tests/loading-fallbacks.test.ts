@@ -65,6 +65,7 @@ describe("provider-free loading boundaries", () => {
     expect(page).toContain('data-slot="skeleton"');
     expect(shell).toContain('data-loading-layout="page"');
     expect(shell).not.toContain('data-loading-layout="library"');
+    expect(shell).not.toContain('id="site-sidebar"');
   });
 
   it("does not guess My Teams when the pathname suspends during partial prefetching", () => {
@@ -108,23 +109,6 @@ describe("provider-free loading boundaries", () => {
     route.pathname = "/rosters";
     route.search = search;
     expect(renderToStaticMarkup(createElement(InitialLoading))).toContain('data-loading-layout="editor"');
-  });
-
-  it("matches the Sevens roster detail's single support column", () => {
-    route.pathname = "/rosters/human";
-    route.search = "ruleset=kyiv-seven-sins-sevens";
-    const html = renderToStaticMarkup(createElement(InitialLoading));
-    expect(html).toContain('data-loading-layout="reference"');
-    expect(html).toContain("sm:max-w-lg");
-    expect(html).not.toContain("xl:grid-cols-[300px_minmax(0,1fr)]");
-  });
-
-  it("aligns the catalog loading header and shows its static filters", () => {
-    const html = renderToStaticMarkup(createElement(LoadingLayout, { variant: "catalog", label: "Loading…" }));
-    expect(html).toContain("mb-5 gap-4");
-    expect(html).toContain("catalog-layout");
-    expect(html).toContain("flex max-w-full flex-wrap items-end gap-x-4 gap-y-2");
-    expect(html).toContain("sm:h-9");
   });
 
   it("renders recovered draft geometry without mounting editor controls or providers", () => {

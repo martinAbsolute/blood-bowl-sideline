@@ -37,7 +37,3 @@ The frontend requires `VERCEL_ENV=preview` and matching backend metadata. A Verc
 Either `VERCEL_ENV=production` or `VERCEL_TARGET_ENV=production` disables the route, even when opt-in variables are accidentally present. A production Convex deploy key also disables the frontend. Convex separately requires an explicit `dev` or `preview` type, the bound deployment name and its built-in cloud URL; missing, production or inconsistent settings reject impersonation, user listing and test-account creation. Convex documents deployment URLs as runtime built-ins, so its type is deliberately configured per deployment. Never set these opt-in variables on a production backend.
 
 Preview sign-in lets anyone with access to that preview act as its users. Use Vercel Deployment Protection and isolated test data when enabling it on a hosted preview. Disable the bypass by removing either server's opt-in flag.
-
-## Verification
-
-`tests/dev-auth-env.test.ts`, `tests/dev-auth-route.test.ts` and `tests/dev-auth.test.ts` cover production denial, missing or mismatched settings, regional URL binding, same-origin requests, tampered/expired tokens and ordinary ownership enforcement. Preview gating is tested with production `NODE_ENV` and explicit preview metadata. Follow [the two-coach league test](league-testing.md) for the complete playable workflow.

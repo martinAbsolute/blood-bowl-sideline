@@ -427,7 +427,6 @@ html:has(.catalog-layout) {
   }
 }
 
-/* Compact reference pages and team workspace. */
 .catalog-layout {
   display: grid;
   grid-template-columns: 190px minmax(0, 1fr);

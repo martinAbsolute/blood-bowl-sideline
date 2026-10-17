@@ -118,6 +118,7 @@ export function SiteShell({ children, footer }: { children: React.ReactNode; foo
     <>
       {isAuthenticated && viewer ? <UserPresence key={viewer.id} userId={viewer.id} /> : null}
       <ShellFrame
+        sidebarId="site-sidebar"
         footer={footer}
         sidebarOpen={sidebarOpen}
         header={

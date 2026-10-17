@@ -31,7 +31,7 @@ Run it with `enabled: false` to restore the user role. This mutation is internal
 
 ## Stack and project layout
 
-Next.js App Router, React, TypeScript, Tailwind CSS, shadcn/ui, and Magic UI power the frontend. Convex provides authentication and reactive persistence; `next-intl` provides local English and Ukrainian messages, ICU pluralization, and locale-aware formatting. The `bbs_locale` cookie stores the language preference; routes are shared across languages. Vercel Web Analytics and Speed Insights are mounted in the root layout.
+Next.js App Router, React, TypeScript, Tailwind CSS, shadcn/ui power the frontend. Convex provides authentication and reactive persistence; `next-intl` provides local English and Ukrainian messages, ICU pluralization, and locale-aware formatting. The `bbs_locale` cookie stores the language preference; routes are shared across languages. Vercel Web Analytics and Speed Insights are mounted in the root layout.
 
 | Directory         | Purpose                                                             |
 | ----------------- | ------------------------------------------------------------------- |
@@ -61,24 +61,23 @@ pnpm exec convex deploy --cmd 'pnpm run build'
 
 For your own deployment, import your fork into Vercel and connect your own Convex project. The only manually configured Vercel variable is `CONVEX_DEPLOY_KEY`: use a production deploy key for Production and a preview deploy key for Preview. Use the development deploy key for Development and pull it into `.env.local` for `pnpm dev`.
 
-Keep Vercel's Automatically expose System Environment Variables enabled. Metadata and sitemap URLs use `VERCEL_PROJECT_PRODUCTION_URL`, with `http://localhost:3000` for local development. Convex supplies `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL` to the build, so neither needs to be defined manually on Vercel. The auth proxy uses that HTTP endpoint directly. Telegram readiness comes from Convex credentials rather than a frontend flag.
+Keep Vercel's Automatically expose System Environment Variables enabled. Metadata and sitemap URLs use `VERCEL_PROJECT_PRODUCTION_URL`, falling back to `https://sideline.com.ua` when that variable is absent. Convex supplies `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL` to the build, so neither needs to be defined manually on Vercel. The auth proxy uses that HTTP endpoint directly. Telegram readiness comes from Convex credentials rather than a frontend flag.
 
 Configure authentication secrets in Convex as described above. Set `SITE_URL` to the hosted application's public HTTPS origin in the corresponding Convex deployment. The Convex Auth package patch in `patches/` uses this value for both redirects and the frontend OAuth proxy. Register that origin's `/api/auth/callback/telegram` with Telegram. These settings remain in Convex because Vercel's system variables are not available inside Convex functions. The optional bot webhook also needs `TELEGRAM_BOT_TOKEN` and `TELEGRAM_WEBHOOK_SECRET` in Convex.
 
-The production origin is `https://sideline.com.ua`: set Convex `SITE_URL` to this value, and register `https://sideline.com.ua/api/auth/callback/telegram` in Telegram's Allowed URLs. Vercel redirects `sideline.com.ua` and the previous Vercel domain to `sideline.com.ua`.
+The production origin is `https://sideline.com.ua`: set Convex `SITE_URL` to this value, and register `https://sideline.com.ua/api/auth/callback/telegram` in Telegram's Allowed URLs.
 
 Preview builds deploy an isolated Convex preview backend for the Git branch. Set required auth signing keys and optional Telegram credentials in Convex preview environment defaults; never expose the production deploy key to Preview. Preview metadata and robots prevent indexing. The sitemap includes public reference pages and the builder entry, while UUID team pages carry `noindex`.
 
 Enable **Web Analytics** and **Speed Insights** for the Vercel project in its dashboard; the application already includes both SDKs. See Vercel's [Analytics setup](https://vercel.com/docs/analytics/quickstart) and [Speed Insights setup](https://vercel.com/docs/speed-insights/quickstart).
 
-GitHub Actions checks formatting, types, lint, and tests on pull requests and pushes to `main`. It uses Node.js 24 and the pnpm version pinned in `package.json`, caches dependencies, and cancels superseded runs. Tests use four workers locally and in CI. Vercel handles the build and Convex deployment; GitHub Actions needs no deployment credentials or production URLs. To release, bump the version in `package.json` (shown in the footer), run the local checks, and push to `main`:
+GitHub Actions checks formatting, types, lint, and tests on pull requests and pushes to `main`. It uses Node.js 24 and the pnpm version pinned in `package.json`, caches dependencies, and cancels superseded runs. Tests use four workers locally and in CI. Vercel handles the build and Convex deployment; GitHub Actions needs no deployment credentials or production URLs. The version in `package.json` is shown in the footer. Required checks:
 
 ```sh
 pnpm format:check
 pnpm check
 pnpm test
 pnpm build
-git push origin main
 ```
 
 Never commit `.env` files, deploy keys, Telegram tokens, auth payloads, or signing keys. [.env.example](../.env.example) contains safe placeholders only.

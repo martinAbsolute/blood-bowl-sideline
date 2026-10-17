@@ -18,9 +18,7 @@ export function TeamReadiness({ team, startingTreasury }: { team: Team; starting
         <h2 className="font-semibold text-sm">{validation.valid ? t("ready") : t("workInProgress")}</h2>
       </div>
       {validation.valid ? (
-        <>
-          <p className="mt-3 text-xs leading-relaxed text-emerald-900">{t("legalText")}</p>
-        </>
+        <p className="mt-3 text-xs leading-relaxed text-emerald-900">{t("legalText")}</p>
       ) : (
         <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
           {validation.issues.map((issue, index) => (

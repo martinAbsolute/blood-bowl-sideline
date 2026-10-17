@@ -3,13 +3,7 @@
   "plugins": ["typescript", "unicorn", "oxc", "react", "nextjs", "jsx-a11y"],
   "categories": { "correctness": "error" },
   "env": { "browser": true, "node": true },
-  "ignorePatterns": [
-    "convex/_generated/**",
-    ".agents/**",
-    "src/components/ui/**",
-    "src/components/magic-ui/**",
-    "src/hooks/use-mobile.ts"
-  ],
+  "ignorePatterns": ["convex/_generated/**", ".agents/**", "src/components/ui/**", "src/hooks/use-mobile.ts"],
   "rules": {
     "react/rules-of-hooks": "error",
     "typescript/no-explicit-any": "error",

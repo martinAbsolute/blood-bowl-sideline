@@ -24,7 +24,7 @@ Both coaches edit and confirm the same match report. Once both confirm, Sideline
 
 League rosters have their own official state. Editing a team in the exhibition builder does not change its league progression. Coaches can spend earned SPP on chosen skills and manage their post-game sequence. Random skills, characteristic advancements, automatic concession consequences, and season redrafting are not yet supported.
 
-See the [league testing guide](docs/league-testing.md), [match reports](docs/league-event-reporting.md), and [league rules sources](docs/league-rules-sources.md).
+See [match reports](docs/league-event-reporting.md) and [league rules sources](docs/league-rules-sources.md).
 
 ## Run locally
 

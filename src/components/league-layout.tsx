@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { BrandPeriod } from "./brand-period";
 
-/** Shared page identity for seasons, official teams and match reports. */
 export function LeaguePageHeader({
   title,
   eyebrow,

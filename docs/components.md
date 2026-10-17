@@ -1,14 +1,12 @@
 # Component primitives
 
-The full shadcn and Magic UI collection is retained. `components.json` uses `base-nova`, so future shadcn installations resolve to Base UI. Install or upgrade components with `pnpm exec shadcn add <name> --overwrite` and review the diff.
+Application components use shadcn/ui with Base UI. The registry style in `components.json` is `base-nova`.
 
-The following components need special care when reinstalling:
+- Use `render` for composition. Buttons rendering links need `nativeButton={false}`.
+- Accordion values are arrays. Dialog focus uses `initialFocus` / `finalFocus`; CSS state selectors use `data-open`, `data-closed`, and `--accordion-panel-height`.
+- `ui/command.tsx` uses Base UI Autocomplete with an inline list. Root `value` / `onValueChange` control the search text; item `onSelect` handles selection.
+- `ui/form.tsx` integrates React Hook Form with Base UI `useRender`. Pass controls using `render={<Input />}`.
+- Notifications use `toast.add({ type: "success", title: message })` from `ui/toast`. Mount `Toaster` once in the providers. `ui/sonner.tsx` exposes the same implementation.
+- `ReadinessCard` composes the shadcn card primitives with a conditional Tailwind success style.
 
-- `ui/command.tsx` uses Base UI Autocomplete with an inline list. Its exports remain available; root `value` / `onValueChange` control the search text, and item `onSelect` handles selection. The official registry currently uses cmdk, which brings Radix back into the dependency tree.
-- `ui/form.tsx` keeps React Hook Form integration and uses Base UI `useRender` for composition. Pass the control to `FormControl` using `render={<Input />}`. The legacy registry implementation still uses Radix Slot.
-- `ui/sonner.tsx` re-exports the Base UI toast implementation. Use `toast.add({ type: "success", title: message })` from `ui/toast` and mount `Toaster` once in the providers.
-- Magic UI `bento-grid`, `file-tree`, and `rainbow-button` have local Base UI adaptations. Their upstream registry still uses Radix. Preserve these adaptations when upgrading.
-
-Use `render` for composition instead of Radix `asChild`. Buttons rendering links need `nativeButton={false}`. Accordion values are arrays. Dialog focus uses `initialFocus` / `finalFocus`; CSS state selectors use `data-open`, `data-closed`, and `--accordion-panel-height`.
-
-Specialized libraries for charts, drag and drop, calendars, code highlighting, animation, and other retained components remain installed because Base UI does not replace those capabilities. Radix, cmdk, Vaul, and Sonner are removed.
+Use Tailwind utilities for component styling and the shared tokens in `src/app/sideline.css`. Keep custom CSS for layout, print rules, and browser workarounds that need it.

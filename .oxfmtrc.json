@@ -8,7 +8,6 @@
     ".codex/**",
     "convex/_generated/**",
     "src/components/ui/**",
-    "src/components/magic-ui/**",
     "public/**",
     "pnpm-lock.yaml",
     "skills-lock.json",
