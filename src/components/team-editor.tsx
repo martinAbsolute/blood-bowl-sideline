@@ -284,7 +284,11 @@ export function TeamEditor({
           <Badge variant="outline" className="h-auto min-h-6 max-w-full whitespace-normal text-left">
             {rules.name}
           </Badge>
-          {readOnly && <Badge variant="outline">{t("viewOnly")}</Badge>}
+          {readOnly && (
+            <Badge variant="outline" className="h-auto min-h-6 max-w-full whitespace-normal text-left">
+              {t("viewOnly")}
+            </Badge>
+          )}
         </div>
       </TeamHeader>
       {!readOnly && leagueContext && (
