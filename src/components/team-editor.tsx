@@ -317,7 +317,9 @@ export function TeamEditor({
                 <Table aria-label={t("players")} className="player-table min-w-[740px] table-auto lg:table-fixed">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-8 pl-2 pr-1 text-right">#</TableHead>
+                      <TableHead className="w-[calc(2ch+13px)] pl-[9px] pr-1 text-right font-mono text-xs!">
+                        <span className="text-[10px]">#</span>
+                      </TableHead>
                       <TableHead className="w-48 lg:w-64">{t("player")}</TableHead>
                       {["MA", "ST", "AG", "PA", "AV"].map((x) => (
                         <TableHead key={x} className="w-8 text-center font-mono text-xs">
@@ -382,7 +384,7 @@ export function TeamEditor({
                             }
                           }}
                         >
-                          <TableCell className="pl-2 pr-1 text-right font-mono text-xs text-muted-foreground">
+                          <TableCell className="pl-[9px] pr-1 text-right font-mono text-xs text-muted-foreground">
                             {readOnly ? (
                               p.number
                             ) : (
@@ -568,7 +570,7 @@ export function TeamEditor({
                               }
                             }}
                           >
-                            <TableCell className="pl-2 pr-1 text-right text-amber-700">
+                            <TableCell className="pl-[9px] pr-1 text-right text-amber-700">
                               <Star className="ml-auto size-3" />
                             </TableCell>
                             <TableCell>
