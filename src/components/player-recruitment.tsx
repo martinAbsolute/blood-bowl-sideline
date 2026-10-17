@@ -84,7 +84,7 @@ export function PlayerRecruitment({ team, onChange }: { team: Team; onChange: (t
                       {stat}
                     </TableHead>
                   ))}
-                  <TableHead>{t("skills")}</TableHead>
+                  <TableHead>{t("skillsAndTraits")}</TableHead>
                   <TableHead className="w-14 text-right">{t("cost")}</TableHead>
                   <TableHead className="sticky right-0 w-32 bg-card pr-3 text-right">{t("quantity")}</TableHead>
                 </TableRow>
@@ -114,7 +114,7 @@ export function PlayerRecruitment({ team, onChange }: { team: Team; onChange: (t
                         </TableCell>
                       ))}
                       <TableCell>
-                        <TableSkills ids={p.skills} label={`${t("skills")} · ${positionLabel(p.position)}`} />
+                        <TableSkills ids={p.skills} label={`${t("skillsAndTraits")} · ${positionLabel(p.position)}`} />
                       </TableCell>
                       <TableCell className="text-right font-mono text-xs">{p.cost / 1000}k</TableCell>
                       <TableCell className="sticky right-0 bg-card pr-3">

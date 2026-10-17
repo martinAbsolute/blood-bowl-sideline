@@ -222,7 +222,7 @@ export function PlayerDialog({
             </dl>
             <div className="space-y-3 border-t pt-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-xs font-semibold">{t("skills")}</h3>
+                <h3 className="text-xs font-semibold">{t("skillsAndTraits")}</h3>
                 {player && (
                   <span className="text-xs text-muted-foreground" role="status">
                     {t("playerModal.addedCount", { count: draft.skills.length, max })}

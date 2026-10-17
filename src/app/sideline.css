@@ -659,6 +659,9 @@ html:has(.catalog-layout) {
 .player-dialog-view {
   max-width: 440px;
 }
+.star-recruitment {
+  max-width: 1024px;
+}
 .player-dialog-navigation {
   display: none;
 }

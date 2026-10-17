@@ -30,12 +30,12 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "./ui/dropdown-menu";
-import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
 import { RosterIcon } from "./player-icon";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { PlayerRecruitment } from "./player-recruitment";
+import { StarRecruitment } from "./star-recruitment";
 import { TableSkills } from "./skill-box";
 import { TeamAffiliations, SpecialRules } from "./team-affiliations";
 import { Checkbox } from "./ui/checkbox";
@@ -59,7 +59,6 @@ import {
   Copy,
   Ellipsis,
   ChevronDown,
-  Plus,
   Printer,
   RectangleVertical,
   RectangleHorizontal,
@@ -468,7 +467,7 @@ export function TeamEditor({
                               }
                               captain={team.captainId === p.id}
                               veteran={isSevens(team) && team.veteranId === p.id}
-                              label={t("skills")}
+                              label={t("skillsAndTraits")}
                             />
                           </TableCell>
                           {requiresCaptain && (
@@ -604,7 +603,7 @@ export function TeamEditor({
                               </TableCell>
                             ))}
                             <TableCell className="whitespace-normal text-xs text-muted-foreground">
-                              <TableSkills ids={s.skills} label={t("skills")} />
+                              <TableSkills ids={s.skills} label={t("skillsAndTraits")} />
                             </TableCell>
                             {requiresCaptain && <TableCell />}
                             {isSevens(team) && <TableCell />}
@@ -769,88 +768,7 @@ export function TeamEditor({
           if (!open) setDialog(null);
         }}
       >
-        <DialogContent className="star-recruitment flex max-h-[85dvh] flex-col overflow-hidden sm:max-w-5xl">
-          <DialogHeader>
-            <DialogTitle className="display-font text-3xl">{t("addStar")}</DialogTitle>
-            <DialogDescription>{t("starHint")}</DialogDescription>
-          </DialogHeader>
-          <>
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t("searchRosters")}
-              aria-label={t("starPlayers")}
-            />
-            <div className="min-h-0 overflow-auto rounded-lg border bg-card" data-star-player-list>
-              <Table className="min-w-[740px] table-auto md:table-fixed" aria-label={t("starPlayers")}>
-                <TableHeader className="sticky top-0 z-10 bg-card">
-                  <TableRow>
-                    <TableHead className="w-48 pl-3">{t("player")}</TableHead>
-                    {["MA", "ST", "AG", "PA", "AV"].map((stat) => (
-                      <TableHead key={stat} className="w-8 text-center font-mono text-xs">
-                        {stat}
-                      </TableHead>
-                    ))}
-                    <TableHead>{t("skills")}</TableHead>
-                    <TableHead className="w-14 text-right">{t("cost")}</TableHead>
-                    <TableHead className="sticky right-0 w-14 bg-card pr-3">
-                      <span className="sr-only">{t("addStar")}</span>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {allowedStars.flatMap((choice) => {
-                    const pair = starPairs.find((pair) => pair.includes(choice.id)) ?? [choice.id];
-                    const members = pair.map((id) => stars.find((star) => star.id === id)!);
-                    return members.map((star, index) => (
-                      <TableRow key={star.id} className="h-12">
-                        <TableCell className="pl-3">
-                          <div className="flex items-center gap-2">
-                            <StarPlayerIcon starId={star.id} className="size-8" />
-                            <strong className="truncate text-sm" title={star.name}>
-                              {star.name}
-                            </strong>
-                          </div>
-                        </TableCell>
-                        {[star.ma, star.st, star.ag, star.pa, star.av].map((stat, i) => (
-                          <TableCell key={i} className="text-center font-mono text-xs">
-                            {stat}
-                          </TableCell>
-                        ))}
-                        <TableCell>
-                          <TableSkills ids={star.skills} label={t("skills") + " · " + star.name} />
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-xs">{star.cost / 1000}k</TableCell>
-                        {index === 0 && (
-                          <TableCell rowSpan={members.length} className="sticky right-0 bg-card pr-3 text-right">
-                            <Button
-                              size="icon"
-                              className="size-8"
-                              aria-label={t("hireStarPlayer", { player: members.map((star) => star.name).join(" & ") })}
-                              onClick={() => hireStar(choice.id)}
-                            >
-                              <Plus className="size-4" />
-                            </Button>
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    ));
-                  })}
-                  {!allowedStars.length && (
-                    <TableRow>
-                      <TableCell colSpan={9} className="py-6 text-center text-sm text-muted-foreground">
-                        {t("noStars")}
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </>
-          <Button variant="outline" onClick={() => setDialog(null)}>
-            {t("close")}
-          </Button>
-        </DialogContent>
+        <StarRecruitment choices={allowedStars} search={search} onSearch={setSearch} onHire={hireStar} />
       </Dialog>
       <AlertDialog open={copyConfirmationOpen} onOpenChange={setCopyConfirmationOpen}>
         <AlertDialogContent>
