@@ -326,7 +326,7 @@ export function TeamEditor({
                           {x}
                         </TableHead>
                       ))}
-                      <TableHead>{t("skills")}</TableHead>
+                      <TableHead>{t("skillsAndTraits")}</TableHead>
                       {requiresCaptain && (
                         <TableHead className="w-14 px-1 text-center text-xs">
                           <RuleHelp

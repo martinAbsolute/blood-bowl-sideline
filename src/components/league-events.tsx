@@ -309,7 +309,7 @@ export function LeagueEvents({
                     {stat}
                   </TableHead>
                 ))}
-                <TableHead>{t("skills")}</TableHead>
+                <TableHead>{t("skillsAndTraits")}</TableHead>
                 <TableHead className="w-10 text-center font-mono text-xs">TD</TableHead>
                 <TableHead className="w-12 text-center font-mono text-xs">SPP</TableHead>
                 <TableHead className="w-10">

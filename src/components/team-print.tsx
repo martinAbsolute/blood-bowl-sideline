@@ -27,18 +27,18 @@ export function printStyles(orientation: PrintOrientation) {
       size: A4 ${orientation}; margin: 6mm 10mm 10mm;
       @top-left { content: ""; }
       @top-right { content: ""; }
-      @bottom-left { content: "sideline.com.ua | Blood Bowl Sideline."; font: 8pt Arial, sans-serif; }
-      @bottom-right { content: counter(page) " / " counter(pages); font: 8pt Arial, sans-serif; }
+      @bottom-left { content: "Blood Bowl Sideline. sideline.com.ua"; font: 8pt var(--print-body-font, "Geist", Arial, sans-serif); }
+      @bottom-right { content: counter(page) " / " counter(pages); font: 8pt var(--print-body-font, "Geist", Arial, sans-serif); }
     }
     * { box-sizing: border-box; }
-    body { margin: 0; color: #000; background: #fff; font: 10pt Arial, sans-serif; }
-    h1 { font: bold 20pt Georgia, serif; margin: 0 0 3mm; overflow-wrap: anywhere; }
+    body { margin: 0; color: #000; background: #fff; font: 10pt var(--print-body-font, "Geist", Arial, sans-serif); }
+    h1 { font: 800 20pt var(--print-display-font, "Roboto Condensed", Arial, sans-serif); margin: 0 0 3mm; overflow-wrap: anywhere; }
     h3 { font-size: 9pt; margin: 0 0 2mm; border-bottom: 1px solid; padding-bottom: 1mm; break-after: avoid; }
     p { margin: 0; }
     .overview { ${orientation === "landscape" ? "display: grid; grid-template-columns: 45mm minmax(0, 1fr); gap: 4mm; align-items: start;" : "display: block;"} }
     .identity { margin-bottom: 4mm; }
     .identity p { margin-top: 1mm; }
-    .summary { display: flex; align-items: flex-start; gap: 3mm; margin: 3mm 0 4mm; }
+    .summary { display: flex; align-items: flex-start; gap: 3mm; margin: ${orientation === "landscape" ? "0" : "3mm"} 0 4mm; }
     .summary section { flex: 1; min-width: 0; border: 1px solid; padding: 2mm; break-inside: avoid; }
     dl { margin: 0; }
     dl div { display: flex; justify-content: space-between; gap: 2mm; margin-bottom: 1mm; }
@@ -49,7 +49,7 @@ export function printStyles(orientation: PrintOrientation) {
     th:last-child, td:last-child { border-right: 0; }
     tbody tr:last-child td { border-bottom: 0; }
     th { text-align: left; }
-    .number { width: 7mm; text-align: center; }
+    .number { width: 7mm; text-align: right; }
     .player-designation { margin-top: 0.5mm; color: #777; font-size: 0.85em; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
     .player-name { font-weight: 600; }
     .position { width: ${orientation === "portrait" ? "32" : "43"}mm; }
@@ -129,7 +129,8 @@ export function TeamPrint({ team, t, locale = "en" }: { team: Team; t: Translate
           <header className="identity">
             <h1>{team.name || t("untitled")}</h1>
             <p>
-              {roster.name} · {ruleset.name} · {t("tier")} {totals.tier}
+              {roster.name} · {ruleset.name}
+              {Object.keys(ruleset.tiers).length > 0 && ` · ${t("tier")} ${totals.tier}`}
             </p>
           </header>
           <div className="summary">
@@ -187,13 +188,13 @@ export function TeamPrint({ team, t, locale = "en" }: { team: Team; t: Translate
           <thead>
             <tr>
               <th className="number">#</th>
-              <th className="position">{t("position")}</th>
+              <th className="position">{t("player")}</th>
               {["MA", "ST", "AG", "PA", "AV"].map((stat) => (
                 <th className="stat" key={stat}>
                   {stat}
                 </th>
               ))}
-              <th>{t("skills")}</th>
+              <th>{t("skillsAndTraits")}</th>
               <th className="cost">{t("cost")}</th>
             </tr>
           </thead>
@@ -299,10 +300,22 @@ export async function printTeam(team: Team, orientation: PrintOrientation, t: Tr
   frame.title = t("print");
   frame.style.cssText = "position:fixed;left:-10000px;top:0;width:1px;height:1px;border:0";
   await new Promise<void>((resolve, reject) => {
-    frame.onload = () => {
+    frame.onload = async () => {
       try {
         const target = frame.contentWindow;
         if (!target) throw new Error("Print window unavailable");
+        // The standalone document needs the site's font faces and resolved Next.js family names.
+        const bodyFont = getComputedStyle(document.body).fontFamily;
+        const displayFont = getComputedStyle(document.documentElement).getPropertyValue("--font-display").trim();
+        const rootStyle = target.document.documentElement.style;
+        rootStyle.setProperty("--print-body-font", bodyFont);
+        if (displayFont) rootStyle.setProperty("--print-display-font", displayFont);
+        document.fonts.forEach((face) => target.document.fonts.add(face));
+        const printText = target.document.body.textContent || "";
+        await Promise.all([
+          target.document.fonts.load(`10pt ${bodyFont}`, printText),
+          target.document.fonts.load(`800 20pt ${displayFont || '"Roboto Condensed", Arial, sans-serif'}`, printText),
+        ]);
         target.addEventListener("afterprint", () => frame.remove(), { once: true });
         target.focus();
         target.print();

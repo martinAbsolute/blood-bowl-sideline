@@ -163,7 +163,7 @@ it("uses A4, starts skills on a new page, and controls print margins in both ori
     expect(printStyles(orientation)).toContain("break-before: page");
     expect(printStyles(orientation)).toContain('@top-left { content: ""; }');
     expect(printStyles(orientation)).toContain('@top-right { content: ""; }');
-    expect(printStyles(orientation)).toContain('content: "sideline.com.ua | Blood Bowl Sideline."');
+    expect(printStyles(orientation)).toContain('content: "Blood Bowl Sideline. sideline.com.ua"');
     expect(printStyles(orientation)).toContain("border-collapse: separate; border-spacing: 0; border: 0.75pt solid;");
     expect(printStyles(orientation)).toContain("border-right: 0.75pt solid; border-bottom: 0.75pt solid;");
     expect(printStyles(orientation)).toContain(
