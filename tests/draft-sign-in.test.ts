@@ -630,10 +630,16 @@ it("keeps the UUID editor, typing focus mounted across recovery writes and ackno
   await act(async () => input("First edit"));
   expect(container.querySelector('input[aria-label="teamName"]')).toBe(name);
   expect(document.activeElement).toBe(name);
+  // The input stays local until the name debounce publishes recovery data.
+  expect(readDrafts()).toEqual([]);
+  await act(async () => vi.advanceTimersByTimeAsync(200));
+  expect(container.querySelector('input[aria-label="teamName"]')).toBe(name);
+  expect(document.activeElement).toBe(name);
   expect(unloadPrevented()).toBe(true);
   await act(async () => vi.advanceTimersByTimeAsync(450));
   expect(mocks.save).toHaveBeenCalledExactlyOnceWith({ team: { ...team, name: "First edit" }, expectedRevision: 3 });
   await act(async () => input("Second edit"));
+  await act(async () => vi.advanceTimersByTimeAsync(200));
   await act(async () => {
     mocks.query.mockReturnValue({ ...live, team: { ...team, name: "First edit" }, revision: 4 });
     root.render(page());
