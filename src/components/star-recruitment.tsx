@@ -12,6 +12,7 @@ import { TableSkills } from "./skill-box";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import { TableScrollArea } from "./table-scroll-area";
 
 const playerStatLabels = ["MA", "ST", "AG", "PA", "AV"];
 
@@ -62,7 +63,7 @@ export function StarRecruitment({
           />
         </div>
         <div className="flex min-h-0 flex-col overflow-hidden rounded-lg border bg-card">
-          <div className="min-h-0 overflow-auto overscroll-contain" data-star-player-list>
+          <TableScrollArea className="min-h-0 overflow-auto overscroll-contain" data-star-player-list>
             {/* Cover fractional-pixel seams independently of the browser's table painting. */}
             <div aria-hidden="true" className="pointer-events-none sticky top-0 left-0 z-20 -mb-px h-px bg-card" />
             {/* Separate cell borders avoid collapsed-border gaps around the sticky header. */}
@@ -84,7 +85,7 @@ export function StarRecruitment({
                   <TableHead scope="col" className="w-14 text-right">
                     {t("cost")}
                   </TableHead>
-                  <TableHead scope="col" className="sticky right-0 w-14 bg-card pr-3">
+                  <TableHead scope="col" className="sticky-right-column sticky right-0 w-14 bg-card pr-3">
                     <span className="sr-only">{t("addStar")}</span>
                   </TableHead>
                 </TableRow>
@@ -111,7 +112,10 @@ export function StarRecruitment({
                       </TableCell>
                       <TableCell className="text-right font-mono text-xs tabular-nums">{gold(star.cost)}</TableCell>
                       {index === 0 && (
-                        <TableCell rowSpan={members.length} className="sticky right-0 bg-card pr-3 text-right">
+                        <TableCell
+                          rowSpan={members.length}
+                          className="sticky-right-column sticky right-0 bg-card pr-3 text-right"
+                        >
                           <Button
                             size="icon"
                             className="size-8"
@@ -132,7 +136,7 @@ export function StarRecruitment({
                 {t(search.trim() ? "leagueUx.noSearchResults" : "noStars")}
               </p>
             )}
-          </div>
+          </TableScrollArea>
         </div>
       </div>
     </DialogContent>

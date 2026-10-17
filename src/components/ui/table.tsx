@@ -2,10 +2,11 @@
 
 import * as React from "react"
 import { cn } from "cn"
+import { TableScrollArea } from "@/components/table-scroll-area"
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
-    <div
+    <TableScrollArea
       data-slot="table-container"
       className="relative w-full overflow-x-auto"
     >
@@ -14,7 +15,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
         className={cn("w-full caption-bottom text-sm", className)}
         {...props}
       />
-    </div>
+    </TableScrollArea>
   )
 }
 

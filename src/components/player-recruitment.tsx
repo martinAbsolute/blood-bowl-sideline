@@ -86,7 +86,9 @@ export function PlayerRecruitment({ team, onChange }: { team: Team; onChange: (t
                   ))}
                   <TableHead>{t("skillsAndTraits")}</TableHead>
                   <TableHead className="w-14 text-right">{t("cost")}</TableHead>
-                  <TableHead className="sticky right-0 w-32 bg-card pr-3 text-right">{t("quantity")}</TableHead>
+                  <TableHead className="sticky-right-column sticky right-0 w-32 bg-card pr-3 text-right">
+                    {t("quantity")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -117,7 +119,7 @@ export function PlayerRecruitment({ team, onChange }: { team: Team; onChange: (t
                         <TableSkills ids={p.skills} label={`${t("skillsAndTraits")} · ${positionLabel(p.position)}`} />
                       </TableCell>
                       <TableCell className="text-right font-mono text-xs">{p.cost / 1000}k</TableCell>
-                      <TableCell className="sticky right-0 bg-card pr-3">
+                      <TableCell className="sticky-right-column sticky right-0 bg-card pr-3">
                         <QuantityStepper
                           label={positionLabel(p.position)}
                           value={matching.length}

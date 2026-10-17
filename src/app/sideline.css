@@ -588,6 +588,22 @@ html:has(.catalog-layout) {
 .recruitment-menu [data-slot="accordion-trigger"] > svg {
   translate: 0 0;
 }
+.sticky-right-column {
+  z-index: 1;
+}
+.sticky-right-column::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  right: 100%;
+  width: 10px;
+  pointer-events: none;
+  background: linear-gradient(to left, rgb(38 56 47 / 12%), transparent);
+  opacity: 0;
+}
+[data-scroll-right="true"] .sticky-right-column::before {
+  opacity: 1;
+}
 .team-builder .player-recruitment td,
 .team-builder .player-table td,
 .star-recruitment td {
