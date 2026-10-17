@@ -578,9 +578,10 @@ it("limits name edits without helper text and keeps maximum-length copies valid"
     );
     name.dispatchEvent(new Event("input", { bubbles: true }));
   });
-  expect(value).toHaveLength(TEAM_NAME_MAX_LENGTH);
+  expect(name.value).toHaveLength(TEAM_NAME_MAX_LENGTH);
   expect(container.textContent).not.toContain("40/40");
   await act(async () => name.blur());
+  expect(value).toHaveLength(TEAM_NAME_MAX_LENGTH);
   expect(name.hasAttribute("aria-describedby")).toBe(false);
   const team = { ...newTeam(randomUUID()), name: value };
   storeDraft(team);
@@ -608,6 +609,8 @@ it("finishes name editing with Enter, restores it with Escape, and stays single-
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(name, "Changed\nname");
     name.dispatchEvent(new Event("input", { bubbles: true }));
   });
+  expect(name.value).toBe("Changedname");
+  await act(async () => vi.advanceTimersByTimeAsync(200));
   expect(value).toBe("Changedname");
   await act(async () => name.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })));
   expect(value).toBe("Original team");
@@ -617,6 +620,79 @@ it("finishes name editing with Enter, restores it with Escape, and stays single-
     name.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
   });
   expect(document.activeElement).not.toBe(name);
+});
+
+it("keeps rapid team-name edits local and persists only the latest name after a pause", async () => {
+  let team = { ...newTeam(randomUUID()), name: "Original" };
+  storeDraft(team);
+  const change = vi.fn((name: string) => {
+    team = { ...team, name };
+    storeDraft(team);
+    render();
+  });
+  const render = () =>
+    root.render(
+      createElement(TeamName, { value: team.name, placeholder: "Untitled", label: "Name", onChange: change }),
+    );
+  await act(async () => render());
+  const name = container.querySelector("input")!;
+  await act(async () => name.focus());
+  for (const next of ["F", "Fa", "Fast", "Fast team"]) {
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(name, next);
+      name.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    expect(name.value).toBe(next);
+    await act(async () => vi.advanceTimersByTimeAsync(50));
+  }
+  expect(change).not.toHaveBeenCalled();
+  expect(readDrafts()[0].name).toBe("Original");
+  await act(async () => vi.advanceTimersByTimeAsync(150));
+  expect(change).toHaveBeenCalledExactlyOnceWith("Fast team");
+  expect(readDrafts()[0].name).toBe("Fast team");
+  await act(async () => name.blur());
+  expect(change).toHaveBeenCalledTimes(1);
+});
+
+it.each(["blur", "Enter", "beforeunload", "pagehide"])("flushes a pending team name on %s", async (finish) => {
+  const change = vi.fn();
+  await act(async () =>
+    root.render(
+      createElement(TeamName, { value: "Original", placeholder: "Untitled", label: "Name", onChange: change }),
+    ),
+  );
+  const name = container.querySelector("input")!;
+  await act(async () => {
+    name.focus();
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(name, "Latest name");
+    name.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  expect(change).not.toHaveBeenCalled();
+  await act(async () => {
+    if (finish === "blur") name.blur();
+    else if (finish === "Enter") name.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    else window.dispatchEvent(new Event(finish));
+  });
+  expect(change).toHaveBeenCalledExactlyOnceWith("Latest name");
+});
+
+it("cancels a pending team rename on Escape", async () => {
+  const change = vi.fn();
+  await act(async () =>
+    root.render(
+      createElement(TeamName, { value: "Original", placeholder: "Untitled", label: "Name", onChange: change }),
+    ),
+  );
+  const name = container.querySelector("input")!;
+  await act(async () => {
+    name.focus();
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(name, "Cancelled");
+    name.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await act(async () => name.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })));
+  await act(async () => vi.advanceTimersByTimeAsync(300));
+  expect(name.value).toBe("Original");
+  expect(change).not.toHaveBeenCalled();
 });
 
 it("acknowledges names exactly while they are being typed, without retaining duplicate recovery cards", async () => {
@@ -709,6 +785,7 @@ it("restores the focus-time name when a changed name is cleared to whitespace", 
     name.dispatchEvent(new Event("input", { bubbles: true }));
   };
   await act(async () => input("Changed name"));
+  await act(async () => vi.advanceTimersByTimeAsync(200));
   expect(value).toBe("Changed name");
   await act(async () => input("   "));
   expect(name.value).toBe("   ");
@@ -747,6 +824,24 @@ it("updates a focused idle name field from the cloud without writing its old buf
   const name = container.querySelector("input")!;
   await act(async () => name.focus());
   await act(async () => root.render(render("Other tab")));
+  expect(name.value).toBe("Other tab");
+  await act(async () => name.blur());
+  expect(change).not.toHaveBeenCalled();
+});
+
+it("cancels a pending rename when a newer cloud name arrives", async () => {
+  const change = vi.fn();
+  const render = (value: string) =>
+    createElement(TeamName, { value, onChange: change, placeholder: "Untitled", label: "Name" });
+  await act(async () => root.render(render("Original")));
+  const name = container.querySelector("input")!;
+  await act(async () => {
+    name.focus();
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(name, "Pending edit");
+    name.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await act(async () => root.render(render("Other tab")));
+  await act(async () => vi.advanceTimersByTimeAsync(300));
   expect(name.value).toBe("Other tab");
   await act(async () => name.blur());
   expect(change).not.toHaveBeenCalled();

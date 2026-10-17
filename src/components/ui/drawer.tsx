@@ -99,9 +99,8 @@ function DrawerSwipeHandle({
 function DrawerContent({
   className,
   children,
-  swipeHeader,
   ...props
-}: DrawerPrimitive.Popup.Props & { swipeHeader?: React.ReactNode }) {
+}: DrawerPrimitive.Popup.Props) {
   const { hasSnapPoints, modal, showSwipeHandle, swipeDirection } = useDrawer()
   const swipeAxis =
     swipeDirection === "down" || swipeDirection === "up" ? "y" : "x"
@@ -150,7 +149,6 @@ function DrawerContent({
           {...props}
         >
           {showSwipeHandle && <DrawerSwipeHandle />}
-          {swipeHeader}
           <DrawerPrimitive.Content
             data-slot="drawer-content"
             className={cn(

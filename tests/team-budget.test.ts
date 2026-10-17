@@ -102,27 +102,6 @@ it("never consumes Android Back for the resting bar, and releases it after closi
   }
 });
 
-it("opens with an upward swipe but leaves horizontal gestures alone", async () => {
-  await render();
-  await reportBudgetPosition(1000);
-  const button = document.querySelector<HTMLButtonElement>(".mobile-budget-bar button")!;
-  button.setPointerCapture = vi.fn();
-  const pointer = (type: string, x: number, y: number) =>
-    button.dispatchEvent(
-      new PointerEvent(type, { bubbles: true, isPrimary: true, button: 0, pointerId: 1, clientX: x, clientY: y }),
-    );
-  await act(async () => {
-    pointer("pointerdown", 20, 700);
-    pointer("pointerup", 120, 690);
-  });
-  expect(document.querySelector(".mobile-budget-drawer")).toBeNull();
-  await act(async () => {
-    pointer("pointerdown", 20, 700);
-    pointer("pointerup", 20, 650);
-  });
-  expect(document.querySelector(".mobile-budget-drawer")).not.toBeNull();
-});
-
 it("shows the inline breakdown directly without an accordion", async () => {
   await render(false);
   expect(container.textContent).toContain("treasury");
@@ -201,26 +180,30 @@ it("keeps the resting budget outside a dialog, opens on demand, then hands off t
   await render();
   await reportBudgetPosition(1000);
   const bar = document.querySelector<HTMLElement>(".mobile-budget-bar")!;
-  const button = bar.querySelector<HTMLButtonElement>(".budget-drawer-summary button")!;
-  const header = bar.querySelector(".budget-drawer-summary")!;
-  const headerContent = header.innerHTML;
+  const button = bar.querySelector<HTMLButtonElement>('[data-slot="drawer-trigger"]')!;
+  const overview = bar.querySelector(".budget-overview")!.innerHTML;
   expect(document.querySelector('[role="dialog"]')).toBeNull();
-  expect(document.querySelector(".mobile-budget-drawer")).toBeNull();
+  expect(bar.querySelector(".budget-drawer-handle")).toBeNull();
   await act(async () => button.click());
   const popup = document.querySelector<HTMLElement>(".mobile-budget-drawer")!;
-  expect(document.querySelector(".mobile-budget-bar")).toBeNull();
-  // The handle sits outside Content so the drawer primitive can claim drags.
-  expect(popup.querySelector('[data-slot="drawer-content"] .budget-drawer-handle')).toBeNull();
-  expect(popup.dataset.expanded).toBe("true");
-  expect(popup.querySelector(".budget-drawer-summary")!.innerHTML).toBe(
-    headerContent.replace('aria-expanded="false"', 'aria-expanded="true"'),
-  );
+  expect(bar.dataset.visible).toBe("false");
+  expect(bar.hasAttribute("inert")).toBe(true);
+  expect(popup.querySelector(".budget-overview")!.innerHTML).toBe(overview);
+  expect(popup.querySelector(".budget-drawer-handle")).toBeNull();
   expect(popup.querySelector('[data-slot="accordion-trigger"]')).toBeNull();
-  await act(async () => popup.querySelector<HTMLButtonElement>(".budget-drawer-summary button")!.click());
-  expect(document.querySelector(".mobile-budget-bar .budget-drawer-summary")!.innerHTML).toBe(headerContent);
+  expect(popup.querySelector('[data-slot="drawer-close"]')).toBeNull();
+  await act(async () => {
+    popup.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  });
+  expect(bar.dataset.visible).toBe("true");
+  expect(bar.hasAttribute("inert")).toBe(false);
+  expect(bar.querySelector(".budget-overview")!.innerHTML).toBe(overview);
+  await act(async () => button.click());
   await reportBudgetPosition(600);
   expect(document.querySelector(".mobile-budget-drawer")).toBeNull();
-  expect(document.querySelector(".mobile-budget-bar")).toBeNull();
+  expect(bar.dataset.visible).toBe("false");
+  expect(bar.hasAttribute("inert")).toBe(true);
+  expect(closeWatchers.size).toBe(0);
   expect(container.querySelector(".team-budget")).not.toBeNull();
 });
 
@@ -259,7 +242,7 @@ it("preserves the collapsed drawer at the limit without league-specific warnings
   await act(async () => root.render(createElement(TeamBudget, { team })));
   await reportBudgetPosition(1000);
   const popup = document.querySelector<HTMLElement>(".mobile-budget-bar")!;
-  const header = popup.querySelector(".budget-drawer-summary")!;
+  const header = popup.querySelector(".budget-overview")!;
   const progress = header.querySelector('[role="progressbar"]');
   expect(header.textContent).toContain("995k / 1,000k");
   expect(popup.textContent).not.toContain("leagueUi.rookieIssues.rookieFans");
@@ -268,7 +251,7 @@ it("preserves the collapsed drawer at the limit without league-specific warnings
       root.render(createElement(TeamBudget, { team: { ...team, staff: { ...team.staff, dedicatedFans } } })),
     );
     expect(document.querySelector(".mobile-budget-bar")).toBe(popup);
-    expect(popup.querySelector(".budget-drawer-summary")).toBe(header);
+    expect(popup.querySelector(".budget-overview")).toBe(header);
     expect(header.querySelector('[role="progressbar"]')).toBe(progress);
     expect(header.textContent).toContain(dedicatedFans === 3 ? "1,000k / 1,000k" : "995k / 1,000k");
     expect(popup.textContent?.includes("leagueUi.rookieIssues.rookieFans")).toBe(false);
@@ -291,7 +274,7 @@ it("surfaces skill-only overspending in the closed drawer", async () => {
   expect(popup.querySelector(".budget-overview")?.textContent).toContain("treasuryOver");
   const header = popup.querySelector(".budget-overview")!;
   const headerContent = header.innerHTML;
-  await act(async () => popup.querySelector<HTMLButtonElement>(".budget-drawer-summary button")!.click());
+  await act(async () => popup.querySelector<HTMLButtonElement>("button")!.click());
   const drawer = document.querySelector(".mobile-budget-drawer")!;
   expect(drawer.querySelector(".budget-overview")!.innerHTML).toBe(headerContent);
   expect(
@@ -309,13 +292,13 @@ it("opens Flowing Funds help from the drawer header without nesting buttons or t
   const bar = document.querySelector<HTMLElement>(".mobile-budget-bar")!;
   expect(bar.querySelector("button button")).toBeNull();
   expect(bar.textContent).not.toContain("flowingHint");
-  const toggle = bar.querySelector<HTMLButtonElement>('.budget-drawer-summary button[aria-label="budgetBreakdown"]')!;
+  const toggle = bar.querySelector<HTMLButtonElement>('button[aria-label="budgetBreakdown"]')!;
   await act(async () => toggle.click());
   const popup = document.querySelector<HTMLElement>(".mobile-budget-drawer")!;
-  const help = popup.querySelector<HTMLButtonElement>('.budget-drawer-summary button[aria-label="explainRule"]')!;
+  const help = popup.querySelector<HTMLButtonElement>('button[aria-label="explainRule"]')!;
   expect(help).not.toBeNull();
   await act(async () => help.click());
-  expect(popup.dataset.expanded).toBe("true");
+  expect(popup.getAttribute("role")).toBe("dialog");
   expect(
     Array.from(document.querySelectorAll('[role="dialog"]')).some((dialog) =>
       dialog.textContent?.includes("flowingHint"),
@@ -328,9 +311,9 @@ it("shows readiness in an empty default drawer and updates warnings as the team 
   await act(async () => root.render(createElement(TeamBudget, { team })));
   await reportBudgetPosition(1000);
   const bar = document.querySelector<HTMLElement>(".mobile-budget-bar")!;
-  await act(async () => bar.querySelector<HTMLButtonElement>(".budget-drawer-summary button")!.click());
+  await act(async () => bar.querySelector<HTMLButtonElement>("button")!.click());
   const popup = document.querySelector<HTMLElement>(".mobile-budget-drawer")!;
-  const breakdown = popup.querySelector(".budget-drawer-breakdown")!;
+  const breakdown = popup.querySelector('[data-slot="drawer-content"]')!;
   expect(breakdown.hasAttribute("inert")).toBe(false);
   expect(breakdown.textContent).toContain("workInProgress");
   expect(breakdown.textContent).toContain("issues.minPlayers");

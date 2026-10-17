@@ -6,7 +6,7 @@ import type { Team } from "@/domain/types";
 import { budgetSummary } from "@/domain/budget";
 import { BudgetBreakdown, BudgetOverview } from "./budget-details";
 import { TeamReadiness } from "./team-readiness";
-import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "./ui/drawer";
+import { Drawer, DrawerContent, DrawerDescription, DrawerTitle, DrawerTrigger } from "./ui/drawer";
 
 export function TeamBudget({
   team,
@@ -19,27 +19,24 @@ export function TeamBudget({
 }) {
   const t = useTranslations();
   const summary = budgetSummary(team, startingTreasury);
-  // Keep the same allowance in the header throughout opening and closing.
+  // Surface overspending or reserve usage in the compact bar.
   const drawerPool =
     summary.issues[0] ?? summary.pools.find((pool) => pool.id === "funds" && pool.used > 0) ?? summary.pools[0];
   const section = useRef<HTMLElement>(null);
-  const trigger = useRef<HTMLButtonElement>(null);
   const [aboveBudget, setAboveBudget] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const swipeStart = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const target = section.current;
     if (!floating || !target) return;
     const mobile = window.matchMedia("(max-width: 767px)");
-    // Give the full card room to enter before withdrawing the bottom bar.
+    // Slide the bar away when the inline Treasury reaches the screen.
     const observer = new IntersectionObserver(
       ([entry]) => {
         const above = mobile.matches && entry.boundingClientRect.top >= (entry.rootBounds?.bottom ?? 0);
         setAboveBudget(above);
         if (!above) setExpanded(false);
       },
-      { rootMargin: "0px 0px -80px 0px" },
     );
     const observe = () => {
       observer.disconnect();
@@ -68,68 +65,25 @@ export function TeamBudget({
         <BudgetBreakdown summary={summary} />
       </section>
       {/* An open Base UI drawer owns Android Back, even when non-modal.
-          Keep the resting bar outside the drawer so Back navigates immediately. */}
-      {floating && aboveBudget && !expanded && (
-        <div
-          className="mobile-budget-bar budget-panel no-print"
-          onPointerDown={(event) => {
-            if (event.isPrimary && event.button === 0) {
-              swipeStart.current = { x: event.clientX, y: event.clientY };
-              // Capture on the pressed control so a tap still clicks it.
-              if (event.target instanceof HTMLElement) event.target.setPointerCapture(event.pointerId);
-            }
-          }}
-          onPointerCancel={() => {
-            swipeStart.current = null;
-          }}
-          onPointerUp={(event) => {
-            const start = swipeStart.current;
-            swipeStart.current = null;
-            if (start && start.y - event.clientY > 30 && start.y - event.clientY > Math.abs(start.x - event.clientX))
-              setExpanded(true);
-          }}
-        >
-          <div className="budget-drawer-summary">
-            <span className="budget-drawer-handle" aria-hidden="true" />
-            <div className="relative">
-              <button
-                ref={trigger}
-                type="button"
-                className="absolute inset-0 w-full cursor-pointer rounded-sm"
-                aria-label={t("budgetBreakdown")}
-                aria-expanded={false}
-                onClick={() => setExpanded(true)}
-              />
-              <BudgetOverview pool={drawerPool} />
-            </div>
-          </div>
-        </div>
-      )}
+          Keep the resting bar outside the popup so Back navigates immediately. */}
       {floating && (
         <Drawer open={aboveBudget && expanded} onOpenChange={setExpanded}>
-          <DrawerContent
-            className="mobile-budget-drawer budget-panel no-print"
-            data-expanded="true"
-            finalFocus={trigger}
-            swipeHeader={
-              <div className="budget-drawer-summary">
-                <span className="budget-drawer-handle" aria-hidden="true" />
-                <div className="relative">
-                  <button
-                    type="button"
-                    className="absolute inset-0 w-full cursor-pointer rounded-sm"
-                    aria-label={t("budgetBreakdown")}
-                    aria-expanded={expanded}
-                    onClick={() => setExpanded(!expanded)}
-                  />
-                  <BudgetOverview pool={drawerPool} />
-                </div>
-              </div>
-            }
+          <div
+            className="mobile-budget-bar no-print md:hidden"
+            data-visible={aboveBudget && !expanded}
+            inert={!aboveBudget || expanded}
           >
+            <DrawerTrigger
+              className="absolute inset-0 w-full cursor-pointer rounded-t-lg focus-visible:outline-2 focus-visible:-outline-offset-3 focus-visible:outline-ring"
+              aria-label={t("budgetBreakdown")}
+            />
+            <BudgetOverview pool={drawerPool} />
+          </div>
+          <DrawerContent className="mobile-budget-drawer no-print">
             <DrawerTitle className="sr-only">{t("treasury")}</DrawerTitle>
             <DrawerDescription className="sr-only">{t("budgetBreakdown")}</DrawerDescription>
-            <div className="budget-drawer-breakdown min-h-0 overflow-y-auto overscroll-contain">
+            <div className="min-h-0 overflow-y-auto overscroll-contain">
+              <BudgetOverview pool={drawerPool} />
               <BudgetBreakdown summary={summary} drawerPool={drawerPool} />
               <div className="px-3 pb-3">
                 <TeamReadiness team={team} startingTreasury={startingTreasury} />

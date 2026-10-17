@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TEAM_NAME_MAX_LENGTH } from "@/domain/team-name";
 
 export function TeamName({
@@ -27,6 +27,21 @@ export function TeamName({
     }
   }
   const displayed = editing ?? value;
+  useEffect(() => {
+    // Keep keystrokes local: saving a draft also notifies storage subscribers
+    // and renders the whole roster. Publish once typing has paused instead.
+    if (editing === null || !editing.trim() || editing === value) return;
+    const publish = () => onChange(editing);
+    const timer = window.setTimeout(publish, 200);
+    // A reload or closing the tab can happen before the debounce or blur.
+    window.addEventListener("beforeunload", publish);
+    window.addEventListener("pagehide", publish);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("beforeunload", publish);
+      window.removeEventListener("pagehide", publish);
+    };
+  }, [editing, value, onChange]);
   return (
     <span className="relative grid w-max min-w-[1ch] max-w-full grid-cols-[minmax(0,1fr)]">
       <span aria-hidden="true" className="invisible min-w-0 overflow-hidden whitespace-pre py-1">
@@ -51,8 +66,6 @@ export function TeamName({
         onChange={(event) => {
           const next = event.target.value.slice(0, TEAM_NAME_MAX_LENGTH);
           setEditing(next);
-          // An empty editing buffer isn't a team rename or a recovery draft.
-          if (next.trim()) onChange(next);
         }}
         onBlur={() => {
           if (!cancelled.current) {

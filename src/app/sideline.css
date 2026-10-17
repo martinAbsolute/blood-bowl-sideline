@@ -461,61 +461,35 @@ html:has(.catalog-layout) {
 }
 .mobile-budget-drawer,
 .mobile-budget-bar {
-  --drawer-content-height: auto;
-  --drawer-content-max-height: 85dvh;
-  margin: 0 var(--page-gutter);
   padding-bottom: env(safe-area-inset-bottom);
-  border-bottom: 0;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
+  background: var(--card);
   box-shadow: 0 -4px 16px #193e320a;
 }
 .mobile-budget-bar {
   position: fixed;
   inset: auto 0 0;
+  margin: 0;
   z-index: 40;
+  border-top: 1px solid var(--border);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  transform: translateY(calc(100% + 16px));
+  visibility: hidden;
+  transition:
+    transform 200ms ease,
+    visibility 0s 200ms;
 }
-.budget-drawer-summary {
-  touch-action: pan-x;
-  user-select: none;
-  display: block;
-  flex-shrink: 0;
-  width: 100%;
-  padding: 0;
-  text-align: left;
-  cursor: grab;
+.mobile-budget-bar[data-visible="true"] {
+  transform: translateY(0);
+  visibility: visible;
+  transition-delay: 0s;
 }
-.budget-drawer-summary:active {
-  cursor: grabbing;
-}
-.budget-drawer-summary button:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: -3px;
-  border-top-left-radius: var(--radius-lg);
-  border-top-right-radius: var(--radius-lg);
-}
-.budget-drawer-handle {
-  display: block;
-  height: 20px;
-  padding-top: 8px;
-}
-.budget-drawer-handle::after {
-  content: "";
-  display: block;
-  width: 48px;
-  height: 4px;
-  margin: 0 auto;
-  border-radius: 999px;
-  background: var(--border);
-}
-.mobile-budget-drawer .budget-overview,
 .mobile-budget-bar .budget-overview {
-  padding: 0 12px 10px;
   pointer-events: none;
   position: relative;
 }
 @media (prefers-reduced-motion: reduce) {
-  .mobile-budget-drawer {
+  .mobile-budget-drawer,
+  .mobile-budget-bar {
     transition: none;
   }
 }
@@ -688,8 +662,7 @@ html:has(.catalog-layout) {
 .player-dialog-navigation {
   display: none;
 }
-/* The persistent, non-modal budget drawer stays below player and rule dialogs,
-   including when its portal mounts after a viewport change. */
+/* Keep Treasury below player and rule dialogs opened from its content. */
 [data-slot="drawer-overlay"]:has(+ [data-slot="drawer-viewport"] .mobile-budget-drawer),
 [data-slot="drawer-viewport"]:has(.mobile-budget-drawer) {
   z-index: 40;
