@@ -206,8 +206,8 @@ body {
     display: none;
   }
   .site-shell-body {
-    /* Apply the content width once; animating tracks relayouts every team card per frame. */
     grid-template-columns: var(--site-sidebar-width) minmax(0, 1fr);
+    transition: grid-template-columns 200ms ease-in-out;
   }
   .site-sidebar {
     min-width: 0;
