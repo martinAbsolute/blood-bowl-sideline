@@ -52,8 +52,8 @@ export function StarRecruitment({
           <X className="size-4" aria-hidden="true" />
         </DialogClose>
       </DialogHeader>
-      <div className="min-h-0 overflow-auto overscroll-contain bg-card [scrollbar-gutter:stable]" data-star-player-list>
-        <div className="sticky left-0 bg-popover pb-4">
+      <div className="flex min-h-0 flex-col gap-4">
+        <div className="shrink-0">
           <Input
             value={search}
             onChange={(event) => onSearch(event.target.value)}
@@ -61,73 +61,75 @@ export function StarRecruitment({
             aria-label={t("leagueUx.searchStars")}
           />
         </div>
-        {/* A native table keeps its sticky header attached to the modal body scroll area. */}
-        <table
-          className="w-full min-w-[960px] table-fixed caption-bottom border text-sm [&_.table-skills]:w-full [&_.table-skills>div]:flex-wrap"
-          aria-label={t("starPlayers")}
-        >
-          <TableHeader className="sticky top-0 z-10 bg-card">
-            <TableRow>
-              <TableHead scope="col" className="w-48 pl-3 lg:w-64">
-                {t("player")}
-              </TableHead>
-              {playerStatLabels.map((stat) => (
-                <TableHead scope="col" key={stat} className="w-8 text-center font-mono text-xs">
-                  {stat}
+        <div className="min-h-0 overflow-auto overscroll-contain rounded-lg border bg-card" data-star-player-list>
+          {/* One scroll container keeps the table header sticky and the rounded frame visible. */}
+          <table
+            className="w-full min-w-[960px] table-fixed caption-bottom text-sm [&_.table-skills]:w-full [&_.table-skills>div]:flex-wrap"
+            aria-label={t("starPlayers")}
+          >
+            <TableHeader className="sticky top-0 z-10 bg-card">
+              <TableRow>
+                <TableHead scope="col" className="w-48 pl-3 lg:w-64">
+                  {t("player")}
                 </TableHead>
-              ))}
-              <TableHead scope="col">{t("skillsAndTraits")}</TableHead>
-              <TableHead scope="col" className="w-14 text-right">
-                {t("cost")}
-              </TableHead>
-              <TableHead scope="col" className="sticky right-0 w-14 bg-card pr-3">
-                <span className="sr-only">{t("addStar")}</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {groups.flatMap(({ choice, members }) =>
-              members.map((star, index) => (
-                <TableRow key={star.id} className="h-12">
-                  <TableCell className="pl-3">
-                    <div className="flex items-center gap-2">
-                      <StarPlayerIcon starId={star.id} className="size-8 shrink-0" />
-                      <strong className="truncate text-sm" title={star.name}>
-                        {star.name}
-                      </strong>
-                    </div>
-                  </TableCell>
-                  {[star.ma, star.st, star.ag, star.pa, star.av].map((value, i) => (
-                    <TableCell key={i} className="text-center font-mono text-xs">
-                      {value}
+                {playerStatLabels.map((stat) => (
+                  <TableHead scope="col" key={stat} className="w-8 text-center font-mono text-xs">
+                    {stat}
+                  </TableHead>
+                ))}
+                <TableHead scope="col">{t("skillsAndTraits")}</TableHead>
+                <TableHead scope="col" className="w-14 text-right">
+                  {t("cost")}
+                </TableHead>
+                <TableHead scope="col" className="sticky right-0 w-14 bg-card pr-3">
+                  <span className="sr-only">{t("addStar")}</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {groups.flatMap(({ choice, members }) =>
+                members.map((star, index) => (
+                  <TableRow key={star.id} className="h-12">
+                    <TableCell className="pl-3">
+                      <div className="flex items-center gap-2">
+                        <StarPlayerIcon starId={star.id} className="size-8 shrink-0" />
+                        <strong className="truncate text-sm" title={star.name}>
+                          {star.name}
+                        </strong>
+                      </div>
                     </TableCell>
-                  ))}
-                  <TableCell className="whitespace-normal">
-                    <TableSkills ids={star.skills} label={`${t("skillsAndTraits")} · ${star.name}`} />
-                  </TableCell>
-                  <TableCell className="text-right font-mono text-xs tabular-nums">{gold(star.cost)}</TableCell>
-                  {index === 0 && (
-                    <TableCell rowSpan={members.length} className="sticky right-0 bg-card pr-3 text-right">
-                      <Button
-                        size="icon"
-                        className="size-8"
-                        aria-label={t("hireStarPlayer", { player: members.map((star) => star.name).join(" & ") })}
-                        onClick={() => onHire(choice.id)}
-                      >
-                        <Plus className="size-4" aria-hidden="true" />
-                      </Button>
+                    {[star.ma, star.st, star.ag, star.pa, star.av].map((value, i) => (
+                      <TableCell key={i} className="text-center font-mono text-xs">
+                        {value}
+                      </TableCell>
+                    ))}
+                    <TableCell className="whitespace-normal">
+                      <TableSkills ids={star.skills} label={`${t("skillsAndTraits")} · ${star.name}`} />
                     </TableCell>
-                  )}
-                </TableRow>
-              )),
-            )}
-          </TableBody>
-        </table>
-        {!choices.length && (
-          <p role="status" className="px-6 py-12 text-center text-sm text-muted-foreground">
-            {t(search.trim() ? "leagueUx.noSearchResults" : "noStars")}
-          </p>
-        )}
+                    <TableCell className="text-right font-mono text-xs tabular-nums">{gold(star.cost)}</TableCell>
+                    {index === 0 && (
+                      <TableCell rowSpan={members.length} className="sticky right-0 bg-card pr-3 text-right">
+                        <Button
+                          size="icon"
+                          className="size-8"
+                          aria-label={t("hireStarPlayer", { player: members.map((star) => star.name).join(" & ") })}
+                          onClick={() => onHire(choice.id)}
+                        >
+                          <Plus className="size-4" aria-hidden="true" />
+                        </Button>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                )),
+              )}
+            </TableBody>
+          </table>
+          {!choices.length && (
+            <p role="status" className="px-6 py-12 text-center text-sm text-muted-foreground">
+              {t(search.trim() ? "leagueUx.noSearchResults" : "noStars")}
+            </p>
+          )}
+        </div>
       </div>
     </DialogContent>
   );
