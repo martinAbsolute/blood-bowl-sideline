@@ -20,6 +20,87 @@ import type { ReactNode } from "react";
 import { UsersLoading } from "./list-loading";
 import { LeagueContentLoading, LeagueDirectoryLoading } from "./league-content-loading";
 import { rosterChoices } from "@/lib/roster-ruleset";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import { isSevens } from "@/domain/rules";
+
+function EditorTableLoading({
+  rows,
+  recruitment = false,
+  text,
+}: {
+  rows: number;
+  recruitment?: boolean;
+  text?: Translate;
+}) {
+  return (
+    <Table className={`${recruitment ? "min-w-[780px]" : "player-table min-w-[740px]"} table-auto lg:table-fixed`}>
+      <TableHeader>
+        <TableRow>
+          {!recruitment && <TableHead className="w-[calc(2ch+13px)] pl-[9px] pr-1 text-right">#</TableHead>}
+          <TableHead className={recruitment ? "w-48 pl-3" : "w-48 lg:w-64"}>
+            {text?.("player") || <Skeleton className="h-3 w-12" />}
+          </TableHead>
+          {["MA", "ST", "AG", "PA", "AV"].map((stat) => (
+            <TableHead key={stat} className="w-8 text-center font-mono text-xs">
+              {stat}
+            </TableHead>
+          ))}
+          <TableHead>
+            {text?.(recruitment ? "skills" : "skillsAndTraits") || <Skeleton className="h-3 w-24" />}
+          </TableHead>
+          <TableHead className="w-14 text-right">
+            {text?.("cost") || <Skeleton className="ml-auto h-3 w-8" />}
+          </TableHead>
+          <TableHead className={recruitment ? "w-32 pr-3 text-right" : "w-8"}>
+            {recruitment && (text?.("quantity") || <Skeleton className="ml-auto h-3 w-16" />)}
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {Array.from({ length: rows }, (_, index) => (
+          <TableRow key={index} className={recruitment ? "h-12" : "h-[38px]"}>
+            {!recruitment && (
+              <TableCell className="pl-[9px] pr-1">
+                <Skeleton className="ml-auto h-3 w-3" />
+              </TableCell>
+            )}
+            <TableCell className={recruitment ? "pl-3" : ""}>
+              <div className="flex min-w-0 items-center gap-2">
+                <Skeleton className="size-8 shrink-0" />
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <Skeleton className="h-3.5 w-28 max-w-full" />
+                  {!recruitment && <Skeleton className="h-3 w-20 max-w-full" />}
+                </div>
+              </div>
+            </TableCell>
+            {[0, 1, 2, 3, 4].map((stat) => (
+              <TableCell key={stat}>
+                <Skeleton className="mx-auto h-3 w-4" />
+              </TableCell>
+            ))}
+            <TableCell>
+              <Skeleton className="h-3 w-3/4" />
+            </TableCell>
+            <TableCell>
+              <Skeleton className="ml-auto h-3 w-8" />
+            </TableCell>
+            <TableCell className={recruitment ? "pr-3" : ""}>
+              {recruitment ? (
+                <div className="flex items-center justify-end gap-2">
+                  <Skeleton className="size-8 shrink-0" />
+                  <Skeleton className="h-3 w-5" />
+                  <Skeleton className="size-8 shrink-0" />
+                </div>
+              ) : (
+                <Skeleton className="mx-auto h-3 w-2" />
+              )}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
 
 export type LoadingVariant =
   | "page"
@@ -229,12 +310,16 @@ export function LoadingLayout({
             back={
               <div className="inline-flex min-h-8 items-center gap-1.5 text-sm text-muted-foreground">
                 <ArrowLeft className="size-3.5" />
-                {text?.("myTeams")}
+                {text?.("myTeams") || <Skeleton className="h-4 w-16" />}
               </div>
             }
             title={
-              <div className="page-heading team-heading min-w-0 truncate py-1">
-                {team?.name || <Skeleton className="h-[1.2em] w-60 max-w-full" />}
+              <div className="page-heading team-heading flex min-w-0 items-center py-1">
+                {team?.name ? (
+                  <span className="truncate">{team.name}</span>
+                ) : (
+                  <Skeleton className="h-[1.2em] w-60 max-w-full" />
+                )}
               </div>
             }
             status={<Skeleton className="h-3 w-16" />}
@@ -242,16 +327,16 @@ export function LoadingLayout({
               <>
                 <span className="hidden h-9 items-center justify-center gap-2 rounded-lg border bg-background px-3 text-sm font-medium sm:inline-flex">
                   <Copy className="size-4" />
-                  {text?.("duplicate")}
+                  {text?.("duplicate") || <Skeleton className="h-4 w-16" />}
                 </span>
                 <span className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground sm:h-9 sm:flex-none">
                   <Printer className="size-4" />
-                  {text?.("print")}
+                  {text?.("print") || <Skeleton className="h-4 w-12" />}
                   <ChevronDown className="size-4" />
                 </span>
                 <span className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg border bg-background px-3 text-sm font-medium sm:hidden">
                   <Ellipsis className="size-4" />
-                  {text?.("teamActions")}
+                  {text?.("teamActions") || <Skeleton className="h-4 w-20" />}
                 </span>
               </>
             }
@@ -276,32 +361,46 @@ export function LoadingLayout({
           </TeamHeader>
           <div className="budget-grid">
             <div className="@container space-y-5">
-              <TableLoading
-                rows={recruitmentOpen ? (roster?.players.length ?? 4) : 0}
-                empty={!recruitmentOpen}
-                heading={text?.("recruitPlayers")}
-                text={text}
-              />
+              <div className="player-recruitment overflow-hidden rounded-lg border bg-card">
+                <div className="flex items-center justify-between bg-secondary px-4 py-3.5 text-base font-semibold">
+                  {text?.("recruitPlayers") || <Skeleton className="h-6 w-36" />}
+                  <ChevronDown className="size-4 text-primary" />
+                </div>
+                {recruitmentOpen && (
+                  <div className="border-t">
+                    <EditorTableLoading rows={roster?.players.length ?? 4} recruitment text={text} />
+                  </div>
+                )}
+              </div>
               <div>
                 <div className="mb-2 flex h-6 items-center justify-between px-1">
-                  <h2 className="section-title">{text?.("players")}</h2>
+                  <h2 className="section-title">{text?.("players") || <Skeleton className="h-5 w-16" />}</h2>
                   <Skeleton className="h-3 w-10" />
                 </div>
-                <TableLoading
-                  rows={team ? team.players.length + team.stars.length || 1 : 3}
-                  empty={!!team && !team.players.length && !team.stars.length}
-                  title={false}
-                  text={text}
-                />
-                <div className="-mt-px flex h-12 justify-end rounded-b-lg border bg-card p-2">
-                  <span className="flex h-7 items-center px-2 text-xs font-medium">{text?.("addStar")}</span>
+                <div className="overflow-hidden rounded-lg border bg-card">
+                  {team && !team.players.length && !team.stars.length ? (
+                    <div className="px-4 py-6 text-center text-xs leading-relaxed text-muted-foreground">
+                      {text?.("emptyRosterHint") || <Skeleton className="mx-auto h-4 w-3/4" />}
+                    </div>
+                  ) : (
+                    <EditorTableLoading rows={team ? team.players.length + team.stars.length : 3} text={text} />
+                  )}
+                  {(!team || !isSevens(team)) && (
+                    <div className="flex justify-end border-t px-3 py-2">
+                      <span className="flex h-7 items-center px-2 text-xs font-medium">
+                        {text?.("addStar") || <Skeleton className="h-4 w-24" />}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="grid items-start gap-4 @min-[780px]:grid-cols-2">
                 {supportRows.map((count, sectionIndex) => (
-                  <section key={sectionIndex}>
+                  <section key={sectionIndex} className="min-w-0">
                     <div className="mb-2 flex h-6 items-center justify-between px-1">
-                      <h2 className="section-title">{text?.(sectionIndex === 0 ? "staff" : "inducements")}</h2>
+                      <h2 className="section-title">
+                        {text?.(sectionIndex === 0 ? "staff" : "inducements") || <Skeleton className="h-5 w-24" />}
+                      </h2>
                       <Skeleton className="h-3 w-12" />
                     </div>
                     <div className="space-y-1.5">
@@ -310,13 +409,13 @@ export function LoadingLayout({
                           key={index}
                           className="flex h-14 items-center justify-between gap-2 rounded-lg border bg-card px-3"
                         >
-                          <div className="flex-1 space-y-1.5">
+                          <div className="min-w-0 flex-1 space-y-1.5">
                             <Skeleton className="h-4 w-3/4" />
                             <Skeleton className="h-3 w-2/3" />
                           </div>
-                          <Skeleton className="size-8" />
-                          <Skeleton className="h-4 w-5" />
-                          <Skeleton className="size-8" />
+                          <Skeleton className="size-8 shrink-0" />
+                          <Skeleton className="h-4 w-5 shrink-0" />
+                          <Skeleton className="size-8 shrink-0" />
                         </div>
                       ))}
                     </div>
@@ -333,7 +432,11 @@ export function LoadingLayout({
                   ).map((index) => (
                     <div key={index} className={`space-y-1 ${index === 2 ? "max-[900px]:col-start-2" : ""}`}>
                       <div className="text-xs font-medium text-muted-foreground">
-                        {index < 2 ? text?.(index === 0 ? "ruleset" : "roster") : <Skeleton className="h-4 w-16" />}
+                        {index < 2 ? (
+                          text?.(index === 0 ? "ruleset" : "roster") || <Skeleton className="h-4 w-16" />
+                        ) : (
+                          <Skeleton className="h-4 w-16" />
+                        )}
                       </div>
                       {team && index < 2 ? (
                         <div className="flex h-9 items-center justify-between gap-2 rounded-lg border bg-background px-3 text-sm">

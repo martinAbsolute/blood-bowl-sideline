@@ -403,15 +403,17 @@ export function TeamEditor({
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <PlayerIcon positionId={pos.id} className="size-8" />
-                              <div className="lg:min-w-0">
+                              <div className="flex h-8 flex-col justify-center lg:min-w-0">
                                 {readOnly ? (
-                                  <strong className="text-sm">{p.name || positionLabel(pos.position)}</strong>
+                                  <strong className="block text-sm leading-5">
+                                    {p.name || positionLabel(pos.position)}
+                                  </strong>
                                 ) : (
                                   <>
-                                    <strong className="hidden text-sm print:block">
+                                    <strong className="hidden text-sm leading-5 print:block">
                                       {p.name || positionLabel(pos.position)}
                                     </strong>
-                                    <div className="no-print inline-flex items-start gap-1 lg:max-w-full">
+                                    <div className="no-print flex items-center gap-1 lg:max-w-full">
                                       <InlinePlayerName
                                         value={p.name}
                                         designation={positionLabel(pos.position)}
@@ -432,7 +434,8 @@ export function TeamEditor({
                                 {hasPlayerName(p.name, positionLabel(pos.position)) && (
                                   <p
                                     className={
-                                      (readOnly ? "" : "hidden print:block ") + "mt-0.5 text-xs text-muted-foreground"
+                                      (readOnly ? "" : "hidden print:block ") +
+                                      "text-xs leading-3 text-muted-foreground"
                                     }
                                   >
                                     {positionLabel(pos.position)}

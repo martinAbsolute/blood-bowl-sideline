@@ -121,8 +121,8 @@ export function InlinePlayerName({
   }
   const displayed = draft ?? value;
   return (
-    <div className="min-w-0 max-w-full">
-      <span className="relative grid w-max min-w-[1ch] max-w-full grid-cols-[minmax(0,1fr)] text-sm font-semibold">
+    <div className="flex h-8 min-w-0 max-w-full flex-col justify-center">
+      <span className="relative grid w-max min-w-[1ch] max-w-full grid-cols-[minmax(0,1fr)] text-sm font-semibold leading-5">
         <span aria-hidden="true" className="invisible min-w-0 overflow-hidden whitespace-pre">
           {displayed || designation}
           {"\u200b"}
@@ -162,7 +162,7 @@ export function InlinePlayerName({
           }}
         />
       </span>
-      {hasPlayerName(value, designation) && <p className="mt-0.5 text-xs text-muted-foreground">{designation}</p>}
+      {hasPlayerName(value, designation) && <p className="text-xs leading-3 text-muted-foreground">{designation}</p>}
     </div>
   );
 }
