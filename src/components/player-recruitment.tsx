@@ -75,7 +75,7 @@ export function PlayerRecruitment({ team, onChange }: { team: Team; onChange: (t
                 <span className="font-mono">{t("sevensSpecialists", { count: specialists, max: 4 })}</span>
               </div>
             )}
-            <Table aria-label={t("recruitPlayers")} className="min-w-[740px] table-auto md:table-fixed">
+            <Table aria-label={t("recruitPlayers")} className="roster-table min-w-[740px] table-auto md:table-fixed">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-48 pl-3">{t("player")}</TableHead>

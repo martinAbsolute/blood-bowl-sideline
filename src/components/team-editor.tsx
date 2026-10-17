@@ -317,7 +317,10 @@ export function TeamEditor({
                   {t("emptyRosterHint")}
                 </p>
               ) : (
-                <Table aria-label={t("players")} className="player-table min-w-[740px] table-auto lg:table-fixed">
+                <Table
+                  aria-label={t("players")}
+                  className="roster-table player-table min-w-[740px] table-auto lg:table-fixed"
+                >
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-[calc(2ch+13px)] pl-[9px] pr-1 text-right font-mono text-xs!">

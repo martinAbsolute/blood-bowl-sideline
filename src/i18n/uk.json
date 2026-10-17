@@ -737,6 +737,7 @@
   "skillLimitReached": "Досягнуто ліміту навичок. Видаліть навичку, щоб вибрати іншу.",
   "noMatchingSkills": "Навичок не знайдено",
   "hireStarPlayer": "Найняти: {player}",
+  "hire": "Найняти",
   "ok": "Гаразд",
   "proCaptain": "Профі · капітан",
   "savedCloud": "Збережено",

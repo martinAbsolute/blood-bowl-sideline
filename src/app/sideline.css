@@ -509,11 +509,13 @@ html:has(.catalog-layout) {
   grid-column: 1;
   grid-row: 1;
 }
-.team-builder th {
+.team-builder th,
+.roster-table th {
   height: 34px;
   font-size: 10px;
 }
-.team-builder td {
+.team-builder td,
+.roster-table td {
   padding-top: 7px;
   padding-bottom: 7px;
 }
@@ -604,14 +606,18 @@ html:has(.catalog-layout) {
 [data-scroll-right="true"] .sticky-right-column::before {
   opacity: 1;
 }
-.team-builder .player-recruitment td,
-.team-builder .player-table td,
-.star-recruitment td {
+.roster-table td {
   padding-block: 3px;
 }
-.player-recruitment .skill-box,
-.player-table .skill-box,
-.star-recruitment .skill-box {
+.roster-table tbody tr {
+  height: 48px;
+}
+.roster-table strong {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+.roster-table .skill-box {
   padding: 3px 7px;
   white-space: nowrap;
 }

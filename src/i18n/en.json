@@ -743,6 +743,7 @@
   "skillLimitReached": "Skill limit reached. Remove a skill to choose another.",
   "noMatchingSkills": "No matching skills",
   "hireStarPlayer": "Hire {player}",
+  "hire": "Hire",
   "ok": "OK",
   "proCaptain": "Pro (Team Captain)",
   "savedCloud": "Saved",

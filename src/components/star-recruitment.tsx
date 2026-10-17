@@ -68,7 +68,7 @@ export function StarRecruitment({
             <div aria-hidden="true" className="pointer-events-none sticky top-0 left-0 z-20 -mb-px h-px bg-card" />
             {/* Separate cell borders avoid collapsed-border gaps around the sticky header. */}
             <table
-              className="w-full min-w-[960px] table-fixed border-separate border-spacing-0 caption-bottom text-sm [&_tr]:border-0 [&_th]:border-b [&_td]:border-b [&_tbody>tr:last-child>td]:border-b-0 [&_.table-skills]:w-full [&_.table-skills>div]:flex-wrap"
+              className="roster-table w-full min-w-[960px] table-fixed border-separate border-spacing-0 caption-bottom text-sm [&_tr]:border-0 [&_th]:border-b [&_td]:border-b [&_tbody>tr:last-child>td]:border-b-0 [&_.table-skills]:w-full [&_.table-skills>div]:flex-wrap"
               aria-label={t("starPlayers")}
             >
               <TableHeader className="sticky -top-px z-10 bg-card">
@@ -85,8 +85,8 @@ export function StarRecruitment({
                   <TableHead scope="col" className="w-14 text-right">
                     {t("cost")}
                   </TableHead>
-                  <TableHead scope="col" className="sticky-right-column sticky right-0 w-14 bg-card pr-3">
-                    <span className="sr-only">{t("addStar")}</span>
+                  <TableHead scope="col" className="sticky-right-column sticky right-0 w-14 bg-card pr-3 text-right">
+                    {t("hire")}
                   </TableHead>
                 </TableRow>
               </TableHeader>
