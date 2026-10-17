@@ -17,6 +17,7 @@ import {
 } from "@/domain/rules";
 import { budgetSummary } from "@/domain/budget";
 import type { Position, Star, Team } from "@/domain/types";
+import { numberedPlayers, nextPlayerNumber } from "@/domain/player-number";
 import { siteUrl } from "./site-metadata";
 
 type PublicSnapshot = {
@@ -58,12 +59,12 @@ export function teamStructuredData(data: PublicSnapshot) {
   const { totals } = budget;
   const skillUnit = ruleset.skillCurrency?.toUpperCase() ?? "gold pieces";
   const url = new URL(`/teams/${team.uuid}`, siteUrl).href;
-  const players = team.players.map((player, index) => {
+  const players = numberedPlayers(team.players).map((player) => {
     const position = roster.players.find((p) => p.id === player.positionId)!;
     const skillCost = playerSkillCost(team, position, player.skills);
     return {
       id: player.id,
-      number: index + 1,
+      number: Number(player.number),
       name: player.name,
       position: { id: position.id, name: position.position },
       attributes: attributes(
@@ -86,7 +87,7 @@ export function teamStructuredData(data: PublicSnapshot) {
     const star = stars.find((s) => s.id === id)!;
     return {
       id,
-      number: players.length + index + 1,
+      number: Number(nextPlayerNumber(team.players, index)),
       name: star.name,
       playerType: star.playerType,
       attributes: attributes(star),

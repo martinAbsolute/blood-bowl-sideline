@@ -238,3 +238,27 @@ it("prints star special rules before ordinary skills in both the roster and appe
     appendix.indexOf(">Dodge<"),
   );
 });
+
+it.each(["portrait", "landscape"] as const)(
+  "prints names above muted designations in %s",
+  (orientation) => {
+    const team = newTeam(randomUUID(), "human");
+    team.players = ["Captain", "", "Human Lineman"].map((name) => ({
+      id: randomUUID(),
+      positionId: "human-0",
+      name,
+      skills: [],
+    }));
+    const html = renderToStaticMarkup(
+      createElement(TeamPrint, { team, t: translator(en) }),
+    );
+    expect(html).toContain(
+      '<div class="player-name">Captain</div><div class="player-designation">Human Lineman</div>',
+    );
+    expect(html.match(/class="player-designation"/g)).toHaveLength(1);
+    expect(printStyles(orientation)).toMatch(
+      /\.player-designation\s*\{[^}]*color: #777/,
+    );
+    expect(printStyles(orientation)).toContain("print-color-adjust: exact");
+  },
+);

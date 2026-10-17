@@ -6,6 +6,7 @@ import { getRoster, getRuleset } from "@/domain/catalog";
 import { isSevens, isLineman } from "@/domain/rules";
 import { needsPlayerRecruitment } from "@/lib/builder";
 import type { Team } from "@/domain/types";
+import { numberedPlayers, nextPlayerNumber } from "@/domain/player-number";
 import { PlayerIcon } from "./player-icon";
 import {
   Accordion,
@@ -68,7 +69,10 @@ export function PlayerRecruitment({
   }
 
   function removePlayer(id: string) {
-    const next = { ...team, players: team.players.filter((p) => p.id !== id) };
+    const next = {
+      ...team,
+      players: numberedPlayers(team.players).filter((p) => p.id !== id),
+    };
     if (next.captainId === id) delete next.captainId;
     if (next.veteranId === id) delete next.veteranId;
     updateRecruitment(next);
@@ -211,15 +215,16 @@ export function PlayerRecruitment({
                           onIncrease={() =>
                             updateRecruitment({
                               ...team,
-                              players: [
-                                ...team.players,
+                              players: numberedPlayers([
+                                ...numberedPlayers(team.players),
                                 {
                                   id: crypto.randomUUID(),
+                                  number: nextPlayerNumber(team.players),
                                   positionId: p.id,
                                   name: "",
                                   skills: [],
                                 },
-                              ],
+                              ]),
                             })
                           }
                         />

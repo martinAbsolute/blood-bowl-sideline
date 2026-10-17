@@ -13,6 +13,10 @@ import {
 } from "@/domain/rules";
 import type { Team } from "@/domain/types";
 import {
+  isPlayerNumberAvailable,
+  numberedPlayers,
+} from "@/domain/player-number";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -22,12 +26,13 @@ import {
 import { Button } from "./ui/button";
 import { PlayerIcon, StarPlayerIcon } from "./player-icon";
 import { PlayerName } from "./player-name";
+import { PlayerNumber } from "./player-number";
 import { PlayerSkillPicker } from "./player-skill-picker";
 import { SkillBox, VeteranSkill } from "./skill-box";
 import { RemovePlayerButton } from "./remove-player-button";
 import { positionLabel } from "./position-name";
 
-/** Name and skill edits are staged until Save; removal is a separate action. */
+/** Player edits are staged until Save; removal is a separate action. */
 export function PlayerDialog({
   team,
   selected,
@@ -50,8 +55,9 @@ export function PlayerDialog({
   const [mobileSection, setMobileSection] = useState("profile");
   const roster = getRoster(team.rosterId)!;
   const rules = getRuleset(team.rulesetId);
-  const playerIndex = team.players.findIndex((item) => item.id === selected);
-  const player = team.players[playerIndex];
+  const players = numberedPlayers(team.players);
+  const playerIndex = players.findIndex((item) => item.id === selected);
+  const player = players[playerIndex];
   const position = roster.players.find(
     (item) => item.id === player?.positionId,
   );
@@ -59,6 +65,7 @@ export function PlayerDialog({
     ? stars.find((item) => item.id === selected)
     : undefined;
   const [draft, setDraft] = useState(() => ({
+    number: player?.number ?? "",
     name: player?.name ?? "",
     skills: player?.skills ?? [],
   }));
@@ -72,19 +79,32 @@ export function PlayerDialog({
     ? positionLabel(position.position)
     : star?.playerType || t("starPlayers");
   const title = star?.name || draft.name.trim() || type;
+  const invalidNumber = !isPlayerNumberAvailable(
+    players,
+    selected,
+    draft.number,
+  );
   const dirty =
     editable &&
-    (draft.name.trim() !== player.name.trim() ||
+    (draft.number !== player.number ||
+      draft.name.trim() !== player.name.trim() ||
       JSON.stringify(sortSkillIds(draft.skills)) !==
         JSON.stringify(sortSkillIds(player.skills)));
   const draftTeam = player
     ? {
         ...team,
-        players: team.players.map((item) =>
-          item.id === selected
-            ? { ...item, ...draft, name: draft.name.trim() }
-            : item,
-        ),
+        players: players
+          .map((item) =>
+            item.id === selected
+              ? {
+                  ...item,
+                  ...draft,
+                  number: invalidNumber ? item.number : draft.number,
+                  name: draft.name.trim(),
+                }
+              : item,
+          )
+          .sort((a, b) => Number(a.number) - Number(b.number)),
       }
     : team;
   const skillCost = position
@@ -107,7 +127,7 @@ export function PlayerDialog({
     else onClose();
   }
   function save() {
-    if (!editable || !dirty) return;
+    if (!editable || !dirty || invalidNumber) return;
     onChange(draftTeam);
     onClose();
   }
@@ -146,11 +166,22 @@ export function PlayerDialog({
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <DialogDescription className="mb-1 text-xs">
+              <DialogDescription className="mb-1 flex flex-wrap items-baseline gap-x-1 text-xs">
                 {type} ·{" "}
-                {star
-                  ? t("starPlayers")
-                  : "#" + String(playerIndex + 1).padStart(2, "0")}
+                {star ? (
+                  t("starPlayers")
+                ) : editable ? (
+                  <PlayerNumber
+                    value={draft.number}
+                    label={t("playerModal.number")}
+                    invalid={invalidNumber}
+                    onChange={(number) =>
+                      setDraft((current) => ({ ...current, number }))
+                    }
+                  />
+                ) : (
+                  "#" + player.number
+                )}
               </DialogDescription>
               <DialogTitle
                 ref={titleRef}
@@ -354,7 +385,7 @@ export function PlayerDialog({
             {editable && (
               <Button
                 className="h-11 min-w-20 sm:h-8"
-                disabled={!dirty}
+                disabled={!dirty || invalidNumber}
                 onClick={save}
               >
                 <Check className="size-4" />

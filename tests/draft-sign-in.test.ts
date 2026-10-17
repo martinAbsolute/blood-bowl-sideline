@@ -259,6 +259,8 @@ it("shows a local draft status in the team header without claiming a cloud save"
   await act(async () => root.render(editor(newTeam(randomUUID(), "amazon"))));
   const status = container.querySelector('[role="status"]');
   expect(status?.textContent).toBe("savedInDrafts");
+  expect(status?.parentElement?.querySelector("button")).toBeNull();
+  expect(status?.parentElement?.querySelector("[aria-haspopup]")).toBeNull();
   expect(status?.closest("header")?.querySelector("h1 input")).not.toBeNull();
   expect(mocks.save).not.toHaveBeenCalled();
 });

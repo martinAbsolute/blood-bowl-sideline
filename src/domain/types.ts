@@ -38,13 +38,23 @@ export const teamSchema = z
         z
           .object({
             id: z.uuid(),
+            number: z
+              .string()
+              .regex(/^\d{1,2}$/)
+              .optional(),
             positionId: z.string().max(100),
             name: z.string().trim().max(80),
             skills: z.array(z.string().max(60)).max(6),
           })
           .strict(),
       )
-      .max(16),
+      .max(16)
+      .refine((players) => {
+        const numbers = players.flatMap((player) =>
+          player.number === undefined ? [] : [Number(player.number)],
+        );
+        return new Set(numbers).size === numbers.length;
+      }, "Player numbers must be unique"),
     stars: z.array(z.string().max(100)).max(4),
     staff: z
       .object({

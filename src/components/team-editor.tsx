@@ -22,6 +22,8 @@ import {
   summarize,
 } from "@/domain/rules";
 import type { Team } from "@/domain/types";
+import { hasPlayerName } from "@/domain/player-name";
+import { numberedPlayers } from "@/domain/player-number";
 import { storeDraft } from "@/lib/drafts";
 import { saveCloudDraft } from "@/lib/cloud-save";
 import { duplicateTeam } from "@/lib/duplicate-team";
@@ -72,6 +74,8 @@ import { TeamAffiliations, SpecialRules } from "./team-affiliations";
 import { Checkbox } from "./ui/checkbox";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { PlayerDialog } from "./player-dialog";
+import { InlinePlayerName } from "./player-name";
+import { InlinePlayerNumber } from "./player-number";
 import { RemovePlayerButton } from "./remove-player-button";
 import { positionLabel } from "./position-name";
 import { TeamSupport } from "./team-support";
@@ -467,7 +471,7 @@ export function TeamEditor({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {team.players.map((p, index) => {
+                    {numberedPlayers(team.players).map((p, index) => {
                       const pos = roster.players.find(
                         (x) => x.id === p.positionId,
                       );
@@ -498,7 +502,22 @@ export function TeamEditor({
                           }}
                         >
                           <TableCell className="px-2 text-left font-mono text-xs text-muted-foreground">
-                            {String(index + 1).padStart(2, "0")}
+                            {readOnly ? (
+                              p.number
+                            ) : (
+                              <>
+                                <span className="hidden print:inline">
+                                  {p.number}
+                                </span>
+                                <span className="no-print">
+                                  <InlinePlayerNumber
+                                    team={team}
+                                    playerId={p.id}
+                                    onChange={change}
+                                  />
+                                </span>
+                              </>
+                            )}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -517,19 +536,25 @@ export function TeamEditor({
                                     <strong className="hidden text-sm print:block">
                                       {p.name || positionLabel(pos.position)}
                                     </strong>
-                                    <div className="no-print inline-flex items-center gap-1 lg:max-w-full">
-                                      <button
-                                        className="text-left text-sm font-semibold text-primary hover:underline lg:min-w-0 lg:truncate"
-                                        title={
-                                          p.name || positionLabel(pos.position)
+                                    <div className="no-print inline-flex items-start gap-1 lg:max-w-full">
+                                      <InlinePlayerName
+                                        value={p.name}
+                                        designation={positionLabel(
+                                          pos.position,
+                                        )}
+                                        label={t("playerName")}
+                                        onChange={(name) =>
+                                          change({
+                                            ...team,
+                                            players: team.players.map(
+                                              (player) =>
+                                                player.id === p.id
+                                                  ? { ...player, name }
+                                                  : player,
+                                            ),
+                                          })
                                         }
-                                        onClick={() => {
-                                          setSelected(p.id);
-                                          setSearch("");
-                                        }}
-                                      >
-                                        {p.name || positionLabel(pos.position)}
-                                      </button>
+                                      />
                                       <RemovePlayerButton
                                         team={team}
                                         selected={p.id}
@@ -539,8 +564,16 @@ export function TeamEditor({
                                     </div>
                                   </>
                                 )}
-                                {p.name && (
-                                  <p className="mt-0.5 text-xs text-muted-foreground">
+                                {hasPlayerName(
+                                  p.name,
+                                  positionLabel(pos.position),
+                                ) && (
+                                  <p
+                                    className={
+                                      (readOnly ? "" : "hidden print:block ") +
+                                      "mt-0.5 text-xs text-muted-foreground"
+                                    }
+                                  >
                                     {positionLabel(pos.position)}
                                   </p>
                                 )}

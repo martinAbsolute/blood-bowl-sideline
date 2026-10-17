@@ -9,6 +9,7 @@ import {
   starPairs,
   stars,
 } from "../src/domain/catalog";
+import { PLAYER_NAME_MAX_LENGTH } from "../src/domain/player-name";
 import type { Team } from "../src/domain/types";
 import { PlayerDialog } from "../src/components/player-dialog";
 import { generatePlayerName } from "../src/lib/player-name-generator";
@@ -107,9 +108,9 @@ async function click(label: string, scope: ParentNode = document) {
 function confirmation() {
   return Array.from(document.querySelectorAll('[role="dialog"]')).at(-1)!;
 }
-async function rename(value: string) {
+async function rename(value: string, label = "playerName") {
   const input = document.querySelector<HTMLInputElement>(
-    'input[aria-label="playerName"]',
+    `input[aria-label="${label}"]`,
   )!;
   await act(async () => {
     input.focus();
@@ -121,6 +122,42 @@ async function rename(value: string) {
   });
   return input;
 }
+
+it("rejects overlapping numbers and saves a number change in numeric roster order", async () => {
+  team.players.push({
+    id: crypto.randomUUID(),
+    positionId: team.players[0].positionId,
+    name: "Teammate",
+    skills: [],
+  });
+  await render();
+  const input = await rename("2", "playerModal.number");
+  expect(input.getAttribute("aria-invalid")).toBe("true");
+  expect(document.querySelector('[role="alert"]')).toBeNull();
+  expect(button("playerModal.save").disabled).toBe(true);
+  await rename("02", "playerModal.number");
+  expect(button("playerModal.save").disabled).toBe(true);
+  await rename("", "playerModal.number");
+  expect(button("playerModal.save").disabled).toBe(true);
+  await rename("9", "playerModal.number");
+  expect(onChange).not.toHaveBeenCalled();
+  await click("playerModal.save");
+  expect(team.players.map((player) => player.number)).toEqual(["02", "9"]);
+  expect(team.players[1].id).toBe(selected);
+});
+
+it("restores the previous player number on Escape", async () => {
+  await render();
+  const input = await rename("09", "playerModal.number");
+  await act(async () => {
+    input.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+    );
+  });
+  expect(input.value).toBe("01");
+  expect(button("playerModal.save").disabled).toBe(true);
+  expect(onClose).not.toHaveBeenCalled();
+});
 
 it("stages name and skills, previews costs, and applies both only on Save", async () => {
   await render();
@@ -418,4 +455,43 @@ it("shows read-only players and stars without editing or removal controls", asyn
   team.stars = [selected];
   await render();
   expect(button("removePlayer")).toBeUndefined();
+});
+
+it("labels the name-edit tooltip and focuses the name field from its pencil", async () => {
+  team.players[0].name = "Captain";
+  await render();
+  const edit = button("playerModal.editName");
+  // happy-dom does not track keyboard focus visibility for tooltip triggers.
+  const matches = edit.matches.bind(edit);
+  const focusVisible = vi
+    .spyOn(edit, "matches")
+    .mockImplementation(
+      (selector) => selector === ":focus-visible" || matches(selector),
+    );
+  await act(async () => edit.focus());
+  await vi.waitFor(() =>
+    expect(
+      document.querySelector('[data-slot="tooltip-content"]')?.textContent,
+    ).toContain("playerModal.editName"),
+  );
+  focusVisible.mockRestore();
+  await act(async () => edit.click());
+  const input = document.querySelector<HTMLInputElement>(
+    'input[aria-label="playerName"]',
+  )!;
+  expect(document.activeElement).toBe(input);
+  expect(input.selectionStart).toBe(0);
+  expect(input.selectionEnd).toBe("Captain".length);
+});
+
+it("limits new names in the modal and generated names to the shared maximum", async () => {
+  await render();
+  const input = await rename("A".repeat(PLAYER_NAME_MAX_LENGTH + 1));
+  expect(input.maxLength).toBe(PLAYER_NAME_MAX_LENGTH);
+  expect(input.value).toHaveLength(PLAYER_NAME_MAX_LENGTH);
+  vi.mocked(generatePlayerName).mockReturnValue(
+    "B".repeat(PLAYER_NAME_MAX_LENGTH + 1),
+  );
+  await click("playerModal.randomizeName");
+  expect(input.value).toBe("B".repeat(PLAYER_NAME_MAX_LENGTH));
 });

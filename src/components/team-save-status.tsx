@@ -73,9 +73,7 @@ export function TeamSaveStatus({
           ? "storageError"
           : isAuthenticated && !team.name.trim()
             ? "teamNameRequired"
-            : !isAuthenticated
-              ? "guestText"
-              : undefined;
+            : undefined;
   const indicator = (
     <>
       <Icon

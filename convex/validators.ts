@@ -32,6 +32,7 @@ export const teamValidator = v.object({
   players: v.array(
     v.object({
       id: v.string(),
+      number: v.optional(v.string()),
       positionId: v.string(),
       name: v.string(),
       skills: v.array(v.string()),

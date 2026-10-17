@@ -20,6 +20,8 @@ import {
 } from "@/domain/rules";
 import { specialRuleKey } from "@/domain/team-reference";
 import type { Team } from "@/domain/types";
+import { hasPlayerName } from "@/domain/player-name";
+import { numberedPlayers, nextPlayerNumber } from "@/domain/player-number";
 import { positionLabel } from "./position-name";
 
 import type { Translate } from "@/i18n/messages";
@@ -54,6 +56,8 @@ export function printStyles(orientation: PrintOrientation) {
     tbody tr:last-child td { border-bottom: 0; }
     th { text-align: left; }
     .number { width: 7mm; text-align: center; }
+    .player-designation { margin-top: 0.5mm; color: #777; font-size: 0.85em; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    .player-name { font-weight: 600; }
     .position { width: ${orientation === "portrait" ? "32" : "43"}mm; }
     .stat { width: 9mm; text-align: center; white-space: nowrap; overflow-wrap: normal; }
     .cost { width: 16mm; text-align: right; }
@@ -231,7 +235,7 @@ export function TeamPrint({
             </tr>
           </thead>
           <tbody>
-            {team.players.map((player, index) => {
+            {numberedPlayers(team.players).map((player) => {
               const position = roster.players.find(
                 (p) => p.id === player.positionId,
               )!;
@@ -242,10 +246,21 @@ export function TeamPrint({
                   : 0);
               return (
                 <tr key={player.id}>
-                  <td className="number">{index + 1}</td>
+                  <td className="number">{player.number}</td>
                   <td>
-                    {positionLabel(position.position)}
-                    {player.name && <div>{player.name}</div>}
+                    {hasPlayerName(
+                      player.name,
+                      positionLabel(position.position),
+                    ) ? (
+                      <>
+                        <div className="player-name">{player.name}</div>
+                        <div className="player-designation">
+                          {positionLabel(position.position)}
+                        </div>
+                      </>
+                    ) : (
+                      positionLabel(position.position)
+                    )}
                   </td>
                   {[
                     playerMovement(team, player.id, position),
@@ -273,7 +288,9 @@ export function TeamPrint({
             })}
             {selectedStars.map((star, index) => (
               <tr key={star.id}>
-                <td className="number">{team.players.length + index + 1}</td>
+                <td className="number">
+                  {nextPlayerNumber(team.players, index)}
+                </td>
                 <td>{star.name}</td>
                 {[star.ma, star.st, star.ag, star.pa, star.av].map(
                   (stat, i) => (

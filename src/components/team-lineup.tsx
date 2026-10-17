@@ -1,5 +1,6 @@
 import { getRoster, stars } from "@/domain/catalog";
 import type { Team } from "@/domain/types";
+import { numberedPlayers } from "@/domain/player-number";
 import { PlayerIcon, StarPlayerIcon } from "./player-icon";
 import { positionLabel } from "./position-name";
 import { lineupPhoto } from "@/lib/lineup-photo";
@@ -9,7 +10,7 @@ export function TeamLineup({ team }: { team: Team }) {
   const roster = getRoster(team.rosterId);
   const spriteClass = "size-9";
   const players = [
-    ...team.players.map((player, index) => ({
+    ...numberedPlayers(team.players).map((player, index) => ({
       id: player.id,
       label: [
         player.name,

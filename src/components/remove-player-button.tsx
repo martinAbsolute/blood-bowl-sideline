@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { ShieldCheck, Trash2 } from "lucide-react";
 import { getRoster, starPairs, stars } from "@/domain/catalog";
 import type { Team } from "@/domain/types";
+import { numberedPlayers } from "@/domain/player-number";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -62,7 +63,9 @@ export function RemovePlayerButton({
   function remove() {
     const next = {
       ...team,
-      players: team.players.filter((item) => item.id !== selected),
+      players: numberedPlayers(team.players).filter(
+        (item) => item.id !== selected,
+      ),
       stars: team.stars.filter((id) => !removedStars.includes(id)),
     };
     if (next.captainId === selected) delete next.captainId;
