@@ -34,7 +34,7 @@ export function PlayerNumber({
         aria-invalid={invalid}
         title={label}
         style={{ width: `${Math.max(2, value.length)}ch`, font: "inherit" }}
-        className="min-w-0 border-0 bg-transparent p-0 text-foreground outline-none aria-invalid:text-destructive"
+        className={`min-w-0 border-0 bg-transparent p-0 text-foreground outline-none aria-invalid:text-destructive ${prefix ? "" : "text-right"}`}
         onFocus={(event) => {
           beforeFocus.current = value;
           cancelled.current = false;

@@ -317,7 +317,7 @@ export function TeamEditor({
                 <Table aria-label={t("players")} className="player-table min-w-[740px] table-auto lg:table-fixed">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-10 px-2 text-left">#</TableHead>
+                      <TableHead className="w-8 pl-2 pr-1 text-right">#</TableHead>
                       <TableHead className="w-48 lg:w-64">{t("player")}</TableHead>
                       {["MA", "ST", "AG", "PA", "AV"].map((x) => (
                         <TableHead key={x} className="w-8 text-center font-mono text-xs">
@@ -355,8 +355,8 @@ export function TeamEditor({
                           </RuleHelp>
                         </TableHead>
                       )}
-                      <TableHead className="w-12 px-1 text-right text-xs">{t("cost")}</TableHead>
-                      <TableHead className="no-print w-8 px-1">
+                      <TableHead className="w-12 pl-1 pr-0 text-right text-xs">{t("cost")}</TableHead>
+                      <TableHead className="no-print w-8 px-2">
                         <span className="sr-only">{t("managePlayer")}</span>
                       </TableHead>
                     </TableRow>
@@ -382,7 +382,7 @@ export function TeamEditor({
                             }
                           }}
                         >
-                          <TableCell className="px-2 text-left font-mono text-xs text-muted-foreground">
+                          <TableCell className="pl-2 pr-1 text-right font-mono text-xs text-muted-foreground">
                             {readOnly ? (
                               p.number
                             ) : (
@@ -535,12 +535,12 @@ export function TeamEditor({
                               )}
                             </TableCell>
                           )}
-                          <TableCell className="px-1 text-right font-mono text-xs tabular-nums">
+                          <TableCell className="pl-1 pr-0 text-right font-mono text-xs tabular-nums">
                             {gold(
                               pos.cost + (rules.id === "bb2025-default" ? playerSkillCost(team, pos, p.skills) : 0),
                             )}
                           </TableCell>
-                          <TableCell className="no-print px-1">
+                          <TableCell className="no-print px-2">
                             <ChevronRight
                               aria-hidden="true"
                               className="mx-auto size-3.5 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 group-has-[:focus-visible]:opacity-100 [@media(hover:none)]:opacity-100"
@@ -568,8 +568,8 @@ export function TeamEditor({
                               }
                             }}
                           >
-                            <TableCell className="px-2 text-left text-amber-700">
-                              <Star className="size-3" />
+                            <TableCell className="pl-2 pr-1 text-right text-amber-700">
+                              <Star className="ml-auto size-3" />
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
@@ -599,10 +599,10 @@ export function TeamEditor({
                             </TableCell>
                             {requiresCaptain && <TableCell />}
                             {isSevens(team) && <TableCell />}
-                            <TableCell className="px-1 text-right font-mono text-xs tabular-nums">
+                            <TableCell className="pl-1 pr-0 text-right font-mono text-xs tabular-nums">
                               {gold(s.cost)}
                             </TableCell>
-                            <TableCell className="no-print px-1">
+                            <TableCell className="no-print px-2">
                               <ChevronRight
                                 aria-hidden="true"
                                 className="mx-auto size-3.5 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 group-has-[:focus-visible]:opacity-100 [@media(hover:none)]:opacity-100"
